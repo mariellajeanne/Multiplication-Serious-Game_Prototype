@@ -1,0 +1,24 @@
+PANADERYA QUEST — QUICK START (WINDOWS)
+======================================
+1. Extract the downloaded ZIP.
+2. Open VS Code → File → Open Folder → select the extracted project folder.
+3. Press Ctrl+Shift+X; install "Live Server" by Ritwick Dey.
+4. Open index.html. Right-click → "Open with Live Server".
+5. The game will open at http://127.0.0.1:5500/ in your browser.
+6. Save an edited file (Ctrl+S) and Live Server will refresh the game.
+
+EDIT GAME DIRECTLY WITH YOUR CHATGPT ACCOUNT:
+1. In VS Code Extensions, install "Codex – OpenAI's coding agent" (publisher OpenAI).
+2. Click Codex, or Ctrl+Shift+P → "Codex: Open Codex Sidebar".
+3. Click "Sign in with ChatGPT" and sign into your SAME ChatGPT account in the browser.
+4. Select a file and ask for ONE small change at a time. Review its diff.
+
+Good first prompt:
+"Read AGENTS.md. Do not edit worksheet/v33-engine.html. Change ONLY the menu
+food tile design in styles/menu.css to be a little taller. Keep the rest of the
+game, all rewards and all interactions unchanged. Show me the changes."
+
+NO Node/npm/build step is needed. To publish on GitHub Pages, upload ALL
+folders, not just index.html.
+
+For file map and safety guidance, read README.md and AGENTS.md.

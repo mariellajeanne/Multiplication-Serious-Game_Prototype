@@ -1,0 +1,11 @@
+/* Panaderya Quest v3 — styles/tickets.css */
+/* Tickets are entire vivid rarity-filled cards, not only colored borders. */
+.tickets{gap:12px}.ticket{--tA:#d8d4ca;--tB:#f1f0e9;--tEdge:#a9a39b;position:relative;overflow:hidden;border:3px solid var(--tEdge);background:linear-gradient(125deg,var(--tB),var(--tA) 70%,var(--tB));box-shadow:0 4px 0 color-mix(in srgb,var(--tEdge),#43372d 25%),0 10px 16px #53351b16;border-radius:17px;min-height:126px;padding:17px 13px 12px;transform:translateZ(0)}
+.ticket:hover:not(:disabled){transform:translateY(-3px);background:linear-gradient(125deg,var(--tB),var(--tA) 80%,#fff);box-shadow:0 7px 0 color-mix(in srgb,var(--tEdge),#43372d 25%)}
+.ticket:before{content:"";position:absolute;inset:-80% auto auto -65%;width:60%;height:250%;background:linear-gradient(90deg,transparent,#ffffffb5,transparent);transform:rotate(28deg);animation:shine 4.5s ease-in-out infinite;pointer-events:none}
+.ticket:after{content:"✦";position:absolute;right:11px;top:4px;color:#ffffffc2;font-size:26px;text-shadow:0 2px 8px #5b402a7a}
+@keyframes shine{0%,24%{left:-75%}52%,100%{left:155%}}
+.ticket.r0{--tA:#c5c5bd;--tB:#f9f8f3;--tEdge:#9d988f}.ticket.r1{--tA:#93c89c;--tB:#e4ffeb;--tEdge:#549764}.ticket.r2{--tA:#6fa9ed;--tB:#e0eeff;--tEdge:#407ac5}.ticket.r3{--tA:#bb85e7;--tB:#f4e2ff;--tEdge:#8d51b9}.ticket.r4{--tA:#f2b23f;--tB:#fff0ab;--tEdge:#c28a22}.ticket.r5{--tA:#f184b1;--tB:#ffe1ee;--tEdge:#b94f85}
+.ticket .eq{font-size:22px;font-weight:1000;letter-spacing:-.4px;color:#4e3428;text-shadow:0 1px #ffffffc9}
+.ticket .rarity-title{font-weight:1000;text-transform:uppercase;letter-spacing:1px;font-size:12px;color:#4e3428}.ticket .ticket-note{font-size:12px;font-weight:850;color:#674d3c}
+.rightcol .panel.tickets-only{padding:16px}.ticket:disabled{opacity:.69;filter:saturate(.65)}

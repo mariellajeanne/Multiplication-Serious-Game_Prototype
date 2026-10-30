@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#f5e8d6"><title>Batch & Carry • Worksheet Lab v33</title>
+<style>
+:root{font-family:ui-rounded,"Trebuchet MS",system-ui,sans-serif;color:#503a2b;--ink:#503a2b;--gold:#e7aa46;--cream:#fff9ed;--cell:clamp(42px,5.6vw,64px);--gap:5px;--soft:#ac8865;--orange:#db9935}*{box-sizing:border-box}body{margin:0;min-width:320px;background:radial-gradient(ellipse at top left,#fffdf7,transparent 58%),radial-gradient(ellipse at bottom right,#e5c497,transparent 63%),#f5e9d6}button,select{font:inherit;color:inherit}button{cursor:pointer;touch-action:manipulation}button:focus-visible,select:focus-visible{outline:3px solid #e6ad48;outline-offset:3px}.shell{width:min(1330px,100%);margin:auto;padding:16px clamp(10px,2.5vw,28px) 40px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:15px}.brand{display:flex;align-items:center;gap:11px}.logo{font-size:28px;background:linear-gradient(145deg,#f9d994,#a9713e);box-shadow:0 3px 0 #a87145;width:51px;height:51px;border-radius:15px;display:grid;place-items:center;border:2px solid #ffe6b0}.brand h1{font-size:24px;letter-spacing:-.8px;margin:0}.brand small{font-size:10px;letter-spacing:1.5px;font-weight:900;color:#a47b55}.controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.tool,.chooser{border:1px solid #e1c5a2;background:#fff9ed;border-radius:12px;box-shadow:0 2px 0 #dfc29c;padding:10px 11px;font-weight:850;font-size:12px}.chooser{max-width:235px}.balance{font-weight:950;background:#5b3d2b;color:#ffe4a0;padding:11px 14px;border-radius:12px}.modes{display:flex;gap:8px;margin-bottom:14px}.mode{background:#fff9ec;border:2px solid #e6d0b3;border-radius:14px;padding:12px 16px;text-align:left;flex:1;min-width:0}.mode[aria-pressed=true]{border-color:#cf9134;background:#ffefd0;box-shadow:0 2px 0 #d4a76a}.mode b{font-size:13px;display:block}.mode small{display:block;margin-top:3px;font-size:11px;color:#a17f5e;line-height:1.35}.layout{display:grid;grid-template-columns:minmax(0,1fr) 265px;gap:15px;align-items:start}.card{background:#fffbf5;border:1px solid #e1c9ab;border-radius:19px;box-shadow:0 4px 0 #ddc4a1,0 15px 32px #79553212}.workspace{padding:18px;min-width:0}.head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}.eyebrow{font-size:10px;color:#ac7f54;font-weight:1000;letter-spacing:1.4px}.head h2{font-size:21px;margin:4px 0 0}.roundtag{padding:9px 11px;background:#f6e6ce;color:#956e43;border-radius:15px;font-size:11px;font-weight:950}.sheet{border:2px solid #e5cbaa;position:relative;isolation:isolate;background:linear-gradient(120deg,#fff9ee,#fffdf8 55%,#fff5e2);min-height:390px;border-radius:17px;padding:11px 9px 19px;overflow:hidden}.sheet:before{content:none}.sheethead{position:relative;z-index:2;display:flex;justify-content:space-between;gap:8px;font-size:10px;font-weight:900;letter-spacing:1.1px;color:#ac8766;margin:3px 9px 12px}.scroller{position:relative;z-index:2;overflow-x:auto;overflow-y:visible;padding:6px 6px 22px;scrollbar-color:#d3b18e transparent}.math{position:relative;width:max-content;margin:0 auto;padding:0 24px 0 44px}.line{display:grid;grid-template-columns:repeat(var(--cols),var(--cell));gap:var(--gap);min-height:var(--cell);position:relative;margin-bottom:6px}.line.carryline{min-height:32px;height:32px;margin-bottom:3px}.line.topline{margin-bottom:8px}.line.bottomline{padding-bottom:9px;border-bottom:3px solid #9c7655;margin-bottom:11px}.line.finalline{border-top:3px solid #9c7655;padding-top:9px;margin-top:14px}.symbol{position:absolute;left:-39px;width:32px;text-align:right;font-size:24px;font-weight:950;top:calc(50% - 15px)}.cell{width:var(--cell);height:var(--cell);position:relative;border-radius:11px;border:2px solid transparent;background:transparent;font-size:clamp(23px,3vw,32px);font-weight:950;display:grid;place-items:center;padding:0;user-select:none;font-variant-numeric:tabular-nums;touch-action:none}.cell:active{transform:scale(.96)}.cell.number{border-color:#e5c8a5;background:linear-gradient(#fffdf8,#f8ead5);box-shadow:0 2px 0 #debf9b}.cell.number.first{background:#ffe7ac;border-color:#d9a04b}.cell.number.connecting{box-shadow:0 0 0 4px #efbb5c77,0 2px 0 #debf9b}.cell.rowcell{border:2px dashed #e4cfb2;background:#fffaf0}.cell.rowcell.filled{border-style:solid;border-color:#d3b28a;background:#fff1d8}.cell.rowcell.provisional{background:#fff3cd;border-color:#dfa640;border-style:dashed}.cell.rowcell.zero{color:#c0a486;background:#fff8eb;border-style:solid}.cell.rowcell:active{filter:brightness(.98)}.cell.rowcell.liftable{border-color:#dfa84d;background:linear-gradient(135deg,#fff2d1,#ffe7ae);box-shadow:0 2px 0 #d6a65d;cursor:pointer}.cell.rowcell.liftable:hover{filter:brightness(1.03)}.cell.rowcell.liftable:after{content:"↗";position:absolute;right:1px;top:-10px;font-size:13px;color:#b88031;opacity:.75}.cell.hold{height:32px;border:1px dashed #e0cbb0;font-size:18px;color:#a37444;border-radius:8px;background:#fff7e7}.cell.hold.waiting{border:2px solid #d4a253;background:#ffecbe}.cell.hold.provisional{border:2px dashed #dc9c34;background:#fff4d0}.cell.hold.armed{border:3px solid #bd7a26;background:#ffe39d;box-shadow:0 0 0 4px #eaa5435c}.cell.rowcell.targeted,.ftile.targeted{outline:3px solid #dfac52;outline-offset:1px}.cell.dormant{opacity:.3}.cell.faint{background:transparent!important;border:1px solid transparent!important;box-shadow:none!important}.paper .sheet{background:#fffefd;border-color:#e5dbce}.paper .sheet:before{opacity:.045}.paper .cell.number{background:transparent;border:1px solid transparent;box-shadow:none;border-radius:0}.paper .cell.number.first{background:#ffebc255}.paper .cell.hold{background:transparent;border:1px solid transparent;color:#786c5d}.paper .cell.rowcell{background:transparent;border-color:transparent}.paper .cell.rowcell.provisional{border-bottom:2px dashed #d2a257}.paper .cell.rowcell.filled{border-color:transparent}.paper .line.bottomline,.paper .line.finalline{border-color:#66564a}.simple .cell.rowcell{background:#fffdfa}.simple .cell.hold{background:#fffdf8}.pack .cell.rowcell{box-shadow:inset 0 2px 4px #b08a4933,0 2px 0 #dec39c}.pack .cell.hold{box-shadow:inset 0 2px 3px #bb854922}.pair-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;overflow:visible}.pair-svg path{opacity:0;transition:opacity .17s ease;stroke-linejoin:round}.pair-svg .pair-glow{fill:none;stroke:#ffc967;stroke-width:13;filter:blur(7px)}.pair-svg .pair-shell{fill:#f7c2632b;stroke:#c98a31;stroke-width:3.2;filter:drop-shadow(0 2px 1px #9d672a55)}.pair-svg .pair-rib{fill:none;stroke:#fff0bb;stroke-width:2.4;stroke-dasharray:5 7;animation:march .75s linear infinite}.pair-svg.live path{opacity:1}@keyframes march{to{stroke-dashoffset:-24}}
+.tutorial-toggle[aria-pressed=true]{background:#ffefc9;border-color:#d59a3f;box-shadow:0 2px 0 #d9a15a}
+/* One clear animated guidance trail. A real 42px-high element is required for mask fade to render. */
+.tutorial-layer{position:absolute;inset:0;pointer-events:none;z-index:15;overflow:visible}
+.tutorial-stream{position:absolute;height:42px;transform-origin:0 21px;opacity:.84;
+  -webkit-mask-image:linear-gradient(to right,transparent 0%,#000 17%,#000 83%,transparent 100%);
+  mask-image:linear-gradient(to right,transparent 0%,#000 17%,#000 83%,transparent 100%)}
+.tutorial-stream .shaft{position:absolute;left:0;top:21px;width:100%;height:2px;
+  background:linear-gradient(to right,transparent,rgba(139,87,23,.42) 18%,rgba(139,87,23,.42) 82%,transparent)}
+.tutorial-stream .stream-chevron{position:absolute;left:0;top:11px;width:21px;height:21px;
+  color:rgba(130,79,19,.91);filter:drop-shadow(0 1px 0 rgba(255,247,211,.35));
+  animation:arrowtravel 1.6s linear infinite}
+.tutorial-stream .stream-chevron::before,.tutorial-stream .stream-tip::before{content:"";position:absolute;left:1px;top:3px;
+  width:13px;height:13px;border-top:4px solid currentColor;border-right:4px solid currentColor;
+  border-radius:2px;transform:rotate(45deg)}
+.tutorial-stream .stream-tip{position:absolute;right:-10px;top:11px;width:21px;height:21px;color:rgba(130,79,19,.72);filter:drop-shadow(0 1px 0 rgba(255,247,211,.22))}
+@keyframes arrowtravel{from{transform:translateX(-8px)}to{transform:translateX(var(--travel))}}
+.floating{position:absolute;width:max-content;z-index:8;display:flex;gap:4px;align-items:center;padding:6px;border:2px solid #cf9a4f;border-radius:13px;background:linear-gradient(#fffaf0,#ffe9bb);box-shadow:0 3px 0 #ba8b50,0 7px 15px #74512a2e;opacity:0;transform:translateY(6px) scale(.93);pointer-events:none;transition:opacity .13s,transform .13s}.floating.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}.ftile{height:40px;min-width:39px;padding:0 8px;border-radius:8px;border:2px solid #d8a044;background:linear-gradient(#fff9e8,#ffdc94);font-size:23px;font-weight:950;box-shadow:0 2px 0 #c68c37;touch-action:none;user-select:none}.ftile:active{transform:scale(.96)}.ftile.selected{outline:3px solid #865f38;outline-offset:1px}.ftile.done{opacity:.24;pointer-events:none;transform:scale(.88)}.ftile.pretend{border-style:dashed}.floating .dash{font-size:13px;color:#bd8c50;font-weight:900}.floating.merged{animation:pop .2s ease-out}.paper .floating{background:#fffdf7;border-color:#d4c7b4;box-shadow:0 2px 0 #e1d4c2}.paper .ftile{background:#fffefc;border:1px solid #ddcfbd;box-shadow:none}.statusbar{min-height:42px;display:flex;align-items:center;gap:10px;justify-content:space-between;margin-top:12px}.status{font-size:13px;font-weight:850;line-height:1.5}.status.error{color:#b34d36}.hintpill{font-size:10px;font-weight:950;color:#a68054;white-space:nowrap}.actions{display:flex;gap:8px;justify-content:space-between;flex-wrap:wrap;margin-top:6px}.footnote{font-size:11px;color:#9a795a;margin-top:12px;line-height:1.5}.side{display:flex;flex-direction:column;gap:14px}.panel{padding:17px}.ticket{margin-top:11px;border:2px solid #e2bd80;background:linear-gradient(120deg,#fff5da,#fffbec);border-radius:13px;padding:16px}.ticket .num{font-size:25px;font-weight:1000;letter-spacing:-.7px;margin:7px 0 4px}.ticket small{color:#947354;font-weight:750;font-size:11px}.feature{font-size:12px;color:#81634d;line-height:1.6}.feature b{color:#614533}.belt{height:68px;overflow:hidden;background:repeating-linear-gradient(90deg,#a88a75 0 16px,#6e5346 16px 21px);border-radius:10px;margin:14px 0 8px;border:6px solid #b28a63;display:flex;align-items:center}.cargo{white-space:nowrap;font-size:27px;animation:belt 12s linear infinite}.moneyline{display:flex;justify-content:space-between;align-items:center;font-size:11px;font-weight:950;color:#987450}.meter{height:13px;background:#ead6bc;border:1px solid #ddc2a0;border-radius:40px;overflow:hidden;margin-top:12px}.meter>div{height:100%;width:0;background:linear-gradient(90deg,#e5b95e,#e8953d);transition:width .35s}.legend{font-size:11px;color:#987956;line-height:1.6}.complete{border:2px solid #a6c28a;background:#f5ffe9;border-radius:14px;margin-top:13px;padding:14px}.complete h3{margin:0 0 5px;font-size:19px}.complete p{margin:0 0 9px;font-size:13px}.spark{position:absolute;z-index:25;font-size:23px;color:#d39b35;font-weight:1000;pointer-events:none;animation:spark .65s ease-out forwards}.fly{position:absolute;z-index:26;pointer-events:none;display:grid;place-items:center;background:#ffe4ad;border:2px solid #d9a34f;border-radius:9px;color:#6c4525;font-size:23px;font-weight:950;box-shadow:0 3px 5px #6f42182b;transform-origin:center}.ghost{position:fixed;pointer-events:none;z-index:9999;border:2px solid #d99c36;background:#ffebbd;box-shadow:0 4px 15px #79512f50;border-radius:9px;width:42px;height:42px;display:grid;place-items:center;font-size:25px;font-weight:950}.notice{font-size:11px;font-weight:800;padding:8px 10px;border-radius:10px;background:#fff1d1;color:#956523}.tip{margin-top:11px}.hidden{display:none!important}@keyframes belt{to{transform:translateX(-130px)}}@keyframes spark{to{opacity:0;transform:translateY(-34px) scale(1.4)}}@keyframes pop{50%{transform:scale(1.08)}}@media(max-width:890px){.layout{grid-template-columns:minmax(0,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}.sheet{min-height:350px}.shell{padding:12px}.workspace{padding:13px}}@media(max-width:510px){:root{--cell:43px;--gap:3px}.side{grid-template-columns:1fr}.mode{padding:9px 7px}.mode small{font-size:10px}.brand h1{font-size:21px}.sheet{padding:8px 4px;min-height:335px}.floating{padding:3px}.ftile{min-width:35px;height:36px}.statusbar{flex-wrap:wrap}}@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+
+/* V13 worksheet-only layout: all legacy data nodes stay in DOM so game logic is unchanged */
+:root{--cell:clamp(43px,6vw,65px)}body{background:#f6f0e7}
+.shell{width:min(1050px,100%);padding:18px 14px 36px}
+.top{border-bottom:1px solid #e5d5c2;padding:0 0 15px;margin-bottom:12px;align-items:center}
+.logo{width:42px;height:42px;font-size:22px}.brand h1{font-size:21px}.brand small{font-size:9px}
+.controls{gap:7px}.controls .balance{display:none}.controls .chooser{max-width:210px}
+.modes,.side,.footnote,.actions #ruleToggle,.head .eyebrow,.head #heading+.sub,.sheethead span:first-child,.connector-selector{display:none!important}
+.layout{display:block}.workspace{margin:0 auto;padding:12px 14px 18px;max-width:960px;box-shadow:0 3px 0 #ddc4a1,0 8px 20px #7955320c}
+.head{margin:2px 4px 9px}.head h2{font-size:18px}.roundtag{padding:7px 10px}
+.sheet{min-height:405px;overflow:hidden;padding:12px 4px 16px}.sheethead{margin:0 14px 7px;justify-content:end}
+.scroller{padding:4px 8px 8px;overflow-x:auto}.math{padding:0 26px 0 42px}.statusbar{margin-top:10px;min-height:24px}.hintpill{font-weight:800}
+.actions{margin-top:9px}.actions .tool{padding:8px 12px}.footnote{display:none}
+.customLabel{font-weight:850;font-size:12px;display:flex;gap:5px;align-items:center;padding:7px 9px;border:1px solid #e1c5a2;border-radius:12px;background:#fff9ed}
+.customLabel input{width:61px;padding:5px 6px;border-radius:6px;background:#fff;border:1px solid #dbc09c;color:#513d2c;font:inherit;font-size:13px;font-weight:800;text-align:center}
+.customLabel input:first-child{width:76px}
+.preview-pair{z-index:7;opacity:0;transition:opacity .08s;filter:drop-shadow(0 4px 7px #de9d4e55)}
+.preview-pair.active{opacity:1}.preview-pair path{opacity:1!important}
+.preview-pair .pair-shell{stroke:#dd8c21;stroke-width:4;fill:#ffc86844;filter:drop-shadow(0 2px 2px #a76f35a1)}
+.preview-pair .pair-glow{stroke:#ffd179;stroke-width:14;filter:blur(8px)}
+.preview-pair .pair-rib{stroke:#fff8dd;stroke-width:3;stroke-dasharray:8 6}
+@media(max-width:725px){.top{align-items:flex-start}.controls{width:100%}.controls .chooser{flex:1}.brand h1{font-size:18px}.customLabel{padding:6px}.customLabel input{width:46px!important}.sheet{min-height:355px}.workspace{padding:10px 8px 14px}.shell{padding:10px 6px 26px}.head h2{font-size:17px}}
+
+/* V14: pure connector-shape A/B/C experiment; no other mechanic changes */
+.connector-selector{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
+.connector-label{font-weight:900;font-size:10px;letter-spacing:1.0px;color:#927252;margin-right:5px}
+.connector-selector button{font-size:12px;font-weight:850;padding:7px 11px;border-radius:11px;border:1px solid #dfc29c;background:#fffaf2;box-shadow:0 1px 0 #ead7be}
+.connector-selector button[aria-pressed=true]{background:#ffdf9e;border-color:#c58729;color:#754a17;box-shadow:0 1px 0 #c58729}
+/* Give the connector the visual weight without making it opaque enough to hide digits */
+.pair-svg .pair-shell{fill:#f6c66a30}
+.preview-pair .pair-shell{fill:#f4be5e33}
+.pair-svg .pair-rib{stroke-opacity:.5}
+@media(max-width:600px){.connector-selector{gap:5px}.connector-label{width:100%;margin-bottom:1px}.connector-selector button{font-size:11px;padding:7px 8px}}
+
+/* V19: keep the product as the visual focus. Operands fade only while its two tiles exist. */
+.cell.number{transition:opacity .22s ease,filter .22s ease}
+.product-focus .cell.number[data-top],.product-focus .cell.number[data-bottom]{animation:operand-dim .24s ease both;opacity:.45;filter:saturate(.65)}
+@keyframes operand-dim{from{opacity:1}to{opacity:.45}}
+.addition-lab{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #e4c9a2;border-radius:13px;background:#fff9ed}
+.addition-lab .lab-label{font-size:11px;letter-spacing:.07em;font-weight:950;color:#96734d;margin-right:4px}
+.addmode{border:1px solid #dfbf91;border-radius:10px;background:#fffefd;font-weight:900;font-size:12px;padding:9px 12px;min-height:40px}
+.addmode[aria-pressed=true]{background:#ffe5ae;border:2px solid #c68b30;color:#65401d;padding:8px 11px}
+.addition-help{min-height:22px;font-size:12px;font-weight:800;color:#9a714b;margin:0 0 8px}
+.addition-ghost{position:absolute;z-index:29;pointer-events:none;display:grid;place-items:center;border:2px solid #d3a04a;border-radius:10px;background:#ffe6ad;box-shadow:0 4px 10px #c3934d33;color:#69421f;font-size:24px;font-weight:1000;will-change:transform,opacity}
+.addition-merged{background:#ffd68a;border-color:#c48a2e;box-shadow:0 0 0 6px #ffd89044,0 4px 13px #c8913d35}
+.addition-spark{position:absolute;pointer-events:none;z-index:30;font-size:17px;color:#ca8b27;font-weight:1000;animation:addspark .45s ease-out forwards}
+@keyframes addspark{to{opacity:0;transform:translateY(-22px) scale(1.3)}}
+.addition-sum-ready .line.productline .cell.filled{transition:opacity .2s}
+@media(max-width:640px){.addition-lab{padding:8px}.addmode{font-size:11px;padding:8px;min-height:36px}}
+
+/* V20: crisp, immediate two-mode merging experiment */
+.addition-swipe-guide{z-index:18}
+.addition-swipe-guide .tutorial-stream{opacity:.70}
+.addition-swipe-guide .tutorial-stream .shaft{height:3px;background:linear-gradient(to right,transparent,rgba(125,77,22,.46) 18%,rgba(125,77,22,.46) 82%,transparent)}
+.addition-swipe-guide .tutorial-stream .stream-chevron{color:rgba(125,72,19,.83)}
+.line.productline .rowcell.addition-consumed{opacity:.05;transform:scale(.78);transition:opacity .11s,transform .11s}
+.line.productline.addition-empty{opacity:0;transition:opacity .11s}
+.line.finalline.addition-empty{opacity:0}
+.line.productline .rowcell.addition-merged{color:#674017;transition:background .08s,box-shadow .08s}
+.line.final-merged .final-merged-digit{border-color:#c78e39;background:linear-gradient(135deg,#fff0cb,#ffd99c);box-shadow:0 2px 0 #d1a36a,0 0 0 3px rgba(231,174,73,.14)}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .tutorial-stream .stream-chevron{animation:none}}
+
+/* v21: one downward swipe, one smoothly descending arrow, no repeated chevrons. */
+body.addition-active{touch-action:none;overscroll-behavior:contain}
+.addition-swipe-guide{z-index:33;pointer-events:none}
+.addition-swipe-guide .drop-guide{position:absolute;width:54px;height:54px;pointer-events:none;opacity:0;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 3px rgba(114,75,30,.16));animation:dropHint 1.55s cubic-bezier(.42,0,.58,1) infinite}
+.addition-swipe-guide .drop-guide svg{display:block;width:100%;height:100%;overflow:visible}
+@keyframes dropHint{
+ 0%{opacity:0;transform:translate(-50%,-50%) translateY(0px) scale(.86)}
+ 20%{opacity:.86}
+ 72%{opacity:.82}
+ 100%{opacity:0;transform:translate(-50%,-50%) translateY(var(--drop-distance)) scale(1.07)}
+}
+.line.productline .rowcell.merge-landing{box-shadow:0 2px 0 #d1a36a,0 0 0 5px rgba(222,162,67,.27);background:linear-gradient(135deg,#fff2d5,#ffdc9e);border-color:#ce9135}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .drop-guide{animation:none;opacity:.75;transform:translate(-50%,-50%) translateY(16px)}}
+/* v22 - math-aware product tiles, one solid number without a separating dot */
+.floating{gap:0;padding:5px 6px;border-radius:13px;overflow:visible}
+.floating .dash{display:none!important}
+.floating .ftile{border-radius:6px 0 0 6px}
+.floating .ftile:last-child{border-radius:0 6px 6px 0}
+.floating .ftile:only-child{border-radius:7px}
+.floating .ftile + .ftile{margin-left:-2px;border-left-color:rgba(159,101,33,.55)}
+.floating::before{content:attr(data-equation);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:950;letter-spacing:.02em;color:#81521e;background:#fff5deea;border:1px solid #e6c08b;border-radius:999px;padding:3px 9px;box-shadow:0 2px 4px #81512315;pointer-events:none}
+.sheethead{align-items:center}
+.operation-cue{margin-right:auto;padding:3px 8px;border-radius:7px;background:#f5e2ba;color:#926029;font-size:11px;font-weight:950;letter-spacing:.035em}
+/* A single row-wide chevron: two diagonal strokes, absolutely no scaling during its descent. */
+.addition-swipe-guide .drop-guide{width:var(--chevron-width);height:54px;filter:drop-shadow(0 3px 4px rgba(102,66,28,.17));opacity:0;transform:translateY(0);animation:wideChevronDrop 1.42s ease-in-out infinite}
+.addition-swipe-guide .drop-guide svg{width:100%;height:100%;display:block;overflow:visible}
+@keyframes wideChevronDrop{0%{opacity:0;transform:translateY(0px)}18%{opacity:.82}75%{opacity:.78}100%{opacity:0;transform:translateY(var(--drop-distance))}}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .drop-guide{opacity:.75;animation:none;transform:translateY(12px)}}
+
+/* v24: spacious, centered funnel arrow directly over addition rows */
+.addition-swipe-guide{z-index:20;pointer-events:none}
+.addition-swipe-guide .drop-guide{
+ position:absolute;left:var(--guide-left);top:var(--guide-top);
+ width:var(--guide-width);height:var(--guide-height);
+ transform-origin:center top;opacity:0;pointer-events:none;
+ filter:drop-shadow(0px 3px 2px rgba(104,67,25,.12));
+ animation:hourglassCascade 1.6s cubic-bezier(.42,0,.25,1) infinite;
+}
+.addition-swipe-guide .drop-guide svg{width:100%;height:100%;display:block;overflow:visible}
+.addition-swipe-guide .drop-guide .chev{
+ fill:none;stroke:rgba(137,84,25,.64);stroke-width:6;
+ stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;
+}
+.addition-swipe-guide .drop-guide .chev2{stroke:rgba(147,89,30,.54)}
+.addition-swipe-guide .drop-guide .chev3{stroke:rgba(156,96,34,.47)}
+.addition-swipe-guide .drop-guide .chev4{stroke:rgba(160,102,38,.37)}
+@keyframes hourglassCascade{
+ 0%{opacity:0;transform:translateY(0) scale(1)}
+ 14%{opacity:.83}
+ 70%{opacity:.75}
+ 100%{opacity:0;transform:translateY(var(--drop-distance)) scale(.82)}
+}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .drop-guide{animation:none;opacity:.75;transform:none}}
+/* The equation is shown through a fast visual transformation on the connection,
+   not as a permanent badge detached from it. */
+.floating::before{display:none!important}
+
+/* V25: fixed-width floating result from the first frame. The ones position never shifts. */
+.floating.count-active{opacity:1;visibility:visible;pointer-events:none;transform:translateY(0) scale(1);z-index:20}
+.floating.count-active .ftile{transition:none;cursor:default}
+.floating.count-active .ftile.count-reveal{animation:countTap .12s cubic-bezier(.25,.85,.25,1) both}
+@keyframes countTap{0%{transform:translateY(3px) scale(.94);filter:brightness(1.12)}100%{transform:translateY(0) scale(1);filter:brightness(1)}}
+.floating .multiply-burst{position:absolute;pointer-events:none;z-index:4;left:50%;top:50%;font-size:43px;font-weight:1000;line-height:1;color:#99611c;text-shadow:0 2px 9px #ffecb9;transform:translate(-50%,-50%) scale(.55);animation:floatMultiplyPop .21s ease-out forwards}
+@keyframes floatMultiplyPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}27%{opacity:1;transform:translate(-50%,-50%) scale(1.07)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
+.floating.count-complete{animation:countArrival .17s ease-out}
+@keyframes countArrival{0%{filter:brightness(1.1)}50%{filter:brightness(1.22)}100%{filter:brightness(1)}}
+.animation-toggle[aria-pressed=true]{background:#fff1cf;border-color:#dfae63}
+
+/* V26: three interchangeable multiplication micro-animations */
+.multiplication-lab{display:flex;gap:9px;align-items:center;flex-wrap:wrap;border:1px solid #e5caa4;background:#fff9ef;border-radius:15px;padding:10px 12px;margin-bottom:12px}
+.multiplication-lab-title{display:flex;flex-direction:column;gap:3px;min-width:155px;flex:1}
+.multiplication-lab-title span{font-weight:950;letter-spacing:.6px;font-size:11px;color:#8d5e30}
+.multiplication-lab-title small{font-size:10px;color:#ab8965}
+.mult-choices{display:flex;gap:6px;flex-wrap:wrap}
+.mult-choice{background:#fffdf8;border:2px solid #e5ccb0;border-radius:10px;padding:6px 11px;min-width:103px;text-align:left}
+.mult-choice b{font-size:12px;display:block}
+.mult-choice small{font-size:10px;display:block;color:#9c7c59;margin-top:2px}
+.mult-choice[aria-pressed=true]{border-color:#ce8a2e;background:#ffe6b5;box-shadow:0 2px 0 #d3a05a}
+#replayMult:disabled{opacity:.45;cursor:default}
+.floating.multiply-running{opacity:1;transform:translateY(0) scale(1);pointer-events:none;z-index:15}
+.floating.multiply-running .ftile{opacity:1!important;pointer-events:none}
+.multiplication-fx{position:absolute;display:none;z-index:26;pointer-events:none;min-width:108px;min-height:52px;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 5px rgba(117,75,23,.13))}
+.multiplication-fx.active{display:flex}
+.fx-formula{white-space:nowrap;background:rgba(255,247,226,.98);border:2px solid #dca75b;border-radius:11px;padding:9px 12px;font-size:23px;letter-spacing:-.5px;font-weight:1000;color:#74451c;box-shadow:0 2px 0 #d6af7f}
+.fx-formula .fx-times{color:#bb7320;display:inline-block;margin:0 3px;font-weight:1000}
+.fx-formula.fx-intro{animation:fxAppear .17s cubic-bezier(.13,.85,.32,1) both}
+.fx-formula.fx-answer{animation:fxStamp .2s cubic-bezier(.18,1.4,.22,1) both}
+.fx-core{position:relative;display:grid;place-items:center;width:88px;height:58px}
+.fx-core .fx-times{position:absolute;display:grid;place-items:center;font-size:42px;color:#a56b25;animation:fxCross .24s ease-out both;line-height:1}
+.fx-pip-grid{display:grid;grid-template-columns:repeat(var(--dot-columns),7px);gap:3px;padding:10px;background:#fff3d7;border:2px solid #e0af69;border-radius:12px;box-shadow:0 3px 0 #ddb277;transform-origin:center}
+.fx-pip{width:7px;height:7px;border-radius:3px;background:linear-gradient(145deg,#dca052,#915b2b);opacity:0;transform:scale(.15);animation:fxPipIn .16s cubic-bezier(.18,1.3,.28,1) both;animation-delay:var(--delay)}
+.fx-array-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;max-width:145px}
+.fx-array-caption{font-size:11px;font-weight:950;color:#916024;background:#fff7e5c9;border-radius:7px;padding:2px 6px}
+.fx-array-board{display:grid;grid-template-columns:18px repeat(var(--dot-columns),18px);grid-auto-rows:18px;gap:10px 11px;align-items:center;justify-items:center;padding:10px 12px 12px;background:#fff3d7;border:2px solid #e0af69;border-radius:13px;box-shadow:0 3px 0 #ddb277}.fx-array-board .blank{width:1px;height:1px}.fx-array-top,.fx-array-side{font-size:12px;font-weight:1000;color:#8d5f2d;opacity:0;animation:fxAppear .16s cubic-bezier(.18,1.2,.28,1) both;animation-delay:var(--delay)}.fx-array-dot{width:11px;height:11px;border-radius:50%;border:2.5px solid #6f4926;background:#fffdf5;opacity:0;animation:fxPipRing .15s cubic-bezier(.18,1.25,.28,1) both;animation-delay:var(--delay)}@keyframes fxPipRing{0%{opacity:0;transform:translateY(5px) scale(.25)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.fx-source{position:absolute;z-index:26;pointer-events:none;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:30px;font-weight:1000;color:#765029;text-shadow:0 2px 0 #fff1d4;background:#ffe2a5;border:2px solid #dfa44f;border-radius:12px;box-shadow:0 4px 8px #744c2023}
+@keyframes fxAppear{from{opacity:0;transform:translateY(7px) scale(.83)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fxCross{0%{opacity:0;transform:scale(.55) rotate(-12deg)}32%{opacity:1;transform:scale(1.12)}100%{opacity:0;transform:scale(1.52)}}
+@keyframes fxStamp{0%{opacity:0;transform:translateY(-4px) scale(1.22)}75%{opacity:1;transform:scale(.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fxPipIn{0%{opacity:0;transform:translateY(7px) scale(.2)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:710px){.multiplication-lab-title{min-width:100%}.mult-choice{min-width:85px;padding:5px 8px}#replayMult{margin-left:auto}}
+@media(prefers-reduced-motion:reduce){.fx-pip,.fx-core .fx-times,.fx-formula{animation:none!important}}
+
+/* V28: circle-group counting and a type-on expression physically centered in the float. */
+.fx-array-board{grid-template-columns:var(--array-size) repeat(var(--dot-columns),var(--array-size));grid-auto-rows:var(--array-size);gap:var(--array-gap);min-width:max-content}
+.fx-array-top,.fx-array-side,.fx-array-dot{animation:none;opacity:0;transition:opacity .13s ease,transform .16s cubic-bezier(.2,1.3,.3,1)}
+.fx-array-top,.fx-array-side{font-size:11px;transform:translateY(3px)}
+.fx-array-top.revealed,.fx-array-side.revealed{opacity:1;transform:translateY(0)}
+.fx-array-dot{width:65%;height:65%;background:#fffdf5;border:2.4px solid #714723;border-radius:50%;transform:scale(.32)}
+.fx-array-dot.revealed{opacity:1;transform:scale(1)}
+.fx-array-wrap{max-width:none;position:relative}
+.fx-array-count{font-weight:950;font-size:12px;color:#86511d;background:#ffe7b6;border:1px solid #d7a051;border-radius:999px;padding:3px 9px;min-width:62px;text-align:center}
+.floating.multiply-running[data-fx-mode="typeon"] .ftile,
+.floating.multiply-running[data-fx-mode="fusion"] .ftile{color:transparent!important;text-shadow:none!important}
+.floating .fx-typeon{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:none;white-space:nowrap;border-radius:10px;background:linear-gradient(135deg,#fff8e6ef,#ffdea6f5);border:1.5px solid #d8a052;box-shadow:0 3px 9px #74401c22;padding:6px 10px;min-height:35px}
+.floating .fx-typeon .char{font-size:22px;font-weight:950;color:#87521e;opacity:0;transform:translateY(7px) scale(.84);transition:opacity .065s,transform .095s cubic-bezier(.22,1.3,.38,1);min-width:13px;text-align:center}
+.floating .fx-typeon .char.revealed{opacity:1;transform:translateY(0) scale(1)}
+.floating .ftile.fx-count-new{animation:fxNumberBump .14s ease-out}
+@keyframes fxNumberBump{0%{filter:brightness(1.25);transform:translateY(3px) scale(.92)}100%{filter:brightness(1);transform:translateY(0) scale(1)}}
+@media(max-width:520px){.fx-array-board{padding:7px;gap:4px}.floating .fx-typeon{padding:4px 7px}.floating .fx-typeon .char{font-size:19px}}
+
+/* v30: type-on uses one rounded floating frame, pre-sized before characters arrive. */
+.floating .fx-typeon{border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;outline:0!important;min-height:0;padding:0 4px;left:50%;top:50%;gap:4px}
+.floating .fx-typeon .char{font-size:21px;min-width:12px}
+.array-speed{flex:1 0 100%;display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px;background:#fff2d8;border:1px solid #e3be82;padding:11px 13px;border-radius:12px}
+.array-speed[hidden]{display:none!important}
+.array-speed-label{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:13px;font-weight:900;color:#85521f}
+.array-speed-label output{font-variant-numeric:tabular-nums;font-size:15px;color:#6c421d}
+.array-speed-track{display:flex;align-items:center;gap:11px;width:100%}
+.array-speed-track span{font-size:11px;color:#97714b;min-width:40px}
+.array-speed input[type=range]{width:100%;flex:1;accent-color:#c88727;cursor:pointer;min-height:26px;touch-action:pan-x}
+.array-speed-help{font-size:11px;color:#956c44}
+.fx-array-top,.fx-array-side,.fx-array-dot{transition-duration:var(--array-reveal-ms,130ms)!important}
+@media(max-width:520px){.array-speed{padding:9px}.floating .fx-typeon .char{font-size:19px}}
+
+/* V30: simplify experimental chrome to one chosen multiplication mode. */
+.mult-choices,.array-speed{display:none!important}
+.multiplication-lab{padding:9px 14px}
+.multiplication-lab-title{min-width:0}
+.floating.typeon-sized{
+  box-sizing:border-box;
+  justify-content:center;
+  border-radius:16px;
+  padding:7px 12px;
+  overflow:visible;
+}
+.floating.typeon-sized .ftile{visibility:hidden!important}
+.floating.typeon-sized .fx-typeon{
+  box-sizing:border-box;
+  position:absolute;
+  inset:0;
+  left:0!important;top:0!important;
+  width:100%;height:100%;
+  transform:none!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 10px;
+  border:0!important;
+  border-radius:inherit!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.floating.typeon-sized .fx-typeon .char{font-size:23px;line-height:1;min-width:17px}
+<style>
+/* v31 · Fully themed but worksheet-first order terminal. All input hitboxes remain intact. */
+:root{--machine-ink:#553420;--machine-bronze:#a96e35;--machine-gold:#e1b35e}
+body{background:radial-gradient(ellipse at 12% 12%,#fff4d9 0%,transparent 48%),radial-gradient(ellipse at 90% 80%,#d5aa70 0%,transparent 48%),#e8d4b6;color:var(--machine-ink)}
+.shell{max-width:1430px;padding:17px clamp(11px,2.5vw,35px) 55px}
+.top{margin-bottom:17px}
+.brand h1{font-size:27px;color:#5a3824}
+.brand small{color:#a47743;font-size:10px;letter-spacing:1.7px}
+.logo{background:linear-gradient(145deg,#fff2cd,#e3ae60 80%);border-color:#fff3c8;box-shadow:0 3px 0 #b7834c,0 5px 16px #905d322e}
+.controls .tool,.controls .chooser,.controls .customLabel{border-color:#d9b383;background:#fffaf0;color:#694322;box-shadow:0 2px 0 #cfa874}
+.balance{background:#593b2b;color:#f7db87;box-shadow:0 3px 0 #38251d}
+.multiplication-lab{background:#f9efd9;border-color:#d1ae7b;border-radius:13px;max-width:820px;margin-left:auto;margin-right:auto;gap:14px}
+.multiplication-lab-title span{color:#95602c}.multiplication-lab-title small{color:#99744f}
+.modes{display:none!important}
+.addition-lab{max-width:920px;margin-left:auto;margin-right:auto}
+.addition-help{display:none!important}
+.layout{grid-template-columns:minmax(0,1fr) 266px;gap:21px;align-items:start}
+.workspace{position:relative;padding:0 0 0;border:7px solid #9b673c;background:linear-gradient(125deg,#e5b16a,#d7a05f 32%,#e9bd81 58%,#b9824d);border-radius:29px;box-shadow:0 8px 0 #8f5930,0 24px 55px #744c2a44, inset 0 2px 0 #ffe0a2}
+.machine-canopy{min-height:111px;padding:23px 25px 19px;background:linear-gradient(135deg,#b4743d,#8f542e 46%,#b67843);position:relative;border-radius:20px 20px 7px 7px;border-bottom:4px solid #774423;box-shadow:inset 0 4px 0 #d89a5c,0 3px 9px #4b2f2240;color:#fff0ce}
+.machine-mainline{display:flex;align-items:center;gap:12px;min-height:57px}
+.machine-symbol{width:51px;height:51px;border-radius:15px;border:2px solid #eed3a0;display:grid;place-items:center;background:linear-gradient(#fbdf9c,#dbac5d);box-shadow:0 3px 0 #a56a35;color:#82502c;font-size:33px}
+.machine-mainline strong{display:block;font-size:22px;letter-spacing:2.1px;line-height:1.1;text-shadow:0 1px 2px #54311c33}
+.machine-mainline small{display:block;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#edcda6;margin-top:6px}
+.machine-live{margin-left:auto;display:flex;align-items:center;gap:7px;background:#543525a8;border:1px solid #d49b5d;padding:10px 13px;border-radius:999px;white-space:nowrap;font-size:10px;font-weight:900;letter-spacing:.6px;color:#f7d8a1}
+.machine-live i{width:8px;height:8px;border-radius:50%;display:block;background:#bce779;box-shadow:0 0 10px #c9fc80;animation:machinePulse 2s ease-in-out infinite}
+.machine-screws span{position:absolute;top:10px;width:8px;height:8px;border:2px solid #f3be7e;background:#714325;border-radius:50%;box-shadow:inset 0 1px 1px #fff6bd4d}.machine-screws span:first-child{left:14px}.machine-screws span:last-child{right:14px}
+.feed-mouth{height:31px;padding:5px 40px;position:relative;display:flex;align-items:center;gap:10px;background:linear-gradient(#af7644,#e1b479);border-bottom:3px solid #b07b4e}
+.feed-roller{height:13px;width:26px;border-radius:10px;background:linear-gradient(#fff4c9,#dbae73,#87562f);box-shadow:0 2px 0 #986136}
+.feed-slot{height:14px;flex:1;border-radius:5px;background:linear-gradient(#45281e,#70442e);box-shadow:inset 0 4px 6px #1f110c,0 1px 0 #f2c38e}
+.ticket-feed{position:absolute;z-index:55;left:50%;bottom:-10px;transform:translate(-50%,-75px);width:120px;min-height:92px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:10px;border:1px solid #c59b65;background:#fff9e9;box-shadow:0 5px 12px #48291540;border-radius:4px;pointer-events:none;opacity:0;color:#714723}
+.ticket-feed strong{font-weight:1000;font-size:23px}
+.tiny-ticket-top,.tiny-ticket-bottom{font-size:9px;font-weight:900;letter-spacing:2px;color:#ae8655}
+.ticket-feed.feeding{animation:ticketFeed .87s cubic-bezier(.22,.65,.42,1) both}
+.receipt-wrapper{position:relative;margin:0 24px;padding:17px 19px 18px;background:linear-gradient(#fffef8,#fff8e9);box-shadow:inset 0 2px 0 #ffffff,0 11px 18px #754a2a25}
+.receipt-wrapper.printing{animation:receiptPrint .68s cubic-bezier(.3,.74,.28,1) both;transform-origin:50% 0}
+.receipt-caption{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px dashed #bca17f;color:#9c7954;font-size:10px;font-weight:1000;letter-spacing:1.5px}
+.receipt-number b{color:#7d512a}
+.workspace .head{margin:13px 0 8px}
+.workspace .head h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;letter-spacing:-.4px;color:#603f2d}
+.workspace .head .eyebrow{font-size:9px;color:#a58766}
+.roundtag{background:#f8e5c3;border:1px solid #ebd0a9;border-radius:7px;color:#8b613a}
+.sheet{background:#fffdf7;border-radius:6px;border:1px solid #d9c3a8;padding:12px 6px 22px;min-height:355px;box-shadow:0 3px 0 #ebd6b6}
+.sheet:before{content:none}
+.sheethead{color:#a48664}
+.sheethead #operationCue{background:#eddbb9;border:1px solid #e0c49a;color:#8a5a2c}
+.math{margin:0 auto}
+.cell.number{background:linear-gradient(#fffaf0,#f8e6c7);border-color:#d5b18b;box-shadow:0 2px 0 #c8a17c}
+.cell.number.first{background:#ffe6ab;border-color:#d39a4a}
+.cell.rowcell{border-color:#dfc39e;background:#fffaf1}
+.cell.rowcell.filled{background:#f8ebd3;border-color:#c9a77b}
+.cell.hold{background:#faf1dd;border-color:#dbc09b}
+.receipt-rule{height:19px;margin:4px 0 4px;border-bottom:1px dashed #bd9b77;position:relative}
+.receipt-rule span{position:absolute;left:0;bottom:-9px;background:#fff8ea;padding:0 7px;color:#b89a76;font-size:17px}
+.workspace .statusbar{padding:8px 2px 1px}
+.workspace .actions{padding:8px 0 6px}
+.workspace .tool{background:#fff3da;border-color:#d8b083;box-shadow:0 2px 0 #ceaa85}
+.receipt-footer{margin:0 24px 19px;background:#fff8e9;padding:13px 20px 16px;display:flex;justify-content:space-between;gap:10px;color:#a48561;letter-spacing:1.5px;font-size:10px;font-weight:900;clip-path:polygon(0 0,100% 0,100% 84%,97% 100%,94% 84%,91% 100%,88% 84%,85% 100%,82% 84%,79% 100%,76% 84%,73% 100%,70% 84%,67% 100%,64% 84%,61% 100%,58% 84%,55% 100%,52% 84%,49% 100%,46% 84%,43% 100%,40% 84%,37% 100%,34% 84%,31% 100%,28% 84%,25% 100%,22% 84%,19% 100%,16% 84%,13% 100%,10% 84%,7% 100%,4% 84%,0 100%)}
+.side .panel{background:linear-gradient(#fff9ea,#f7e4c6);border:1px solid #caac7d;border-radius:17px;padding:18px;box-shadow:0 4px 0 #b89163,0 16px 27px #79512c1a}
+.side .ticket{position:relative;border:1px dashed #be9260;border-radius:4px;background:#fffdf5;box-shadow:0 5px 0 #e9d5b7;margin-top:13px;text-align:center}
+.side .ticket:before,.side .ticket:after{content:'';position:absolute;width:12px;height:12px;background:#f9ebd7;border-radius:50%;top:45%}
+.side .ticket:before{left:-8px}.side .ticket:after{right:-8px}
+.side .ticket .num{font-size:30px;font-family:Georgia,serif}
+.side .eyebrow{color:#947046}
+.side .belt{border-color:#b69069}
+.side .moneyline{color:#97704c}
+.receipt-stamp{position:absolute;z-index:22;right:20px;top:33px;pointer-events:none;display:none;border:4px double #7ca76b;border-radius:9px;color:#618b53;font-size:19px;font-weight:1000;letter-spacing:3px;padding:6px 14px;transform:rotate(-11deg);background:#fffdf4dd;box-shadow:0 1px 5px #9ab08438}
+.receipt-stamp.stamped{display:block;animation:receiptStamp .48s cubic-bezier(.24,1.4,.22,1) both}
+#complete .complete{margin:12px 0 0;border:1px solid #d1b280;border-radius:8px;background:#fff3d7;color:#714a27;padding:12px}
+#complete .complete h3{color:#75501f}
+.cash-terminal{position:relative;display:none;max-width:550px;margin:14px auto 2px;border:5px solid #92582e;background:linear-gradient(#ca904e,#bb7c3e);border-radius:16px;padding:9px 15px 14px;box-shadow:0 7px 0 #77451f,0 8px 14px #663f2538;text-align:center;color:#fff2d1}
+.cash-terminal.open{display:block;animation:cashAppear .34s cubic-bezier(.2,1,.4,1) both}
+.cash-display{display:flex;justify-content:space-between;align-items:center;background:#334a34;border:3px solid #79502c;border-radius:9px;padding:10px 14px;box-shadow:inset 0 3px 6px #192d1d;color:#d9efaa}
+.cash-display small{letter-spacing:1.5px;font-weight:900;font-size:10px}
+.cash-display strong{font-size:23px;font-variant-numeric:tabular-nums}
+.cash-drawer{height:45px;position:relative;margin:11px 15px 0;background:#9c6438;border:3px solid #63381e;border-radius:7px;box-shadow:inset 0 4px 8px #60351f88}
+.drawer-handle{position:absolute;z-index:2;left:50%;top:9px;transform:translateX(-50%);background:#e4c58f;border:2px solid #82572a;border-radius:15px;width:83px;height:14px}
+.drawer-inner{position:absolute;top:4px;left:5px;right:5px;height:34px;opacity:0;background:linear-gradient(#e6c797,#c7a072);border:2px solid #e1bb80;border-radius:4px;box-shadow:0 3px 6px #56362142;transform:translateY(2px)}
+.cash-terminal.open .drawer-inner{animation:drawerOpen .58s .26s cubic-bezier(.18,1.15,.28,1) both}
+.cash-note{position:absolute;left:18px;top:5px;width:50px;padding:4px;border:2px solid #8a9c57;background:#e5f1ac;color:#66844b;border-radius:4px;font-weight:1000}
+.coin{position:absolute;top:7px;right:24px;width:23px;height:23px;border:2px solid #b27b22;border-radius:50%;background:#ffdc68;color:#a46d20;font-weight:900;font-size:13px;display:grid;place-items:center;opacity:0}
+.coin.c2{right:53px}.coin.c3{right:81px}.coin.c4{right:110px}
+.cash-terminal.open .coin{animation:cashCoin .65s cubic-bezier(.13,.95,.22,1) both}
+.cash-terminal.open .coin.c1{animation-delay:.4s}.cash-terminal.open .coin.c2{animation-delay:.49s}.cash-terminal.open .coin.c3{animation-delay:.57s}.cash-terminal.open .coin.c4{animation-delay:.64s}
+.cash-label{font-size:10px;font-weight:1000;letter-spacing:2px;margin-top:12px}
+@keyframes ticketFeed{0%{opacity:0;transform:translate(-50%,-75px)}17%{opacity:1}62%{opacity:1;transform:translate(-50%,-10px)}100%{opacity:0;transform:translate(-50%,65px)}}
+@keyframes receiptPrint{0%{opacity:.45;transform:translateY(-12px) scaleY(.96)}100%{opacity:1;transform:none}}
+@keyframes machinePulse{50%{box-shadow:0 0 14px #d7ffa2;filter:brightness(1.25)}}
+@keyframes receiptStamp{0%{opacity:0;transform:rotate(-11deg) scale(1.4)}75%{opacity:1;transform:rotate(-11deg) scale(.96)}100%{opacity:1;transform:rotate(-11deg) scale(1)}}
+@keyframes cashAppear{0%{opacity:0;transform:translateY(-10px) scale(.96)}100%{opacity:1;transform:none}}
+@keyframes drawerOpen{0%{opacity:0;transform:translateY(0)}100%{opacity:1;transform:translateY(18px)}}
+@keyframes cashCoin{0%{opacity:0;transform:translateY(0) scale(.6)}38%{opacity:1}100%{opacity:1;transform:translateY(-19px) scale(1)}}
+@media(max-width:1000px){.layout{grid-template-columns:minmax(0,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}.workspace{max-width:900px;margin:auto;width:100%}}
+@media(max-width:670px){.side{grid-template-columns:1fr}.machine-canopy{padding:22px 13px 13px}.machine-symbol{width:41px;height:41px;font-size:25px}.machine-mainline strong{font-size:16px}.machine-mainline small{font-size:7px}.machine-live{padding:7px 8px;font-size:8px}.receipt-wrapper{margin:0 7px;padding:11px 7px 14px}.receipt-caption{font-size:8px;letter-spacing:.5px}.receipt-footer{margin:0 7px 10px;padding:9px 10px 16px;font-size:8px;letter-spacing:.5px}.workspace{border-width:5px}.sheet{padding:8px 2px 17px}.machine-mainline{gap:7px}.cash-display small{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.ticket-feed.feeding,.receipt-wrapper.printing,.cash-terminal.open,.receipt-stamp.stamped{animation-duration:.01ms!important}}
+
+/* v33 — a stationary, immediately available M × N button replaces the reveal animation. */
+.floating.equation-pending{min-width:132px;max-width:none;justify-content:stretch;padding:4px;border-radius:16px;pointer-events:auto;opacity:1;transform:translateY(0) scale(1)}
+.floating.equation-pending .equation-reveal{width:100%;min-height:45px;padding:5px 12px;border:0;border-radius:12px;background:linear-gradient(150deg,#fff9e8,#fbe0ad);color:#785027;font-size:24px;font-weight:1000;letter-spacing:.02em;white-space:nowrap;touch-action:manipulation;box-shadow:none;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;user-select:none}
+.floating.equation-pending .equation-reveal:active{background:#f8d99b;transform:scale(.97)}
+.floating.equation-pending .equation-reveal:focus-visible{outline:3px solid #b87d2e;outline-offset:-3px}
+<style>.addition-lab,.multiplication-lab{display:none!important}.workspace{margin-top:0!important} .shell{padding-top:0!important} </style><style id="v33-embed-adjust">
+html,body{width:100%;min-width:0;overflow-x:hidden;background:transparent!important}
+#app.shell{width:100%;max-width:none;margin:0!important;padding:3px 3px 26px!important}
+.top,.side{display:none!important}
+.layout{display:block!important;grid-template-columns:1fr!important}
+.workspace{padding:10px!important;width:100%;max-width:100%}
+.multiplication-lab{margin-bottom:8px!important;padding:8px!important;gap:6px!important}
+.mult-choices{flex:1 1 100%;min-width:0!important}
+.mult-choice{padding:7px 5px!important}
+.mult-choice b{font-size:11px!important}
+.mult-choice small{font-size:9px!important}
+.modes{margin-bottom:8px!important;gap:5px!important}
+.mode{padding:8px 7px!important}
+.mode small{font-size:9px!important}
+.addition-lab{margin-bottom:6px!important}
+.receipt-wrapper{margin:0 8px!important;padding:11px 8px 12px!important}
+.machine-canopy{max-width:100%!important}
+.sheet{min-height:390px!important}
+.sheet .scroller{max-width:100%!important}
+.receipt-caption{font-size:9px!important}
+@media(max-width:550px){.workspace{padding:5px!important}.receipt-wrapper{margin:0 2px!important;padding:8px 4px!important}.mult-choices{display:grid!important;grid-template-columns:1fr 1fr!important}.machine-canopy{display:none!important}}
+</style></head>
+<body><div class="shell pack" id="app"><header class="top"><div class="brand"><div class="logo">🥐</div><div><h1>Batch & Carry</h1><small>THE BAKERY WORKSHOP · RECEIPT TERMINAL</small></div></div><div class="controls"><select class="chooser" id="problem" aria-label="Choose sample problem"></select><button class="tool" id="restart">↻ Restart</button><button class="tool" id="sound">♫ Sound on</button><button class="tool tutorial-toggle" id="tutorialToggle" aria-pressed="true">➜ Tutorial on</button><span class="balance" id="balance">₱0</span><label class="customLabel">Custom <input id="customA" type="number" min="1" max="99999" value="48" inputmode="numeric" aria-label="Multiplicand"> × <input id="customB" type="number" min="1" max="99" value="6" inputmode="numeric" aria-label="Multiplier"></label><button class="tool" id="tryCustom">Try</button></div></header>
+<div class="multiplication-lab" role="group" aria-label="Multiplication animation mode">
+  <div class="multiplication-lab-title"><span>✧ MACHINE CALIBRATION</span><small>Connect digits, pack the result, train the machine.</small></div>
+  <div class="mult-choices">
+    <button type="button" class="mult-choice" data-mult-mode="equation" aria-pressed="false"><b>A · Equation</b><small>6 × 8 → 48</small></button>
+    <button type="button" class="mult-choice" data-mult-mode="fusion" aria-pressed="false"><b>B · Fusion</b><small>Digits combine</small></button>
+    <button type="button" class="mult-choice" data-mult-mode="array" aria-pressed="false"><b>C · Array</b><small>Circles + groups</small></button>
+    <button type="button" class="mult-choice" data-mult-mode="typeon" aria-pressed="true"><b>D · Type-on</b><small>Tap to reveal product</small></button>
+  </div>
+  <button type="button" class="tool" id="replayMult" disabled title="Show the equation button again before placing digits">↺ Show M × N</button>
+  <div id="arraySpeedWrap" class="array-speed" hidden>
+    <label for="arraySpeed" class="array-speed-label">Array speed <output id="arraySpeedValue" for="arraySpeed">1.00×</output></label>
+    <div class="array-speed-track"><span>Slower</span><input id="arraySpeed" type="range" min="0.4" max="3" step="0.1" value="1" aria-label="Array animation speed"><span>Faster</span></div>
+    <span class="array-speed-help">Change speed to replay the current multiplication automatically.</span>
+  </div>
+</div>
+<div class="modes"><button class="mode" data-visual="pack" aria-pressed="true"><b>📦 Trays</b><small>Visible packing structure</small></button><button class="mode" data-visual="simple" aria-pressed="false"><b>▦ Simple</b><small>Subtle worksheet slots</small></button><button class="mode" data-visual="paper" aria-pressed="false"><b>✎ Paper</b><small>Minimal visual assistance</small></button></div>
+<div class="addition-lab" id="additionLab"><span class="lab-label">ADDITION TEST</span><span class="lab-label">↓ Swipe down anywhere</span><button class="tool" id="jumpAddition">↪ Jump to addition</button><button class="tool" id="runMerge">↓ Merge now</button></div><p class="addition-help" id="additionHelp">Finish a two-row problem or jump directly to the addition test.</p><div class="layout"><main class="card workspace">
+<div class="machine-canopy">
+  <div class="machine-screws"><span></span><span></span></div>
+  <div class="machine-mainline"><span class="machine-symbol">✳</span><div><strong>THE ORDER PRESS</strong><small>BAKERY PACKING TERMINAL · MODEL 01</small></div><div class="machine-live"><i></i><span id="machineLive">READY TO PRINT</span></div></div>
+  <div class="ticket-feed" id="ticketFeed" aria-hidden="true"><span class="tiny-ticket-top">ORDER IN</span><strong id="ticketFeedEq">48 × 6</strong><span class="tiny-ticket-bottom">•••</span></div>
+</div>
+<div class="feed-mouth" aria-hidden="true"><span class="feed-roller"></span><span class="feed-slot"></span><span class="feed-roller"></span></div>
+<div class="receipt-wrapper" id="receiptWrapper"><div class="receipt-caption"><span>ORDER CALCULATION RECEIPT</span><span class="receipt-number">BATCH <b id="ticketNumber">001</b></span></div>
+<div class="head"><div><div class="eyebrow">AUTOPACKER TRAINING IN PROGRESS</div><h2 id="heading">Packing calculation</h2></div><span class="roundtag" id="rowTag">ROW 1 / 2</span></div>
+<section class="sheet receipt-paper" id="sheet" aria-label="Interactive multiplication worksheet"><div class="sheethead"><span>✦ CALIBRATION WORKSHEET</span><span id="operationCue" class="operation-cue" aria-live="off">MULTIPLY</span><span id="pairs">0 / 5 PAIRS</span></div><div class="scroller" id="scroller"><div class="math" id="math"></div></div><svg id="pair" class="pair-svg" aria-hidden="true"><path id="pairGlow" class="pair-glow"/><path id="pairHalo" class="pair-shell"/><path id="pairTrace" class="pair-rib"/></svg><svg id="connectorPreview" class="pair-svg preview-pair" aria-hidden="true"><path id="previewGlow" class="pair-glow"/><path id="previewHalo" class="pair-shell"/><path id="previewTrace" class="pair-rib"/></svg><div id="floating" class="floating" aria-label="Floating product digit tiles"></div><div id="multiplicationFx" class="multiplication-fx" aria-hidden="true"></div><div id="tutorial" class="tutorial-layer" aria-hidden="true"></div><div id="additionSwipeGuide" class="tutorial-layer addition-swipe-guide" aria-hidden="true"></div><div class="receipt-stamp" id="receiptStamp" aria-hidden="true">✓ PACKED</div></section>
+<div class="receipt-rule" aria-hidden="true"><span>✂</span></div><div class="statusbar"><span class="status" id="status" aria-live="polite">Connect the digits.</span><span class="hintpill" id="progressTag">CONNECT • SPLIT • PACK</span></div><div class="actions"><button class="tool" id="undo">↶ Undo</button><button class="tool" id="ruleToggle">◇ Show rule</button><span class="notice hidden" id="selectedLabel">Tile selected</span></div><details class="footnote"><summary style="cursor:pointer;font-weight:850">Controls (optional)</summary><p>Tap two digits or drag between them. Tap the floating M × N to reveal the product. Tap a floating digit, then its destination—or drag it there. You may put both digits in the bottom row first, then tap the left digit there to lift it as carry. If a previous carry is waiting, select it and then choose the right product digit—either floating or already placed. You can also drag that carry directly onto the right product digit.</p></details><div id="complete"></div>
+<div class="cash-terminal" id="cashTerminal" aria-live="polite"><div class="cash-display"><small>PAYMENT VERIFIED</small><strong id="cashDisplay">+₱50</strong></div><div class="cash-drawer"><div class="drawer-handle"></div><div class="drawer-inner"><span class="cash-note">₱</span><span class="coin c1">₱</span><span class="coin c2">₱</span><span class="coin c3">₱</span><span class="coin c4">₱</span></div></div><div class="cash-label">ORDER COMPLETED · CHA-CHING!</div></div>
+</div><div class="receipt-footer"><span>BAKED WITH PRECISION</span><span>✳ ✳ ✳</span><span>THANK YOU!</span></div></main>
+<aside class="side"><section class="card panel"><div class="eyebrow">✧ TODAY’S ORDER</div><div class="ticket"><div class="eyebrow">CUSTOMER TICKET · #001</div><div class="num" id="equation">48 × 6</div><small id="category">1 row · With carry</small></div><div class="tip"><span class="eyebrow">CURRENT BATCH</span><p class="feature" id="counter" style="margin:5px 0 0">0 product cycles sealed</p></div></section>
+<section class="card panel"><div class="eyebrow">✧ PACKER STATUS</div><div class="moneyline" style="margin-top:12px"><span>CALIBRATION COMPLETE</span><span id="percent">0%</span></div><div class="meter"><div id="meterFill"></div></div><div class="belt"><div class="cargo">📦 📦 🥐 📦 📦 🥨 📦 📦 🥐 📦</div></div><div class="moneyline"><span>STEPS COMPLETED</span><span id="boxes">0</span></div><div class="legend" id="rule" hidden><hr style="border:0;border-top:1px solid #e8d3b8;margin:13px 0"><b>Math rule:</b> Choose where to add any waiting carry to the new product. One ones digit stays in the current column; any tens go to the next column left. The left digit can temporarily rest in the partial-product row before moving up. Placed digits remain provisional until an incoming carry is resolved.</div></section></aside></div></div>
+<script>
+(()=>{'use strict';
+const $=id=>document.getElementById(id), Q=sel=>document.querySelector(sel);
+const groups=[['1 row · No carry',[[12,3],[21,4],[123,2],[112,3],[32,3]]],['1 row · With carry',[[48,6],[67,4],[248,6],[96,7],[305,4],[69,9],[19,9]]],['2 rows · No carry',[[11,11],[12,12],[21,12],[23,12],[111,11]]],['2 rows · With carry',[[48,16],[248,26],[56,27],[78,34],[54321,67]]]];
+const allCases=groups.flatMap(([group,problems])=>problems.map(([a,b])=>({group,a,b})));
+for(const [g,items] of groups){const optgroup=document.createElement('optgroup');optgroup.label=g;for(const [a,b] of items){const o=document.createElement('option');o.value=`${a},${b}`;o.textContent=`${a} × ${b}`;optgroup.append(o)}$('problem').append(optgroup)}$('problem').value='48,6';
+const rev=n=>String(n).split('').reverse().map(Number), fmt=n=>Number(n).toLocaleString('en-US');
+let s, history=[], visual='pack', money=0, sound=true, tutorial=true, multMode='typeon', arraySpeed=1, multiplyRunning=false, multiplySerial=0, additionStart=null, additionCollapsed=false, context, busy=false, run=0, connectionTimer=null, selection=null, pointer=null, ignoreClick=false, connectorStyle='capsule';
+function state(a,b){let A=rev(a),B=rev(b),cols=String(a*b).length;return{a,b,A,B,cols,row:0,k:0,first:null,phase:'select',revealed:false,raw:0,mixed:false,incoming:0,onesPlaced:false,tensPlaced:false,tensLocation:null,chosen:null,carrySlots:{},rows:B.map((_,r)=>Object.fromEntries(Array.from({length:r},(_,c)=>[c,0]))),sum:{},sumCol:0,sumCarry:0,done:0,boxes:0,complete:false,carryArmed:false}}
+function snapshot(){history.push({s:structuredClone(s),money});if(history.length>200)history.shift();}
+function reset(){run++;multiplySerial++;multiplyRunning=false;clearMultiplyFx();busy=false;additionCollapsed=false;additionStart=null;selection=null;pointer=null;hidePreview();clearTimeout(connectionTimer);for(const e of document.querySelectorAll('.fly,.spark,.ghost,.addition-ghost,.addition-spark'))e.remove();let[a,b]=$('problem').value.split(',').map(Number);s=state(a,b);money=0;history=[];$('complete').innerHTML='';$('tutorialToggle').setAttribute('aria-pressed',String(tutorial));$('tutorialToggle').textContent=tutorial?'➜ Tutorial on':'➜ Tutorial off';render();status('Machine ready.');}
+function status(str,error=false){$('status').textContent=str;$('status').classList.toggle('error',error)}
+function invalid(){play('bad');if(Q('#math')?.animate)Q('#math').animate([{transform:'translateX(0)'},{transform:'translateX(-3px)'},{transform:'translateX(3px)'},{transform:'translateX(0)'}],{duration:140});}
+function play(kind){if(!sound)return;try{context??=new(window.AudioContext||window.webkitAudioContext)();if(context.state==='suspended')context.resume();let notes={link:[380,550],drop:[490,650],carry:[560,810],mix:[410,590,720],done:[530,690,920],finish:[500,630,790,1000],bad:[190]}[kind]||[460];notes.forEach((hz,i)=>{let o=context.createOscillator(),g=context.createGain(),t=context.currentTime+i*.052;o.type='sine';o.frequency.value=hz;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.042,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+.13);o.connect(g);g.connect(context.destination);o.start(t);o.stop(t+.14)})}catch(e){}}
+function value(){return s.raw+(s.mixed?s.incoming:0)}
+function ones(){return value()%10}function tens(){return Math.floor(value()/10)}
+function currentCol(){return s.row+s.k}function lastDigit(){return s.k===s.A.length-1}
+function currentIncoming(){return Number(s.carrySlots[s.k]?.value||0)}
+function productActive(){return s.phase==='product'}
+function operand(kind,c){if(s.phase!=='select')return;const wanted=kind==='top'?s.k:s.row;if(c!==wanted){invalid();status('Try another digit pair.',true);return}if(!s.first){s.first={kind,c};play('link');render();return}if(s.first.kind===kind){s.first={kind,c};render();return}snapshot();s.first=null;s.phase='product';s.revealed=false;s.raw=s.A[s.k]*s.B[s.row];s.incoming=currentIncoming();s.mixed=!s.incoming;s.onesPlaced=false;s.tensPlaced=false;s.tensLocation=null;s.chosen=null;s.carryArmed=false;selection=null;play('link');render();startMultiplySequence();}
+function flashConnection(){const id=run;$('pair').classList.add('live');clearTimeout(connectionTimer);connectionTimer=setTimeout(()=>{if(id===run)$('pair').classList.remove('live')},440)}
+// A single soft confirming sound: no repeated count-by beeps.
+function playMultiplyStamp(){if(!sound)return;try{
+ context??=new(window.AudioContext||window.webkitAudioContext)();if(context.state==='suspended')context.resume();
+ const t=context.currentTime;for(const [hz,delay] of [[520,0],[775,.057]]){
+ const o=context.createOscillator(),g=context.createGain();o.type='sine';o.frequency.value=hz;
+ g.gain.setValueAtTime(.0001,t+delay);g.gain.exponentialRampToValueAtTime(.027,t+delay+.012);
+ g.gain.exponentialRampToValueAtTime(.0001,t+delay+.15);o.connect(g);g.connect(context.destination);o.start(t+delay);o.stop(t+delay+.16);
+ }}catch(e){}
+}
+function clearMultiplyFx(){const layer=$('multiplicationFx');if(layer){layer.innerHTML='';layer.classList.remove('active')}const f=$('floating');if(f){f.classList.remove('multiply-running');f.removeAttribute('data-fx-mode');f.querySelectorAll('.fx-typeon').forEach(e=>e.remove())}document.querySelectorAll('.fx-source').forEach(e=>e.remove())}
+function fxPosition(){const layer=$('multiplicationFx'),float=$('floating'),sheet=$('sheet');if(!layer||!float||!sheet)return;
+ const f=float.getBoundingClientRect(),r=sheet.getBoundingClientRect();
+ if(layer.classList.contains('array')){
+   // Put the demonstration beside the live floating product, so the counting stays
+   // visible in the actual digit tiles rather than being obscured by the circle grid.
+   const lw=layer.offsetWidth,lh=layer.offsetHeight;
+   const toLeft=f.left-r.left-18-lw/2;
+   const toRight=f.right-r.left+18+lw/2;
+   const placeRight=toLeft<lw/2+8 && toRight+lw/2<r.width-8;
+   const cx=placeRight?toRight:Math.max(lw/2+8,toLeft);
+   layer.style.left=cx+'px';
+   layer.style.top=Math.max(lh/2+8,Math.min(r.height-lh/2-8,f.top+f.height/2-r.top))+'px';
+   return;
+ }
+ // All other effects share the same anchor as the floating product.
+ const ones=float.querySelector('[data-part="ones"]');const anchor=ones?.getBoundingClientRect();
+ layer.style.left=((anchor?anchor.left+anchor.width/2:f.left+f.width/2)-r.left)+'px';
+ layer.style.top=(f.top+f.height/2-r.top)+'px';
+}
+function showMultiplyFx(html,kind=''){const layer=$('multiplicationFx');layer.className='multiplication-fx active '+kind;layer.innerHTML=html;fxPosition();}
+function pauseMultiply(ms){return new Promise(resolve=>setTimeout(resolve,ms))}
+function pauseArray(ms){return pauseMultiply(ms/arraySpeed)}
+function flyOperand(el,end,duration=240,delay=0){if(!el)return Promise.resolve();const r=el.getBoundingClientRect(),sheet=$('sheet').getBoundingClientRect();
+ const clone=document.createElement('span');clone.className='fx-source';clone.textContent=el.textContent;clone.style.left=(r.left-sheet.left)+'px';clone.style.top=(r.top-sheet.top)+'px';clone.style.width=r.width+'px';clone.style.height=r.height+'px';$('sheet').append(clone);
+ const x=end.x-(r.left+r.width/2-sheet.left),y=end.y-(r.top+r.height/2-sheet.top);
+ const motion=clone.animate([{transform:'translate(0,0) scale(1)',opacity:1},{offset:.7,transform:`translate(${x*.72}px,${y*.72}px) scale(.83)`,opacity:.96},{transform:`translate(${x}px,${y}px) scale(.55)`,opacity:0}],{duration,delay,fill:'forwards',easing:'cubic-bezier(.32,.05,.18,1)'});
+ return motion.finished.catch(()=>{}).then(()=>clone.remove());}
+function pulseFloatTiles(){const tiles=[...document.querySelectorAll('#floating .ftile')];tiles.forEach(t=>{t.classList.remove('count-reveal');void t.offsetWidth;t.classList.add('count-reveal')})}
+function setArrayCount(n){
+ const f=$('floating'),left=f.querySelector('[data-part="tens"]'),right=f.querySelector('[data-part="ones"]');
+ if(!right)return;
+ right.textContent=n?String(n%10):'';
+ if(left){left.textContent=n>=10?String(Math.floor(n/10)):'';left.style.visibility=n>=10?'visible':'hidden'}
+ const chip=Q('#multiplicationFx .fx-array-count');if(chip)chip.textContent=n?`Total: ${n}`:'Total: —';
+ for(const tile of [left,right])if(tile){tile.classList.remove('fx-count-new');void tile.offsetWidth;tile.classList.add('fx-count-new')}
+}
+function buildArrayFx(cols,rows){
+ const compact=Math.max(cols,rows)>6;
+ let cells='<span class="blank"></span>';
+ for(let c=1;c<=cols;c++)cells+=`<span class="fx-array-top" data-col="${c}">${c}</span>`;
+ for(let r=1;r<=rows;r++){
+   cells+=`<span class="fx-array-side" data-row-label="${r}">${r}</span>`;
+   for(let c=1;c<=cols;c++)cells+=`<i class="fx-array-dot" data-r="${r}" data-c="${c}" aria-hidden="true"></i>`;
+ }
+ return `<div class="fx-array-wrap"><div class="fx-array-caption">${cols} × ${rows}</div><div class="fx-array-board" style="--dot-columns:${cols};--array-size:${compact?'14px':'19px'};--array-gap:${compact?'5px':'9px'}">${cells}</div><div class="fx-array-count">Total: —</div></div>`;
+}
+function playArrayTick(group=false){
+ if(!sound)return;
+ try{context??=new(window.AudioContext||window.webkitAudioContext)();if(context.state==='suspended')context.resume();
+ const t=context.currentTime,o=context.createOscillator(),g=context.createGain();o.type='sine';o.frequency.value=group?600:455;
+ g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(group?.022:.012,t+.012);
+ g.gain.exponentialRampToValueAtTime(.0001,t+.085);o.connect(g);g.connect(context.destination);o.start(t);o.stop(t+.095)}catch(e){}
+}
+async function animateArray(cols,rows,valid){
+ showMultiplyFx(buildArrayFx(cols,rows),'array');
+ $('multiplicationFx').style.setProperty('--array-reveal-ms',Math.max(42,130/arraySpeed)+'ms');
+ setArrayCount(0);
+ const get=(sel)=>Q('#multiplicationFx '+sel);
+ get('[data-row-label="1"]')?.classList.add('revealed');
+ // First group: reveal circles 1, 2, 3... one at a time, not just the header numbers.
+ for(let c=1;c<=cols;c++){
+   await pauseArray(c===1?95:120);if(!valid())return false;
+   get(`[data-col="${c}"]`)?.classList.add('revealed');
+   get(`[data-r="1"][data-c="${c}"]`)?.classList.add('revealed');
+   setArrayCount(c);playArrayTick();
+ }
+ // Every following group of exactly 'cols' circles appears together; count by cols.
+ for(let r=2;r<=rows;r++){
+   await pauseArray(210);if(!valid())return false;
+   get(`[data-row-label="${r}"]`)?.classList.add('revealed');
+   for(let c=1;c<=cols;c++)get(`[data-r="${r}"][data-c="${c}"]`)?.classList.add('revealed');
+   setArrayCount(r*cols);playArrayTick(true);
+ }
+ await pauseArray(250);return valid();
+}
+async function animateTypeOn(multiplier,multiplicand,valid){
+ const f=$('floating');
+ const overlay=document.createElement('div');overlay.className='fx-typeon';overlay.setAttribute('aria-hidden','true');
+ const symbols=[String(multiplier),'×',String(multiplicand)];
+ overlay.innerHTML=symbols.map(ch=>`<span class="char">${ch}</span>`).join('');
+ f.append(overlay);
+ for(const ch of overlay.children){
+   await pauseMultiply(64);if(!valid())return false;
+   ch.classList.add('revealed');
+ }
+ await pauseMultiply(145);return valid();
+}
+function startMultiplySequence(){
+ if(!productActive())return;
+ ++multiplySerial;
+ multiplyRunning=false;busy=false;
+ clearMultiplyFx();
+ s.revealed=false;
+ clearTimeout(connectionTimer);
+ $('pair').classList.add('live');
+ render();
+ status('Tap the multiplication expression to reveal its product.');
+}
+function revealProduct(){
+ if(!productActive()||busy||s.revealed)return;
+ snapshot();
+ s.revealed=true;
+ clearTimeout(connectionTimer);
+ $('pair').classList.remove('live');
+ playMultiplyStamp();
+ render();
+ status('Place either product digit, or add a waiting carry.');
+}
+
+function originFor(part){return Q(`[data-part="${part}"]`)||$('floating')}
+function destinationFor(part,kind){const c=currentCol();return part==='ones'?Q(`[data-slot="${s.row}:${c}"]`):(kind==='slot'||lastDigit())?Q(`[data-slot="${s.row}:${c+1}"]`):Q(`[data-carry="${s.k+1}"]`)}
+function animateMove(from,to,text,kind){if(!from||!to||window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();let base=$('sheet'),root=base.getBoundingClientRect(),a=from.getBoundingClientRect(),b=to.getBoundingClientRect();let el=document.createElement('div');el.className='fly';el.textContent=text;el.style.left=(a.left-root.left)+'px';el.style.top=(a.top-root.top)+'px';el.style.width=a.width+'px';el.style.height=a.height+'px';base.append(el);let dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2),scale=Math.min(1,b.height/Math.max(a.height,1));let anim=el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(${scale})`,opacity:.9}],{duration:kind==='up'?330:270,easing:'cubic-bezier(.15,.85,.27,1)',fill:'forwards'});return anim.finished.catch(()=>{}).then(()=>el.remove());}
+function spark(el,txt='✦'){if(!el||window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches)return;let base=$('sheet').getBoundingClientRect(),p=el.getBoundingClientRect(),node=document.createElement('span');node.className='spark';node.textContent=txt;node.style.left=p.left+p.width/2-base.left+'px';node.style.top=p.top-base.top+'px';$('sheet').append(node);setTimeout(()=>node.remove(),690)}
+// The tens tile has TWO destinations during a normal column: the carry shelf OR
+// a temporary place in the partial-product row. The latter is not finalized.
+function place(part,kind,c){
+ if(!productActive()||busy||!s.revealed)return;
+ const cc=currentCol(),isLast=lastDigit();
+ let valid=part==='ones'?(kind==='slot'&&c===cc):((kind==='slot'&&c===cc+1)||(kind==='carry'&&!isLast&&c===s.k+1));
+ if(!valid){invalid();status('That digit belongs in a different place-value position.',true);return}
+ if(part==='ones'&&s.onesPlaced||part==='tens'&&s.tensPlaced)return;
+ if(part==='tens'&&!tens())return;
+ snapshot();const source=originFor(part),dest=destinationFor(part,kind),n=part==='ones'?ones():tens();
+ busy=true;const token=run;
+ animateMove(source,dest,n,part==='tens'&&kind==='carry'?'up':'down').then(()=>{
+  if(token!==run)return;busy=false;
+  if(part==='ones'){s.onesPlaced=true;s.rows[s.row][cc]=ones()}
+  else {s.tensPlaced=true;s.tensLocation=kind==='slot'?'row':'carry';
+   if(kind==='slot')s.rows[s.row][cc+1]=tens();
+   else s.carrySlots[s.k+1]={value:tens(),provisional:!s.mixed};}
+  s.chosen=null;selection=null;play(part==='tens'&&kind==='carry'?'carry':'drop');render();spark(destinationFor(part,kind));maybeAdvance();
+ });
+}
+// Lift a provisional tens tile OUT of the partial-product row into its carry
+// shelf, without insisting that the previous incoming carry has already landed.
+function liftTens(){
+ if(!productActive()||busy||!s.revealed||!s.tensPlaced||s.tensLocation!=='row'||lastDigit())return;
+ snapshot();const cc=currentCol();const source=Q(`[data-slot="${s.row}:${cc+1}"]`),dest=Q(`[data-carry="${s.k+1}"]`);
+ busy=true;const token=run;
+ animateMove(source,dest,tens(),'up').then(()=>{
+  if(token!==run)return;busy=false;delete s.rows[s.row][cc+1];s.tensLocation='carry';
+  s.carrySlots[s.k+1]={value:tens(),provisional:!s.mixed};s.chosen=null;selection=null;
+  play('carry');render();spark(Q(`[data-carry="${s.k+1}"]`));maybeAdvance();
+ });
+}
+function chooseTile(part){if(!productActive()||busy||!s.revealed)return;if(part==='ones'&&s.onesPlaced||part==='tens'&&(s.tensPlaced||!tens()))return;s.chosen=s.chosen===part?null:part;selection=s.chosen;render();}
+function armCarry(){
+ if(!productActive()||busy||!s.revealed||s.mixed||!s.incoming)return;
+ s.carryArmed=!s.carryArmed;
+ s.chosen=null;selection=null;render();status(s.carryArmed?'Carry selected.':'');
+}
+// The incoming carry is never added merely by clicking the register or a product slot.
+// The learner must explicitly pick the source AND choose its target (floating ones or placed ones).
+function addCarry(target){
+ if(!productActive()||busy||!s.revealed||s.mixed||!s.incoming)return;
+ if(!['floating','placed'].includes(target)){invalid();return;}
+ if(target==='placed'&&!s.onesPlaced || target==='floating'&&s.onesPlaced){invalid();status('Select a current product digit.',true);return;}
+ const current=s.carrySlots[s.k];if(!current)return;
+ snapshot();const from=Q(`[data-carry="${s.k}"]`);
+ const to=target==='placed'?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
+ busy=true;let token=run;animateMove(from,to,s.incoming,'down').then(()=>{
+ if(token!==run)return;busy=false;s.mixed=true;s.carryArmed=false;delete s.carrySlots[s.k];
+ if(s.onesPlaced)s.rows[s.row][currentCol()]=ones();
+ if(s.tensPlaced){
+  if(tens()===0){s.tensPlaced=false;if(s.tensLocation==='row')delete s.rows[s.row][currentCol()+1];else delete s.carrySlots[s.k+1];s.tensLocation=null}
+  else if(s.tensLocation==='row')s.rows[s.row][currentCol()+1]=tens();
+  else s.carrySlots[s.k+1]={value:tens(),provisional:false};
+ }
+ s.chosen=null;selection=null;play('mix');render();spark(to,'✦');status('Combined.');maybeAdvance();
+ });
+}
+function maybeAdvance(){if(busy||!productActive()||!s.revealed||!s.mixed||!s.onesPlaced||(tens()>0&&(!s.tensPlaced||(!lastDigit()&&s.tensLocation!=='carry'))))return;s.done++;s.boxes++;money+=5;play('done');s.k++;s.raw=0;s.mixed=false;s.incoming=0;s.onesPlaced=false;s.tensPlaced=false;s.tensLocation=null;s.chosen=null;s.carryArmed=false;s.first=null;selection=null;if(s.k<s.A.length){s.phase='select';render();status('');return}if(s.row<s.B.length-1){s.row++;s.k=0;s.phase='select';s.carrySlots={};render();status('New row.');return}if(s.B.length>1){s.phase='sum';s.sumCol=0;s.sumCarry=0;render();status('Partial products ready.');return}finish();}
+function sum(c){if(s.phase!=='sum'||busy)return;return playCascadeAddition()}
+function updateAdditionHelp(){
+ const text=s?.phase==='sum'?'Swipe downward anywhere. The columns fall together in a right-to-left cascade, then the sum rises.':'Finish a two-row problem or jump directly to the addition test.';
+ const el=$('additionHelp');if(el)el.textContent=text;
+ document.body.classList.toggle('addition-active',Boolean(s&&s.phase==='sum'));
+}
+function startAdditionLab(){
+ let [a,b]=$('problem').value.split(',').map(Number);
+ if(b<10){a=248;b=26;$('problem').value='248,26';}
+ reset();s.phase='sum';s.row=s.B.length-1;s.k=s.A.length;s.done=s.A.length*s.B.length;s.boxes=s.done;
+ s.rows=s.B.map((digit,r)=>{const v=s.a*digit*10**r, digits=rev(v);return Object.fromEntries(digits.map((d,c)=>[c,d]))});
+ s.sum={};s.sumCol=0;s.sumCarry=0;s.carrySlots={};additionCollapsed=false;history=[];render();status('Addition ready.');
+}
+function calculateSum(){let carry=0,vals=[];for(let c=0;c<s.cols;c++){const amount=s.rows.reduce((t,r)=>t+(r[c]||0),carry);vals.push(amount%10);carry=Math.floor(amount/10)}return vals;}
+function cellCenter(el){if(!el)return null;let rr=el.getBoundingClientRect(),root=$('sheet').getBoundingClientRect();return{x:rr.left-root.left+rr.width/2,y:rr.top-root.top+rr.height/2,w:rr.width,h:rr.height};}
+function sparkleAt(x,y){if(window.__BATCH_TEST_FAST)return;const el=document.createElement('div');el.className='addition-spark';el.textContent='✦';el.style.left=x+'px';el.style.top=y+'px';$('sheet').append(el);setTimeout(()=>el.remove(),520)}
+function sleep(ms){return window.__BATCH_TEST_FAST?Promise.resolve():new Promise(r=>setTimeout(r,ms))}
+function launchDigit(from,to,digit,duration=185,delay=0){
+ if(!from||!to||window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches)return Promise.resolve();
+ const a=cellCenter(from),b=cellCenter(to);if(!a||!b)return Promise.resolve();
+ const el=document.createElement('div');el.className='addition-ghost';el.textContent=digit;el.style.left=(a.x-a.w/2)+'px';el.style.top=(a.y-a.h/2)+'px';el.style.width=a.w+'px';el.style.height=a.h+'px';$('sheet').append(el);
+ const dx=b.x-a.x,dy=b.y-a.y;
+ return new Promise(resolve=>{setTimeout(()=>{
+  const anim=el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{offset:.78,transform:`translate(${dx*.76}px,${dy*.76}px) scale(.95)`,opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.88)`,opacity:.08}],{duration,easing:'cubic-bezier(.18,.85,.25,1)',fill:'forwards'});
+  anim.finished.catch(()=>{}).then(()=>{el.remove();resolve()})
+ },delay)})
+}
+function showFinalDigits(vals){for(let c=0;c<s.cols;c++){s.sum[c]=vals[c]}s.sumCol=s.cols;s.sumCarry=0;}
+// Only one gesture hint is shown. It stays outside the mathematics cells' hit areas.
+function updateAdditionSwipeGuide(){
+ const guide=$('additionSwipeGuide');if(!guide)return;guide.innerHTML='';
+ if(!s||s.phase!=='sum'||busy)return;
+ // Grid displays columns in descending order: the largest column is physically LEFT.
+ const leftEl=Q(`[data-slot="0:${s.cols-1}"]`), rightEl=Q('[data-slot="0:0"]');
+ const rowTop=leftEl?.closest('.productline'),rowBottom=Q('[data-slot="1:0"]')?.closest('.productline');
+ if(!leftEl||!rightEl||!rowTop||!rowBottom)return;
+ const base=$('sheet').getBoundingClientRect(), leftRect=leftEl.getBoundingClientRect(),rightRect=rightEl.getBoundingClientRect();
+ const topRect=rowTop.getBoundingClientRect(), bottomRect=rowBottom.getBoundingClientRect();
+ // Anchor at the separator just ABOVE the first addition row.
+ const left=Math.max(8,leftRect.left-base.left+3), right=Math.min(base.width-8,rightRect.right-base.left-3);
+ const width=Math.max(100,right-left), startY=Math.max(15,topRect.top-base.top-28);
+ const rowSpan=bottomRect.bottom-topRect.top;
+ const height=Math.min(164,Math.max(112,rowSpan+22));
+ const drop=document.createElement('div');drop.className='drop-guide';
+ drop.style.setProperty('--guide-left',left+'px');drop.style.setProperty('--guide-top',startY+'px');
+ drop.style.setProperty('--guide-width',width+'px');drop.style.setProperty('--guide-height',height+'px');
+ drop.style.setProperty('--drop-distance',Math.max(32,Math.min(76,rowSpan*.42))+'px');
+ // Four separated V chevrons, wide-to-narrow, creating a downward hourglass funnel.
+ drop.innerHTML='<svg viewBox="0 0 100 150" preserveAspectRatio="none" aria-hidden="true">'
+ +'<polyline class="chev chev1" points="4,7 50,33 96,7"/>'
+ +'<polyline class="chev chev2" points="16,63 50,85 84,63"/>'
+ +'<polyline class="chev chev3" points="28,116 50,134 72,116"/>'
+ +'</svg>';
+ guide.append(drop);
+}
+function rowDigitCells(r){return Array.from({length:s.cols},(_,c)=>Q(`[data-slot="${r}:${c}"]`));}
+function mergeIntoLowerColumn(c,vals){
+ const upper=Q(`[data-slot="0:${c}"]`),lower=Q(`[data-slot="1:${c}"]`);
+ if(upper)upper.classList.add('addition-consumed');
+ if(lower){
+  // This is the actual per-column sum, including the carry from the right.
+  const last=vals.findLastIndex(v=>v!==0);
+  lower.textContent=c>last&&last!==-1?'':vals[c];
+  lower.classList.add('filled','addition-merged','merge-landing');
+  const q=cellCenter(lower);if(q)sparkleAt(q.x,q.y);
+  if(!window.__BATCH_TEST_FAST)setTimeout(()=>lower.classList.remove('merge-landing'),150);
+ }
+}
+async function riseMergedRow(token){
+ // The lower row is the final sum. Raise its digits one by one into the original first row,
+ // beginning at the right, so the movement feels like a gentle domino wave.
+ const first=Q('[data-slot="0:0"]')?.closest('.productline');
+ const last=Q('[data-slot="1:0"]')?.closest('.productline');
+ if(!first||!last)return;
+ first.classList.add('addition-empty');
+ const travel=first.getBoundingClientRect().top-last.getBoundingClientRect().top;
+ const reduced=window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches;
+ if(reduced)return;
+ const animations=[];
+ for(let c=0;c<s.cols;c++){
+  const el=Q(`[data-slot="1:${c}"]`);if(!el||!el.textContent.trim())continue;
+  animations.push(new Promise(resolve=>{
+    const anim=el.animate([
+      {transform:'translateY(0px) scale(1)',opacity:1},
+      {offset:.65,transform:`translateY(${travel*.65}px) scale(1.015)`,opacity:1},
+      {transform:`translateY(${travel}px) scale(1)`,opacity:1}
+    ],{duration:295,delay:c*47,easing:'cubic-bezier(.36,0,.23,1)',fill:'forwards'});
+    anim.finished.catch(()=>{}).then(resolve);
+  }));
+ }
+ play('done');await Promise.all(animations);
+ if(token!==run)return;
+}
+async function commitAdditionResult(token,vals){
+ if(token!==run)return;
+ showFinalDigits(vals);
+ additionCollapsed=true;busy=false;finish();
+}
+async function playCascadeAddition(){
+ if(s.phase!=='sum'||busy)return;
+ snapshot();busy=true;additionStart=null;updateAdditionSwipeGuide();
+ const token=run,vals=calculateSum(),reduced=window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches;
+ play('mix');
+ // Begin with the ONES column (at the right) and start the next drop before the previous finishes.
+ const perColumn=[];
+ for(let c=0;c<s.cols;c++){
+  perColumn.push((async()=>{
+   if(!reduced)await sleep(c*58);
+   if(token!==run)return;
+   const from=Q(`[data-slot="0:${c}"]`),to=Q(`[data-slot="1:${c}"]`),topValue=s.rows[0][c];
+   if(topValue!==undefined&&from&&to){
+     const movement=launchDigit(from,to,topValue,226);
+     from.classList.add('addition-consumed');
+     await movement;
+   }else if(!reduced)await sleep(90);
+   if(token!==run)return;
+   const above=s.rows[0][c]||0,below=s.rows[1][c]||0;
+   let carryIn=0;for(let n=0;n<c;n++)carryIn=Math.floor(((s.rows[0][n]||0)+(s.rows[1][n]||0)+carryIn)/10);
+   $('operationCue').textContent=`＋ ${above} + ${below}${carryIn?' + '+carryIn:''} = ${above+below+carryIn}`;
+   mergeIntoLowerColumn(c,vals);
+   // A little impact makes each column feel like a separate, completed addition.
+   if(!reduced&&to)to.animate([
+     {transform:'scale(.96)'},{transform:'scale(1.075)',offset:.48},{transform:'scale(1)'}
+   ],{duration:148,easing:'ease-out'});
+  })());
+ }
+ await Promise.all(perColumn);
+ if(token!==run)return;
+ if(!reduced)await sleep(90);
+ if(token!==run)return;
+ await riseMergedRow(token);
+ await commitAdditionResult(token,vals);
+}
+// Compatibility aliases for older test runners. There is now only one addition animation.
+function playVerticalAddition(){return playCascadeAddition()}
+function playHorizontalAddition(){return playCascadeAddition()}
+function setAdditionMode(mode){return 'cascade'}
+
+function finish(){const arr=s.B.length>1?s.sum:s.rows[0],total=Object.entries(arr).reduce((n,[c,v])=>n+Number(v)*10**Number(c),0);if(total!==s.a*s.b){console.error('Math result mismatch',s,total);status('Calculation check failed.',true);return}s.complete=true;s.phase='complete';money+=50;play('finish');render();$('receiptStamp').classList.add('stamped');$('machineLive').textContent='ORDER COMPLETE';$('cashDisplay').textContent='+₱50';$('cashTerminal').classList.remove('open');void $('cashTerminal').offsetWidth;$('cashTerminal').classList.add('open');$('complete').innerHTML=`<div class="complete"><h3>Order packed and verified!</h3><p>${fmt(s.a)} × ${fmt(s.b)} = <strong>${fmt(total)}</strong> pastries processed.</p><button class="tool" id="again">↻ New order</button></div>`;$('again').onclick=reset;status('Order complete!')}
+function undo(){if(!history.length||busy)return;additionCollapsed=false;run++;multiplySerial++;multiplyRunning=false;clearMultiplyFx();clearTimeout(connectionTimer);$('pair').classList.remove('live');document.querySelectorAll('.fly,.addition-ghost,.addition-spark').forEach(x=>x.remove());const h=history.pop();s=h.s;money=h.money;selection=null;s.chosen=null;s.carryArmed=false;$('complete').innerHTML='';render();status('Undone.')}
+function render(){const active=productActive(),last=lastDigit();$('replayMult').disabled=!active||busy||!s.revealed||s.onesPlaced||s.tensPlaced;$('app').className='shell '+visual+(active?' product-focus':'');$('operationCue').textContent=s.phase==='sum'?'＋ ADD PARTIAL PRODUCTS':s.phase==='complete'?'✓ FINISHED':s.phase==='product'?'× MULTIPLY':'× MULTIPLY';$('rowTag').textContent=s.phase==='sum'?'FINAL ADDITION':s.phase==='complete'?'✓ PACKED':`ROW ${s.row+1} / ${s.B.length}`;$('pairs').textContent=`${s.done} / ${s.A.length*s.B.length} PAIRS`;$('equation').textContent=fmt(s.a)+' × '+fmt(s.b);$('category').textContent=allCases.find(o=>o.a===s.a&&o.b===s.b)?.group||'';$('counter').textContent=s.done+' product cycles sealed';$('boxes').textContent=s.boxes;$('meterFill').style.width=100*s.done/(s.A.length*s.B.length)+'%';$('percent').textContent=Math.round(100*s.done/(s.A.length*s.B.length))+'%';$('balance').textContent='₱'+fmt(money);$('undo').disabled=!history.length||busy;$('selectedLabel').classList.toggle('hidden',!s.chosen&&!s.carryArmed);$('selectedLabel').textContent=s.carryArmed?'Carry selected':s.chosen==='tens'?'Tens tile selected':'Ones tile selected';
+ let html='';const box=(klass,txt='',data='',aria='')=>`<button type="button" class="cell ${klass}" ${data} aria-label="${aria}">${txt}</button>`;function line(className,sign,fn){let out=`<div class="line ${className}" style="--cols:${s.cols}">`;if(sign)out+=`<span class="symbol">${sign}</span>`;for(let c=s.cols-1;c>=0;c--)out+=fn(c);return out+'</div>'};const empty=()=>'<span class="cell"></span>';
+ html+=line('carryline','',c=>c<s.A.length?box('hold '+(s.carrySlots[c]?'waiting ':'')+(s.carryArmed&&c===s.k?'armed ':'')+(s.carrySlots[c]?.provisional?'provisional ':'')+(s.phase==='select'&&s.first?'':'') ,s.carrySlots[c]?.value??'',`data-carry="${c}"`,`Carry above digit ${s.A[c]}`):empty());
+ html+=line('topline','',c=>c<s.A.length?box('number '+((s.first?.kind==='top'&&s.first.c===c)?'first ':'')+(active&&s.k===c?'connecting ':''),s.A[c],`data-top="${c}"`,`Multiplicand ${s.A[c]}`):empty());
+ html+=line('bottomline','×',c=>c<s.B.length?box('number '+((s.first?.kind==='bottom'&&s.first.c===c)?'first ':'')+(active&&s.row===c?'connecting ':''),s.B[c],`data-bottom="${c}"`,`Multiplier ${s.B[c]}`):empty());
+ if(s.phase==='complete'&&additionCollapsed){
+  html+=line('productline final-merged','',c=>{const n=s.sum[c];return box('rowcell '+(n!==undefined?'filled final-merged-digit':'') , n??'',`data-slot="0:${c}"`,`Final product column ${c+1}`)});
+ }else{
+ for(let r=0;r<s.B.length;r++){if(r>s.row&&s.phase!=='complete'&&s.phase!=='sum')continue;html+=line('productline',r?'＋':'',c=>{let n=s.rows[r][c],filled=n!==undefined,provisional=active&&r===s.row&&!s.mixed&&((s.onesPlaced&&c===currentCol())||(s.tensPlaced&&s.tensLocation==='row'&&c===currentCol()+1));return box('rowcell '+(filled?'filled ':'')+(provisional?'provisional ':'')+(s.carryArmed&&r===s.row&&c===currentCol()&&s.onesPlaced?'targeted ':'')+(active&&r===s.row&&s.tensLocation==='row'&&c===currentCol()+1&&!last?'liftable ':'')+(c<r?'zero ':''),filled?n:'',`data-slot="${r}:${c}"`,`Product row ${r+1} column ${c+1}`)})}
+ if(s.B.length>1&&s.phase==='complete')html+=line('finalline','=',c=>box('rowcell '+(s.sum[c]!==undefined?'filled':''),s.sum[c]??'',`data-sum="${c}"`,`Sum column ${c+1}`));
+ }
+ $('math').innerHTML=html;updateAdditionHelp();requestAnimationFrame(updateAdditionSwipeGuide);$('progressTag').textContent=s.phase==='complete'?'✓ CALIBRATED':`${s.done} PACKING CYCLES`;requestAnimationFrame(positionFloater);
+}
+function positionFloater(){
+ const float=$('floating'),svg=$('pair');
+ if(!productActive()){$('pair').classList.remove('live');float.classList.remove('show','multiply-running');float.innerHTML='';updateTutorial();return}
+ const ta=Q(`[data-top="${s.k}"]`),bo=Q(`[data-bottom="${s.row}"]`);if(!ta||!bo)return;
+ const rect=$('sheet').getBoundingClientRect(),a=ta.getBoundingClientRect(),b=bo.getBoundingClientRect();
+ const ax=a.left+a.width/2-rect.left,ay=a.top+a.height/2-rect.top,bx=b.left+b.width/2-rect.left,by=b.top+b.height/2-rect.top;
+ const len=Math.hypot(bx-ax,by-ay)||1,nx=-(by-ay)/len,ny=(bx-ax)/len;
+ const capsule=convexConnector({x:ax,y:ay},{x:bx,y:by});
+ $('pairHalo').setAttribute('d',capsule);$('pairGlow').setAttribute('d',capsule);
+ $('pairTrace').setAttribute('d',`M ${ax} ${ay} L ${bx} ${by}`);
+ const T=tens(),O=ones();
+ float.dataset.equation=`${s.B[s.row]} × ${s.A[s.k]} =`;
+ float.setAttribute('aria-label',`Product ${value()}; select either digit`);
+ const leftVisible=T>0;
+ float.innerHTML=`${leftVisible?`<button class="ftile ${s.tensPlaced?'done ':''}${s.chosen==='tens'?'selected ':''}${!s.mixed?'pretend ':''}" data-part="tens" aria-label="Tens digit ${T}">${T}</button>`:''}<button class="ftile ${s.onesPlaced?'done ':''}${s.chosen==='ones'?'selected ':''}${s.carryArmed?'targeted ':''}${!s.mixed?'pretend ':''}" data-part="ones" aria-label="Ones digit ${O}">${O}</button>`;
+ if(!s.revealed){
+   float.innerHTML=`<button type="button" id="equationReveal" class="equation-reveal" aria-label="Multiply ${s.B[s.row]} by ${s.A[s.k]} and show the product">${s.B[s.row]} × ${s.A[s.k]}</button>`;
+ }
+ float.classList.add('show');float.classList.remove('multiply-running');float.classList.toggle('equation-pending',!s.revealed);
+ const typeOnActive=!s.revealed;
+ float.classList.toggle('typeon-sized',typeOnActive);
+ // Set dimensions BEFORE measuring and positioning: a 1-digit result must still fit '7 × 1'.
+ float.style.minWidth=typeOnActive?'132px':'';
+ const w=float.offsetWidth,h=float.offsetHeight;
+ const onesBtn=float.querySelector('[data-part="ones"]');
+ const onesCenter=onesBtn?onesBtn.offsetLeft+onesBtn.offsetWidth/2:w/2;
+ // The product ones digit stays vertically under the current multiplicand digit.
+ let x=(typeOnActive?ax-w/2:ax-onesCenter), y=(ay+by)/2-h/2-6;
+ x=Math.max(4,Math.min(rect.width-w-4,x));y=Math.max(22,Math.min(rect.height-h-5,y));
+ float.style.left=x+'px';float.style.top=y+'px';
+ if(s.revealed)updateTutorial(ax,ay,bx,by);else $('tutorial').innerHTML='';
+ fxPosition();
+}
+
+function pointOf(el){if(!el)return null;const base=$('sheet').getBoundingClientRect(),r=el.getBoundingClientRect();return {x:r.left+r.width/2-base.left,y:r.top+r.height/2-base.top};}
+function makeStream(a,b,cls){
+ if(!a||!b)return null;
+ const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);
+ if(len<24)return null;
+ const stream=document.createElement('div');stream.className=`tutorial-stream ${cls}`;
+ stream.style.left=a.x+'px';stream.style.top=(a.y-21)+'px';stream.style.width=len+'px';
+ stream.style.setProperty('--travel',Math.max(2,len-14)+'px');
+ stream.style.transform=`rotate(${Math.atan2(dy,dx)*180/Math.PI}deg)`;
+ const count=len<95?2:len<185?3:4;
+ stream.innerHTML='<div class="shaft"></div>'+Array.from({length:count},(_,i)=>
+ `<span class="stream-chevron" style="animation-delay:${(-i*1.6/count).toFixed(3)}s"></span>`).join('')+'<span class="stream-tip"></span>';
+ return stream;
+}
+function updateTutorial(ax=null,ay=null,bx=null,by=null){const layer=$('tutorial');if(!layer)return;layer.innerHTML='';layer.hidden=!tutorial;if(!tutorial)return;if(s.phase==='complete'||s.phase==='sum')return;const topEl=Q(`[data-top="${s.k}"]`),bottomEl=Q(`[data-bottom="${s.row}"]`);const top=topEl?pointOf(topEl):null,bottom=bottomEl?pointOf(bottomEl):null;if(!productActive()){if(top&&bottom){const stream=makeStream(bottom,top,'connect');if(stream)layer.append(stream);}return;}const onesFloating=Q('#floating [data-part="ones"]'),tensFloating=Q('#floating [data-part="tens"]');const onesPlaced=Q(`[data-slot="${s.row}:${currentCol()}"]`),tensRow=Q(`[data-slot="${s.row}:${currentCol()+1}"]`),carryNow=Q(`[data-carry="${s.k}"]`),carryNext=Q(`[data-carry="${s.k+1}"]`);const onesSource=s.onesPlaced?onesPlaced:onesFloating;if(s.incoming&&!s.mixed&&carryNow&&onesSource){const stream=makeStream(pointOf(carryNow),pointOf(onesSource),'carry');if(stream)layer.append(stream);return;}if(!s.onesPlaced&&onesFloating&&onesPlaced){const stream=makeStream(pointOf(onesFloating),pointOf(onesPlaced),'place');if(stream)layer.append(stream);return;}if(tens()>0){let from=null,to=null;if(s.tensLocation==='row'&&tensRow){from=pointOf(tensRow);to=lastDigit()?pointOf(tensRow):(carryNext?pointOf(carryNext):null);}else if(!s.tensPlaced&&tensFloating){from=pointOf(tensFloating);to=lastDigit()?pointOf(tensRow):(carryNext?pointOf(carryNext):null);}if(from&&to){const stream=makeStream(from,to,'lift');if(stream)layer.append(stream);return;}}}
+
+function targetClicked(el){
+ if(busy)return;
+ if(el.hasAttribute('data-top')){operand('top',Number(el.dataset.top));return}
+ if(el.hasAttribute('data-bottom')){operand('bottom',Number(el.dataset.bottom));return}
+ if(el.hasAttribute('data-carry')){
+  const c=Number(el.dataset.carry);
+  if(productActive()&&!s.mixed&&c===s.k){armCarry();return}
+  if(productActive()&&s.chosen==='tens')place('tens','carry',c);return;
+ }
+ if(el.hasAttribute('data-slot')){
+  const [r,c]=el.dataset.slot.split(':').map(Number);
+  if(productActive()&&r===s.row&&s.carryArmed){
+   if(s.onesPlaced&&c===currentCol())addCarry('placed');
+   else {invalid();status('That is not the digit holding the product ones.',true)}
+   return;
+  }
+  if(productActive()&&r===s.row&&s.chosen){place(s.chosen,'slot',c);return}
+  if(productActive()&&r===s.row&&s.tensLocation==='row'&&c===currentCol()+1){liftTens();return}
+  return;
+ }
+ if(el.hasAttribute('data-sum'))sum(Number(el.dataset.sum));
+}
+$('math').addEventListener('click',e=>{if(ignoreClick||busy)return;let el=e.target.closest('button');if(el)targetClicked(el)});$('floating').addEventListener('click',e=>{if(ignoreClick||busy)return;if(e.target.closest('#equationReveal')){revealProduct();return}const el=e.target.closest('[data-part]');if(el){if(s.carryArmed){if(el.dataset.part==='ones')addCarry('floating');else{invalid();status('Carry must combine with the ones part of the product.',true)}}else chooseTile(el.dataset.part)}});
+// Drags have the same effect as selecting a tile then tapping its destination.
+function isPointerTarget(el){return el&&el.closest('[data-part],[data-top],[data-bottom],[data-carry],[data-slot]')}
+function digitCenter(el){if(!el)return null;const base=$('sheet').getBoundingClientRect(),r=el.getBoundingClientRect();return {x:r.left+r.width/2-base.left,y:r.top+r.height/2-base.top};}
+// A single geometry function for BOTH the held connector and final connection.
+// Each cap is a convex outward cubic semicircle, never an inward SVG arc.
+function convexConnector(start,end){
+ const dx=end.x-start.x,dy=end.y-start.y,length=Math.hypot(dx,dy);
+ const ux=length>.01?dx/length:0,uy=length>.01?dy/length:1;
+ const nx=-uy,ny=ux;
+ const radius=connectorStyle==='ribbon'?32:connectorStyle==='slim'?18:26;
+ const bow=connectorStyle==='ribbon'?7:0;
+ const cap=radius*4/3;
+ const coord=(center,side,forward)=>`${(center.x+nx*side+ux*forward).toFixed(2)} ${(center.y+ny*side+uy*forward).toFixed(2)}`;
+ const a=coord(start,radius,0),b=coord(end,radius,0),c=coord(end,-radius,0),d=coord(start,-radius,0);
+ // Each upper/lower edge is either straight or bows OUTWARD, not inward.
+ const edge1=bow?`C ${coord(start,radius+bow,length*.33)} ${coord(end,radius+bow,-length*.33)} ${b}`:`L ${b}`;
+ const edge2=bow?`C ${coord(end,-radius-bow,-length*.33)} ${coord(start,-radius-bow,length*.33)} ${d}`:`L ${d}`;
+ return `M ${a} ${edge1} C ${coord(end,radius,cap)} ${coord(end,-radius,cap)} ${c} ${edge2} C ${coord(start,-radius,-cap)} ${coord(start,radius,-cap)} ${a} Z`;
+}
+function previewDrag(e){if(!pointer||pointer.pid!==e.pointerId||!['top','bottom'].includes(pointer.kind)||s.phase!=='select')return;
+ let from=pointer.el;if(s.first){let old=Q(s.first.kind==='top'?`[data-top="${s.first.c}"]`:`[data-bottom="${s.first.c}"]`);if(old)from=old;}
+ const start=digitCenter(from);if(!start)return;const r=$('sheet').getBoundingClientRect();const end={x:e.clientX-r.left,y:e.clientY-r.top};const shape=convexConnector(start,end);
+ $('previewGlow').setAttribute('d',shape);$('previewHalo').setAttribute('d',shape);$('previewTrace').setAttribute('d',`M ${start.x} ${start.y} L ${end.x} ${end.y}`);$('connectorPreview').classList.add('active');
+}
+function hidePreview(){$('connectorPreview').classList.remove('active')}
+function down(e){if(busy||!isPointerTarget(e.target))return;let el=isPointerTarget(e.target),kind=el.dataset.part?'tile':el.hasAttribute('data-carry')?'carry':el.hasAttribute('data-slot')?'rowtens':el.hasAttribute('data-top')?'top':'bottom';if(kind==='rowtens'&&(!productActive()||s.tensLocation!=='row'||el.dataset.slot!==`${s.row}:${currentCol()+1}`))return;pointer={pid:e.pointerId,kind,el,part:el.dataset.part,c:el.hasAttribute('data-top')?Number(el.dataset.top):el.hasAttribute('data-bottom')?Number(el.dataset.bottom):el.hasAttribute('data-carry')?Number(el.dataset.carry):null,x:e.clientX,y:e.clientY,drag:false,ghost:null};if(['top','bottom'].includes(kind))previewDrag(e);}
+function move(e){if(!pointer||pointer.pid!==e.pointerId)return;previewDrag(e);let d=Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y);if(d>10){pointer.drag=true;if((pointer.kind==='tile'||pointer.kind==='carry'||pointer.kind==='rowtens')&&!pointer.ghost&&productActive()){let ghost=document.createElement('div');ghost.className='ghost';ghost.textContent=pointer.el.textContent;document.body.append(ghost);pointer.ghost=ghost}if(pointer.ghost){pointer.ghost.style.left=(e.clientX-21)+'px';pointer.ghost.style.top=(e.clientY-21)+'px'}}}
+function up(e){if(!pointer||pointer.pid!==e.pointerId)return;const p=pointer;pointer=null;hidePreview();p.ghost?.remove();if(!p.drag)return;ignoreClick=true;setTimeout(()=>ignoreClick=false,0);let target=document.elementFromPoint(e.clientX,e.clientY)?.closest('button');if(p.kind==='carry'&&target&&productActive()&&!s.mixed&&p.c===s.k){if(target.dataset.part==='ones'&&!s.onesPlaced)addCarry('floating');else if(target.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row&&c===currentCol()&&s.onesPlaced)addCarry('placed');else{invalid();status('Carry must join the ones digit.',true)}}return;}if(p.kind==='rowtens'&&target?.hasAttribute('data-carry')&&Number(target.dataset.carry)===s.k+1){liftTens();return}if(p.kind==='tile'&&target){if(target.hasAttribute('data-slot')){let [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row)place(p.part,'slot',c)}else if(target.hasAttribute('data-carry'))place(p.part,'carry',Number(target.dataset.carry));return}if((p.kind==='top'||p.kind==='bottom')&&target){if(target.hasAttribute('data-top')||target.hasAttribute('data-bottom')){let kind=target.hasAttribute('data-top')?'top':'bottom',c=Number(target.dataset[kind]);if(kind!==p.kind&&s.phase==='select'){operand(p.kind,p.c);operand(kind,c)}}}}
+$('sheet').addEventListener('pointerdown',down);window.addEventListener('pointermove',move);window.addEventListener('pointerup',up);window.addEventListener('pointercancel',()=>{hidePreview();pointer?.ghost?.remove();pointer=null});
+// Connector style is fixed to capsule for this lab.
+
+$('tryCustom').onclick=()=>{const a=Number($('customA').value),b=Number($('customB').value);if(!Number.isInteger(a)||a<1||a>99999||!Number.isInteger(b)||b<1||b>99){status('Choose 1–99999 × 1–99.',true);return;}let v=`${a},${b}`;if(!Array.from($('problem').options).some(o=>o.value===v)){let o=new Option(`${a} × ${b}`,v);$('problem').add(o,0)}$('problem').value=v;reset()};
+$('restart').onclick=reset;$('problem').onchange=reset;$('undo').onclick=undo;$('sound').onclick=()=>{sound=!sound;$('sound').textContent=sound?'♫ Sound on':'♫ Sound off'};document.querySelectorAll('[data-mult-mode]').forEach(btn=>btn.addEventListener('click',()=>{
+ multMode=btn.dataset.multMode;
+ $('arraySpeedWrap').hidden=multMode!=='array';
+ document.querySelectorAll('[data-mult-mode]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+ if(s.phase==='product'&&!s.onesPlaced&&!s.tensPlaced){multiplySerial++;multiplyRunning=false;busy=false;clearMultiplyFx();startMultiplySequence()}
+}));
+function replayAnimation(){if(s.phase==='product'&&s.revealed&&!s.onesPlaced&&!s.tensPlaced){startMultiplySequence()}}
+$('replayMult').onclick=replayAnimation;
+$('arraySpeed').addEventListener('input',e=>{arraySpeed=Number(e.target.value);$('arraySpeedValue').textContent=arraySpeed.toFixed(2)+'×'});
+$('arraySpeed').addEventListener('change',()=>{if(multMode==='array')replayAnimation()});$('tutorialToggle').onclick=()=>{tutorial=!tutorial;$('tutorialToggle').setAttribute('aria-pressed',String(tutorial));$('tutorialToggle').textContent=tutorial?'➜ Tutorial on':'➜ Tutorial off';requestAnimationFrame(positionFloater)};$('ruleToggle').onclick=()=>{$('rule').hidden=!$('rule').hidden;$('ruleToggle').textContent=$('rule').hidden?'◇ Show rule':'◇ Hide rule'};
+document.querySelectorAll('[data-visual]').forEach(btn=>btn.onclick=()=>{visual=btn.dataset.visual;document.querySelectorAll('[data-visual]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));render()});window.addEventListener('resize',()=>requestAnimationFrame(positionFloater));$('scroller').addEventListener('scroll',()=>requestAnimationFrame(positionFloater));
+
+// A downward gesture anywhere on the screen initiates the cascade immediately.
+// Controls (select, input and buttons) are excluded so they stay usable.
+window.addEventListener('pointerdown',e=>{
+ if(s.phase!=='sum'||busy)return;
+ if(e.target.closest('button,input,select,textarea,[role="button"]'))return;
+ additionStart={id:e.pointerId,x:e.clientX,y:e.clientY};
+},{passive:true});
+window.addEventListener('pointermove',e=>{
+ if(!additionStart||additionStart.id!==e.pointerId||s.phase!=='sum'||busy)return;
+ const dx=e.clientX-additionStart.x,dy=e.clientY-additionStart.y;
+ if(dy>32&&Math.abs(dy)>Math.abs(dx)*.67){additionStart=null;playCascadeAddition()}
+},{passive:true});
+window.addEventListener('pointerup',e=>{
+ if(!additionStart||additionStart.id!==e.pointerId)return;
+ const p=additionStart;additionStart=null;
+ if(s.phase!=='sum'||busy)return;
+ const dx=e.clientX-p.x,dy=e.clientY-p.y;
+ if(dy>32&&Math.abs(dy)>Math.abs(dx)*.67)playCascadeAddition();
+});
+window.addEventListener('pointercancel',()=>{additionStart=null});
+$('jumpAddition').addEventListener('click',startAdditionLab);
+$('runMerge').addEventListener('click',()=>playCascadeAddition());
+
+window.__BATCH_FREEFLOW__={liftTens,get:()=>structuredClone(s),reset:()=>reset(),jumpAddition:startAdditionLab,setAdditionMode,playVerticalAddition,playHorizontalAddition,playCascadeAddition,cases:allCases,setVisual:v=>{visual=v;render()},setProblem:(a,b)=>{$('problem').value=`${a},${b}`;reset()},toggleTutorial:()=>{$('tutorialToggle').click()},setMultMode:v=>{document.querySelector(`[data-mult-mode="${v}"]`)?.click()},replayMult:()=>{$('replayMult').click()},revealProduct,setArraySpeed:v=>{const slider=$('arraySpeed');slider.value=String(v);slider.dispatchEvent(new Event('input',{bubbles:true}));slider.dispatchEvent(new Event('change',{bubbles:true}))},select:(kind,c)=>operand(kind,c),choose:part=>chooseTile(part),place:(part,kind,c)=>place(part,kind,c),mix:addCarry,armCarry,sum};
+
+// V35 bridge. This is an adapter: it does NOT replace v33's interaction functions.
+const bridgeMetrics={errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,startedAt:performance.now(),pausedSince:0};
+const report=(type,additional={})=>window.parent.postMessage({source:'bc-v33',type,...additional},'*');
+const baseInvalid=invalid;
+invalid=function(...args){bridgeMetrics.errors++;bridgeMetrics.currentCombo=0;return baseInvalid(...args)};
+const basePlace=place;
+place=function(part,kind,c){
+ if(s&&s.phase==='product'&&s.revealed&&!busy&&part==='tens'&&kind==='carry'&&s.k!==s.A.length-1&&c===s.k+1&&!s.tensPlaced&&tens()>0) bridgeMetrics.carryUp++;
+ return basePlace(part,kind,c);
+};
+const baseLift=liftTens;
+liftTens=function(...args){if(s&&s.phase==='product'&&!busy&&s.tensLocation==='row'&&s.k!==s.A.length-1) bridgeMetrics.carryUp++;return baseLift(...args)};
+const baseAddCarry=addCarry;
+addCarry=function(target){if(s&&s.phase==='product'&&!busy&&!s.mixed&&s.incoming&&((target==='placed'&&s.onesPlaced)||(target==='floating'&&!s.onesPlaced))) bridgeMetrics.carryDown++;return baseAddCarry(target)};
+function bridgeStats(){return {cycles:bridgeMetrics.cycles,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,errors:bridgeMetrics.errors,lookup:0,recall:0,tempo:1};}
+let lastReport='',lastHeight=0;
+function bridgePoll(){
+ if(!s)return;
+ if(s.done!==bridgeMetrics.lastDone){
+  if(s.done>bridgeMetrics.lastDone){for(let i=bridgeMetrics.lastDone;i<s.done;i++){bridgeMetrics.cycles++;bridgeMetrics.currentCombo++;bridgeMetrics.bestCombo=Math.max(bridgeMetrics.bestCombo,bridgeMetrics.currentCombo)}}
+  else bridgeMetrics.currentCombo=Math.max(0,s.k);
+  bridgeMetrics.lastDone=s.done;
+ }
+ if(s.row!==bridgeMetrics.lastRow){bridgeMetrics.currentCombo=0;bridgeMetrics.lastRow=s.row;}
+ const stage=s.phase==='select'?'connect':s.phase==='product'?(s.revealed?(s.onesPlaced?(s.incoming&&!s.mixed?'applyCarry':(tens()>0&&(!s.tensPlaced||s.tensLocation==='row')?'liftCarry':'rowFinish')):'place'):'fact'):s.phase==='sum'?'addDigit':s.phase==='complete'?'result':s.phase;
+ const dat={step:stage,combo:bridgeMetrics.currentCombo,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,row:s.row,done:s.done,phase:s.phase,factLookups:s.done+(s.phase==='product'&&s.revealed?1:0),factRecalls:s.done,hadOld:!!s.incoming,errors:bridgeMetrics.errors};
+ const signature=JSON.stringify(dat);
+ if(signature!==lastReport){lastReport=signature;report('state',dat)}
+ if(s.complete&&!bridgeMetrics.sent){
+  bridgeMetrics.sent=true;report('complete',{ticket:window.__ACTIVE_V33_TICKET||{id:'none'},top:s.a,bottom:s.b,stats:bridgeStats()});
+ }
+ const height=Math.ceil(Math.max(document.documentElement.scrollHeight,document.body.scrollHeight));
+ if(Math.abs(height-lastHeight)>24){lastHeight=height;report('height',{height})}
+}
+setInterval(bridgePoll,180);
+function externalStart(ticket){
+ if(!ticket)return;const a=Number(ticket.a),b=Number(ticket.b);
+ if(!Number.isInteger(a)||a<1||a>99999||!Number.isInteger(b)||b<1||b>99){report('unsupported',{a,b});return;}
+ window.__ACTIVE_V33_TICKET=ticket;
+ Object.assign(bridgeMetrics,{errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,startedAt:performance.now()});
+ $('customA').value=a;$('customB').value=b;$('tryCustom').click();
+ report('started',{a,b});bridgePoll();
+}
+window.addEventListener('message',event=>{
+ const m=event.data;if(!m||m.source!=='bc-shell')return;
+ if(m.type==='start')externalStart(m.ticket);
+ if(m.type==='restart'&&window.__ACTIVE_V33_TICKET)externalStart(window.__ACTIVE_V33_TICKET);
+ if(m.type==='sound'){$('sound').textContent=m.enabled?'♫ Sound on':'♫ Sound off';sound=!!m.enabled;}
+});
+setTimeout(()=>report('ready'),0);
+
+reset();
+})();
+</script><script>
+window.addEventListener('message',function(ev){
+const m=ev.data;if(!m||m.source!=='bc-shell')return;
+if(m.type==='tutorial'){
+  const b=document.getElementById('tutorialToggle');
+  if(b && (b.getAttribute('aria-pressed')==='true')!==!!m.enabled)b.click();
+}
+});
+</script></body></html>

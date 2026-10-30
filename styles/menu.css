@@ -1,0 +1,35 @@
+/* Panaderya Quest v3 — styles/menu.css */
+/* V3 menu-first information hierarchy */
+.layout{grid-template-columns:minmax(185px,.7fr) minmax(520px,2.25fr) minmax(235px,.93fr);gap:14px;max-width:1730px;}
+.topbar{background:#fff8e9}.topstats .statpill:first-child{border:2px solid #dcb36a;background:linear-gradient(135deg,#fff2c3,#fff9e8);box-shadow:0 2px 0 #d3a260}
+.topstats .statpill:first-child .val{font-size:1.36rem;color:#684526}
+.leftcol .scene{min-height:155px}.leftcol .navgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.leftcol .navcard{min-height:65px}.leftcol .navcard .em{font-size:1.3rem}
+.menu-stage{min-height:700px;padding:23px 21px;background:radial-gradient(ellipse at 0 0,#fff9e6,#fffefa 42%,#f7e6d4)}
+.menu-header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.menu-title{font-family:Georgia,serif;font-size:clamp(23px,2.35vw,34px);margin:0 0 3px;color:#684634}
+.menu-sub{font-size:13px;color:#997d65;font-weight:650}
+.value-hero{margin:17px auto 20px;max-width:510px;text-align:center;border:2px solid #d7aa66;border-radius:20px;padding:14px 20px;background:linear-gradient(125deg,#fff0c6,#ffe0a0 45%,#fff4d7);box-shadow:0 5px 0 #deb976,0 12px 22px #a8783530}
+.value-hero .caption{font-size:11px;font-weight:1000;letter-spacing:.11em;color:#885b2b;text-transform:uppercase}
+.value-hero .number{font-size:clamp(33px,4vw,57px);color:#64432a;font-weight:1000;line-height:1.2;text-shadow:0 2px #fff7dd}
+.value-hero small{font-weight:750;color:#90693d}
+.menu-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;align-content:start}
+.food-tile{--fooda:#f4e5d6;--foodb:#f9f2e5;--foodedge:#cab69d;position:relative;min-width:0;height:177px;padding:0 9px 10px;border-radius:17px;border:3px solid var(--foodedge);background:linear-gradient(150deg,var(--foodb),var(--fooda));box-shadow:0 5px 0 color-mix(in srgb,var(--foodedge),#6a3f2b 25%),0 12px 18px #76533917;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;text-align:center;color:#4d3529;transition:transform .17s ease,filter .17s ease}
+.food-tile:hover:not(:disabled){transform:translateY(-3px);filter:brightness(1.05)}.food-tile:active{transform:translateY(2px)}
+.food-tile:before{content:"";position:absolute;inset:-100% auto auto -80%;width:75%;height:310%;transform:rotate(25deg);background:linear-gradient(90deg,transparent,#ffffff43,transparent);pointer-events:none}
+.food-tile .tier-banner{position:absolute;top:0;left:0;right:0;text-align:center;background:color-mix(in srgb,var(--foodedge),#2c1829 12%);color:white;font-size:11px;font-weight:1000;letter-spacing:1.2px;text-shadow:0 1px 3px #45332260;padding:7px}
+.food-tile .food-icon{font-size:clamp(39px,4.1vw,61px);line-height:1.15;filter:drop-shadow(0 6px 2px #8464452d);margin-top:16px;transition:transform .15s}
+.food-tile:hover .food-icon{transform:scale(1.08) rotate(-3deg)}
+.food-tile .food-name{font-size:12px;font-weight:900;max-width:100%;line-height:1.2;margin-top:5px;white-space:normal}
+.food-tile .food-level,.food-tile .food-value{position:absolute;bottom:7px;font-weight:1000;background:#fffdf5db;padding:4px 7px;border-radius:9px;box-shadow:0 2px 4px #52301e20}
+.food-tile .food-level{left:7px;font-size:11px}.food-tile .food-value{right:7px;font-size:15px;color:#754c2a}
+.food-tile.r0{--fooda:#dfd9d2;--foodb:#fffdfa;--foodedge:#b4a79b}
+.food-tile.r1{--fooda:#a7d8b6;--foodb:#edfbee;--foodedge:#69a77d}
+.food-tile.r2{--fooda:#a3c4f2;--foodb:#ecf6ff;--foodedge:#608dcc}
+.food-tile.r3{--fooda:#d5aaf0;--foodb:#f8edff;--foodedge:#a276c5}
+.food-tile.r4{--fooda:#f8c96e;--foodb:#fff7d6;--foodedge:#d6a33f}
+.food-tile.r5{--fooda:#f3a8c8;--foodb:#fff1fa;--foodedge:#df6fa8}
+.food-tile.empty{border:2.5px dashed #cbb9a2;background:#fffaf1;color:#b3a18b;box-shadow:none}
+.food-tile.empty .plus-mark{font-size:49px;font-weight:300;line-height:1}.food-tile.empty .slot-help{font-size:12px;font-weight:900;color:#93775a}
+.food-tile.buy-slot{border:2.5px dashed #d9a451;background:linear-gradient(155deg,#fff2cf,#ffe3a4);box-shadow:0 3px 0 #d5b47e}
+.food-tile.buy-slot .plus-mark{font-size:43px;color:#ba8742}.food-tile.buy-slot .slot-price{font-size:15px;font-weight:1000;color:#8c5725}
+.menu-footer{margin:18px auto 0;display:flex;justify-content:center;gap:9px;flex-wrap:wrap}
