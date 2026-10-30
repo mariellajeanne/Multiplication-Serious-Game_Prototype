@@ -21,7 +21,7 @@ function foodArt(id,extraClass=''){
   brazo:'<path d="M36 39l63-9q32 3 34 33t-28 30l-64 4z" fill="#fff1ce"/><ellipse cx="43" cy="68" rx="24" ry="29" fill="#fff9e8"/><path d="M39 47c-25 12-14 45 9 38 20-9 4-32-9-20-7 8 1 16 8 11" fill="none" stroke="#edc256" stroke-width="7"/>',
   'ube-ensaymada':bun+'<ellipse cx="80" cy="58" rx="48" ry="29" fill="#ac76bd"/>'+spiral
  };
- return `<svg class="food-art ${extraClass}" viewBox="0 0 160 120" role="img" aria-label="${food.name}"><ellipse cx="80" cy="104" rx="58" ry="9" fill="#8e613422"/><ellipse cx="80" cy="97" rx="65" ry="8" fill="#fff5df"/>${drawings[food.id]||bun}</svg>`;
+ return `<svg class="food-art ${extraClass}" viewBox="0 0 160 120" role="img" aria-label="${food.name}"><ellipse cx="80" cy="104" rx="58" ry="9" fill="#8e613422"/><ellipse cx="80" cy="97" rx="65" ry="8" fill="#fff5df"/>${drawings[food.artId||food.id]||bun}</svg>`;
 }
 function orderFood(ticket){return FOOD.filter(f=>f.rarity===ticket.rarity)[ticket.id%FOOD.filter(f=>f.rarity===ticket.rarity).length]||FOOD[0]}
 function orderStory(ticket){return `${ticket.b} trays · ${ticket.a} ${orderFood(ticket).name} each`}

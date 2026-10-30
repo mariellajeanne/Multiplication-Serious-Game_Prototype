@@ -7,7 +7,7 @@ Panaderya Quest is a tablet-first educational incremental bakery game for practi
 - Read `docs/REWARDS_AND_PROGRESSION.md` for rewards, economy, bakery, levels, mastery, game modes, and unlocks. It distinguishes **agreed direction** from **proposals** and **existing prototype shortcuts**.
 - Read `docs/ARCHITECTURE.md` when refactoring code, debugging, modifying the worksheet or integrating features.
 - Read only relevant files for a focused visual edit; do **not** exhaustively reread all docs for every small task.
-- Latest visual pass: `docs/BAKERY_COMPONENT_REVIEW.md`. References are aesthetic guidance only: no scenic wallpaper or translucent UI over an illustration. Theme the actual components with paper, light wood, pastry-box motifs, illustrated icons and shared rounded sans-serif type. Stop for review before Stage C. The 30-level track remains a preview; ticket refresh (3-minute cooldown, max 5 tickets) and all progression changes are still deferred.
+- Latest visual pass: `docs/BAKERY_COMPONENT_REVIEW.md`. References are aesthetic guidance only: no scenic wallpaper or translucent UI over an illustration. Theme the actual components with paper, light wood, pastry-box motifs, illustrated icons and shared rounded sans-serif type. The owner subsequently authorized Stage C/D; see `docs/STAGE_C_D_IMPLEMENTATION.md` for implemented eight ranks, Level/Tier 5 conservation, Auto Equip, five tickets/3-minute refresh, Bakery 30, Kitchen 20, migration and tests. Preserve the accepted component theme.
 
 ## Non-negotiable interaction and UX principles
 - Preserve the **behavior**, not a particular version's appearance, of the long multiplication worksheet: digit tap/drag connection with rounded capsule, floating `M × N` button revealing product tiles, flexible tile placement and carry handling, downward swipe to merge partial-product rows, satisfying sound effects, and guidance arrows only when tutorial is ON.
@@ -28,6 +28,7 @@ Panaderya Quest is a tablet-first educational incremental bakery game for practi
 
 ## Existing structure
 - Data: `src/data/catalog.js`.
+- Deterministic progression/migration: `src/game/progression.js`; economy transactions/formulas: `src/game/progression-economy.js`.
 - Progress/save/ticket generator: `src/game/state.js`.
 - Coins/chests/gameplay run: `src/game/rewards.js`.
 - Food levels/fusions/sales, kitchen, decor, staff, modes: `src/game/economy.js`.

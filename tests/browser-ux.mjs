@@ -6,6 +6,7 @@ import {readFile,mkdtemp,writeFile,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {resolve,extname,join,sep} from 'node:path';
 import {spawn} from 'node:child_process';
+import {checkProgression} from './browser-progression-checks.mjs';
 
 const root=resolve(import.meta.dirname,'..');
 const server=createServer(async(req,res)=>{
@@ -69,7 +70,7 @@ try{
   assert.equal(await evaluate(`document.querySelector('.modal')===null`),true,'no reading assignment on first launch');
   assert.equal(await evaluate(`$('walletCoins').textContent`),'250');
   assert.equal(await evaluate(`document.querySelector('.topbar .wallet')===null&&document.querySelector('.menu-valuebar .wallet')!==null`),true);
-  const shots=resolve(root,'docs/previews/bakery-components');await mkdir(shots,{recursive:true});
+  const shots=resolve(root,'docs/previews/progression');await mkdir(shots,{recursive:true});
   const screenshot=async name=>{
     await pause(280);
     const shot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
@@ -82,7 +83,8 @@ try{
     if(width===2000)assert.equal(await evaluate(`document.documentElement.scrollHeight<=innerHeight`),true,'main page fits 2000x1200');
   }
   await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
-  await evaluate(`g.completed=16;g.coins=100000;g.owned=FOOD.map((f,i)=>({uid:i+1,id:f.id,level:1,fusion:0,spent:0}));g.discovered=FOOD.map(f=>f.id);g.uidNext=16;g.activeMenu=[1,4,8];render()`);
+  await checkProgression({evaluate,cdp,screenshot,waitFor,pause});
+  await evaluate(`g.completed=16;g.coins=100000;g.owned=FOOD.map((f,i)=>({uid:i+1,id:f.id,level:1,fusion:1,spent:0}));g.discovered=FOOD.map(f=>f.id);g.uidNext=FOOD.length+1;g.activeMenu=[1,4,8];render()`);
   await evaluate(`g.mastery=18;g.permanentLuck=4;g.board=[{id:880,a:79,b:18,rarity:1,base:304},{id:881,a:248,b:6,rarity:3,base:640},{id:882,a:123,b:24,rarity:4,base:1200}];render()`);
   for(const [width,height] of [[2000,1200],[1194,834],[1024,768],[768,1024]]){
     await cdp('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
@@ -125,33 +127,34 @@ try{
   await evaluate(`$('inventoryRemove').click()`);await screenshot('inventory-remove-confirmation');
   assert.equal(await evaluate(`g.activeMenu.includes(2)&&g.activeMenu.includes(3)`),true,'confirmation has not yet removed foods');
   await evaluate(`document.querySelector('.modal .primary').click()`);
-  assert.equal(await evaluate(`!g.activeMenu.includes(2)&&!g.activeMenu.includes(3)&&g.owned.length===15`),true);
+  assert.equal(await evaluate(`!g.activeMenu.includes(2)&&!g.activeMenu.includes(3)&&g.owned.length===FOOD.length`),true);
   await inventoryClick(2);await inventoryClick(3);
   const salePrice=await evaluate(`resalePrice(g.owned.find(o=>o.uid===2))+resalePrice(g.owned.find(o=>o.uid===3))`),saleWallet=await evaluate('g.coins');
   await evaluate(`$('inventorySell').click()`);await screenshot('inventory-sale-confirmation');
   await evaluate(`document.querySelector('.modal .primary').click();confirmInventoryAction()`);
   assert.equal(await evaluate('g.coins'),saleWallet+salePrice);
-  assert.equal(await evaluate(`g.owned.length===13&&g.discovered.includes('monay')&&JSON.parse(localStorage.getItem('panaderyaQuestV2')).owned.length===13`),true);
+  assert.equal(await evaluate(`g.owned.length===FOOD.length-2&&g.discovered.includes('monay')&&JSON.parse(localStorage.getItem('panaderyaQuestV2')).owned.length===FOOD.length-2`),true);
   await evaluate(`g=structuredClone(inventoryFixture);closeModal();save();render()`);
   const upgradeCost=await evaluate('foodLevelCost(g.owned[0])');
   await evaluate(`document.querySelector('[data-uid="1"] .card-level:not(:disabled)').click()`);
   assert.equal(await evaluate('g.owned[0].level'),2);
   assert.equal(await evaluate(`document.querySelector('.modal')===null`),true,'inline level-up does not open a general popup');
   assert.equal(await evaluate('g.coins'),100000-upgradeCost);
-  await evaluate(`for(let i=0;i<3;i++)g.owned.push({uid:g.uidNext++,id:'pandesal',level:1,fusion:0,spent:0});openFusion(1,2)`);
-  await screenshot('fusion-quantity');
-  assert.equal(await evaluate(`document.getElementById('fusionQty').value`),'2');
-  const fusionCost=await evaluate('duplicateFusionPlan(g.owned[0],2).fee'),beforeFusion=await evaluate('g.coins');
-  await evaluate(`submitDuplicateFusion();submitDuplicateFusion()`);
-  assert.equal(await evaluate('g.owned[0].fusion'),2);assert.equal(await evaluate('g.coins'),beforeFusion-fusionCost);
-  assert.equal(await evaluate('g.owned[0].level'),2);
+  await evaluate(`for(let i=0;i<3;i++)g.owned.push({uid:g.uidNext++,id:'pandesal',level:1,fusion:1,spent:0});window.donorId=g.owned.at(-1).uid;openFusion(1,donorId)`);
+  await screenshot('fusion-preview');
+  assert.equal(await evaluate(`Number(document.getElementById('fusionDonor').value)===donorId`),true);
+  const fusionCost=await evaluate('duplicateFusionPlan(g.owned.find(o=>o.uid===1),donorId).fee'),beforeFusion=await evaluate('g.coins');
+  await evaluate(`submitDuplicateFusion();submitDuplicateFusion();closeModal()`);
+  assert.equal(await evaluate('g.owned.find(o=>o.uid===1).fusion'),2);assert.equal(await evaluate('g.coins'),beforeFusion-fusionCost);
+  assert.equal(await evaluate('g.owned.find(o=>o.uid===1).level'),2);
   await evaluate('openFusion(2)');
-  const ingredientCost=await evaluate('fusionFee(g.owned[1])+fusionIngredientCost(g.owned[1])'),beforeIngredients=await evaluate('g.coins');
+  const ingredientCost=await evaluate('fusionFee(g.owned.find(o=>o.uid===2))+fusionIngredientCost(g.owned.find(o=>o.uid===2))'),beforeIngredients=await evaluate('g.coins');
   await evaluate(`document.querySelector('.ingredient-alternative button').click();document.querySelector('.modal .primary').click();closeModal()`);
-  assert.equal(await evaluate('g.owned[1].fusion'),1);assert.equal(await evaluate('g.coins'),beforeIngredients-ingredientCost);
+  assert.equal(await evaluate('g.owned.find(o=>o.uid===2).fusion'),2);assert.equal(await evaluate('g.coins'),beforeIngredients-ingredientCost);
   await evaluate(`$('toasts').innerHTML='';g.board=[{id:808,a:79,b:18,rarity:1,base:304}];startTicket(808);$('toasts').innerHTML=''`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===808`);
   await evaluate(`window.auditFrame=$('worksheetFrame');window.auditChild=auditFrame.contentWindow;void 0`);
+  assert.equal(await evaluate(`(()=>{const run=g.run,ledger=JSON.stringify(g.run.worksheetRewards);const ok=refreshOrders();return ok&&g.run===run&&$('worksheetFrame')===auditFrame&&JSON.stringify(g.run.worksheetRewards)===ledger&&g.board.length===5})()`),true,'refreshing available orders preserves the active worksheet and reward ledger');
   await evaluate('auditChild.document.fonts.ready');
   assert.equal(await evaluate(`Array.from(auditChild.document.fonts).some(f=>f.family==='Panaderya Rounded'&&f.status==='loaded')`),true,'worksheet uses the same actual rounded font');
   for(const [width,height] of [[2000,1200],[1194,834],[1280,800],[1024,768],[768,1024],[390,844]]){
@@ -189,7 +192,7 @@ try{
   }
   // Actual claim transaction using a fixture matching the owner's popup mockup.
   await evaluate(`g=fresh();g.coins=0;g.mastery=3;g.completed=3;
-    g.owned.push({uid:2,id:'monay',level:1,fusion:0,spent:0});g.uidNext=3;g.discovered.push('monay');
+    g.owned.push({uid:2,id:'monay',level:1,fusion:1,spent:0});g.uidNext=3;g.discovered.push('monay');
     g.run={phase:'claim',chests:[{rarity:0},{rarity:1},{rarity:0}],pool:3004,correct:6,mistakes:0,mode:'normal'};
     window.rewardRolls=[0,0,.4];Math.random=()=>rewardRolls.shift()??.999;prizeItems();prizeItems();$('toasts').innerHTML=''`);
   assert.equal(await evaluate('g.coins===3004&&g.permanentLuck===1&&g.owned.length===5'),true);

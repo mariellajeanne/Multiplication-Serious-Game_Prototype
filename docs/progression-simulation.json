@@ -1,0 +1,173 @@
+{
+  "probabilities": [
+    {
+      "mastery": 0,
+      "percent": [
+        75.1447,
+        21.9172,
+        2.7397,
+        0.1903,
+        0.0079,
+        0.0002,
+        0,
+        0
+      ]
+    },
+    {
+      "mastery": 40,
+      "percent": [
+        7.6327,
+        23.7314,
+        31.622,
+        23.4091,
+        10.3975,
+        2.7709,
+        0.4103,
+        0.026
+      ]
+    },
+    {
+      "mastery": 160,
+      "percent": [
+        0.0986,
+        1.1654,
+        5.9017,
+        16.6032,
+        28.0257,
+        28.3839,
+        15.9704,
+        3.8511
+      ]
+    },
+    {
+      "mastery": 240,
+      "percent": [
+        0.03,
+        0.4591,
+        3.0109,
+        10.9707,
+        23.9839,
+        31.4599,
+        22.9257,
+        7.16
+      ]
+    }
+  ],
+  "economy": [
+    {
+      "name": "early",
+      "multiplier": 1.72,
+      "initialOrder": 213,
+      "rates": {
+        "secondsPerOrder": 90,
+        "activePerSecond": 2.362265540449621,
+        "staffPerSecond": 0.5905663851124052,
+        "ratio": 4
+      },
+      "prices": {
+        "foodLevelOrders": 1.1994135649940743,
+        "fusionFeeOrders": 2.1495372517736935,
+        "kitchenOrders": 0.8513484520154017,
+        "bakeryOrders": 2.502305947360186
+      },
+      "purchases": [
+        {
+          "kind": "Food level",
+          "cumulativeOrders": 2,
+          "cost": 255,
+          "nextOrder": 266,
+          "gainPercent": 25
+        },
+        {
+          "kind": "Oven",
+          "cumulativeOrders": 3,
+          "cost": 226,
+          "nextOrder": 280,
+          "gainPercent": 5.5
+        },
+        {
+          "kind": "Bakery",
+          "cumulativeOrders": 5,
+          "cost": 701,
+          "nextOrder": 304,
+          "gainPercent": 8.5
+        }
+      ]
+    },
+    {
+      "name": "middle",
+      "multiplier": 1126.78,
+      "initialOrder": 494601,
+      "rates": {
+        "secondsPerOrder": 90,
+        "activePerSecond": 5495.565939959608,
+        "staffPerSecond": 1373.891484989902,
+        "ratio": 4
+      },
+      "prices": {
+        "foodLevelOrders": 0.10795976364981269,
+        "fusionFeeOrders": 0.030804632450672248,
+        "kitchenOrders": 2.9119839839675583,
+        "bakeryOrders": 5.002699806904461
+      },
+      "purchases": [
+        {
+          "kind": "Food level",
+          "cumulativeOrders": 1,
+          "cost": 53397,
+          "nextOrder": 499191,
+          "gainPercent": 0.928
+        },
+        {
+          "kind": "Oven",
+          "cumulativeOrders": 4,
+          "cost": 1453636,
+          "nextOrder": 526646,
+          "gainPercent": 5.5
+        },
+        {
+          "kind": "Bakery",
+          "cumulativeOrders": 9,
+          "cost": 2634653,
+          "nextOrder": 571411,
+          "gainPercent": 8.5
+        }
+      ]
+    },
+    {
+      "name": "late",
+      "multiplier": 226084.06,
+      "initialOrder": 202359846,
+      "rates": {
+        "secondsPerOrder": 90,
+        "activePerSecond": 2248442.7309415876,
+        "staffPerSecond": 562110.6827353969,
+        "ratio": 4
+      },
+      "prices": {
+        "foodLevelOrders": null,
+        "fusionFeeOrders": null,
+        "kitchenOrders": 6.570565206964829,
+        "bakeryOrders": 10.231663134406805
+      },
+      "purchases": [
+        {
+          "kind": "Oven",
+          "cumulativeOrders": 7,
+          "cost": 1329618562,
+          "nextOrder": 213489637,
+          "gainPercent": 5.5
+        },
+        {
+          "kind": "Bakery",
+          "cumulativeOrders": 17,
+          "cost": 2184354051,
+          "nextOrder": 231636256,
+          "gainPercent": 8.5
+        }
+      ]
+    }
+  ],
+  "bakeryTrackEquivalentOrders": 197.36,
+  "paceAssumption": "90 seconds per Normal ticket; not a timer or learner target"
+}

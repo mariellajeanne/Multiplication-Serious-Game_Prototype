@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const $=id=>document.getElementById(id);const fmt=n=>Math.floor(n).toLocaleString('en-US');const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));const pick=a=>a[Math.floor(Math.random()*a.length)];const RARITIES=['Common','Uncommon','Rare','Epic','Legendary','Divine'];
+const $=id=>document.getElementById(id);const fmt=n=>Math.floor(n).toLocaleString('en-US');const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));const pick=a=>a[Math.floor(Math.random()*a.length)];const RARITIES=['Classic','Favorite','Special','Premium','Deluxe','Signature','Masterpiece','Crown Jewel'];
 const FOOD=[
 {id:'pandesal',name:'Pandesal',icon:'🥖',rarity:0,base:1.2,ingredients:['Flour','Yeast']},
 {id:'monay',name:'Monay',icon:'🍞',rarity:0,base:1.45,ingredients:['Flour','Butter']},
@@ -18,7 +18,9 @@ const FOOD=[
 {id:'ube-pandesal',name:'Ube Cheese Pandesal',icon:'💜',rarity:3,base:9.2,ingredients:['Ube','Cheese']},
 {id:'buko-pie',name:'Buko Pie',icon:'🥧',rarity:4,base:14.0,ingredients:['Coconut','Butter']},
 {id:'brazo',name:'Brazo de Mercedes',icon:'🍮',rarity:4,base:17.2,ingredients:['Eggs','Vanilla']},
-{id:'ube-ensaymada',name:'Special Ube Ensaymada',icon:'✨',rarity:5,base:27,ingredients:['Ube','Cheese']}];
+{id:'ube-ensaymada',name:'Special Ube Ensaymada',icon:'✨',rarity:7,base:27,ingredients:['Ube','Cheese']}];
+FOOD.push({id:'butter-mamon',artId:'mamon',name:'Butter Mamon',rarity:5,base:20,ingredients:['Butter','Vanilla']},{id:'celebration-ensaymada',artId:'ensaymada',name:'Celebration Ensaymada',rarity:6,base:23.5,ingredients:['Cheese','Butter']});
+FOOD.sort((a,b)=>a.rarity-b.rarity);
 const INGREDIENTS=[['Flour','🌾',18],['Yeast','🫧',24],['Butter','🧈',40],['Eggs','🥚',38],['Brown Sugar','🍯',52],['Coconut','🥥',65],['Cheese','🧀',90],['Mung Bean','🫘',98],['Vanilla','🌼',145],['Ube','💜',210]];
 const KITCHEN=[{id:'oven',name:'Oven',icon:'🔥',bonus:0.055},{id:'mixer',name:'Mixer',icon:'🥣',bonus:0.042},{id:'fridge',name:'Refrigerator',icon:'🧊',bonus:0.033},{id:'display',name:'Display Cabinet',icon:'🪟',bonus:0.028}];
 const MODE=[{id:'normal',name:'Normal',icon:'✏️',unlock:0,desc:'Learn at your own pace. Unlimited retries.',base:1},{id:'lookup',name:'Lookup',icon:'🔢',unlock:0,desc:'Multiplication table available whenever needed.',base:1},{id:'blindfold',name:'Blindfold',icon:'🙈',unlock:3,desc:'Recall products before placing digits.',base:1.5},{id:'streak',name:'Streak',icon:'🔥',unlock:4,desc:'Chain correct combos for a rising bonus.',base:1.2},{id:'bullseye',name:'Bullseye',icon:'🎯',unlock:5,desc:'Finish accurately to maximize your payout.',base:2.5},{id:'survival',name:'Survival',icon:'❤️',unlock:6,desc:'Limited lives, higher payouts with fewer lives.',base:2.6}];

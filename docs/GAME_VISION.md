@@ -1,5 +1,7 @@
 # Panaderya Quest — game vision and interaction goals
 
+**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 and Kitchen Level 20, migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
+
 **Current review:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md) follows the newest owner direction: the components themselves carry the bakery theme, using paper, light wood, display labels, pastry boxes, matching illustrations and rounded sans-serif typography. The background is subtle; scenic wallpaper is not part of the active UI. Stop for owner review before Stage C.
 
 Public title: **My Panaderya**. The 30-level roadmap remains a visual preview. Earlier annotation, corrective and cozy-image documents preserve implementation history; this newer direction overrides their appearance guidance. Mathematical interaction requirements below remain.

@@ -54,7 +54,7 @@ try{
     const detail=await evaluate(`({phase:g.run?.phase,errors:g.run?.mistakes,
       bridgeDone:g.run?.bridgeDone,actions:g.run&&Object.keys(g.run.worksheetRewards?.actions||{}),
       child:window.auditChild&&auditChild.eval('({phase:s.phase,done:s.done,busy,additionStart,complete:s.complete,events:window.auditEvents})')})`);
-    const shots=resolve(root,'docs/previews/bakery-components');await mkdir(shots,{recursive:true});
+    const shots=resolve(root,'docs/previews/progression');await mkdir(shots,{recursive:true});
     const failed=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     await writeFile(join(shots,'browser-failure.png'),Buffer.from(failed.data,'base64'));
     throw Error('Timed out: '+expression+' '+JSON.stringify({detail,errors}));
@@ -186,12 +186,13 @@ try{
   assert.equal(await evaluate('g.run.chests.length'),1);
   assert.equal(await evaluate('g.run.correct'),9);
   assert.equal(await evaluate('Object.keys(g.run.worksheetRewards.actions).length'),20);
+  assert.equal(await evaluate(`(()=>{const run=g.run,before=JSON.stringify(run);return refreshOrders()&&g.run===run&&JSON.stringify(g.run)===before&&g.board.length===5})()`),true,'refresh keeps unclaimed rewards and the completed ticket untouched');
   // The claim is durable; a reload before collecting must not strand or repay it.
   await cdp('Page.reload');
   await waitFor(`typeof startTicket==='function'&&g.run?.phase==='claim'&&document.querySelector('.claim-screen .primary')!==null`);
   assert.equal(await evaluate('g.run.pool'),budget);
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.claim-screen')).display!=='none'`),true);
-  const shots=resolve(root,'docs/previews/bakery-components');await mkdir(shots,{recursive:true});
+  const shots=resolve(root,'docs/previews/progression');await mkdir(shots,{recursive:true});
   await cdp('Emulation.setDeviceMetricsOverride',{width:1194,height:834,deviceScaleFactor:1,mobile:false});
   await pause(250);
   const completedShot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});

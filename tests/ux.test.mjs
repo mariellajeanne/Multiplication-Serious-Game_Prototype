@@ -7,7 +7,7 @@ const root=resolve(import.meta.dirname,'..');
 function ui(){
  const c=vm.createContext({Math:Object.create(Math),localStorage:{getItem:()=>null,setItem:()=>{}},
    document:{getElementById:()=>null},setTimeout:()=>{}});
- for(const file of ['src/data/catalog.js','src/game/state.js','src/game/rewards.js','src/game/economy.js',
+ for(const file of ['src/data/catalog.js','src/game/progression.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js',
    'src/ui/bakery-art.js','src/ui/dialogs.js','src/ui/scene.js','src/ui/menu.js'])
    vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
  vm.runInContext(`showModal=(title,html)=>{result={title,html}};toast=()=>{};render=()=>{};
@@ -23,7 +23,7 @@ test('order narrative and reward preview use real quantities without consuming r
 });
 test('food preview shows actual next value and cost without changing saved ownership',()=>{
  const c=ui();vm.runInContext(`openFoodItem(1);before=JSON.stringify(g.owned)`,c);
- assert.match(c.result.html,/×1\.20/);assert.match(c.result.html,/×1\.44/);assert.match(c.result.html,/145/);
+ assert.match(c.result.html,/×1\.20/);assert.match(c.result.html,/×1\.50/);assert.match(c.result.html,/255/);
  assert.doesNotMatch(c.result.html,/Fusion ·/,'advanced controls stay hidden at first');
  vm.runInContext(`assignFood(1);after=JSON.stringify(g.owned);active=g.activeMenu.length`,c);
  assert.equal(c.before,c.after);assert.equal(c.active,1,'same copy cannot occupy two slots');
@@ -41,7 +41,7 @@ test('navigation introduces systems at existing thresholds and keeps collection 
 });
 test('food illustration and discovery renderers cover all catalog foods with named local art',()=>{
  const c=ui();vm.runInContext('result=FOOD.map(f=>({id:f.id,name:f.name,art:foodArt(f.id)}))',c);
- assert.equal(c.result.length,15);
+ assert.equal(c.result.length,17);
  for(const food of c.result){assert.ok(food.art.includes(`aria-label="${food.name}"`));assert.match(food.art,/<svg/);}
 });
 
@@ -186,27 +186,29 @@ test('reward arrival updates display even without animation promises and never c
  }
 });
 
-test('direct card level-up charges the existing cost without opening inventory',()=>{
- const c=ui();vm.runInContext(`menuOpened=0;openMenu=()=>menuOpened++;upgradeFood(1,true);
+test('direct card level-up charges the displayed progression cost without opening inventory',()=>{
+ const c=ui();vm.runInContext(`g.coins=1000;expected=foodLevelCost(g.owned[0]);menuOpened=0;openMenu=()=>menuOpened++;upgradeFood(1,true);
    result={coins:g.coins,level:g.owned[0].level,spent:g.owned[0].spent};`,c);
- assert.deepEqual(JSON.parse(JSON.stringify(c.result)),{coins:105,level:2,spent:145});assert.equal(c.menuOpened,0);
+ assert.deepEqual(JSON.parse(JSON.stringify(c.result)),{coins:1000-c.expected,level:2,spent:c.expected});assert.equal(c.menuOpened,0);
 });
-test('fusion quantity is sequential tiers with exact fees and retained investment/level',()=>{
- const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;g.owned[0].level=2;
-   g.owned.push({uid:2,id:'pandesal',level:1,fusion:0,spent:100},{uid:3,id:'pandesal',level:2,fusion:0,spent:200});
-   g.activeMenu=[1,2,3];openMenu=()=>{};openFusion(1,2);preview=duplicateFusionPlan(g.owned[0],2);
-   submitDuplicateFusion();submitDuplicateFusion();result={coins:g.coins,food:g.owned[0],owned:g.owned.length,active:g.activeMenu};`,c);
- assert.equal(c.preview.fee,950);assert.equal(c.preview.nextTier,2);
- assert.equal(c.result.coins,9050);assert.equal(c.result.food.level,2);assert.equal(c.result.food.fusion,2);
- assert.equal(c.result.food.spent,1250);assert.equal(c.result.owned,1);assert.deepEqual([...c.result.active],[1]);
+test('fusion preview lists every deterministic result and paid investment before consuming',()=>{
+ const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;g.owned[0].level=2;g.owned[0].spent=145;
+   g.owned.push({uid:2,id:'pandesal',level:2,fusion:2,spent:100});g.uidNext=3;
+   openFusion(1,2);preview=duplicateFusionPlan(g.owned[0],2);popup=result.html;
+   submitDuplicateFusion();submitDuplicateFusion();result={coins:g.coins,food:g.owned.find(o=>o.uid===1),owned:g.owned.length};`,c);
+ assert.match(c.popup,/All results/);assert.match(c.popup,/Transfers 245 paid coins/);
+ assert.equal(c.result.coins,10000-c.preview.fee);assert.equal(c.result.food.level,3);assert.equal(c.result.food.fusion,3);
+ assert.equal(c.result.food.spent,245+c.preview.fee);assert.equal(c.result.owned,1);
 });
-test('fusion refuses excess copies/tiers and keeps the ingredient route at its actual cost',()=>{
+
+test('fusion refuses missing donors and previews the ingredient route at its actual cost',()=>{
  const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;openMenu=()=>{};openFusion(1);
-   popup=result.html;bad=duplicateFusionPlan(g.owned[0],3);fuseIngredients(1);
-   result={coins:g.coins,tier:g.owned[0].fusion,spent:g.owned[0].spent};`,c);
- assert.match(c.popup,/ingredientFusionInfo\(1\)/);assert.equal(c.bad,null);
- assert.equal(c.result.coins,9750);assert.equal(c.result.tier,1);assert.equal(c.result.spent,250);
+   popup=result.html;bad=duplicateFusionPlan(g.owned[0],999);expected=fusionFee(g.owned[0])+fusionIngredientCost(g.owned[0]);
+   ingredientFusionInfo(1);submitIngredientFusion();again=submitIngredientFusion();result={coins:g.coins,tier:g.owned[0].fusion,spent:g.owned[0].spent};`,c);
+ assert.match(c.popup,/ingredientFusionInfo\(1\)/);assert.equal(c.bad,null);assert.equal(c.again,false);
+ assert.equal(c.result.coins,10000-c.expected);assert.equal(c.result.tier,2);assert.equal(c.result.spent,c.expected);
 });
+
 test('guide graduates once at the third claimed order and respects later opt-in',()=>{
  const c=ui();vm.runInContext(`g.completed=2;g.run={phase:'claim',chests:[],pool:100,correct:1,mistakes:0,mode:'normal'};
    prizeItems();off=!g.tutorialArrows&&g.guideGraduated;
@@ -217,7 +219,7 @@ test('guide graduates once at the third claimed order and respects later opt-in'
 test('older established saves retain their explicit guide preference and original storage key',()=>{
  const original=ui();const saved=vm.runInContext(`(()=>{const old=fresh();old.completed=8;old.tutorialArrows=true;delete old.guideGraduated;return JSON.stringify(old)})()`,original);
  const c=vm.createContext({localStorage:{getItem:key=>{assert.equal(key,'panaderyaQuestV2');return saved}},document:{getElementById:()=>null}});
- for(const file of ['src/data/catalog.js','src/game/state.js'])vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
+ for(const file of ['src/data/catalog.js','src/game/progression.js','src/game/state.js'])vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
  assert.equal(vm.runInContext('g.guideGraduated&&g.tutorialArrows',c),true);
 });
 

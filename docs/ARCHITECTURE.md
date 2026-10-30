@@ -1,5 +1,7 @@
 # Architecture, code map, and constraints
 
+**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 and Kitchen Level 20, migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
+
 **Current component theme:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md). The final theme stylesheet is replaced, not supplemented with another theme layer. Parent and iframe share local Nunito via styles/typography.css. bakeryIcon() in bakery-art.js supplies UI illustrations and must load before main.js; protocol, economy and saved state are unchanged.
 
 **Latest UI continuation:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md). Inventory selection/pending confirmation are transient UI state; batch actions validate and save once. Resolved-order dialogs use an optional presentation variant with a fixed header and scrolling body. Existing reward/claim protocol and storage key are unchanged; Stage C remains on hold.

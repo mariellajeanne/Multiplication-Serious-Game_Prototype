@@ -1,5 +1,7 @@
 ﻿# Panaderya Quest — codebase audit
 
+**Current progression follow-up:** [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) records the owner-authorized C/D implementation, save migration, formulas, probability/economy simulations and 52 passing automated tests plus desktop/tablet-emulation browser checks. Earlier review holds and prototype caps below are historical.
+
 **Newest visual follow-up:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md) replaces the scenic treatment with component-based bakery objects, self-hosted rounded typography, 41 automated tests and passing browser regressions. Owner review remains pending before Stage C.
 
 **Newest follow-up:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md) records the latest reference-led visual pass, multi-select inventory, mockup-based rewards, 41 automated regressions and real browser evidence. Owner review is pending; older visual notes below are historical.

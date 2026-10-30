@@ -1,5 +1,7 @@
 # Reward economy and progression — design reference
 
+**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 and Kitchen Level 20, migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
+
 **Newest review checkpoint:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md). No progression formulas changed. The 30-level milestone component previews the future design using current decor data. After visual approval, Stage C must additionally implement ticket reset/refresh with a 3-minute cooldown, maximum 5 visible tickets and persisted cooldown/functionality. It is not implemented yet.
 
 **Latest user direction (2026-10-30):** the corrective brief requests Level/Tier 5, value-preserving fusion/overflow, percentage economy improvements, seven rarities including Mythic, and bakery Level 30. These supersede older proposed caps below but are **not implemented yet**: the owner requested a visual review after corrective A/B, before C/D. See [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md) for the exact checkpoint, retained formulas and migration work still required. Player-facing Chest is now **Package**; internal save fields keep their old names.

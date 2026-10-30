@@ -91,7 +91,7 @@ function handleWorksheetMessage(ev){
   if(frame.worksheetAttemptId===ledger.attemptId)return;
   frame.worksheetAttemptId=ledger.attemptId;
   save();sendEngine('start',{ticket:r.ticket,attemptId:ledger.attemptId});
-  sendEngine('sound',{enabled:g.sound,volume:1});sendEngine('tutorial',{enabled:g.tutorialArrows});sendEngine('theme',{level:g.decor});fitWorksheet();return;
+  sendEngine('sound',{enabled:g.sound,volume:1});sendEngine('tutorial',{enabled:g.tutorialArrows});sendEngine('theme',{level:themeLevel()});fitWorksheet();return;
  }
  if(m.attemptId!==ledger.attemptId)return;
  if(m.type==='started'){
