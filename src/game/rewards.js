@@ -7,12 +7,39 @@ function coinFly(count=2){const start=document.querySelector('.mathprompt')||doc
 function modeMultiple(){if(g.mode==='survival')return {'1':4,'3':2.6,'5':1.8}[String(g.lives)]||2.6;return infoMode().base}
 function retryLimit(){return {'normal':Infinity,'lookup':5,'blindfold':3,'streak':2,'bullseye':2,'survival':g.lives===1?1:g.lives===3?2:3}[g.mode]}
 function generateSteps(a,b){const A=String(a).split('').reverse().map(Number),B=String(b).split('').reverse().map(Number);const steps=[];for(let row=0;row<B.length;row++){let carry=0;for(let col=0;col<A.length;col++){const p=A[col]*B[row],sum=p+carry;steps.push({row,col,a:A[col],b:B[row],p,carryIn:carry,ones:sum%10,tens:Math.floor(sum/10),last:col===A.length-1});carry=Math.floor(sum/10)}}return steps}
+// One durable reward ledger per ticket attempt; undo and iframe reload retain it.
+let worksheetAttemptSequence=0;
+function worksheetActionKinds(step){
+ return ['connect','reveal','place-ones',...(step.carryIn?['carry-down']:[]),
+  ...(step.tens?[step.last?'place-tens':'carry-up']:[]),'combo'];
+}
+function worksheetActionId(attemptId,row,col,kind){return `${attemptId}/${row}/${col}/${kind}`}
+function ensureWorksheetRewards(r,reset=false){
+ if(r.worksheetRewards&&!reset)return r.worksheetRewards;
+ const attemptId=globalThis.crypto?.randomUUID?.()||`${Date.now()}-${++worksheetAttemptSequence}-${Math.random().toString(36).slice(2)}`;
+ const ledger={version:1,attemptId,actions:{}};
+ // Old saves have aggregates but no action identities. Keep those rewards and
+ // conservatively baseline completed pairs and the already-started partial pair.
+ if(!reset){
+  const done=Math.max(0,r.bridgeDone||0);
+  for(let i=0;i<Math.min(done,r.steps.length);i++){
+   const step=r.steps[i];for(const kind of worksheetActionKinds(step))
+    ledger.actions[worksheetActionId(attemptId,step.row,step.col,kind)]=true;
+  }
+  const step=r.steps[done];
+  if(step&&r.bridgePrev?.phase==='product')for(const kind of worksheetActionKinds(step)){
+   if(kind!=='combo')ledger.actions[worksheetActionId(attemptId,step.row,step.col,kind)]=true;
+  }
+ }
+ r.worksheetRewards=ledger;return ledger;
+}
 function startTicket(id){
  if(g.run){toast('Finish your current order first.');return;}
  const t=g.board.find(x=>x.id===id);if(!t)return;
  g.board=g.board.filter(x=>x.id!==id);
  const steps=generateSteps(t.a,t.b);
  g.run={ticket:t,steps,index:0,phase:'engine',partial:{},pool:0,earnedActive:0,luck:0,chests:[],mistakes:0,correct:0,streak:0,bestStreak:0,livesLeft:g.lives,retriesLeft:retryLimit(),budget:Math.round(t.base*bakeryValue()*modeMultiple()),mode:g.mode,bridgeDone:0,bridgeSig:'',bridgeErrors:0};
+ ensureWorksheetRewards(g.run,true);
  refillBoard();save();render();toast('Order started! Tap and connect the digits! ✨');
 }
 function runCurrent(){return g.run?.steps[g.run.index]}
