@@ -1,0 +1,226 @@
+/* V13 worksheet-only layout: all legacy data nodes stay in DOM so game logic is unchanged */
+:root{--cell:clamp(43px,6vw,65px)}body{background:#f6f0e7}
+.shell{width:min(1050px,100%);padding:18px 14px 36px}
+.top{border-bottom:1px solid #e5d5c2;padding:0 0 15px;margin-bottom:12px;align-items:center}
+.logo{width:42px;height:42px;font-size:22px}.brand h1{font-size:21px}.brand small{font-size:9px}
+.controls{gap:7px}.controls .balance{display:none}.controls .chooser{max-width:210px}
+.modes,.side,.footnote,.actions #ruleToggle,.head .eyebrow,.head #heading+.sub,.sheethead span:first-child,.connector-selector{display:none!important}
+.layout{display:block}.workspace{margin:0 auto;padding:12px 14px 18px;max-width:960px;box-shadow:0 3px 0 #ddc4a1,0 8px 20px #7955320c}
+.head{margin:2px 4px 9px}.head h2{font-size:18px}.roundtag{padding:7px 10px}
+.sheet{min-height:405px;overflow:hidden;padding:12px 4px 16px}.sheethead{margin:0 14px 7px;justify-content:end}
+.scroller{padding:4px 8px 8px;overflow-x:auto}.math{padding:0 26px 0 42px}.statusbar{margin-top:10px;min-height:24px}.hintpill{font-weight:800}
+.actions{margin-top:9px}.actions .tool{padding:8px 12px}.footnote{display:none}
+.customLabel{font-weight:850;font-size:12px;display:flex;gap:5px;align-items:center;padding:7px 9px;border:1px solid #e1c5a2;border-radius:12px;background:#fff9ed}
+.customLabel input{width:61px;padding:5px 6px;border-radius:6px;background:#fff;border:1px solid #dbc09c;color:#513d2c;font:inherit;font-size:13px;font-weight:800;text-align:center}
+.customLabel input:first-child{width:76px}
+.preview-pair{z-index:7;opacity:0;transition:opacity .08s;filter:drop-shadow(0 4px 7px #de9d4e55)}
+.preview-pair.active{opacity:1}.preview-pair path{opacity:1!important}
+.preview-pair .pair-shell{stroke:#dd8c21;stroke-width:4;fill:#ffc86844;filter:drop-shadow(0 2px 2px #a76f35a1)}
+.preview-pair .pair-glow{stroke:#ffd179;stroke-width:14;filter:blur(8px)}
+.preview-pair .pair-rib{stroke:#fff8dd;stroke-width:3;stroke-dasharray:8 6}
+@media(max-width:725px){.top{align-items:flex-start}.controls{width:100%}.controls .chooser{flex:1}.brand h1{font-size:18px}.customLabel{padding:6px}.customLabel input{width:46px!important}.sheet{min-height:355px}.workspace{padding:10px 8px 14px}.shell{padding:10px 6px 26px}.head h2{font-size:17px}}
+
+/* V14: pure connector-shape A/B/C experiment; no other mechanic changes */
+.connector-selector{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:0 0 12px}
+.connector-label{font-weight:900;font-size:10px;letter-spacing:1.0px;color:#927252;margin-right:5px}
+.connector-selector button{font-size:12px;font-weight:850;padding:7px 11px;border-radius:11px;border:1px solid #dfc29c;background:#fffaf2;box-shadow:0 1px 0 #ead7be}
+.connector-selector button[aria-pressed=true]{background:#ffdf9e;border-color:#c58729;color:#754a17;box-shadow:0 1px 0 #c58729}
+/* Give the connector the visual weight without making it opaque enough to hide digits */
+.pair-svg .pair-shell{fill:#f6c66a30}
+.preview-pair .pair-shell{fill:#f4be5e33}
+.pair-svg .pair-rib{stroke-opacity:.5}
+@media(max-width:600px){.connector-selector{gap:5px}.connector-label{width:100%;margin-bottom:1px}.connector-selector button{font-size:11px;padding:7px 8px}}
+
+/* V19: keep the product as the visual focus. Operands fade only while its two tiles exist. */
+.cell.number{transition:opacity .22s ease,filter .22s ease}
+.product-focus .cell.number[data-top],.product-focus .cell.number[data-bottom]{animation:operand-dim .24s ease both;opacity:.45;filter:saturate(.65)}
+@keyframes operand-dim{from{opacity:1}to{opacity:.45}}
+.addition-lab{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #e4c9a2;border-radius:13px;background:#fff9ed}
+.addition-lab .lab-label{font-size:11px;letter-spacing:.07em;font-weight:950;color:#96734d;margin-right:4px}
+.addmode{border:1px solid #dfbf91;border-radius:10px;background:#fffefd;font-weight:900;font-size:12px;padding:9px 12px;min-height:40px}
+.addmode[aria-pressed=true]{background:#ffe5ae;border:2px solid #c68b30;color:#65401d;padding:8px 11px}
+.addition-help{min-height:22px;font-size:12px;font-weight:800;color:#9a714b;margin:0 0 8px}
+.addition-ghost{position:absolute;z-index:29;pointer-events:none;display:grid;place-items:center;border:2px solid #d3a04a;border-radius:10px;background:#ffe6ad;box-shadow:0 4px 10px #c3934d33;color:#69421f;font-size:24px;font-weight:1000;will-change:transform,opacity}
+.addition-merged{background:#ffd68a;border-color:#c48a2e;box-shadow:0 0 0 6px #ffd89044,0 4px 13px #c8913d35}
+.addition-spark{position:absolute;pointer-events:none;z-index:30;font-size:17px;color:#ca8b27;font-weight:1000;animation:addspark .45s ease-out forwards}
+@keyframes addspark{to{opacity:0;transform:translateY(-22px) scale(1.3)}}
+.addition-sum-ready .line.productline .cell.filled{transition:opacity .2s}
+@media(max-width:640px){.addition-lab{padding:8px}.addmode{font-size:11px;padding:8px;min-height:36px}}
+
+/* V20: crisp, immediate two-mode merging experiment */
+.addition-swipe-guide{z-index:18}
+.addition-swipe-guide .tutorial-stream{opacity:.70}
+.addition-swipe-guide .tutorial-stream .shaft{height:3px;background:linear-gradient(to right,transparent,rgba(125,77,22,.46) 18%,rgba(125,77,22,.46) 82%,transparent)}
+.addition-swipe-guide .tutorial-stream .stream-chevron{color:rgba(125,72,19,.83)}
+.line.productline .rowcell.addition-consumed{opacity:.05;transform:scale(.78);transition:opacity .11s,transform .11s}
+.line.productline.addition-empty{opacity:0;transition:opacity .11s}
+.line.finalline.addition-empty{opacity:0}
+.line.productline .rowcell.addition-merged{color:#674017;transition:background .08s,box-shadow .08s}
+.line.final-merged .final-merged-digit{border-color:#c78e39;background:linear-gradient(135deg,#fff0cb,#ffd99c);box-shadow:0 2px 0 #d1a36a,0 0 0 3px rgba(231,174,73,.14)}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .tutorial-stream .stream-chevron{animation:none}}
+
+/* v21: one downward swipe, one smoothly descending arrow, no repeated chevrons. */
+body.addition-active{touch-action:none;overscroll-behavior:contain}
+.addition-swipe-guide{z-index:33;pointer-events:none}
+.addition-swipe-guide .drop-guide{position:absolute;width:54px;height:54px;pointer-events:none;opacity:0;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 3px rgba(114,75,30,.16));animation:dropHint 1.55s cubic-bezier(.42,0,.58,1) infinite}
+.addition-swipe-guide .drop-guide svg{display:block;width:100%;height:100%;overflow:visible}
+@keyframes dropHint{
+ 0%{opacity:0;transform:translate(-50%,-50%) translateY(0px) scale(.86)}
+ 20%{opacity:.86}
+ 72%{opacity:.82}
+ 100%{opacity:0;transform:translate(-50%,-50%) translateY(var(--drop-distance)) scale(1.07)}
+}
+.line.productline .rowcell.merge-landing{box-shadow:0 2px 0 #d1a36a,0 0 0 5px rgba(222,162,67,.27);background:linear-gradient(135deg,#fff2d5,#ffdc9e);border-color:#ce9135}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .drop-guide{animation:none;opacity:.75;transform:translate(-50%,-50%) translateY(16px)}}
+/* v22 - math-aware product tiles, one solid number without a separating dot */
+.floating{gap:0;padding:5px 6px;border-radius:13px;overflow:visible}
+.floating .dash{display:none!important}
+.floating .ftile{border-radius:6px 0 0 6px}
+.floating .ftile:last-child{border-radius:0 6px 6px 0}
+.floating .ftile:only-child{border-radius:7px}
+.floating .ftile + .ftile{margin-left:-2px;border-left-color:rgba(159,101,33,.55)}
+.floating::before{content:attr(data-equation);position:absolute;bottom:calc(100% + 7px);left:50%;transform:translateX(-50%);white-space:nowrap;font-size:12px;font-weight:950;letter-spacing:.02em;color:#81521e;background:#fff5deea;border:1px solid #e6c08b;border-radius:999px;padding:3px 9px;box-shadow:0 2px 4px #81512315;pointer-events:none}
+.sheethead{align-items:center}
+.operation-cue{margin-right:auto;padding:3px 8px;border-radius:7px;background:#f5e2ba;color:#926029;font-size:11px;font-weight:950;letter-spacing:.035em}
+/* A single row-wide chevron: two diagonal strokes, absolutely no scaling during its descent. */
+.addition-swipe-guide .drop-guide{width:var(--chevron-width);height:54px;filter:drop-shadow(0 3px 4px rgba(102,66,28,.17));opacity:0;transform:translateY(0);animation:wideChevronDrop 1.42s ease-in-out infinite}
+.addition-swipe-guide .drop-guide svg{width:100%;height:100%;display:block;overflow:visible}
+@keyframes wideChevronDrop{0%{opacity:0;transform:translateY(0px)}18%{opacity:.82}75%{opacity:.78}100%{opacity:0;transform:translateY(var(--drop-distance))}}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .drop-guide{opacity:.75;animation:none;transform:translateY(12px)}}
+
+/* v24: spacious, centered funnel arrow directly over addition rows */
+.addition-swipe-guide{z-index:20;pointer-events:none}
+.addition-swipe-guide .drop-guide{
+ position:absolute;left:var(--guide-left);top:var(--guide-top);
+ width:var(--guide-width);height:var(--guide-height);
+ transform-origin:center top;opacity:0;pointer-events:none;
+ filter:drop-shadow(0px 3px 2px rgba(104,67,25,.12));
+ animation:hourglassCascade 1.6s cubic-bezier(.42,0,.25,1) infinite;
+}
+.addition-swipe-guide .drop-guide svg{width:100%;height:100%;display:block;overflow:visible}
+.addition-swipe-guide .drop-guide .chev{
+ fill:none;stroke:rgba(137,84,25,.64);stroke-width:6;
+ stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke;
+}
+.addition-swipe-guide .drop-guide .chev2{stroke:rgba(147,89,30,.54)}
+.addition-swipe-guide .drop-guide .chev3{stroke:rgba(156,96,34,.47)}
+.addition-swipe-guide .drop-guide .chev4{stroke:rgba(160,102,38,.37)}
+@keyframes hourglassCascade{
+ 0%{opacity:0;transform:translateY(0) scale(1)}
+ 14%{opacity:.83}
+ 70%{opacity:.75}
+ 100%{opacity:0;transform:translateY(var(--drop-distance)) scale(.82)}
+}
+@media(prefers-reduced-motion:reduce){.addition-swipe-guide .drop-guide{animation:none;opacity:.75;transform:none}}
+/* The equation is shown through a fast visual transformation on the connection,
+   not as a permanent badge detached from it. */
+.floating::before{display:none!important}
+
+/* V25: fixed-width floating result from the first frame. The ones position never shifts. */
+.floating.count-active{opacity:1;visibility:visible;pointer-events:none;transform:translateY(0) scale(1);z-index:20}
+.floating.count-active .ftile{transition:none;cursor:default}
+.floating.count-active .ftile.count-reveal{animation:countTap .12s cubic-bezier(.25,.85,.25,1) both}
+@keyframes countTap{0%{transform:translateY(3px) scale(.94);filter:brightness(1.12)}100%{transform:translateY(0) scale(1);filter:brightness(1)}}
+.floating .multiply-burst{position:absolute;pointer-events:none;z-index:4;left:50%;top:50%;font-size:43px;font-weight:1000;line-height:1;color:#99611c;text-shadow:0 2px 9px #ffecb9;transform:translate(-50%,-50%) scale(.55);animation:floatMultiplyPop .21s ease-out forwards}
+@keyframes floatMultiplyPop{0%{opacity:0;transform:translate(-50%,-50%) scale(.55)}27%{opacity:1;transform:translate(-50%,-50%) scale(1.07)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}
+.floating.count-complete{animation:countArrival .17s ease-out}
+@keyframes countArrival{0%{filter:brightness(1.1)}50%{filter:brightness(1.22)}100%{filter:brightness(1)}}
+.animation-toggle[aria-pressed=true]{background:#fff1cf;border-color:#dfae63}
+
+/* V26: three interchangeable multiplication micro-animations */
+.multiplication-lab{display:flex;gap:9px;align-items:center;flex-wrap:wrap;border:1px solid #e5caa4;background:#fff9ef;border-radius:15px;padding:10px 12px;margin-bottom:12px}
+.multiplication-lab-title{display:flex;flex-direction:column;gap:3px;min-width:155px;flex:1}
+.multiplication-lab-title span{font-weight:950;letter-spacing:.6px;font-size:11px;color:#8d5e30}
+.multiplication-lab-title small{font-size:10px;color:#ab8965}
+.mult-choices{display:flex;gap:6px;flex-wrap:wrap}
+.mult-choice{background:#fffdf8;border:2px solid #e5ccb0;border-radius:10px;padding:6px 11px;min-width:103px;text-align:left}
+.mult-choice b{font-size:12px;display:block}
+.mult-choice small{font-size:10px;display:block;color:#9c7c59;margin-top:2px}
+.mult-choice[aria-pressed=true]{border-color:#ce8a2e;background:#ffe6b5;box-shadow:0 2px 0 #d3a05a}
+#replayMult:disabled{opacity:.45;cursor:default}
+.floating.multiply-running{opacity:1;transform:translateY(0) scale(1);pointer-events:none;z-index:15}
+.floating.multiply-running .ftile{opacity:1!important;pointer-events:none}
+.multiplication-fx{position:absolute;display:none;z-index:26;pointer-events:none;min-width:108px;min-height:52px;align-items:center;justify-content:center;transform:translate(-50%,-50%);filter:drop-shadow(0 4px 5px rgba(117,75,23,.13))}
+.multiplication-fx.active{display:flex}
+.fx-formula{white-space:nowrap;background:rgba(255,247,226,.98);border:2px solid #dca75b;border-radius:11px;padding:9px 12px;font-size:23px;letter-spacing:-.5px;font-weight:1000;color:#74451c;box-shadow:0 2px 0 #d6af7f}
+.fx-formula .fx-times{color:#bb7320;display:inline-block;margin:0 3px;font-weight:1000}
+.fx-formula.fx-intro{animation:fxAppear .17s cubic-bezier(.13,.85,.32,1) both}
+.fx-formula.fx-answer{animation:fxStamp .2s cubic-bezier(.18,1.4,.22,1) both}
+.fx-core{position:relative;display:grid;place-items:center;width:88px;height:58px}
+.fx-core .fx-times{position:absolute;display:grid;place-items:center;font-size:42px;color:#a56b25;animation:fxCross .24s ease-out both;line-height:1}
+.fx-pip-grid{display:grid;grid-template-columns:repeat(var(--dot-columns),7px);gap:3px;padding:10px;background:#fff3d7;border:2px solid #e0af69;border-radius:12px;box-shadow:0 3px 0 #ddb277;transform-origin:center}
+.fx-pip{width:7px;height:7px;border-radius:3px;background:linear-gradient(145deg,#dca052,#915b2b);opacity:0;transform:scale(.15);animation:fxPipIn .16s cubic-bezier(.18,1.3,.28,1) both;animation-delay:var(--delay)}
+.fx-array-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;max-width:145px}
+.fx-array-caption{font-size:11px;font-weight:950;color:#916024;background:#fff7e5c9;border-radius:7px;padding:2px 6px}
+.fx-array-board{display:grid;grid-template-columns:18px repeat(var(--dot-columns),18px);grid-auto-rows:18px;gap:10px 11px;align-items:center;justify-items:center;padding:10px 12px 12px;background:#fff3d7;border:2px solid #e0af69;border-radius:13px;box-shadow:0 3px 0 #ddb277}.fx-array-board .blank{width:1px;height:1px}.fx-array-top,.fx-array-side{font-size:12px;font-weight:1000;color:#8d5f2d;opacity:0;animation:fxAppear .16s cubic-bezier(.18,1.2,.28,1) both;animation-delay:var(--delay)}.fx-array-dot{width:11px;height:11px;border-radius:50%;border:2.5px solid #6f4926;background:#fffdf5;opacity:0;animation:fxPipRing .15s cubic-bezier(.18,1.25,.28,1) both;animation-delay:var(--delay)}@keyframes fxPipRing{0%{opacity:0;transform:translateY(5px) scale(.25)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.fx-source{position:absolute;z-index:26;pointer-events:none;width:var(--cell);height:var(--cell);display:grid;place-items:center;font-size:30px;font-weight:1000;color:#765029;text-shadow:0 2px 0 #fff1d4;background:#ffe2a5;border:2px solid #dfa44f;border-radius:12px;box-shadow:0 4px 8px #744c2023}
+@keyframes fxAppear{from{opacity:0;transform:translateY(7px) scale(.83)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fxCross{0%{opacity:0;transform:scale(.55) rotate(-12deg)}32%{opacity:1;transform:scale(1.12)}100%{opacity:0;transform:scale(1.52)}}
+@keyframes fxStamp{0%{opacity:0;transform:translateY(-4px) scale(1.22)}75%{opacity:1;transform:scale(.98)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes fxPipIn{0%{opacity:0;transform:translateY(7px) scale(.2)}100%{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:710px){.multiplication-lab-title{min-width:100%}.mult-choice{min-width:85px;padding:5px 8px}#replayMult{margin-left:auto}}
+@media(prefers-reduced-motion:reduce){.fx-pip,.fx-core .fx-times,.fx-formula{animation:none!important}}
+
+/* V28: circle-group counting and a type-on expression physically centered in the float. */
+.fx-array-board{grid-template-columns:var(--array-size) repeat(var(--dot-columns),var(--array-size));grid-auto-rows:var(--array-size);gap:var(--array-gap);min-width:max-content}
+.fx-array-top,.fx-array-side,.fx-array-dot{animation:none;opacity:0;transition:opacity .13s ease,transform .16s cubic-bezier(.2,1.3,.3,1)}
+.fx-array-top,.fx-array-side{font-size:11px;transform:translateY(3px)}
+.fx-array-top.revealed,.fx-array-side.revealed{opacity:1;transform:translateY(0)}
+.fx-array-dot{width:65%;height:65%;background:#fffdf5;border:2.4px solid #714723;border-radius:50%;transform:scale(.32)}
+.fx-array-dot.revealed{opacity:1;transform:scale(1)}
+.fx-array-wrap{max-width:none;position:relative}
+.fx-array-count{font-weight:950;font-size:12px;color:#86511d;background:#ffe7b6;border:1px solid #d7a051;border-radius:999px;padding:3px 9px;min-width:62px;text-align:center}
+.floating.multiply-running[data-fx-mode="typeon"] .ftile,
+.floating.multiply-running[data-fx-mode="fusion"] .ftile{color:transparent!important;text-shadow:none!important}
+.floating .fx-typeon{position:absolute;z-index:30;left:50%;top:50%;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:none;white-space:nowrap;border-radius:10px;background:linear-gradient(135deg,#fff8e6ef,#ffdea6f5);border:1.5px solid #d8a052;box-shadow:0 3px 9px #74401c22;padding:6px 10px;min-height:35px}
+.floating .fx-typeon .char{font-size:22px;font-weight:950;color:#87521e;opacity:0;transform:translateY(7px) scale(.84);transition:opacity .065s,transform .095s cubic-bezier(.22,1.3,.38,1);min-width:13px;text-align:center}
+.floating .fx-typeon .char.revealed{opacity:1;transform:translateY(0) scale(1)}
+.floating .ftile.fx-count-new{animation:fxNumberBump .14s ease-out}
+@keyframes fxNumberBump{0%{filter:brightness(1.25);transform:translateY(3px) scale(.92)}100%{filter:brightness(1);transform:translateY(0) scale(1)}}
+@media(max-width:520px){.fx-array-board{padding:7px;gap:4px}.floating .fx-typeon{padding:4px 7px}.floating .fx-typeon .char{font-size:19px}}
+
+/* v30: type-on uses one rounded floating frame, pre-sized before characters arrive. */
+.floating .fx-typeon{border:0!important;border-radius:0!important;box-shadow:none!important;background:transparent!important;outline:0!important;min-height:0;padding:0 4px;left:50%;top:50%;gap:4px}
+.floating .fx-typeon .char{font-size:21px;min-width:12px}
+.array-speed{flex:1 0 100%;display:flex;flex-wrap:wrap;align-items:center;gap:5px 12px;background:#fff2d8;border:1px solid #e3be82;padding:11px 13px;border-radius:12px}
+.array-speed[hidden]{display:none!important}
+.array-speed-label{display:flex;justify-content:space-between;align-items:center;width:100%;font-size:13px;font-weight:900;color:#85521f}
+.array-speed-label output{font-variant-numeric:tabular-nums;font-size:15px;color:#6c421d}
+.array-speed-track{display:flex;align-items:center;gap:11px;width:100%}
+.array-speed-track span{font-size:11px;color:#97714b;min-width:40px}
+.array-speed input[type=range]{width:100%;flex:1;accent-color:#c88727;cursor:pointer;min-height:26px;touch-action:pan-x}
+.array-speed-help{font-size:11px;color:#956c44}
+.fx-array-top,.fx-array-side,.fx-array-dot{transition-duration:var(--array-reveal-ms,130ms)!important}
+@media(max-width:520px){.array-speed{padding:9px}.floating .fx-typeon .char{font-size:19px}}
+
+/* V30: simplify experimental chrome to one chosen multiplication mode. */
+.mult-choices,.array-speed{display:none!important}
+.multiplication-lab{padding:9px 14px}
+.multiplication-lab-title{min-width:0}
+.floating.typeon-sized{
+  box-sizing:border-box;
+  justify-content:center;
+  border-radius:16px;
+  padding:7px 12px;
+  overflow:visible;
+}
+.floating.typeon-sized .ftile{visibility:hidden!important}
+.floating.typeon-sized .fx-typeon{
+  box-sizing:border-box;
+  position:absolute;
+  inset:0;
+  left:0!important;top:0!important;
+  width:100%;height:100%;
+  transform:none!important;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+  padding:0 10px;
+  border:0!important;
+  border-radius:inherit!important;
+  background:transparent!important;
+  box-shadow:none!important;
+}
+.floating.typeon-sized .fx-typeon .char{font-size:23px;line-height:1;min-width:17px}
+<style>

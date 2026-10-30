@@ -1,24 +1,30 @@
 PANADERYA QUEST — QUICK START (WINDOWS)
 ======================================
 1. Extract the downloaded ZIP.
-2. Open VS Code → File → Open Folder → select the extracted project folder.
+2. Open VS Code → File → Open Folder → select the WHOLE extracted folder.
 3. Press Ctrl+Shift+X; install "Live Server" by Ritwick Dey.
 4. Open index.html. Right-click → "Open with Live Server".
-5. The game will open at http://127.0.0.1:5500/ in your browser.
-6. Save an edited file (Ctrl+S) and Live Server will refresh the game.
+5. The game should open at http://127.0.0.1:5500/ (port may vary).
+6. Save an edited file (Ctrl+S) and Live Server will refresh.
 
-EDIT GAME DIRECTLY WITH YOUR CHATGPT ACCOUNT:
-1. In VS Code Extensions, install "Codex – OpenAI's coding agent" (publisher OpenAI).
-2. Click Codex, or Ctrl+Shift+P → "Codex: Open Codex Sidebar".
-3. Click "Sign in with ChatGPT" and sign into your SAME ChatGPT account in the browser.
-4. Select a file and ask for ONE small change at a time. Review its diff.
+EDIT WITH CODEX USING YOUR CHATGPT ACCOUNT:
+1. In VS Code Extensions, install "Codex" (publisher OpenAI).
+2. Open the Codex sidebar and select "Sign in with ChatGPT".
+3. Open the whole project folder. NO NEED to open the correct source file first.
+4. Tell Codex your desired change in plain English. It can find and edit files.
+5. Have it read AGENTS.md and worksheet/README.md to preserve game behavior.
+6. Review changes / test in the browser; use Git to keep versions.
 
-Good first prompt:
-"Read AGENTS.md. Do not edit worksheet/v33-engine.html. Change ONLY the menu
-food tile design in styles/menu.css to be a little taller. Keep the rest of the
-game, all rewards and all interactions unchanged. Show me the changes."
+GOOD FIRST PROMPT:
+"Read AGENTS.md and worksheet/README.md. Find the relevant code yourself.
+I want to redesign the worksheet frame and digit tiles with a pastel Filipino
+bakery look. Preserve the existing tap/drag connections, flexible carries,
+M × N reveal, swipe-to-add, tutorial arrows and satisfying sounds. Change
+only the appearance and ensure the worksheet still works. Show the diff."
 
-NO Node/npm/build step is needed. To publish on GitHub Pages, upload ALL
-folders, not just index.html.
+The worksheet's mechanics are preserved, but its visuals are NOT frozen.
+Edit styles in worksheet/styles/custom-theme.css first for small restyling.
+For specific input/carry/sound changes, see worksheet/src/.
 
-For file map and safety guidance, read README.md and AGENTS.md.
+NO Node/npm/build step is needed to run it. To publish on GitHub Pages,
+upload ALL folders, not only index.html.

@@ -1,0 +1,9 @@
+/* FUTURE WORKSHEET VISUAL DESIGN LAYER
+   Add new CSS rules here to restyle the worksheet without touching the
+   multiplication mechanics. It loads LAST and can override earlier rules.
+   For example:
+   .sheet { background: #fffdf7; }
+   .cell.number { border-radius: 14px; }
+   .ftile { border-radius: 8px; }
+   Keep .cell, [data-*], and touch targets present for the interactions.
+*/

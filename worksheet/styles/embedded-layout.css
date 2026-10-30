@@ -1,0 +1,21 @@
+
+html,body{width:100%;min-width:0;overflow-x:hidden;background:transparent!important}
+#app.shell{width:100%;max-width:none;margin:0!important;padding:3px 3px 26px!important}
+.top,.side{display:none!important}
+.layout{display:block!important;grid-template-columns:1fr!important}
+.workspace{padding:10px!important;width:100%;max-width:100%}
+.multiplication-lab{margin-bottom:8px!important;padding:8px!important;gap:6px!important}
+.mult-choices{flex:1 1 100%;min-width:0!important}
+.mult-choice{padding:7px 5px!important}
+.mult-choice b{font-size:11px!important}
+.mult-choice small{font-size:9px!important}
+.modes{margin-bottom:8px!important;gap:5px!important}
+.mode{padding:8px 7px!important}
+.mode small{font-size:9px!important}
+.addition-lab{margin-bottom:6px!important}
+.receipt-wrapper{margin:0 8px!important;padding:11px 8px 12px!important}
+.machine-canopy{max-width:100%!important}
+.sheet{min-height:390px!important}
+.sheet .scroller{max-width:100%!important}
+.receipt-caption{font-size:9px!important}
+@media(max-width:550px){.workspace{padding:5px!important}.receipt-wrapper{margin:0 2px!important;padding:8px 4px!important}.mult-choices{display:grid!important;grid-template-columns:1fr 1fr!important}.machine-canopy{display:none!important}}

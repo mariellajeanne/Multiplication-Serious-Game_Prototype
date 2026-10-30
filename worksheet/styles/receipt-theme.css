@@ -1,0 +1,100 @@
+/* v31 · Fully themed but worksheet-first order terminal. All input hitboxes remain intact. */
+:root{--machine-ink:#553420;--machine-bronze:#a96e35;--machine-gold:#e1b35e}
+body{background:radial-gradient(ellipse at 12% 12%,#fff4d9 0%,transparent 48%),radial-gradient(ellipse at 90% 80%,#d5aa70 0%,transparent 48%),#e8d4b6;color:var(--machine-ink)}
+.shell{max-width:1430px;padding:17px clamp(11px,2.5vw,35px) 55px}
+.top{margin-bottom:17px}
+.brand h1{font-size:27px;color:#5a3824}
+.brand small{color:#a47743;font-size:10px;letter-spacing:1.7px}
+.logo{background:linear-gradient(145deg,#fff2cd,#e3ae60 80%);border-color:#fff3c8;box-shadow:0 3px 0 #b7834c,0 5px 16px #905d322e}
+.controls .tool,.controls .chooser,.controls .customLabel{border-color:#d9b383;background:#fffaf0;color:#694322;box-shadow:0 2px 0 #cfa874}
+.balance{background:#593b2b;color:#f7db87;box-shadow:0 3px 0 #38251d}
+.multiplication-lab{background:#f9efd9;border-color:#d1ae7b;border-radius:13px;max-width:820px;margin-left:auto;margin-right:auto;gap:14px}
+.multiplication-lab-title span{color:#95602c}.multiplication-lab-title small{color:#99744f}
+.modes{display:none!important}
+.addition-lab{max-width:920px;margin-left:auto;margin-right:auto}
+.addition-help{display:none!important}
+.layout{grid-template-columns:minmax(0,1fr) 266px;gap:21px;align-items:start}
+.workspace{position:relative;padding:0 0 0;border:7px solid #9b673c;background:linear-gradient(125deg,#e5b16a,#d7a05f 32%,#e9bd81 58%,#b9824d);border-radius:29px;box-shadow:0 8px 0 #8f5930,0 24px 55px #744c2a44, inset 0 2px 0 #ffe0a2}
+.machine-canopy{min-height:111px;padding:23px 25px 19px;background:linear-gradient(135deg,#b4743d,#8f542e 46%,#b67843);position:relative;border-radius:20px 20px 7px 7px;border-bottom:4px solid #774423;box-shadow:inset 0 4px 0 #d89a5c,0 3px 9px #4b2f2240;color:#fff0ce}
+.machine-mainline{display:flex;align-items:center;gap:12px;min-height:57px}
+.machine-symbol{width:51px;height:51px;border-radius:15px;border:2px solid #eed3a0;display:grid;place-items:center;background:linear-gradient(#fbdf9c,#dbac5d);box-shadow:0 3px 0 #a56a35;color:#82502c;font-size:33px}
+.machine-mainline strong{display:block;font-size:22px;letter-spacing:2.1px;line-height:1.1;text-shadow:0 1px 2px #54311c33}
+.machine-mainline small{display:block;font-size:9px;font-weight:800;letter-spacing:1.5px;color:#edcda6;margin-top:6px}
+.machine-live{margin-left:auto;display:flex;align-items:center;gap:7px;background:#543525a8;border:1px solid #d49b5d;padding:10px 13px;border-radius:999px;white-space:nowrap;font-size:10px;font-weight:900;letter-spacing:.6px;color:#f7d8a1}
+.machine-live i{width:8px;height:8px;border-radius:50%;display:block;background:#bce779;box-shadow:0 0 10px #c9fc80;animation:machinePulse 2s ease-in-out infinite}
+.machine-screws span{position:absolute;top:10px;width:8px;height:8px;border:2px solid #f3be7e;background:#714325;border-radius:50%;box-shadow:inset 0 1px 1px #fff6bd4d}.machine-screws span:first-child{left:14px}.machine-screws span:last-child{right:14px}
+.feed-mouth{height:31px;padding:5px 40px;position:relative;display:flex;align-items:center;gap:10px;background:linear-gradient(#af7644,#e1b479);border-bottom:3px solid #b07b4e}
+.feed-roller{height:13px;width:26px;border-radius:10px;background:linear-gradient(#fff4c9,#dbae73,#87562f);box-shadow:0 2px 0 #986136}
+.feed-slot{height:14px;flex:1;border-radius:5px;background:linear-gradient(#45281e,#70442e);box-shadow:inset 0 4px 6px #1f110c,0 1px 0 #f2c38e}
+.ticket-feed{position:absolute;z-index:55;left:50%;bottom:-10px;transform:translate(-50%,-75px);width:120px;min-height:92px;text-align:center;display:flex;flex-direction:column;justify-content:center;gap:6px;padding:10px;border:1px solid #c59b65;background:#fff9e9;box-shadow:0 5px 12px #48291540;border-radius:4px;pointer-events:none;opacity:0;color:#714723}
+.ticket-feed strong{font-weight:1000;font-size:23px}
+.tiny-ticket-top,.tiny-ticket-bottom{font-size:9px;font-weight:900;letter-spacing:2px;color:#ae8655}
+.ticket-feed.feeding{animation:ticketFeed .87s cubic-bezier(.22,.65,.42,1) both}
+.receipt-wrapper{position:relative;margin:0 24px;padding:17px 19px 18px;background:linear-gradient(#fffef8,#fff8e9);box-shadow:inset 0 2px 0 #ffffff,0 11px 18px #754a2a25}
+.receipt-wrapper.printing{animation:receiptPrint .68s cubic-bezier(.3,.74,.28,1) both;transform-origin:50% 0}
+.receipt-caption{display:flex;justify-content:space-between;gap:12px;align-items:center;padding-bottom:12px;border-bottom:1px dashed #bca17f;color:#9c7954;font-size:10px;font-weight:1000;letter-spacing:1.5px}
+.receipt-number b{color:#7d512a}
+.workspace .head{margin:13px 0 8px}
+.workspace .head h2{font-family:Georgia,'Times New Roman',serif;font-size:23px;letter-spacing:-.4px;color:#603f2d}
+.workspace .head .eyebrow{font-size:9px;color:#a58766}
+.roundtag{background:#f8e5c3;border:1px solid #ebd0a9;border-radius:7px;color:#8b613a}
+.sheet{background:#fffdf7;border-radius:6px;border:1px solid #d9c3a8;padding:12px 6px 22px;min-height:355px;box-shadow:0 3px 0 #ebd6b6}
+.sheet:before{content:none}
+.sheethead{color:#a48664}
+.sheethead #operationCue{background:#eddbb9;border:1px solid #e0c49a;color:#8a5a2c}
+.math{margin:0 auto}
+.cell.number{background:linear-gradient(#fffaf0,#f8e6c7);border-color:#d5b18b;box-shadow:0 2px 0 #c8a17c}
+.cell.number.first{background:#ffe6ab;border-color:#d39a4a}
+.cell.rowcell{border-color:#dfc39e;background:#fffaf1}
+.cell.rowcell.filled{background:#f8ebd3;border-color:#c9a77b}
+.cell.hold{background:#faf1dd;border-color:#dbc09b}
+.receipt-rule{height:19px;margin:4px 0 4px;border-bottom:1px dashed #bd9b77;position:relative}
+.receipt-rule span{position:absolute;left:0;bottom:-9px;background:#fff8ea;padding:0 7px;color:#b89a76;font-size:17px}
+.workspace .statusbar{padding:8px 2px 1px}
+.workspace .actions{padding:8px 0 6px}
+.workspace .tool{background:#fff3da;border-color:#d8b083;box-shadow:0 2px 0 #ceaa85}
+.receipt-footer{margin:0 24px 19px;background:#fff8e9;padding:13px 20px 16px;display:flex;justify-content:space-between;gap:10px;color:#a48561;letter-spacing:1.5px;font-size:10px;font-weight:900;clip-path:polygon(0 0,100% 0,100% 84%,97% 100%,94% 84%,91% 100%,88% 84%,85% 100%,82% 84%,79% 100%,76% 84%,73% 100%,70% 84%,67% 100%,64% 84%,61% 100%,58% 84%,55% 100%,52% 84%,49% 100%,46% 84%,43% 100%,40% 84%,37% 100%,34% 84%,31% 100%,28% 84%,25% 100%,22% 84%,19% 100%,16% 84%,13% 100%,10% 84%,7% 100%,4% 84%,0 100%)}
+.side .panel{background:linear-gradient(#fff9ea,#f7e4c6);border:1px solid #caac7d;border-radius:17px;padding:18px;box-shadow:0 4px 0 #b89163,0 16px 27px #79512c1a}
+.side .ticket{position:relative;border:1px dashed #be9260;border-radius:4px;background:#fffdf5;box-shadow:0 5px 0 #e9d5b7;margin-top:13px;text-align:center}
+.side .ticket:before,.side .ticket:after{content:'';position:absolute;width:12px;height:12px;background:#f9ebd7;border-radius:50%;top:45%}
+.side .ticket:before{left:-8px}.side .ticket:after{right:-8px}
+.side .ticket .num{font-size:30px;font-family:Georgia,serif}
+.side .eyebrow{color:#947046}
+.side .belt{border-color:#b69069}
+.side .moneyline{color:#97704c}
+.receipt-stamp{position:absolute;z-index:22;right:20px;top:33px;pointer-events:none;display:none;border:4px double #7ca76b;border-radius:9px;color:#618b53;font-size:19px;font-weight:1000;letter-spacing:3px;padding:6px 14px;transform:rotate(-11deg);background:#fffdf4dd;box-shadow:0 1px 5px #9ab08438}
+.receipt-stamp.stamped{display:block;animation:receiptStamp .48s cubic-bezier(.24,1.4,.22,1) both}
+#complete .complete{margin:12px 0 0;border:1px solid #d1b280;border-radius:8px;background:#fff3d7;color:#714a27;padding:12px}
+#complete .complete h3{color:#75501f}
+.cash-terminal{position:relative;display:none;max-width:550px;margin:14px auto 2px;border:5px solid #92582e;background:linear-gradient(#ca904e,#bb7c3e);border-radius:16px;padding:9px 15px 14px;box-shadow:0 7px 0 #77451f,0 8px 14px #663f2538;text-align:center;color:#fff2d1}
+.cash-terminal.open{display:block;animation:cashAppear .34s cubic-bezier(.2,1,.4,1) both}
+.cash-display{display:flex;justify-content:space-between;align-items:center;background:#334a34;border:3px solid #79502c;border-radius:9px;padding:10px 14px;box-shadow:inset 0 3px 6px #192d1d;color:#d9efaa}
+.cash-display small{letter-spacing:1.5px;font-weight:900;font-size:10px}
+.cash-display strong{font-size:23px;font-variant-numeric:tabular-nums}
+.cash-drawer{height:45px;position:relative;margin:11px 15px 0;background:#9c6438;border:3px solid #63381e;border-radius:7px;box-shadow:inset 0 4px 8px #60351f88}
+.drawer-handle{position:absolute;z-index:2;left:50%;top:9px;transform:translateX(-50%);background:#e4c58f;border:2px solid #82572a;border-radius:15px;width:83px;height:14px}
+.drawer-inner{position:absolute;top:4px;left:5px;right:5px;height:34px;opacity:0;background:linear-gradient(#e6c797,#c7a072);border:2px solid #e1bb80;border-radius:4px;box-shadow:0 3px 6px #56362142;transform:translateY(2px)}
+.cash-terminal.open .drawer-inner{animation:drawerOpen .58s .26s cubic-bezier(.18,1.15,.28,1) both}
+.cash-note{position:absolute;left:18px;top:5px;width:50px;padding:4px;border:2px solid #8a9c57;background:#e5f1ac;color:#66844b;border-radius:4px;font-weight:1000}
+.coin{position:absolute;top:7px;right:24px;width:23px;height:23px;border:2px solid #b27b22;border-radius:50%;background:#ffdc68;color:#a46d20;font-weight:900;font-size:13px;display:grid;place-items:center;opacity:0}
+.coin.c2{right:53px}.coin.c3{right:81px}.coin.c4{right:110px}
+.cash-terminal.open .coin{animation:cashCoin .65s cubic-bezier(.13,.95,.22,1) both}
+.cash-terminal.open .coin.c1{animation-delay:.4s}.cash-terminal.open .coin.c2{animation-delay:.49s}.cash-terminal.open .coin.c3{animation-delay:.57s}.cash-terminal.open .coin.c4{animation-delay:.64s}
+.cash-label{font-size:10px;font-weight:1000;letter-spacing:2px;margin-top:12px}
+@keyframes ticketFeed{0%{opacity:0;transform:translate(-50%,-75px)}17%{opacity:1}62%{opacity:1;transform:translate(-50%,-10px)}100%{opacity:0;transform:translate(-50%,65px)}}
+@keyframes receiptPrint{0%{opacity:.45;transform:translateY(-12px) scaleY(.96)}100%{opacity:1;transform:none}}
+@keyframes machinePulse{50%{box-shadow:0 0 14px #d7ffa2;filter:brightness(1.25)}}
+@keyframes receiptStamp{0%{opacity:0;transform:rotate(-11deg) scale(1.4)}75%{opacity:1;transform:rotate(-11deg) scale(.96)}100%{opacity:1;transform:rotate(-11deg) scale(1)}}
+@keyframes cashAppear{0%{opacity:0;transform:translateY(-10px) scale(.96)}100%{opacity:1;transform:none}}
+@keyframes drawerOpen{0%{opacity:0;transform:translateY(0)}100%{opacity:1;transform:translateY(18px)}}
+@keyframes cashCoin{0%{opacity:0;transform:translateY(0) scale(.6)}38%{opacity:1}100%{opacity:1;transform:translateY(-19px) scale(1)}}
+@media(max-width:1000px){.layout{grid-template-columns:minmax(0,1fr)}.side{display:grid;grid-template-columns:1fr 1fr}.workspace{max-width:900px;margin:auto;width:100%}}
+@media(max-width:670px){.side{grid-template-columns:1fr}.machine-canopy{padding:22px 13px 13px}.machine-symbol{width:41px;height:41px;font-size:25px}.machine-mainline strong{font-size:16px}.machine-mainline small{font-size:7px}.machine-live{padding:7px 8px;font-size:8px}.receipt-wrapper{margin:0 7px;padding:11px 7px 14px}.receipt-caption{font-size:8px;letter-spacing:.5px}.receipt-footer{margin:0 7px 10px;padding:9px 10px 16px;font-size:8px;letter-spacing:.5px}.workspace{border-width:5px}.sheet{padding:8px 2px 17px}.machine-mainline{gap:7px}.cash-display small{font-size:8px}}
+@media(prefers-reduced-motion:reduce){.ticket-feed.feeding,.receipt-wrapper.printing,.cash-terminal.open,.receipt-stamp.stamped{animation-duration:.01ms!important}}
+
+/* v33 — a stationary, immediately available M × N button replaces the reveal animation. */
+.floating.equation-pending{min-width:132px;max-width:none;justify-content:stretch;padding:4px;border-radius:16px;pointer-events:auto;opacity:1;transform:translateY(0) scale(1)}
+.floating.equation-pending .equation-reveal{width:100%;min-height:45px;padding:5px 12px;border:0;border-radius:12px;background:linear-gradient(150deg,#fff9e8,#fbe0ad);color:#785027;font-size:24px;font-weight:1000;letter-spacing:.02em;white-space:nowrap;touch-action:manipulation;box-shadow:none;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;user-select:none}
+.floating.equation-pending .equation-reveal:active{background:#f8d99b;transform:scale(.97)}
+.floating.equation-pending .equation-reveal:focus-visible{outline:3px solid #b87d2e;outline-offset:-3px}
+<style>.addition-lab,.multiplication-lab{display:none!important}.workspace{margin-top:0!important} .shell{padding-top:0!important} 

@@ -31,8 +31,9 @@ test('worksheet uses external v33 engine, bridge and tutorial/sound controls',()
   const main=readFileSync(resolve(root,'src/main.js'),'utf8');
   const bridge=readFileSync(resolve(root,'src/game/v33-bridge.js'),'utf8');
   assert.match(main,/fr\.src='worksheet\/v33-engine\.html'/);
-  assert.match(eng,/source:'bc-v33'/);
-  assert.match(eng,/source!=='bc-shell'/);
+  const wb=readFileSync(resolve(root,'worksheet/src/parent-bridge.js'),'utf8');
+  assert.match(wb,/source:'bc-v33'/);
+  assert.match(wb,/source!=='bc-shell'/);
   assert.match(bridge,/function toggleArrows/);
   assert.match(bridge,/function toggleSfx/);
   assert.match(bridge,/function handleV33Message/);
@@ -47,4 +48,23 @@ test('CSS and menu/ticket renderer are present',()=>{
   assert.match(menu,/buyMenuSlot/);
   const tickets=readFileSync(resolve(root,'styles/tickets.css'),'utf8');
   assert.match(tickets,/\.ticket\.r[0-5]/);
+});
+
+test('worksheet engine scripts load in order and parse',()=>{
+  const document=readFileSync(resolve(root,'worksheet/v33-engine.html'),'utf8');
+  const files=['src/state.js','src/sound-and-multiplication-fx.js','src/product-placement.js',
+    'src/partial-product-addition.js','src/worksheet-render-and-tutorial.js','src/tap-and-drag.js',
+    'src/worksheet-controls.js','src/parent-bridge.js','src/embedded-controls.js'];
+  let last=-1;
+  for(const f of files){
+    const relative='worksheet/'+f;
+    assert.ok(existsSync(resolve(root,relative)));
+    const idx=document.indexOf(`src="${f}"`);
+    assert.ok(idx>last,`wrong worksheet script order: ${f}`);last=idx;
+    const checked=spawnSync(process.execPath,['--check',resolve(root,relative)],{encoding:'utf8'});
+    assert.equal(checked.status,0,checked.stderr);
+  }
+  for(const f of ['foundation.css','effects-and-guides.css','receipt-theme.css','embedded-layout.css','custom-theme.css']) {
+    assert.ok(document.includes(`href="styles/${f}"`));
+  }
 });

@@ -1,6 +1,6 @@
 # Panaderya Quest — VS Code edition
 
-This is the **same playable Panaderya Quest v3** refactored from one large HTML file into separate files. It is still a static browser game, built for fast local editing and GitHub Pages.
+This is **Panaderya Quest v3**, including its worksheet, split into editable source files. It is still a static browser game, built for fast local editing and GitHub Pages.
 
 ## Run in VS Code on Windows (fastest route)
 
@@ -28,7 +28,7 @@ If Python is installed, run `py -m http.server 5500` in the project folder and o
 | Change popups, modes, tutorial text | `src/ui/dialogs.js` |
 | Change bakery scene / sidebars | `src/ui/scene.js` |
 | Change worksheet shell / reward jar | `src/ui/menu.js`, `styles/worksheet.css` |
-| Change multiplication connection/carry/sounds | `worksheet/v33-engine.html` (**only when explicitly requested**) |
+| Change multiplication connection/carry/sounds | `worksheet/src/` (details in `worksheet/README.md`) |
 | Change app startup / iframe loading | `src/main.js` |
 
 ## Tests
@@ -48,3 +48,11 @@ Install the official **Codex – OpenAI's coding agent** extension (`OpenAI.chat
 Example request: "Change ONLY `styles/menu.css` so the food tiles are 10% taller. Preserve all text, grid positions, worksheet behavior and reward logic. Show a diff and test." Review the changes before committing.
 
 Note: the Codex chat in VS Code is a separate conversation from this ChatGPT thread; account sign-in does not automatically migrate the full chat history. `AGENTS.md` preserves key constraints.
+
+## IMPORTANT: You do not need to know the file names
+Open the **whole project folder** in VS Code, then tell Codex what to change in plain English. Codex should read `AGENTS.md`, search relevant source files, make the change, run tests and show what changed. You never need to manually open a specific file just to ask for an edit.
+
+## Worksheet is now visually editable
+The v33 worksheet's **mechanics**, not its old design, are the parts to preserve. `worksheet/v33-engine.html` holds DOM elements and load order; `worksheet/src/` contains inputs, carries, sounds, animations, merging and bridge; `worksheet/styles/` contains the design. For simple worksheet recoloring/repositioning start with `worksheet/styles/custom-theme.css` (loaded last). See `worksheet/README.md`.
+
+This is a **conservative source split** that preserves the legacy engine's shared state and behavior. It is easier to edit, but not yet a fully isolated, independently unit-testable component architecture. More ambitious engine refactors should be incremental and tested.
