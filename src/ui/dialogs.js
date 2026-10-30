@@ -1,5 +1,5 @@
-/* Panaderya Quest v3 — src/ui/dialogs.js
- * Originally extracted from the verified single-file v3 prototype.
+/* Panaderya Quest — src/ui/dialogs.js
+ * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
 function showTutorial(index=0){g.tutorialIndex=index;const t=BASIC_TUTORIAL[index],last=index===BASIC_TUTORIAL.length-1;showModal('👩‍🍳 How to Play',`<div class="introbox"><div class="introart float-icon">${t.emoji}</div><h2>${t.title}</h2><p style="line-height:1.65;max-width:540px;margin:auto">${t.text}</p><div class="introsteps">${BASIC_TUTORIAL.map((_,i)=>`<i class="${i===index?'on':''}"></i>`).join('')}</div></div><div class="btnrow" style="justify-content:space-between;margin-top:18px"><button class="secondary" onclick="skipTutorial()">Skip</button><div class="btnrow">${index?`<button class="secondary" onclick="showTutorial(${index-1})">← Back</button>`:''}<button class="primary" onclick="${last?'skipTutorial()':`showTutorial(${index+1})`}">${last?'Let’s Bake!':'Next →'}</button></div></div>`)}

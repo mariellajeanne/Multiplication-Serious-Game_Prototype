@@ -92,7 +92,7 @@ body{background:radial-gradient(ellipse at 12% 12%,#fff4d9 0%,transparent 48%),r
 @media(max-width:670px){.side{grid-template-columns:1fr}.machine-canopy{padding:22px 13px 13px}.machine-symbol{width:41px;height:41px;font-size:25px}.machine-mainline strong{font-size:16px}.machine-mainline small{font-size:7px}.machine-live{padding:7px 8px;font-size:8px}.receipt-wrapper{margin:0 7px;padding:11px 7px 14px}.receipt-caption{font-size:8px;letter-spacing:.5px}.receipt-footer{margin:0 7px 10px;padding:9px 10px 16px;font-size:8px;letter-spacing:.5px}.workspace{border-width:5px}.sheet{padding:8px 2px 17px}.machine-mainline{gap:7px}.cash-display small{font-size:8px}}
 @media(prefers-reduced-motion:reduce){.ticket-feed.feeding,.receipt-wrapper.printing,.cash-terminal.open,.receipt-stamp.stamped{animation-duration:.01ms!important}}
 
-/* v33 — a stationary, immediately available M × N button replaces the reveal animation. */
+/* Interactive worksheet — a stationary, immediately available M × N button replaces the reveal animation. */
 .floating.equation-pending{min-width:132px;max-width:none;justify-content:stretch;padding:4px;border-radius:16px;pointer-events:auto;opacity:1;transform:translateY(0) scale(1)}
 .floating.equation-pending .equation-reveal{width:100%;min-height:45px;padding:5px 12px;border:0;border-radius:12px;background:linear-gradient(150deg,#fff9e8,#fbe0ad);color:#785027;font-size:24px;font-weight:1000;letter-spacing:.02em;white-space:nowrap;touch-action:manipulation;box-shadow:none;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;user-select:none}
 .floating.equation-pending .equation-reveal:active{background:#f8d99b;transform:scale(.97)}

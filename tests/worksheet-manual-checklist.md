@@ -3,7 +3,7 @@
 After changing worksheet CSS, drag/drop handling, sound, or carry logic:
 
 1. Open index.html with VS Code Live Server.
-2. Select a ticket requiring carrying and complete it. For precise debug you can open `/worksheet/v33-engine.html` directly from Live Server and use the built-in custom problem inputs to try `48 × 6` (=288) or `79 × 18` (=1422).
+2. Select a ticket requiring carrying and complete it. For precise debug you can open `/worksheet/worksheet-engine.html` directly from Live Server and use the built-in custom problem inputs to try `48 × 6` (=288) or `79 × 18` (=1422).
 3. Connect top and bottom digits by **two taps**; verify the rounded capsule appears.
 4. Try **dragging** from one operand to the other; it should connect too.
 5. Tap the floating `M × N` chip; it should reveal product digit tiles.

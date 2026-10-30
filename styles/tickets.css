@@ -1,4 +1,4 @@
-/* Panaderya Quest v3 — styles/tickets.css */
+/* Panaderya Quest — styles/tickets.css */
 /* Tickets are entire vivid rarity-filled cards, not only colored borders. */
 .tickets{gap:12px}.ticket{--tA:#d8d4ca;--tB:#f1f0e9;--tEdge:#a9a39b;position:relative;overflow:hidden;border:3px solid var(--tEdge);background:linear-gradient(125deg,var(--tB),var(--tA) 70%,var(--tB));box-shadow:0 4px 0 color-mix(in srgb,var(--tEdge),#43372d 25%),0 10px 16px #53351b16;border-radius:17px;min-height:126px;padding:17px 13px 12px;transform:translateZ(0)}
 .ticket:hover:not(:disabled){transform:translateY(-3px);background:linear-gradient(125deg,var(--tB),var(--tA) 80%,#fff);box-shadow:0 7px 0 color-mix(in srgb,var(--tEdge),#43372d 25%)}

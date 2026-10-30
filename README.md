@@ -1,58 +1,26 @@
-# Panaderya Quest — VS Code edition
+# Panaderya Quest — modular VS Code project
 
-This is **Panaderya Quest v3**, including its worksheet, split into editable source files. It is still a static browser game, built for fast local editing and GitHub Pages.
+A Filipino bakery-themed long-multiplication serious game, built as a static website with independent UI, economy and worksheet source files.
 
-## Run in VS Code on Windows (fastest route)
+## Quick start (Windows, VS Code)
+1. Extract the project into a folder and **File → Open Folder** in VS Code (select folder containing `index.html`).
+2. Install **Live Server** (Ritwick Dey). Open root `index.html` and choose **Open with Live Server**.
+3. Your browser opens a localhost page. Save edits with `Ctrl+S` and Live Server refreshes it.
+4. For Codex, install the official **Codex – OpenAI's coding agent** extension, sign in with ChatGPT, and open the **entire folder**. The user does not need to know which file to edit.
+5. Paste the starter prompt in [`docs/FIRST_CODEX_MESSAGE.md`](docs/FIRST_CODEX_MESSAGE.md) for a full codebase analysis **without changing code**.
 
-1. Extract the ZIP to a folder, e.g. `C:\UnityProjects\PanaderyaQuest`.
-2. VS Code → **File → Open Folder…** → select the folder containing `index.html`.
-3. Extensions (`Ctrl+Shift+X`) → install **Live Server** by Ritwick Dey (`ritwickdey.LiveServer`).
-4. Right-click `index.html` → **Open with Live Server** (or click **Go Live** in the bottom-right status bar).
-5. A browser opens at `http://127.0.0.1:5500/`. Save files with `Ctrl+S` to refresh the page automatically.
-
-**Do not open `index.html` by double-clicking it directly**; run through a web server so the external worksheet iframe loads reliably.
-
-### Other run options
-
-If Python is installed, run `py -m http.server 5500` in the project folder and open `http://localhost:5500` (refresh manually after edits). No `npm install`, compilation, or Vite setup is required.
-
-## Where to edit things
-
-| Task | Files |
-|---|---|
-| Change menu tile appearance, slot or placement | `styles/menu.css`, `src/ui/menu.js` |
-| Change ticket rarity colors / shine | `styles/tickets.css` |
-| Change food names, icons, base values, rarity | `src/data/catalog.js` |
-| Change tickets / Luck / chest drops | `src/game/state.js`, `src/game/rewards.js`, `src/game/v33-bridge.js` |
-| Change upgrades / ingredients / fusion / reselling | `src/game/economy.js` |
-| Change popups, modes, tutorial text | `src/ui/dialogs.js` |
-| Change bakery scene / sidebars | `src/ui/scene.js` |
-| Change worksheet shell / reward jar | `src/ui/menu.js`, `styles/worksheet.css` |
-| Change multiplication connection/carry/sounds | `worksheet/src/` (details in `worksheet/README.md`) |
-| Change app startup / iframe loading | `src/main.js` |
+## Reference documents for Codex
+- [`AGENTS.md`](AGENTS.md) — concise working rules and pointers.
+- [`docs/GAME_VISION.md`](docs/GAME_VISION.md) — learning objective, target experience and precise worksheet/visual interaction requirements.
+- [`docs/REWARDS_AND_PROGRESSION.md`](docs/REWARDS_AND_PROGRESSION.md) — agreed reward systems, modes, future ideas and open decisions.
+- [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — file map, messaging and saved-data contracts, tests.
+- [`worksheet/README.md`](worksheet/README.md) — worksheet breakdown and manual test expectations.
 
 ## Tests
-
-If Node.js is installed: `node --test tests/smoke.test.mjs`. These are structural/syntax checks, **not** a substitute for manually testing touch and audio.
+If Node.js is available, from project root: `node --test tests/smoke.test.mjs`. For gestures, tutorials, sound and visual checks, run the browser and use `tests/worksheet-manual-checklist.md`.
 
 ## GitHub Pages
+This project is static and does not require a build step. Deploy **all** root files and directories via branch `main` and `/(root)` in GitHub Pages. Preserve `.git` when copying files into your existing clone. A new commit does not erase commit history.
 
-Copy the contents of this folder to the **root** of the existing Git repository (keep `.git`), `git add -A`, commit and push to `main`. In Settings → Pages, use `Deploy from a branch`, `main`, `/(root)`.
-
-Unlike the older single-file version, GitHub Pages **needs the `src/`, `styles/`, and `worksheet/` folders**; do not upload only `index.html`.
-
-## Use Codex in VS Code
-
-Install the official **Codex – OpenAI's coding agent** extension (`OpenAI.chatgpt`), click Codex, and choose **Sign in with ChatGPT**, using your usual ChatGPT account. It can read and change the opened project directly. It will read `AGENTS.md` for coding guidance. For details see https://developers.openai.com/codex/ide.
-
-Example request: "Change ONLY `styles/menu.css` so the food tiles are 10% taller. Preserve all text, grid positions, worksheet behavior and reward logic. Show a diff and test." Review the changes before committing.
-
-Note: the Codex chat in VS Code is a separate conversation from this ChatGPT thread; account sign-in does not automatically migrate the full chat history. `AGENTS.md` preserves key constraints.
-
-## IMPORTANT: You do not need to know the file names
-Open the **whole project folder** in VS Code, then tell Codex what to change in plain English. Codex should read `AGENTS.md`, search relevant source files, make the change, run tests and show what changed. You never need to manually open a specific file just to ask for an edit.
-
-## Worksheet is now visually editable
-The v33 worksheet's **mechanics**, not its old design, are the parts to preserve. `worksheet/v33-engine.html` holds DOM elements and load order; `worksheet/src/` contains inputs, carries, sounds, animations, merging and bridge; `worksheet/styles/` contains the design. For simple worksheet recoloring/repositioning start with `worksheet/styles/custom-theme.css` (loaded last). See `worksheet/README.md`.
-
-This is a **conservative source split** that preserves the legacy engine's shared state and behavior. It is easier to edit, but not yet a fully isolated, independently unit-testable component architecture. More ambitious engine refactors should be incremental and tested.
+## Refactor notes
+Legacy version-specific **source names** were replaced with descriptive `worksheet-*` identifiers, including the frame and protocol, and smoke tests were updated. The persistent `panaderyaQuestV2` localStorage key was intentionally **not** renamed, to preserve existing saves. Gameplay code was otherwise kept as-is rather than silently 'improved'.

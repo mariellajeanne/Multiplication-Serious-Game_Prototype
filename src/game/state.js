@@ -1,5 +1,5 @@
-/* Panaderya Quest v3 — src/game/state.js
- * Originally extracted from the verified single-file v3 prototype.
+/* Panaderya Quest — src/game/state.js
+ * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
 const fresh=()=>({coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:0,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},equipment:{oven:0,mixer:0,fridge:0,display:0},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,menuSlots:4,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});

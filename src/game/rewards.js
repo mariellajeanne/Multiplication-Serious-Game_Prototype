@@ -1,9 +1,9 @@
-/* Panaderya Quest v3 — src/game/rewards.js
- * Originally extracted from the verified single-file v3 prototype.
+/* Panaderya Quest — src/game/rewards.js
+ * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
 function earnCoin(weight=1,extraLuck=1){const r=g.run;if(!r||r.phase==='claim')return;const maxActive=Math.floor(r.budget*.76);const unit=Math.max(1,Math.floor(maxActive/(r.steps.length*4.4)));const bonus=1+ r.steps[r.index]?.row*.25;const amt=Math.min(maxActive-r.pool,Math.max(1,Math.round(unit*weight*bonus)));if(amt>0){r.pool+=amt;r.earnedActive+=amt;coinFly(Math.min(5,1+Math.floor(r.steps[r.index]?.row||0)+Math.round(weight/2)));}r.luck+=extraLuck;save();}
-function coinFly(count=2){const start=document.querySelector('.mathprompt')||document.querySelector('.producttiles')||document.querySelector('#v33Frame');const dest=$('prizejar');if(!start||!dest)return;const s=start.getBoundingClientRect(),d=dest.getBoundingClientRect();for(let i=0;i<count;i++){const e=document.createElement('div');e.className='floatingcoin';e.textContent='🪙';e.style.left=(s.left+s.width*.5+(Math.random()-.5)*40)+'px';e.style.top=(s.top+s.height*.5+(Math.random()-.5)*25)+'px';document.body.appendChild(e);requestAnimationFrame(()=>{e.style.transform=`translate(${d.left+d.width*.25-s.left-s.width*.5}px,${d.top+d.height*.45-s.top-s.height*.5}px) scale(.4)`;e.style.opacity='0'});setTimeout(()=>e.remove(),700)}dest.classList.remove('earned');void dest.offsetWidth;dest.classList.add('earned')}
+function coinFly(count=2){const start=document.querySelector('.mathprompt')||document.querySelector('.producttiles')||document.querySelector('#worksheetFrame');const dest=$('prizejar');if(!start||!dest)return;const s=start.getBoundingClientRect(),d=dest.getBoundingClientRect();for(let i=0;i<count;i++){const e=document.createElement('div');e.className='floatingcoin';e.textContent='🪙';e.style.left=(s.left+s.width*.5+(Math.random()-.5)*40)+'px';e.style.top=(s.top+s.height*.5+(Math.random()-.5)*25)+'px';document.body.appendChild(e);requestAnimationFrame(()=>{e.style.transform=`translate(${d.left+d.width*.25-s.left-s.width*.5}px,${d.top+d.height*.45-s.top-s.height*.5}px) scale(.4)`;e.style.opacity='0'});setTimeout(()=>e.remove(),700)}dest.classList.remove('earned');void dest.offsetWidth;dest.classList.add('earned')}
 function modeMultiple(){if(g.mode==='survival')return {'1':4,'3':2.6,'5':1.8}[String(g.lives)]||2.6;return infoMode().base}
 function retryLimit(){return {'normal':Infinity,'lookup':5,'blindfold':3,'streak':2,'bullseye':2,'survival':g.lives===1?1:g.lives===3?2:3}[g.mode]}
 function generateSteps(a,b){const A=String(a).split('').reverse().map(Number),B=String(b).split('').reverse().map(Number);const steps=[];for(let row=0;row<B.length;row++){let carry=0;for(let col=0;col<A.length;col++){const p=A[col]*B[row],sum=p+carry;steps.push({row,col,a:A[col],b:B[row],p,carryIn:carry,ones:sum%10,tens:Math.floor(sum/10),last:col===A.length-1});carry=Math.floor(sum/10)}}return steps}
@@ -13,7 +13,7 @@ function startTicket(id){
  g.board=g.board.filter(x=>x.id!==id);
  const steps=generateSteps(t.a,t.b);
  g.run={ticket:t,steps,index:0,phase:'engine',partial:{},pool:0,earnedActive:0,luck:0,chests:[],mistakes:0,correct:0,streak:0,bestStreak:0,livesLeft:g.lives,retriesLeft:retryLimit(),budget:Math.round(t.base*bakeryValue()*modeMultiple()),mode:g.mode,bridgeDone:0,bridgeSig:'',bridgeErrors:0};
- refillBoard();save();render();toast('Order started! Tap and connect like in v33. ✨');
+ refillBoard();save();render();toast('Order started! Tap and connect the digits! ✨');
 }
 function runCurrent(){return g.run?.steps[g.run.index]}
 function pickMultiplier(i){const r=g.run,s=runCurrent();if(!r||r.phase!=='chooseB')return;const correct=String(r.ticket.b).length-1-s.row;if(i!==correct){toast('Start with the glowing BOTTOM digit 👇');return}r.phase='chooseA';r.correct++;earnCoin(.5,1);render()}

@@ -1,7 +1,7 @@
 'use strict';
-// V35 bridge. This is an adapter: it does NOT replace v33's interaction functions.
+// Worksheet bridge. This adapter preserves the worksheet interaction functions.
 const bridgeMetrics={errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,startedAt:performance.now(),pausedSince:0};
-const report=(type,additional={})=>window.parent.postMessage({source:'bc-v33',type,...additional},'*');
+const report=(type,additional={})=>window.parent.postMessage({source:'pq-worksheet',type,...additional},'*');
 const baseInvalid=invalid;
 invalid=function(...args){bridgeMetrics.errors++;bridgeMetrics.currentCombo=0;return baseInvalid(...args)};
 const basePlace=place;
@@ -28,7 +28,7 @@ function bridgePoll(){
  const signature=JSON.stringify(dat);
  if(signature!==lastReport){lastReport=signature;report('state',dat)}
  if(s.complete&&!bridgeMetrics.sent){
-  bridgeMetrics.sent=true;report('complete',{ticket:window.__ACTIVE_V33_TICKET||{id:'none'},top:s.a,bottom:s.b,stats:bridgeStats()});
+  bridgeMetrics.sent=true;report('complete',{ticket:window.__ACTIVE_WORKSHEET_TICKET||{id:'none'},top:s.a,bottom:s.b,stats:bridgeStats()});
  }
  const height=Math.ceil(Math.max(document.documentElement.scrollHeight,document.body.scrollHeight));
  if(Math.abs(height-lastHeight)>24){lastHeight=height;report('height',{height})}
@@ -37,7 +37,7 @@ setInterval(bridgePoll,180);
 function externalStart(ticket){
  if(!ticket)return;const a=Number(ticket.a),b=Number(ticket.b);
  if(!Number.isInteger(a)||a<1||a>99999||!Number.isInteger(b)||b<1||b>99){report('unsupported',{a,b});return;}
- window.__ACTIVE_V33_TICKET=ticket;
+ window.__ACTIVE_WORKSHEET_TICKET=ticket;
  Object.assign(bridgeMetrics,{errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,startedAt:performance.now()});
  $('customA').value=a;$('customB').value=b;$('tryCustom').click();
  report('started',{a,b});bridgePoll();
@@ -45,7 +45,7 @@ function externalStart(ticket){
 window.addEventListener('message',event=>{
  const m=event.data;if(!m||m.source!=='bc-shell')return;
  if(m.type==='start')externalStart(m.ticket);
- if(m.type==='restart'&&window.__ACTIVE_V33_TICKET)externalStart(window.__ACTIVE_V33_TICKET);
+ if(m.type==='restart'&&window.__ACTIVE_WORKSHEET_TICKET)externalStart(window.__ACTIVE_WORKSHEET_TICKET);
  if(m.type==='sound'){$('sound').textContent=m.enabled?'♫ Sound on':'♫ Sound off';sound=!!m.enabled;}
 });
 setTimeout(()=>report('ready'),0);

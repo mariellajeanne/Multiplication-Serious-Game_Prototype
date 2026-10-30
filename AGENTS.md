@@ -1,47 +1,38 @@
-# Panaderya Quest — instructions for Codex / AI coding agents
+# Panaderya Quest — agent instructions
 
-## Priority: preserve existing functionality
-- The current playable implementation is the **v3 prototype**, only split into files. This refactor is intended to preserve behavior and appearance.
-- **Worksheet interactions are protected, but its LOOK is NOT frozen.** Keep the tested v33 behaviors: tap/drag rounded digit connection, M × N reveal, placing digits in either order, flexible carry, undo, arrow hints only when tutorial is enabled, synthesized confirmation sounds, and swipe-down addition. The worksheet CSS and visual layout may be redesigned freely when asked. Input geometry/DOM data attributes and JS mechanics may also be refactored, but preserve behavior and test with an entire carrying problem. Never interpret 'preserve v33' as 'do not redesign the worksheet'.
-- The parent/worksheet interface is an iframe + `postMessage` bridge. Parent: `src/game/v33-bridge.js`, worksheet: `worksheet/src/parent-bridge.js`; `src/main.js` loads iframe. Worksheet behavior has been split across `worksheet/src/`, while its visuals live in `worksheet/styles/`. The extracted classic JS scripts intentionally share top-level browser bindings, and must load in listed order. For full isolation into ES modules, do a subsequent separately tested refactor.
-- When tutorial arrows are OFF, there should be no tutorial arrows. Preserve sound feedback on tap/connect/carry.
-- Do not alter unrelated screens, game rules, odds, prices, or artwork when asked for a focused edit.
+## The project and the goal
+Panaderya Quest is a tablet-first educational incremental bakery game for practicing **long multiplication procedure** after students have learned basic multiplication facts. The user is both designer and product owner. Their priority is a delightful, approachable learning experience, not a complicated bakery-management simulator.
 
-## Architecture
-- No framework and **no build**: plain static HTML/CSS/JS so GitHub Pages deploys the root folder unchanged.
-- The JavaScript files are **classic scripts**, not ES modules. Their top-level lexical bindings and function declarations intentionally share the browser's global script environment. They must load in the specified order in `index.html`.
-- `src/data/catalog.js`: Filipino foods, rarities, ingredient definitions, kitchenware, modes, tutorials.
-- `src/game/state.js`: save data, ticket generation and value formulas, event helpers.
-- `src/game/rewards.js`: worksheet actions, coin/chest drops, ticket completion.
-- `src/game/economy.js`: food levels, fusion, resale, kitchen/decor/staff and slots.
-- `src/game/v33-bridge.js`: communication with original v33 engine.
-- `src/ui/scene.js`: bakery scene, tickets and older worksheet UI helpers.
-- `src/ui/menu.js`: current centerpiece tiled menu and main worksheet shell.
-- `src/ui/dialogs.js`: all popup menus, instructions, unlocks and modes.
-- `src/main.js`: app render and initialization.
-- `styles/base.css`: common styles; `menu.css`: tiled menu; `tickets.css`: vivid tickets; `worksheet.css`: v33 container and responsive adjustments.
+- Start with `docs/GAME_VISION.md` when learning the project, changing gameplay, or making UX decisions.
+- Read `docs/REWARDS_AND_PROGRESSION.md` for rewards, economy, bakery, levels, mastery, game modes, and unlocks. It distinguishes **agreed direction** from **proposals** and **existing prototype shortcuts**.
+- Read `docs/ARCHITECTURE.md` when refactoring code, debugging, modifying the worksheet or integrating features.
+- Read only relevant files for a focused visual edit; do **not** exhaustively reread all docs for every small task.
 
-## Workflow for small changes
-1. Read only the relevant files, and edit only what the user requested.
-2. Use Live Server and test visually in the browser.
-3. For changes to script logic, run `node --test tests/smoke.test.mjs` if Node is available.
-4. For math/touch/sound/tutor changes, additionally test one complete carrying problem (e.g. 79 × 18) with the v33 engine, with arrows on and off.
-5. Summarize changed files and any untested behavior. Don't claim unsupported tests passed.
-6. Never push to GitHub unless the user explicitly asks to push.
+## Non-negotiable interaction and UX principles
+- Preserve the **behavior**, not a particular version's appearance, of the long multiplication worksheet: digit tap/drag connection with rounded capsule, floating `M × N` button revealing product tiles, flexible tile placement and carry handling, downward swipe to merge partial-product rows, satisfying sound effects, and guidance arrows only when tutorial is ON.
+- A child's cognitive effort must go toward math. Make rewards immediately comprehensible, controls generous and clear, menus easy to scan, and introduce systems gradually.
+- The main screen centers the **food menu grid**; tile top = rarity, center = food illustration/icon, bottom-left = level, bottom-right = food multiplier; purchased empty slots display `+`, unpurchased slots `Buy Slot` plus price. The **Bakery Value Multiplier** is obvious at the top. The right side shows colorful, filled, shiny rarity-coded order tickets.
+- Filipino panaderia foods are the collection focus. Passive hired staff are supplemental; active math should be approximately 3×+ stronger at a comfortable solving pace.
+- Reward mathematical progress, not repeated clicks; don't pressure students to rush. Preserve a generous tutorial and undo/accidental-tap tolerance.
+- Do not change unrelated functionality, game rules, prices, imagery, learning intent, saved data, or layouts when the requested change is narrow.
 
-## User's non-negotiable design choices
-- The menu grid occupies the center when not solving; tiles show rarity at top, food icon, bottom-left level and bottom-right multiplier; empty purchased slot has plus, unpurchased slot shows Buy Slot with price.
-- Rarity-colored order tickets on the right are **filled and shiny**.
-- Philippine panaderia foods are the collection focus.
-- Coins are guaranteed through mathematical actions, with random chests and grade-dependent rarities.
-- The overall Bakery Value Multiplier is a major visible progression score.
-- Features unlock gradually for younger players.
+## Development workflow
+- The entire workspace is available: **the user never has to tell you which source file to open**. Search and identify the relevant files yourself.
+- For an initial codebase analysis, inspect all relevant files **read-only** and produce a map of functions, screens, data flow, risks, and tests; do not refactor until asked.
+- After a substantive accepted implementation/design decision, update appropriate docs so the next Codex conversation can recover the rationale. Distinguish current behavior from proposed changes.
+- Static HTML/CSS/JS, no build; VS Code Live Server hosts `index.html`. Classic scripts load in deliberate order and share global lexical bindings; be mindful of this before splitting/refactoring.
+- Main app↔worksheet iframe uses a `postMessage` protocol: `src/game/worksheet-bridge.js` and `worksheet/src/parent-bridge.js`. Preserve the protocol contract in both locations. **The `panaderyaQuestV2` localStorage key must remain unchanged unless a tested data migration is requested.**
+- For code changes, run `node --test tests/smoke.test.mjs`. For worksheet changes also complete a carrying math case (e.g., 79 × 18), test click and drag, tutorials ON/OFF, sounds ON/OFF, and swipe-to-add. Never claim an unperformed test passed.
+- Test manually in Live Server as appropriate, summarize exact files changed, and flag risks. No Git push unless explicitly requested.
 
-## When user does not know which file
-- Discover the relevant files yourself via workspace search and AGENTS.md; NEVER require the user to open or name a file.
-- User requests are functional specifications, not file lists. Investigate, implement, test, then summarize files changed.
+## Existing structure
+- Data: `src/data/catalog.js`.
+- Progress/save/ticket generator: `src/game/state.js`.
+- Coins/chests/gameplay run: `src/game/rewards.js`.
+- Food levels/fusions/sales, kitchen, decor, staff, modes: `src/game/economy.js`.
+- Menu/screens: `src/ui/menu.js`, `src/ui/scene.js`, `src/ui/dialogs.js`.
+- Main app entry: `src/main.js`, UI styles: `styles/`.
+- Worksheet entry: `worksheet/worksheet-engine.html`; input, placement, carries, add, SFX, render, tutorial, and iframe protocol in `worksheet/src/`; themes in `worksheet/styles/`.
 
-## Worksheet redesign policy
-- `worksheet/styles/custom-theme.css` is the first place for a new art direction, and may override any existing look.
-- To change worksheet structure, modify HTML and `worksheet/src/worksheet-render-and-tutorial.js`, with tests.
-- The user likes the v33 **actions**, not its visuals. Do not resist asked-for worksheet designs.
+## Naming and refactoring
+Use **behavior-based names** such as `worksheet-engine`, `worksheet-bridge`, `renderWorksheet`; do not name permanent components after historical versions such as v33. Do not mass search/replace externally visible data keys without migration. You can redesign the worksheet visuals freely when asked, while keeping the tested interactions unless the user specifically changes them.

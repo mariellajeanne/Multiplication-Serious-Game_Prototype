@@ -1,5 +1,5 @@
-/* Panaderya Quest v3 — src/ui/scene.js
- * Originally extracted from the verified single-file v3 prototype.
+/* Panaderya Quest — src/ui/scene.js
+ * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
 function themeLevel(){return g.decor}

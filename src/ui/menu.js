@@ -1,5 +1,5 @@
-/* Panaderya Quest v3 — src/ui/menu.js
- * Originally extracted from the verified single-file v3 prototype.
+/* Panaderya Quest — src/ui/menu.js
+ * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
 function slotCost(){return Math.round(420*Math.pow(1.9,Math.max(0,g.menuSlots-4)))}

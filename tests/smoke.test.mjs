@@ -8,7 +8,7 @@ const html=readFileSync(resolve(root,'index.html'),'utf8');
 const scripts=[
  'src/data/catalog.js','src/game/state.js','src/game/rewards.js',
  'src/game/economy.js','src/ui/dialogs.js','src/ui/scene.js',
- 'src/ui/menu.js','src/game/v33-bridge.js','src/main.js'
+ 'src/ui/menu.js','src/game/worksheet-bridge.js','src/main.js'
 ];
 test('all classic scripts are included in dependency order',()=>{
   let prev=-1;
@@ -25,18 +25,18 @@ test('all scripts parse as JavaScript',()=>{
     assert.equal(r.status,0,`${s}: ${r.stderr}`);
   }
 });
-test('worksheet uses external v33 engine, bridge and tutorial/sound controls',()=>{
-  assert.ok(existsSync(resolve(root,'worksheet/v33-engine.html')));
-  const eng=readFileSync(resolve(root,'worksheet/v33-engine.html'),'utf8');
+test('worksheet uses modular worksheet engine, bridge and tutorial/sound controls',()=>{
+  assert.ok(existsSync(resolve(root,'worksheet/worksheet-engine.html')));
+  const eng=readFileSync(resolve(root,'worksheet/worksheet-engine.html'),'utf8');
   const main=readFileSync(resolve(root,'src/main.js'),'utf8');
-  const bridge=readFileSync(resolve(root,'src/game/v33-bridge.js'),'utf8');
-  assert.match(main,/fr\.src='worksheet\/v33-engine\.html'/);
+  const bridge=readFileSync(resolve(root,'src/game/worksheet-bridge.js'),'utf8');
+  assert.match(main,/fr\.src='worksheet\/worksheet-engine\.html'/);
   const wb=readFileSync(resolve(root,'worksheet/src/parent-bridge.js'),'utf8');
-  assert.match(wb,/source:'bc-v33'/);
+  assert.match(wb,/source:'pq-worksheet'/);
   assert.match(wb,/source!=='bc-shell'/);
   assert.match(bridge,/function toggleArrows/);
   assert.match(bridge,/function toggleSfx/);
-  assert.match(bridge,/function handleV33Message/);
+  assert.match(bridge,/function handleWorksheetMessage/);
 });
 test('CSS and menu/ticket renderer are present',()=>{
   for(const s of ['styles/base.css','styles/menu.css','styles/tickets.css','styles/worksheet.css']) {
@@ -51,7 +51,7 @@ test('CSS and menu/ticket renderer are present',()=>{
 });
 
 test('worksheet engine scripts load in order and parse',()=>{
-  const document=readFileSync(resolve(root,'worksheet/v33-engine.html'),'utf8');
+  const document=readFileSync(resolve(root,'worksheet/worksheet-engine.html'),'utf8');
   const files=['src/state.js','src/sound-and-multiplication-fx.js','src/product-placement.js',
     'src/partial-product-addition.js','src/worksheet-render-and-tutorial.js','src/tap-and-drag.js',
     'src/worksheet-controls.js','src/parent-bridge.js','src/embedded-controls.js'];

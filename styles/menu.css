@@ -1,4 +1,4 @@
-/* Panaderya Quest v3 — styles/menu.css */
+/* Panaderya Quest — styles/menu.css */
 /* V3 menu-first information hierarchy */
 .layout{grid-template-columns:minmax(185px,.7fr) minmax(520px,2.25fr) minmax(235px,.93fr);gap:14px;max-width:1730px;}
 .topbar{background:#fff8e9}.topstats .statpill:first-child{border:2px solid #dcb36a;background:linear-gradient(135deg,#fff2c3,#fff9e8);box-shadow:0 2px 0 #d3a260}

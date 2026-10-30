@@ -1,11 +1,11 @@
 # Worksheet engine — editable, not frozen
 
-The worksheet keeps the **v33 interactions** because those are the UX requirements. Its artwork, theme, layout, and animations can change.
+The worksheet keeps the **the established digit-connection, carrying, and merging interactions** because those are the UX requirements. Its artwork, theme, layout, and animations can change.
 
 ## Where Codex should make changes
 
 - **Appearance:** `styles/custom-theme.css` (last-loaded override; ideal for design experiments). Existing cascade: `foundation.css` → `effects-and-guides.css` → `receipt-theme.css` → `embedded-layout.css` → `custom-theme.css`.
-- **HTML structure / interactive tile hooks:** `v33-engine.html` and `src/worksheet-render-and-tutorial.js`.
+- **HTML structure / interactive tile hooks:** `worksheet-engine.html` and `src/worksheet-render-and-tutorial.js`.
 - **State / math operations:** `src/state.js`.
 - **Sound, product reveal / float animation:** `src/sound-and-multiplication-fx.js`.
 - **Product tile placement, carries:** `src/product-placement.js`.
@@ -13,7 +13,7 @@ The worksheet keeps the **v33 interactions** because those are the UX requiremen
 - **Rendering and animated tutorial arrow guidance:** `src/worksheet-render-and-tutorial.js`.
 - **Tap, drag/drop and rounded capsule connection:** `src/tap-and-drag.js`.
 - **Sound/tutorial/custom number UI controls:** `src/worksheet-controls.js` and `src/embedded-controls.js`.
-- **Parent app's ticket communication / mastery stats:** `src/parent-bridge.js` and outside iframe `../src/game/v33-bridge.js`.
+- **Parent app's ticket communication / mastery stats:** `src/parent-bridge.js` and outside iframe `../src/game/worksheet-bridge.js`.
 
 ### Mechanics to preserve unless specifically requested otherwise
 
@@ -26,7 +26,7 @@ The worksheet keeps the **v33 interactions** because those are the UX requiremen
 
 ### Implementation note
 
-The files are currently **ordered classic scripts sharing one global lexical environment** (a conservative transformation from the original IIFE). Script order in `v33-engine.html` is important. It is a real source split, not yet a fully decoupled ES module design. Avoid introducing global names that conflict with built-in browser properties. More granular state isolation could be a later, separately tested change.
+The files are currently **ordered classic scripts sharing one global lexical environment** (a conservative transformation from the original IIFE). Script order in `worksheet-engine.html` is important. It is a real source split, not yet a fully decoupled ES module design. Avoid introducing global names that conflict with built-in browser properties. More granular state isolation could be a later, separately tested change.
 
 ### Test
 

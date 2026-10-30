@@ -1,5 +1,5 @@
-/* Panaderya Quest v3 — src/game/economy.js
- * Originally extracted from the verified single-file v3 prototype.
+/* Panaderya Quest — src/game/economy.js
+ * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
 function foodLevelCost(o){return Math.round(145*Math.pow(F(o.id).rarity+1,1.55)*Math.pow(o.level,2.1))}
