@@ -7,7 +7,7 @@ Panaderya Quest is a tablet-first educational incremental bakery game for practi
 - Read `docs/REWARDS_AND_PROGRESSION.md` for rewards, economy, bakery, levels, mastery, game modes, and unlocks. It distinguishes **agreed direction** from **proposals** and **existing prototype shortcuts**.
 - Read `docs/ARCHITECTURE.md` when refactoring code, debugging, modifying the worksheet or integrating features.
 - Read only relevant files for a focused visual edit; do **not** exhaustively reread all docs for every small task.
-- Latest continuation: `docs/CORRECTIVE_REDESIGN.md` records corrective A/B and real renders. The user requires owner review of these visuals before C/D economy/progression changes; recover any subsequent approval from the conversation before proceeding. Level/Tier 5, seven rarities and bakery Level 30 are not implemented at that checkpoint.
+- Latest visual pass: `docs/BAKERY_COMPONENT_REVIEW.md`. References are aesthetic guidance only: no scenic wallpaper or translucent UI over an illustration. Theme the actual components with paper, light wood, pastry-box motifs, illustrated icons and shared rounded sans-serif type. Stop for review before Stage C. The 30-level track remains a preview; ticket refresh (3-minute cooldown, max 5 tickets) and all progression changes are still deferred.
 
 ## Non-negotiable interaction and UX principles
 - Preserve the **behavior**, not a particular version's appearance, of the long multiplication worksheet: digit tap/drag connection with rounded capsule, floating `M × N` button revealing product tiles, flexible tile placement and carry handling, downward swipe to merge partial-product rows, satisfying sound effects, and guidance arrows only when tutorial is ON.

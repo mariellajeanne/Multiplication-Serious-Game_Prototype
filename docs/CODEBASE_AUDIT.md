@@ -1,5 +1,9 @@
 ﻿# Panaderya Quest — codebase audit
 
+**Newest visual follow-up:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md) replaces the scenic treatment with component-based bakery objects, self-hosted rounded typography, 41 automated tests and passing browser regressions. Owner review remains pending before Stage C.
+
+**Newest follow-up:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md) records the latest reference-led visual pass, multi-select inventory, mockup-based rewards, 41 automated regressions and real browser evidence. Owner review is pending; older visual notes below are historical.
+
 **Latest implementation follow-up:** corrective A/B is recorded in [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md), including 34 passing automated tests, real touch/carry/claim-recovery browser checks, and target-resolution screenshots. Owner visual review is pending before the requested economy/progression overhaul. The findings below are historical snapshots; consult the follow-ups before reimplementing resolved work.
 
 Audit date: 2026-10-30 (Asia/Manila). Scope: all tracked project source, styles, HTML, documentation and tests. This is an analysis snapshot, not authorization to implement changes. No gameplay, balance, visuals, save data, or protocol changes were made.

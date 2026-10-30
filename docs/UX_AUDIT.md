@@ -1,5 +1,9 @@
 # Panaderya Quest — UX audit and redesign
 
+**Current review direction:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md). The references are style inspiration only. The active UI uses no scenic background; its components carry the bakery theme. Real renders and verification are recorded there. Stop before Stage C.
+
+**Newest visual direction:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md) replaces the darker A/B presentation with the supplied cozy bakery mood references and clipboard reward mockup. Implemented and tested; stop for owner approval before Stage C.
+
 **Newest revision:** [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md) supersedes the pale visual direction and earlier outstanding browser checks below. Corrective A/B is implemented with saved, inspected renders and passing browser/automated regressions; owner review is pending before C/D.
 
 **Later revision:** the user's annotated main/worksheet feedback is implemented in [ANNOTATION_REDESIGN.md](ANNOTATION_REDESIGN.md). Public title is now My Panaderya. That document records the newer card/panel arrangement, 24 passing automated tests, passing math browser regression, and the target-resolution visual suite still pending launch approval. Results below describe the earlier redesign stage.

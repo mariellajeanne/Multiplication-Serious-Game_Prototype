@@ -1,8 +1,8 @@
 # Panaderya Quest — game vision and interaction goals
 
-**Latest checkpoint:** [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md) supersedes the pale annotation-led presentation below. Corrective reliability/UX and visuals (A/B) are implemented and tested; the owner must review the real renders before C/D economy/progression implementation. The requested Level/Tier 5, seven rarities and bakery Level 30 remain future work at this checkpoint.
+**Current review:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md) follows the newest owner direction: the components themselves carry the bakery theme, using paper, light wood, display labels, pastry boxes, matching illustrations and rounded sans-serif typography. The background is subtle; scenic wallpaper is not part of the active UI. Stop for owner review before Stage C.
 
-Current public title: **My Panaderya**. The latest user-approved main/worksheet layout is recorded in [ANNOTATION_REDESIGN.md](ANNOTATION_REDESIGN.md): direct card upgrades, top-left food value/top-right rarity, integrated Menu/multiplier/wallet, and a content-sized worksheet with Chest Luck above and the prize below. These newer layout requirements supersede older placement preferences below; mathematical interaction requirements remain.
+Public title: **My Panaderya**. The 30-level roadmap remains a visual preview. Earlier annotation, corrective and cozy-image documents preserve implementation history; this newer direction overrides their appearance guidance. Mathematical interaction requirements below remain.
 
 ## Product vision
 A **tablet-oriented serious game** that makes repeated long multiplication feel satisfying through responsive, bakery-themed play and frequent, meaningful progression. The motivating reference is Roblox **Assassin Leveling**: early and middle stages offer several affordable, parallel ways to improve, creating the feeling that another worthwhile upgrade is always close. **Do not** copy its crowded onboarding, AFK bottlenecks, predatory purchases, or excessive micromanagement.

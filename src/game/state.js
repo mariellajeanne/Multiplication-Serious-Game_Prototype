@@ -26,11 +26,11 @@ function makeTicket(){const rarity=ticketRarity();const dims=[[2,1],[2,2],[2,2],
 function refillBoard(){while(g.board.length<3)g.board.push(makeTicket())}
 function save(){try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g))}catch(_){}}
 function toast(text){const el=document.createElement('div');el.className='toast';el.textContent=text;$('toasts').appendChild(el);setTimeout(()=>el.remove(),3200)}
-function showModal(title,html){if(!modal)modalReturnFocus=document.activeElement;modal={title,html};paintModal()}
+function showModal(title,html,variant=''){if(!modal)modalReturnFocus=document.activeElement;modal={title,html,variant};paintModal()}
 function closeModal(){modal=null;paintModal();render();if(modalReturnFocus?.isConnected)modalReturnFocus.focus?.({preventScroll:true});modalReturnFocus=null}
 function paintModal(){
  const root=$('modals');if(!modal){root.innerHTML='';return}
- root.innerHTML=`<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modalhead"><h2 id="modalTitle">${modal.title}</h2><span class="dialog-wallet">🪙 ${fmt(g.coins)}</span><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`;
+ root.innerHTML=`<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal ${modal.variant||''}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modalhead"><h2 id="modalTitle">${modal.title}</h2><span class="dialog-wallet">🪙 ${fmt(g.coins)}</span><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`;
  if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>root.querySelector?.('.modal')?.focus());
 }
 document.addEventListener?.('keydown',event=>{

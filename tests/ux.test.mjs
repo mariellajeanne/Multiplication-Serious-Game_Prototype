@@ -50,11 +50,78 @@ test('menu sorts rarity then actual value, and puts slot controls before equippe
    {uid:3,id:'ensaymada',level:1,fusion:0,spent:0});g.activeMenu=[1,2,3];
    result=renderMenu();order=sortedMenuFoods(g.owned).map(o=>o.uid);original=[...g.activeMenu];`,c);
  assert.deepEqual([...c.order],[3,2,1]);assert.deepEqual([...c.original],[1,2,3]);
- assert.ok(c.result.indexOf('Add food')<c.result.indexOf('data-uid="3"'));
+ assert.ok(c.result.indexOf('Add Item')<c.result.indexOf('data-uid="3"'));
  assert.ok(c.result.indexOf('Buy Slot')<c.result.indexOf('data-uid="3"'));
  assert.ok(c.result.indexOf('data-uid="3"')<c.result.indexOf('data-uid="2"'));
  assert.match(c.result,/food-management/);assert.match(c.result,/removeFoodPrompt\(3\)/);
  assert.match(c.result,/sellFoodPrompt\(3\)/);
+ assert.ok(c.result.indexOf('buy-slot')<c.result.indexOf('slot-help'));
+ assert.equal((c.result.match(/>\+ Add Item</g)||[]).length,1);
+ assert.match(c.result,/1 Slot Left/);assert.doesNotMatch(c.result,/menu-slots/);
+ assert.ok(c.result.indexOf('walletCoins')<c.result.indexOf('food-navigation'));
+});
+
+test('inventory opens with explicit unchecked boxes and disabled batch actions',()=>{
+ const c=ui();vm.runInContext('openMenu();result=result.html;state=inventoryActionState()',c);
+ for(const id of ['inventoryAdd','inventoryRemove','inventorySell'])assert.match(c.result,new RegExp(`id="${id}"[^>]*disabled`));
+ assert.match(c.result,/type="checkbox"/);assert.doesNotMatch(c.result,/type="checkbox" checked/);
+ assert.equal(c.state.selected.length,0);assert.equal(c.state.canSell,false);
+ vm.runInContext('toggleInventoryFood(1);openMenu();state=inventoryActionState()',c);
+ assert.equal(c.state.selected.length,0,'normal opening starts with no selection');
+});
+
+test('multi-add is capacity checked as a whole and ignores already equipped copies',()=>{
+ const c=ui();vm.runInContext(`g.menuSlots=2;g.owned.push({uid:2,id:'monay',level:2,fusion:1,spent:400},
+   {uid:3,id:'pandesal',level:1,fusion:0,spent:0});openMenu('add');
+   toggleInventoryFood(1);toggleInventoryFood(2);toggleInventoryFood(3);before=JSON.stringify(g);overflow=addInventorySelection();after=JSON.stringify(g);
+   toggleInventoryFood(3,false);accepted=addInventorySelection();repeated=addInventorySelection();active=[...g.activeMenu];`,c);
+ assert.equal(c.overflow,false);assert.equal(c.before,c.after);
+ assert.equal(c.accepted,true);assert.equal(c.repeated,false);assert.deepEqual([...c.active],[1,2]);
+ assert.equal(vm.runInContext('g.owned[1].spent',c),400);
+});
+
+test('batch removal confirms once and keeps all copies, upgrades, coins and discoveries',()=>{
+ const c=ui();vm.runInContext(`g.owned.push({uid:2,id:'monay',level:2,fusion:1,spent:400});g.activeMenu=[1,2];g.discovered.push('monay');
+   openMenu();toggleInventoryFood(1);toggleInventoryFood(2);before=JSON.stringify({owned:g.owned,coins:g.coins,discovered:g.discovered});
+   requestInventoryAction('remove');stillEquipped=g.activeMenu.length;prompt=result;
+   accepted=confirmInventoryAction();again=confirmInventoryAction();after=JSON.stringify({owned:g.owned,coins:g.coins,discovered:g.discovered});`,c);
+ assert.equal(c.stillEquipped,2);assert.match(c.prompt.html,/stop contributing/);
+ assert.equal(c.before,c.after);assert.equal(c.accepted,true);assert.equal(c.again,false);
+ assert.equal(vm.runInContext('g.activeMenu.length',c),0);
+});
+
+test('batch sale pays actual refunds once and saves remaining foods and discoveries',()=>{
+ const c=ui();vm.runInContext(`g.owned.push({uid:2,id:'monay',level:2,fusion:1,spent:401},{uid:3,id:'pandesal',level:3,fusion:2,spent:900});
+   g.activeMenu=[1,2,3];g.discovered.push('monay');openMenu();toggleInventoryFood(2);toggleInventoryFood(3);
+   price=resalePrice(g.owned[1])+resalePrice(g.owned[2]);requestInventoryAction('sell');before=g.coins;prompt=result;
+   localStorage.setItem=(key,value)=>{persisted={key,value}};accepted=confirmInventoryAction();again=confirmInventoryAction();`,c);
+ assert.match(c.prompt.html,/whole copies and their upgrades/);assert.equal(c.accepted,true);assert.equal(c.again,false);
+ const saved=JSON.parse(c.persisted.value);assert.equal(c.persisted.key,'panaderyaQuestV2');
+ assert.equal(saved.coins,c.before+c.price);assert.deepEqual(saved.activeMenu,[1]);assert.equal(saved.owned.length,1);
+ assert.deepEqual(saved.discovered,['pandesal','monay']);
+});
+
+test('cancel and stale batch confirmations cannot remove or sell changed foods',()=>{
+ const c=ui();vm.runInContext(`openMenu();toggleInventoryFood(1);requestInventoryAction('sell');
+   openMenu(inventoryIntent,true);cancelled=confirmInventoryAction();kept=inventorySelection.has(1);
+   requestInventoryAction('sell');g.owned[0].level=2;before=JSON.stringify(g);stale=confirmInventoryAction();after=JSON.stringify(g);`,c);
+ assert.equal(c.cancelled,false);assert.equal(c.kept,true);assert.equal(c.stale,false);assert.equal(c.before,c.after);
+});
+
+test('inventory batch mutations remain blocked during a live worksheet',()=>{
+ const c=ui();vm.runInContext(`openMenu();toggleInventoryFood(1);requestInventoryAction('sell');g.run={phase:'engine'};
+   before=JSON.stringify(g);add=addInventorySelection();remove=requestInventoryAction('remove');sale=confirmInventoryAction();after=JSON.stringify(g);`,c);
+ assert.equal(c.before,c.after);assert.equal(c.add,false);assert.equal(c.remove,false);assert.equal(c.sale,false);
+});
+
+test('resolved packages report new discoveries, correct copy numbers and actual Ticket Luck',()=>{
+ const c=ui();vm.runInContext(`Math.random=()=>0;g.mastery=3;g.owned.push({uid:2,id:'monay',level:1,fusion:0,spent:0});
+   g.run={phase:'claim',chests:[{rarity:0},{rarity:1},{rarity:0}],pool:3004,correct:6,mistakes:0,mode:'normal'};
+   before=g.coins;prizeItems();popup=result;prizeItems();after=g.coins;`,c);
+ assert.equal(c.popup.title,'Order Ticket Resolved!');assert.match(c.popup.html,/2nd Copy!/);assert.match(c.popup.html,/3rd Copy!/);
+ assert.equal((c.popup.html.match(/>NEW!</g)||[]).length,1);
+ assert.match(c.popup.html,/\+3,004/);assert.match(c.popup.html,/resolved-luck.*?<strong>\+1<\/strong>/);
+ assert.match(c.popup.html,/Back to Bakery/);assert.equal(c.after,c.before+3004);
 });
 
 test('inventory distinguishes equipped copies; removal confirms and preserves food investment',()=>{

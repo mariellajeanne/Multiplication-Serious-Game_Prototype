@@ -30,7 +30,7 @@ function animateReward(data){
  const r=g.run,dock=$('prizejar');if(!r||!dock)return;
  if(!data){bumpPrizeDock();return}
  if(data.attemptId!==r.worksheetRewards?.attemptId)return;
- const gains=data.chest?[{kind:'chest',text:`🎁 ${RARITIES[data.rarity]}!`}]:[
+ const gains=data.chest?[{kind:'chest',text:`📦 ${RARITIES[data.rarity]}!`}]:[
   ...(data.coins?[{kind:'coin',text:`+${fmt(data.coins)} 🪙`}]:[]),
   ...(data.luck?[{kind:'luck',text:`+${data.luck} ✨`}]:[])
  ];

@@ -1,0 +1,9 @@
+@font-face{
+ font-family:'Panaderya Rounded';
+ src:url('../assets/fonts/Nunito-Variable.ttf') format('truetype');
+ font-style:normal;font-weight:200 1000;font-display:swap;
+}
+:root{--game-font:'Panaderya Rounded','Arial Rounded MT Bold',Arial,sans-serif}
+html,body,button,input,select,textarea,#app *,#modals *,#toasts *{
+ font-family:var(--game-font)!important;
+}

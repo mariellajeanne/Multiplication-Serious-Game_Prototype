@@ -12,7 +12,7 @@ const server=createServer(async(req,res)=>{
   try{
     const file=resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
     if(!file.startsWith(root+sep))throw Error('outside root');
-    res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css'})[extname(file)]||'text/plain');
+    res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf':'font/ttf'})[extname(file)]||'text/plain');
     res.end(await readFile(file));
   }catch{res.writeHead(404);res.end();}
 });
@@ -54,7 +54,7 @@ try{
     const detail=await evaluate(`({phase:g.run?.phase,errors:g.run?.mistakes,
       bridgeDone:g.run?.bridgeDone,actions:g.run&&Object.keys(g.run.worksheetRewards?.actions||{}),
       child:window.auditChild&&auditChild.eval('({phase:s.phase,done:s.done,busy,additionStart,complete:s.complete,events:window.auditEvents})')})`);
-    const shots=resolve(root,'docs/previews/corrective-redesign');await mkdir(shots,{recursive:true});
+    const shots=resolve(root,'docs/previews/bakery-components');await mkdir(shots,{recursive:true});
     const failed=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     await writeFile(join(shots,'browser-failure.png'),Buffer.from(failed.data,'base64'));
     throw Error('Timed out: '+expression+' '+JSON.stringify({detail,errors}));
@@ -64,6 +64,7 @@ try{
   await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   await cdp('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/index.html`});
   await waitFor(`typeof startTicket==='function'`);
+  await evaluate('document.fonts.ready');
   await evaluate(`g.helpSeen=true;closeModal();g.board=[{id:9001,a:79,b:18,rarity:1,base:304}];render();document.querySelector('.ticket').click();`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9001`);
   await evaluate(`window.auditFrame=$('worksheetFrame');window.auditChild=auditFrame.contentWindow;
@@ -190,7 +191,7 @@ try{
   await waitFor(`typeof startTicket==='function'&&g.run?.phase==='claim'&&document.querySelector('.claim-screen .primary')!==null`);
   assert.equal(await evaluate('g.run.pool'),budget);
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.claim-screen')).display!=='none'`),true);
-  const shots=resolve(root,'docs/previews/corrective-redesign');await mkdir(shots,{recursive:true});
+  const shots=resolve(root,'docs/previews/bakery-components');await mkdir(shots,{recursive:true});
   await cdp('Emulation.setDeviceMetricsOverride',{width:1194,height:834,deviceScaleFactor:1,mobile:false});
   await pause(250);
   const completedShot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});

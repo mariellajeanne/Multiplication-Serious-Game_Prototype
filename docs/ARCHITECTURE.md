@@ -1,5 +1,9 @@
 # Architecture, code map, and constraints
 
+**Current component theme:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md). The final theme stylesheet is replaced, not supplemented with another theme layer. Parent and iframe share local Nunito via styles/typography.css. bakeryIcon() in bakery-art.js supplies UI illustrations and must load before main.js; protocol, economy and saved state are unchanged.
+
+**Latest UI continuation:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md). Inventory selection/pending confirmation are transient UI state; batch actions validate and save once. Resolved-order dialogs use an optional presentation variant with a fixed header and scrolling body. Existing reward/claim protocol and storage key are unchanged; Stage C remains on hold.
+
 **Current A/B checkpoint:** [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md). Completion now retries until an attempt-scoped acknowledgement and can be recovered from a verified complete state; all existing action/combo/ticket checks remain. Worksheet animation errors cannot strand a valid addition, and a saved claim restores the in-page Collect view after reload. The two bridge files must ship together. Economy migrations are deferred until the owner reviews the visuals.
 
 ## Running/deploying

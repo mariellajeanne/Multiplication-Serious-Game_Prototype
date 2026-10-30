@@ -5,9 +5,62 @@ function showTutorial(){
  else{save();closeModal();toast(g.tutorialArrows?'Follow the golden trail.':'Switch Guide ON for a hint.');}
 }
 function skipTutorial(){g.helpSeen=true;save();closeModal()}
-function openMenu(){
+let inventorySelection=new Set(),inventoryIntent='manage',pendingInventoryAction=null;
+function inventoryActionState(){
+ const selected=g.owned.filter(o=>inventorySelection.has(o.uid));
+ const adding=selected.filter(o=>!g.activeMenu.includes(o.uid));
+ const removing=selected.filter(o=>g.activeMenu.includes(o.uid));
+ const slots=Math.max(0,g.menuSlots-g.activeMenu.length);
+ return {selected,adding,removing,slots,canAdd:!g.run&&adding.length>0&&adding.length<=slots,canRemove:!g.run&&removing.length>0,canSell:!g.run&&selected.length>0};
+}
+function inventorySelectionMessage(state=inventoryActionState()){
+ if(g.run)return 'Finish your order before changing foods.';
+ if(!state.selected.length)return `Select foods using the checkboxes. ${state.slots} ${state.slots===1?'slot':'slots'} left on your menu.`;
+ if(state.adding.length>state.slots)return `${state.selected.length} selected. Only ${state.slots} empty ${state.slots===1?'slot':'slots'} — select fewer foods to add.`;
+ return `${state.selected.length} selected · ${state.removing.length} on menu · ${state.slots} empty ${state.slots===1?'slot':'slots'}`;
+}
+function toggleInventoryFood(uid,checked){
+ if(!g.owned.some(o=>o.uid===uid))return;
+ const selected=checked===undefined?!inventorySelection.has(uid):!!checked;
+ if(selected)inventorySelection.add(uid);else inventorySelection.delete(uid);
+ const card=document.querySelector?.(`.inventory-grid [data-uid="${uid}"]`);
+ card?.classList.toggle('is-selected',selected);
+ const checkbox=card?.querySelector('input[type="checkbox"]');if(checkbox)checkbox.checked=selected;
+ const state=inventoryActionState();
+ for(const [id,enabled] of [['inventoryAdd',state.canAdd],['inventoryRemove',state.canRemove],['inventorySell',state.canSell]]){const button=$(id);if(button)button.disabled=!enabled;}
+ const status=$('inventorySelectionStatus');if(status)status.textContent=inventorySelectionMessage(state);
+}
+function openMenu(intent='manage',keepSelection=false){
+ inventoryIntent=intent==='add'?'add':'manage';pendingInventoryAction=null;
+ if(!keepSelection)inventorySelection.clear();
+ inventorySelection=new Set([...inventorySelection].filter(uid=>g.owned.some(o=>o.uid===uid)));
+ const state=inventoryActionState();
  const items=sortedMenuFoods(g.owned).map(o=>renderFoodCard(o,true)).join('');
- showModal('Food Inventory',`<p class="dialog-note">${g.owned.length} owned · ${g.activeMenu.length} on your menu</p><div class="btnrow" style="margin-bottom:16px"><button class="secondary" onclick="openIndex()">📖 Food Index · ${g.discovered.length}/${FOOD.length}</button>${g.completed>=5?'<button class="secondary" onclick="openIngredients()">🧺 Ingredients</button>':''}</div>${items?`<div class="inventory-grid">${items}</div>`:'<div class="empty-collection">🎁<h2>Your next food is in a package.</h2><button class="primary" onclick="closeModal()">Choose an order</button></div>'}`);
+ showModal('Food Inventory',`<div class="inventory-toolbar" data-intent="${inventoryIntent}"><div class="inventory-actions" role="group" aria-label="Selected food actions"><button class="primary" id="inventoryAdd" onclick="addInventorySelection()" ${state.canAdd?'':'disabled'}>Add To Menu</button><button class="secondary" id="inventoryRemove" onclick="requestInventoryAction('remove')" ${state.canRemove?'':'disabled'}>Remove</button><button class="secondary inventory-sell" id="inventorySell" onclick="requestInventoryAction('sell')" ${state.canSell?'':'disabled'}>Sell</button></div><p id="inventorySelectionStatus" role="status">${inventorySelectionMessage(state)}</p></div><div class="inventory-links"><span>${g.owned.length} owned · ${g.activeMenu.length} on menu</span><button class="text-button" onclick="openIndex()">Food Index ↗</button>${g.completed>=5?'<button class="text-button" onclick="openIngredients()">Ingredients ↗</button>':''}</div>${items?`<div class="inventory-grid">${items}</div>`:'<div class="empty-collection">📦<h2>Your next food is in a package.</h2><button class="primary" onclick="closeModal()">Choose an order</button></div>'}`);
+}
+function addInventorySelection(){
+ const state=inventoryActionState();if(!state.canAdd)return false;
+ g.activeMenu.push(...state.adding.map(o=>o.uid));inventorySelection.clear();save();render();
+ if(inventoryIntent==='add')closeModal();else openMenu(inventoryIntent,true);
+ toast(`${state.adding.length} ${state.adding.length===1?'food added':'foods added'} to your menu!`);return true;
+}
+function inventoryFingerprint(foods){return JSON.stringify(foods.map(o=>[o.uid,o.id,o.level,o.fusion,o.spent,g.activeMenu.includes(o.uid)]))}
+function requestInventoryAction(kind){
+ const state=inventoryActionState();
+ if(kind!=='sell'&&kind!=='remove'||kind==='sell'&&!state.canSell||kind==='remove'&&!state.canRemove)return false;
+ const foods=kind==='sell'?state.selected:state.removing;
+ pendingInventoryAction={kind,uids:foods.map(o=>o.uid),fingerprint:inventoryFingerprint(foods)};
+ const price=foods.reduce((sum,o)=>sum+resalePrice(o),0);
+ showModal(kind==='sell'?`Sell ${foods.length} ${foods.length===1?'food':'foods'}?`:'Remove selected foods?',`<div class="selection-review">${foods.map(o=>`<div>${foodArt(o.id)}<span><b>${F(o.id).name}</b><small>Level ${o.level} · Tier ${o.fusion}</small></span>${kind==='sell'?`<strong>🪙 ${fmt(resalePrice(o))}</strong>`:''}</div>`).join('')}</div><p class="warning">${kind==='sell'?'These whole copies and their upgrades will be sold and removed from your menu. Discoveries stay in Food Index.':'These copies stop contributing to the Menu multiplier. Your food and upgrades stay in Food Inventory.'}</p>${kind==='sell'?`<div class="costrow"><span>Total sale · includes existing upgrade refunds</span><strong>+${fmt(price)} 🪙</strong></div>`:''}<div class="btnrow"><button class="secondary" onclick="openMenu(inventoryIntent,true)">Cancel</button><button class="primary" onclick="confirmInventoryAction()">${kind==='sell'?`Sell · ${fmt(price)} 🪙`:'Remove from menu'}</button></div>`);return true;
+}
+function confirmInventoryAction(){
+ const action=pendingInventoryAction;pendingInventoryAction=null;if(!action||g.run)return false;
+ const foods=action.uids.map(uid=>g.owned.find(o=>o.uid===uid));
+ if(foods.some(o=>!o)||inventoryFingerprint(foods)!==action.fingerprint){openMenu(inventoryIntent,true);toast('These foods changed. Please review your selection again.');return false;}
+ const ids=new Set(action.uids);
+ if(action.kind==='sell'){g.coins+=foods.reduce((sum,o)=>sum+resalePrice(o),0);g.owned=g.owned.filter(o=>!ids.has(o.uid));}
+ g.activeMenu=g.activeMenu.filter(uid=>!ids.has(uid));inventorySelection.clear();save();render();openMenu(inventoryIntent,true);
+ toast(action.kind==='sell'?'Foods sold. Your discoveries are safe in Food Index.':'Foods removed. All copies and upgrades are safe in Inventory.');return true;
 }
 
 function ingredientFusionInfo(uid){
@@ -40,7 +93,7 @@ function openProbabilities(){
  const cap=highestRarity(),weights=[65,27,7,1,.2,.01].map((w,i)=>i<=cap?w*(1+i*g.permanentLuck*.16):0);
  if(g.mastery>=12)weights[0]=0;if(g.mastery>=24)weights[1]=0;if(g.mastery>=40)weights[2]=0;
  const total=weights.reduce((a,b)=>a+b,0);
- showModal('A little luck',`<div class="luck-explainer"><div><span>★</span><h3>Practice → Ticket luck</h3><p>Four practice stars raise Ticket Luck. Better tickets appear more often.</p>${luckProgress()}</div><div><span>✦ → 🎁</span><h3>Math actions → Package luck</h3><p>Package Luck raises the chance of a package on each finished digit pair. A drop uses some of it. The last pair guarantees a package if none have dropped.</p></div><div><span>🎟 → 🎁 → 🍞</span><h3>Ticket color → Reward chances</h3><p>Better tickets improve the odds of rarer packages. Every package contains a food.</p></div></div><details class="adult-tools"><summary>Current ticket probabilities</summary>${weights.map((w,i)=>`<div class="odds-row"><span>${RARITIES[i]}</span><div class="progress"><div class="bar" style="width:${w/total*100}%"></div></div><b>${(w/total*100).toFixed(2)}%</b></div>`).join('')}<p>Ticket Luck affects tickets; Package Luck affects package drops. Neither guarantees a rare food.</p></details>`);
+ showModal('A little luck',`<div class="luck-explainer"><div><span>★</span><h3>Practice → Ticket luck</h3><p>Four practice stars raise Ticket Luck. Better tickets appear more often.</p>${luckProgress()}</div><div><span>✦ → 📦</span><h3>Math actions → Package luck</h3><p>Package Luck raises the chance of a package on each finished digit pair. A drop uses some of it. The last pair guarantees a package if none have dropped.</p></div><div><span>🎟 → 📦 → 🍞</span><h3>Ticket color → Reward chances</h3><p>Better tickets improve the odds of rarer packages. Every package contains a food.</p></div></div><details class="adult-tools"><summary>Current ticket probabilities</summary>${weights.map((w,i)=>`<div class="odds-row"><span>${RARITIES[i]}</span><div class="progress"><div class="bar" style="width:${w/total*100}%"></div></div><b>${(w/total*100).toFixed(2)}%</b></div>`).join('')}<p>Ticket Luck affects tickets; Package Luck affects package drops. Neither guarantees a rare food.</p></details>`);
 }
 function sellFoodPrompt(uid){const o=g.owned.find(x=>x.uid===uid);if(!o)return;showModal('Sell this whole food?',`<div class="food-detail">${foodArt(o.id)}<div><h2>${F(o.id).name}</h2><p>Level ${o.level} · Fusion ${o.fusion}</p><div class="tool-preview">🪙 +${fmt(resalePrice(o))}</div></div></div><div class="warning">This removes this copy and its upgrades from your menu. Your discovery stays in Food Index.</div><p class="dialog-note" style="margin-top:12px">${fmt(baseResale(o))} base + ${fmt(Math.floor(o.spent*.5))} upgrade refund</p><div class="btnrow"><button class="primary" onclick="closeModal()">Keep my food</button><button class="secondary" onclick="sellFood(${uid})">Sell for 🪙 ${fmt(resalePrice(o))}</button></div>`)}
 function unlockDemo(){if(g.run){toast('Finish your current order before changing bakery upgrades.');return;}if(!confirm('Demo shortcut: unlock every feature and add test coins? You can reset afterward.'))return;g.completed=Math.max(g.completed,16);g.mastery=Math.max(g.mastery,28);g.permanentLuck=Math.floor(g.mastery/4);g.coins+=100000;for(const id of ['spanish-bread','spanish-bread','ensaymada','ensaymada','ube-pandesal','hopia']){g.owned.push({uid:g.uidNext++,id,level:1,fusion:0,spent:0});if(!g.discovered.includes(id))g.discovered.push(id)}g.activeMenu=[...new Set(g.owned.map(x=>x.id))].slice(0,g.menuSlots).map(id=>g.owned.find(x=>x.id===id).uid);g.board=[];refillBoard();save();closeModal();toast('🧪 All systems unlocked! Sample Filipino foods and coins added.');}

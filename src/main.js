@@ -6,7 +6,7 @@ function render(){
  }
  mountedWorksheetRun=g.run?.phase==='engine'?g.run:null;
  refillBoard();$('app').className=g.run?'playing':'browsing';
- $('app').innerHTML=`<header class="topbar"><div class="brand"><span class="brandlogo" aria-hidden="true">🥖</span><h1>My Panaderya</h1><button class="iconbtn" onclick="openSettings()" aria-label="Settings">⚙</button></div></header><div class="layout">${renderLeft()}${g.run?renderWorksheet():renderMenu()}${renderRight()}</div>`;
+ $('app').innerHTML=`<header class="topbar"><div class="brand"><span class="brandlogo" aria-hidden="true">${bakeryIcon('bakery')}</span><h1>My Panaderya</h1><button class="iconbtn" onclick="openSettings()" aria-label="Settings">${bakeryIcon('settings')}</button></div></header><div class="layout">${renderLeft()}${g.run?renderWorksheet():renderMenu()}${renderRight()}</div>`;
  if(typeof syncRewardPresentation==='function')syncRewardPresentation();
  if(g.run&&g.run.phase==='engine'){const fr=$('worksheetFrame');if(fr)fr.src='worksheet/worksheet-engine.html';if(typeof fitWorksheet==='function')fitWorksheet()}
 }
