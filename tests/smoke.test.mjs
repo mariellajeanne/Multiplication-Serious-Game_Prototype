@@ -39,7 +39,7 @@ test('worksheet uses modular worksheet engine, bridge and tutorial/sound control
   assert.match(bridge,/function handleWorksheetMessage/);
 });
 test('CSS and menu/ticket renderer are present',()=>{
-  for(const s of ['styles/base.css','styles/menu.css','styles/tickets.css','styles/worksheet.css','styles/bakery-theme.css']) {
+  for(const s of ['styles/base.css','styles/menu.css','styles/tickets.css','styles/worksheet.css','styles/bakery-theme.css','styles/feedback-layout.css']) {
     assert.ok(existsSync(resolve(root,s)));
     assert.ok(html.includes(`href="${s}"`));
   }
@@ -64,7 +64,7 @@ test('worksheet engine scripts load in order and parse',()=>{
     const checked=spawnSync(process.execPath,['--check',resolve(root,relative)],{encoding:'utf8'});
     assert.equal(checked.status,0,checked.stderr);
   }
-  for(const f of ['foundation.css','effects-and-guides.css','receipt-theme.css','embedded-layout.css','custom-theme.css']) {
+  for(const f of ['foundation.css','effects-and-guides.css','receipt-theme.css','embedded-layout.css','custom-theme.css','responsive-workspace.css']) {
     assert.ok(document.includes(`href="styles/${f}"`));
   }
 });

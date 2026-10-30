@@ -1,0 +1,24 @@
+/* Fit measured digit cells to the available viewport; preserve native geometry. */
+:root{--cell:72px;--gap:8px;--carry-cell:48px;--float-cell:48px;--operand-gap:68px}
+html,body,button,input,h1,h2,h3,.workspace .head h2{font-family:'Trebuchet MS','Arial Rounded MT Bold',Arial,system-ui,sans-serif!important}
+html,body{background:transparent!important;min-height:0!important}
+#app.shell{padding:3px 5px 4px!important;max-width:none!important}
+.head,.sheethead,.statusbar .status:not(.error),.notice{display:none!important}
+.guide-prompt{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);padding:0!important;margin:0!important;white-space:nowrap}
+.sheet{background:transparent!important;padding:3px 0 0!important;border:0!important;box-shadow:none!important;min-height:0!important;overflow:hidden}
+body[data-rows='2'] .sheet{min-height:0!important}
+.scroller{padding:4px 0 4px!important;overflow-x:auto;overflow-y:visible}
+.math{padding:0 22px 0 36px!important;width:max-content;margin:auto}
+.line{gap:var(--gap);margin-bottom:6px}.line.carryline{height:var(--carry-cell);min-height:var(--carry-cell);margin-bottom:5px}.line.topline{margin-bottom:var(--operand-gap)}.line.bottomline{padding-bottom:9px;margin-bottom:10px}.line.productline{margin-bottom:7px}
+.cell{width:var(--cell)!important;height:var(--cell)!important;font-size:clamp(25px,calc(var(--cell)*.52),78px)!important;border-radius:calc(var(--cell)*.18)!important;font-weight:900!important}
+.cell.hold{height:var(--carry-cell)!important;font-size:clamp(23px,calc(var(--cell)*.4),59px)!important;border-radius:calc(var(--cell)*.16)!important}
+.symbol{left:-32px;top:calc(50% - 19px);font-size:clamp(24px,calc(var(--cell)*.4),40px)}
+.floating{gap:5px;padding:6px;border-radius:17px;transition:opacity .1s!important;transform:none!important;background:linear-gradient(#ffe7a3,#f2c76b)!important;border:3px solid #bb8730!important;box-shadow:0 5px 0 #a5772e,0 7px 14px #86602c30!important}
+.floating.typeon-sized{padding:6px!important}.ftile{height:var(--float-cell)!important;min-width:var(--float-cell)!important;font-size:clamp(25px,calc(var(--cell)*.46),66px)!important;padding:0 10px;border-radius:12px!important;transform:none}
+.floating.equation-pending .equation-reveal{height:var(--float-cell)!important;min-height:44px!important;font-size:clamp(25px,calc(var(--cell)*.39),57px)!important;padding:0 15px;color:#5e401b!important}
+.ftile.done{transform:none!important}.cell.number,.cell.rowcell{box-shadow:0 4px 0 #b9c59e!important}
+.cell.number{background:linear-gradient(#fff7dd,#edcf88)!important;border:2px solid #b69550!important;color:#304b32!important}.cell.rowcell{background:#f1efdb!important;border:2px dashed #96aa7c!important;color:#285439!important}.cell.rowcell.filled{background:linear-gradient(#e9f4cf,#c5dda8)!important;border:2px solid #81a45f!important}.cell.rowcell.provisional{background:#ffe4a0!important;border-color:#b89235!important}.cell.hold{border-color:#b1bda1!important;background:#edf0df!important}.cell.hold.waiting{background:linear-gradient(#e9d8f5,#c8a8df)!important;border-color:#9870b0!important;color:#643c80!important}.line.bottomline{border-bottom:3px solid #547449!important}
+.actions{min-height:48px;margin:0!important;padding:2px 0 4px!important}.actions #undo{height:44px;min-height:44px;min-width:92px;font-size:14px;padding:7px 14px;border-radius:12px;background:#f4f4e8;border:2px solid #d7dfcb;color:#41634d}
+.status.error{font-size:12px}.guide-target{outline-width:3px!important;outline-offset:4px}.tap-cue{width:70px;height:70px}
+@media(max-width:500px){.math{padding-left:30px!important;padding-right:12px!important}.symbol{left:-27px}.actions #undo{min-width:80px}.floating{gap:4px;padding:4px}.ftile{padding:0 6px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}

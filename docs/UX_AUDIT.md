@@ -1,5 +1,9 @@
 # Panaderya Quest — UX audit and redesign
 
+**Newest revision:** [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md) supersedes the pale visual direction and earlier outstanding browser checks below. Corrective A/B is implemented with saved, inspected renders and passing browser/automated regressions; owner review is pending before C/D.
+
+**Later revision:** the user's annotated main/worksheet feedback is implemented in [ANNOTATION_REDESIGN.md](ANNOTATION_REDESIGN.md). Public title is now My Panaderya. That document records the newer card/panel arrangement, 24 passing automated tests, passing math browser regression, and the target-resolution visual suite still pending launch approval. Results below describe the earlier redesign stage.
+
 2026-10-30. Authorized scope: comprehensive child-centered UX/UI implementation. Preserve the long-multiplication interactions, attempt/action reward ledger, save key, economy formulas and existing owned progress. No new progression systems or management simulation. This document records the audit **before implementation**; results are appended as stages are verified.
 
 ## Review method

@@ -1,6 +1,9 @@
 # Architecture, code map, and constraints
 
+**Current A/B checkpoint:** [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md). Completion now retries until an attempt-scoped acknowledgement and can be recovered from a verified complete state; all existing action/combo/ticket checks remain. Worksheet animation errors cannot strand a valid addition, and a saved claim restores the in-page Collect view after reload. The two bridge files must ship together. Economy migrations are deferred until the owner reviews the visuals.
+
 ## Running/deploying
+- Latest annotation-led UI: `styles/feedback-layout.css` and `worksheet/styles/responsive-workspace.css` load last. Parent `fitWorksheet()` sends presentation-only `layout` values; the child changes CSS dimensions and rerenders without resetting math/history. State reports include normalized protected surface geometry used only for reward routing. See [ANNOTATION_REDESIGN.md](ANNOTATION_REDESIGN.md) for implementation and the outstanding target-resolution visual checks.
 - The 2026-10-30 UX redesign adds `src/ui/bakery-art.js` (local SVG foods and order presentation), `src/ui/reward-feedback.js` (presentation-only flights), and last-loaded `styles/bakery-theme.css`. Worksheet visuals use its last-loaded `custom-theme.css`. Keep all files when serving the static site; no package/build step or external asset service was introduced.
 - Static site: root `index.html` imports classic scripts in precise order and CSS from `styles/`; use VS Code Live Server or any static local HTTP server. **No npm build or compilation.** Root GitHub Pages can deploy all files.
 - Data/saves stored via `localStorage` key **`panaderyaQuestV2`**. This key is a compatibility contract, NOT a code-version label to rename casually. An update that changes its format needs a migration plan.

@@ -91,10 +91,26 @@ test('legacy aggregates are retained and conservatively baselined without changi
   assert.ok(h.store.panaderyaQuestV2);
 });
 
+test('completed state recovers a lost complete event; saved claims survive reload and pay once',()=>{
+  const h=shell(),r=h.run();
+  const list=r.steps.flatMap(step=>h.actions(step,vm.runInContext(`worksheetActionKinds(g.run.steps[${r.steps.indexOf(step)}])`,h.context)));
+  h.state(list,{complete:true,ticket:{id:-1},top:79,bottom:18});
+  assert.equal(r.phase,'engine','wrong ticket cannot finish through the fallback');
+  h.state(list,{complete:true,ticket:r.ticket,top:79,bottom:18});
+  assert.equal(r.phase,'claim');assert.equal(r.pool,r.budget);assert.equal(r.chests.length,1);
+  assert.equal(h.sent.filter(m=>m.type==='completion-ack').length,1);
+  const restored=shell(h.store.panaderyaQuestV2),rr=restored.run();
+  assert.equal(rr.phase,'claim');assert.equal(rr.pool,r.budget);
+  const before=vm.runInContext('g.coins',restored.context);
+  restored.context.prizeItems();restored.context.prizeItems();
+  assert.equal(vm.runInContext('g.coins',restored.context),before+r.budget);
+  assert.equal(vm.runInContext('g.completed',restored.context),1);
+});
+
 // Run the real worksheet state/placement functions with only rendering and motion
 // stubbed. Async placement still commits on its actual microtask boundary.
 function worksheet(){
-  const elements=new Map(),messages=[];
+  const elements=new Map(),messages=[],listeners={};
   const element=id=>{if(!elements.has(id))elements.set(id,{value:'',textContent:'',style:{},
     innerHTML:'',append(){},classList:{add(){},remove(){},toggle(){}},setAttribute(){},
     getBoundingClientRect:()=>({left:0,top:0,width:50,height:50})});return elements.get(id);};
@@ -103,7 +119,7 @@ function worksheet(){
     setInterval:()=>{},setTimeout:()=>{},clearTimeout:()=>{},
     document:{getElementById:element,createElement:()=>element(Symbol()),querySelector:()=>null,
       querySelectorAll:()=>[],documentElement:{scrollHeight:600},body:{scrollHeight:600}},
-    window:{parent,addEventListener:()=>{},__BATCH_TEST_FAST:true}});
+    window:{parent,addEventListener:(type,fn)=>{listeners[type]=fn},__BATCH_TEST_FAST:true}});
   vm.runInContext(source('worksheet/src/state.js'),c);
   vm.runInContext(`function render(){}function clearMultiplyFx(){}function hidePreview(){}
     function startMultiplySequence(){}function finish(){s.complete=true;s.phase='complete';render()}
@@ -115,8 +131,19 @@ function worksheet(){
   const exec=code=>vm.runInContext(code,c);
   const list=()=>{exec('bridgePoll()');return messages.filter(m=>m.type==='state').at(-1).actions;};
   const settle=async code=>{exec(code);await Promise.resolve();};
-  return {c,exec,list,settle};
+  return {c,exec,list,settle,messages,ack:attemptId=>listeners.message({source:parent,data:{source:'bc-shell',type:'completion-ack',attemptId}})};
 }
+
+test('worksheet retries completion until its own attempt is acknowledged',()=>{
+  const w=worksheet();w.exec('s.complete=true;s.phase="complete";bridgePoll()');
+  assert.equal(w.messages.filter(m=>m.type==='complete').length,1);
+  w.exec('bridgeMetrics.lastCompleteReport=performance.now()-501;bridgePoll()');
+  assert.equal(w.messages.filter(m=>m.type==='complete').length,2);
+  w.ack('stale-attempt');w.exec('bridgeMetrics.lastCompleteReport=performance.now()-501;bridgePoll()');
+  assert.equal(w.messages.filter(m=>m.type==='complete').length,3);
+  w.ack('attempt-A');w.exec('bridgeMetrics.lastCompleteReport=performance.now()-501;bridgePoll()');
+  assert.equal(w.messages.filter(m=>m.type==='complete').length,3);
+});
 
 test('real worksheet accepted placements emit stable actions across undo, carry paths and async cancellation',async()=>{
   const w=worksheet();w.exec(`operand('bottom',0);operand('top',0);revealProduct()`);

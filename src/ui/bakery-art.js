@@ -1,4 +1,4 @@
-/* Small local vector illustrations: Filipino breads, with no network assets. */
+﻿/* Small local vector illustrations: Filipino breads, with no network assets. */
 function foodArt(id,extraClass=''){
  const food=FOOD.find(f=>f.id===id)||FOOD[0];
  const crumbs='<g fill="#fff1b4"><circle cx="49" cy="54" r="2"/><circle cx="69" cy="42" r="2"/><circle cx="97" cy="60" r="2"/><circle cx="113" cy="49" r="2"/><circle cx="79" cy="72" r="2"/></g>';
@@ -25,4 +25,6 @@ function foodArt(id,extraClass=''){
 }
 function orderFood(ticket){return FOOD.filter(f=>f.rarity===ticket.rarity)[ticket.id%FOOD.filter(f=>f.rarity===ticket.rarity).length]||FOOD[0]}
 function orderStory(ticket){return `${ticket.b} trays · ${ticket.a} ${orderFood(ticket).name} each`}
-function luckProgress(){return `<div class="luck-track"><div><span class="luck-symbol">✦</span><b>Ticket luck +${g.permanentLuck}</b><button class="text-button" onclick="openProbabilities()" aria-label="See ticket and chest chances">ⓘ</button></div><div class="luck-stars" aria-label="${g.mastery%4} of 4 practice stars toward more ticket luck">${Array.from({length:4},(_,i)=>`<span class="${i<g.mastery%4?'filled':''}">★</span>`).join('')}<span>Practice → rarer orders</span></div></div>`}
+function luckProgress(){return `<div class="luck-track permanent-luck"><div class="luck-stars" aria-label="${g.mastery%4} of 4 practice stars">${Array.from({length:4},(_,i)=>`<span class="${i<g.mastery%4?'filled':''}" aria-hidden="true">★</span>`).join('')}</div><small>More mastery → Higher Luck</small><div class="luck-caption"><b>★ Ticket luck +${g.permanentLuck}<small>PERMANENT</small></b><button class="text-button" onclick="openProbabilities()" aria-label="Detailed ticket probabilities">ⓘ</button></div></div>`}
+
+function trayArt(){return '<svg class="tray-icon" viewBox="0 0 64 44" role="img" aria-label="baking tray"><path d="M6 13Q4 5 13 5h38q9 0 7 8l-4 22q-1 5-7 5H17q-6 0-7-5Z" fill="#795032"/><path d="M8 11q0-4 6-4h36q6 0 6 4l-4 19q-1 4-6 4H18q-5 0-6-4Z" fill="#bd8857" stroke="#edc38b" stroke-width="3"/><path d="M17 13h30l-3 14H20Z" fill="#5d4937"/><path d="M3 17h8m42 0h8" stroke="#e3b17a" stroke-width="5" stroke-linecap="round"/></svg>'}

@@ -1,5 +1,7 @@
 # Reward economy and progression — design reference
 
+**Latest user direction (2026-10-30):** the corrective brief requests Level/Tier 5, value-preserving fusion/overflow, percentage economy improvements, seven rarities including Mythic, and bakery Level 30. These supersede older proposed caps below but are **not implemented yet**: the owner requested a visual review after corrective A/B, before C/D. See [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md) for the exact checkpoint, retained formulas and migration work still required. Player-facing Chest is now **Package**; internal save fields keep their old names.
+
 **Legend:** **Direction** = explicitly discussed and favored or accepted; **Proposal** = appealing but undecided; **Prototype** = implementation shortcut that must not be presented as a finalized balance/design choice. Numerical values in the code are tunable examples.
 
 ## Core progression (Direction)

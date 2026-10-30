@@ -7,15 +7,38 @@ function toggleArrows(){g.tutorialArrows=!g.tutorialArrows;save();sendEngine('tu
 function toggleSfx(){g.sound=!g.sound;save();sendEngine('sound',{enabled:g.sound,volume:1});const b=$('sfxToggle');if(b){b.textContent=g.sound?'🔊 Sound ON':'🔈 Sound OFF';b.setAttribute('aria-pressed',String(g.sound))}}
 
 function renderWorksheet(){
- const r=g.run,food=orderFood(r.ticket);
- const claim=r.phase==='claim',failed=r.phase==='failed';
- return `<main class="worksheet-stage"><div class="worksheet-actionline"><div class="order-narrative">${foodArt(food.id)}<div><b>${r.ticket.b} trays · ${r.ticket.a} each</b><small>${food.name} for your customer</small></div></div><div class="worksheet-controls"><button id="arrowToggle" aria-pressed="${g.tutorialArrows}" class="secondary" onclick="toggleArrows()">☝ Guide ${g.tutorialArrows?'ON':'OFF'}</button><button id="sfxToggle" aria-pressed="${g.sound}" class="secondary" onclick="toggleSfx()">${g.sound?'🔊':'🔈'} Sound ${g.sound?'ON':'OFF'}</button><button class="tertiary" onclick="abandonTicket()">✕ Exit</button></div></div>${failed?`<div class="claim-screen"><div class="claim-art">💛</div><h2>Let's try again</h2><p>Take your time. Your bakery is safe.</p><div class="btnrow"><button class="secondary" onclick="retryRun()" ${r.retriesLeft<=0?'disabled':''}>Retry (${r.retriesLeft})</button><button class="primary" onclick="retryNormal()">Play Normal</button></div></div>`:claim?`<div class="claim-screen"><div class="claim-art">🎁</div><h2>Order ready!</h2><p><strong>${fmt(r.ticket.a*r.ticket.b)} ${food.name}</strong> for your customer</p><div class="claim-coins">🪙 ${fmt(r.pool)}</div><p>${r.chests.length} chest${r.chests.length===1?'':'s'} to open</p><button class="primary" onclick="prizeItems()">Collect & open chests</button></div>`:`<iframe id="worksheetFrame" class="worksheet-frame" title="Work out your customer's order" sandbox="allow-scripts allow-same-origin"></iframe><span id="bridgeStatus" hidden></span>${r.mode==='lookup'?`<details class="lookup-aid"><summary>🔢 Multiplication facts</summary><div class="lookup">${Array.from({length:81},(_,i)=>`<div>${Math.floor(i/9)+1}×${i%9+1}=${(Math.floor(i/9)+1)*(i%9+1)}</div>`).join('')}</div></details>`:''}`}${renderPrizeDock(r)}</main>`;
+ const r=g.run,food=orderFood(r.ticket),claim=r.phase==='claim',failed=r.phase==='failed';
+ return `<main class="worksheet-stage ${claim?'order-complete':''}"><div class="worksheet-toolbar"><div class="worksheet-controls"><button id="arrowToggle" aria-pressed="${g.tutorialArrows}" class="secondary" onclick="toggleArrows()">☝ Guide ${g.tutorialArrows?'ON':'OFF'}</button><button id="sfxToggle" aria-pressed="${g.sound}" class="secondary" onclick="toggleSfx()">${g.sound?'🔊':'🔈'} Sound ${g.sound?'ON':'OFF'}</button></div><button class="worksheet-exit" onclick="${claim?'prizeItems()':'abandonTicket()'}">${claim?'Collect':'✕ Exit'}</button></div><div class="worksheet-order">${foodArt(food.id)}<div><h2>${food.name}</h2><div class="order-equation">${r.ticket.a} × ${r.ticket.b} ${trayArt()}</div><small>${r.ticket.b} trays · ${r.ticket.a} each</small></div></div>${renderChestLuck(r)}<div class="reward-shelf" aria-hidden="true"></div>${failed?`<div class="claim-screen"><h2>Let's try again</h2><div class="btnrow"><button class="secondary" onclick="retryRun()" ${r.retriesLeft<=0?'disabled':''}>Retry (${r.retriesLeft})</button><button class="primary" onclick="retryNormal()">Play Normal</button></div></div>`:claim?`<section class="claim-screen" role="region" aria-label="Completed order" aria-live="polite"><div class="claim-art">🎁</div><h2>Order ready!</h2><p><strong>${fmt(r.ticket.a*r.ticket.b)} ${food.name}</strong> for your customer</p><div class="claim-coins">🪙 ${fmt(r.pool)}</div><p>${r.chests.length} package${r.chests.length===1?'':'s'} to open</p><button class="primary" onclick="prizeItems()">Collect & open packages</button><small class="claim-saved">Your prize is saved until you collect it.</small></section>`:`<iframe id="worksheetFrame" class="worksheet-frame" title="Work out your customer's order" sandbox="allow-scripts allow-same-origin"></iframe><span id="bridgeStatus" hidden></span>${r.mode==='lookup'?`<details class="lookup-aid"><summary>🔢 Multiplication facts</summary><div class="lookup">${Array.from({length:81},(_,i)=>`<div>${Math.floor(i/9)+1}×${i%9+1}=${(Math.floor(i/9)+1)*(i%9+1)}</div>`).join('')}</div></details>`:''}`}${renderPrizeDock(r)}</main>`;
 }
-function renderPrizeDock(r){
+function renderChestLuck(r){
  const row=r.steps[Math.min(r.index,r.steps.length-1)]?.row||0,chance=Math.round(clamp(.12+r.luck*.013+row*.03,.06,.83)*100);
- return `<div class="worksheet-prize" id="prizejar" aria-label="Order prize pool"><div class="pool-totals"><div class="pool-coins"><small>YOUR ORDER PRIZE</small><strong id="pendingCoins">🪙 ${fmt(r.pool)}</strong></div><div class="pool-chests"><span aria-hidden="true">🎁</span><div><strong id="pendingChests">${r.chests.length}</strong><small>chests</small></div><div class="chest-tokens" id="chestTokens">${renderChestTokens(r.chests)}</div></div></div><div class="pool-luck"><div>✦ Chest luck <strong id="pendingLuck">+${r.luck}</strong><span aria-hidden="true">→ 🎁</span></div><div class="progress"><div id="chestChanceBar" class="bar" style="width:${chance}%"></div></div><small id="chestChance">${chance}% next pair · at least 1 chest per order</small></div></div>`;
+ return `<div class="chest-luck-top"><div><span>✨ Package luck <strong id="pendingLuck">+${r.luck}</strong></span><span aria-hidden="true">→ 🎁</span></div><div class="progress"><div id="chestChanceBar" class="bar" style="width:${chance}%"></div></div><small id="chestChance">This order · ${chance}% next pair · 1+ package guaranteed</small></div>`;
 }
-function renderChestTokens(chests){return chests.slice(-4).map(c=>`<span class="chest-token r${c.rarity}" title="${RARITIES[c.rarity]} chest">${['🎁','🎁','💠','💜','👑','🌟'][c.rarity]}</span>`).join('')}
+function renderPrizeDock(r){return `<div class="worksheet-prize" id="prizejar" aria-label="Order prize pool"><div class="pool-totals"><div class="pool-coins"><small>YOUR ORDER PRIZE</small><strong id="pendingCoins">🪙 ${fmt(r.pool)}</strong></div><div class="pool-chests"><span aria-hidden="true">🎁</span><div><strong id="pendingChests">${r.chests.length}</strong><small>packages</small></div><div class="chest-tokens" id="chestTokens">${renderChestTokens(r.chests)}</div></div></div></div>`}
+function renderChestTokens(chests){return chests.slice(-4).map(c=>`<span class="chest-token r${c.rarity}" title="${RARITIES[c.rarity]} package">${['🎁','🎁','💠','💜','👑','🌟'][c.rarity]}</span>`).join('')}
+function fitWorksheet(){
+ if(!g.run||g.run.phase!=='engine'||typeof document.querySelector!=='function'||typeof innerWidth==='undefined')return;
+ const stage=document.querySelector('.worksheet-stage');if(!stage)return;
+ if(typeof syncRewardPresentation==='function')syncRewardPresentation();
+ const cols=String(g.run.ticket.a*g.run.ticket.b).length,rows=String(g.run.ticket.b).length;
+ const gap=innerWidth<560?5:8,gutter=innerWidth<560?46:80,mathPadding=innerWidth<560?42:58;
+ const maxWidth=innerWidth-24;
+ stage.style.setProperty('--workspace-width',Math.min(maxWidth,1000)+'px');
+ const margins=el=>{const st=getComputedStyle(el);return parseFloat(st.marginTop)+parseFloat(st.marginBottom)};
+ const header=['.worksheet-toolbar','.worksheet-order'].map(selector=>stage.querySelector(selector)?.getBoundingClientRect()).filter(Boolean);
+ const headerHeight=header.length?Math.max(...header.map(r=>r.bottom))-Math.min(...header.map(r=>r.top)):0;
+ const chrome=headerHeight+['.chest-luck-top','.reward-shelf','#prizejar'].reduce((height,selector)=>{
+  const el=stage.querySelector(selector);return height+(el?el.getBoundingClientRect().height+margins(el):0);
+ },0);
+ const style=getComputedStyle(stage),padding=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom)+4;
+ const available=innerHeight-stage.getBoundingClientRect().top-chrome-padding-64-40;
+ const byHeight=Math.floor((available-50)/(rows+3.6));
+ const byWidth=Math.floor((maxWidth-32-gutter*2-mathPadding-gap*(cols-1))/cols);
+ const cell=Math.max(44,Math.min(148,byHeight,byWidth));
+ const width=Math.min(maxWidth,Math.max(innerWidth<560?0:760,cols*cell+gap*(cols-1)+mathPadding+gutter*2+46));
+ stage.style.setProperty('--workspace-width',width+'px');
+ sendEngine('layout',{cell,gap,rows});
+}
 // Reward domain actions, never poll stages or increasing click/carry counters.
 function applyWorksheetActions(r,actions){
  if(!Array.isArray(actions))return;
@@ -66,17 +89,18 @@ function handleWorksheetMessage(ev){
   if(frame.worksheetAttemptId===ledger.attemptId)return;
   frame.worksheetAttemptId=ledger.attemptId;
   save();sendEngine('start',{ticket:r.ticket,attemptId:ledger.attemptId});
-  sendEngine('sound',{enabled:g.sound,volume:1});sendEngine('tutorial',{enabled:g.tutorialArrows});sendEngine('theme',{level:g.decor});return;
+  sendEngine('sound',{enabled:g.sound,volume:1});sendEngine('tutorial',{enabled:g.tutorialArrows});sendEngine('theme',{level:g.decor});fitWorksheet();return;
  }
  if(m.attemptId!==ledger.attemptId)return;
  if(m.type==='started'){
   if(frame.worksheetStarted)return;
   frame.worksheetStarted=true;r.bridgePrev={};r.bridgeSig='';return;
  }
- if(m.type==='height'){frame.style.height=Math.max(390,Math.min(820,Number(m.height||460)+6))+'px';return;}
+ if(m.type==='height'){frame.style.height=Math.max(200,Math.min(1000,Number(m.height||460)+2))+'px';return;}
  if(m.type!=='state'&&m.type!=='complete')return;
  if(m.type==='complete'&&(m.ticket?.id!==r.ticket.id||m.top!==r.ticket.a||m.bottom!==r.ticket.b))return;
  if(m.type==='state'){
+  if(m.surface)frame.worksheetSurface=m.surface;
   const old=r.bridgePrev||{};
   if(m.errors>Number(old.errors||0)){
    r.mistakes+=m.errors-Number(old.errors||0);g.learning.mistakes+=m.errors-Number(old.errors||0);
@@ -89,11 +113,14 @@ function handleWorksheetMessage(ev){
   r.bridgePrev={...m,errors:Math.max(Number(old.errors||0),Number(m.errors||0))};
  }
  applyWorksheetActions(r,m.actions);
- if(m.type==='complete'){
+ // A verified completed state is a second delivery path if the final event was lost.
+ if(m.type==='complete'||m.complete===true){
+  if(m.ticket?.id!==r.ticket.id||m.top!==r.ticket.a||m.bottom!==r.ticket.b)return;
   if(!r.steps.every(step=>ledger.actions[worksheetActionId(ledger.attemptId,step.row,step.col,'combo')]))return;
   const id=`${ledger.attemptId}/complete`;
   if(ledger.actions[id])return;
   ledger.actions[id]=true;
+  sendEngine('completion-ack',{attemptId:ledger.attemptId});
   if(!r.chests.length)r.chests.push({rarity:rollChestRarity(r.ticket.rarity)});
   r.correct+=1;earnCoin(.65,1);finishSum();return;
  }

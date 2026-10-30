@@ -2,7 +2,7 @@
 // Run: node tests/browser-worksheet.mjs [path-to-Chromium-or-Edge]
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {readFile,mkdtemp,writeFile} from 'node:fs/promises';
+import {readFile,mkdtemp,writeFile,mkdir} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {resolve,extname,join,sep} from 'node:path';
 import {spawn} from 'node:child_process';
@@ -64,37 +64,67 @@ try{
   await pause(500);
   assert.equal(await evaluate(`document.querySelector('.modal')===null`),true,'no reading assignment on first launch');
   assert.equal(await evaluate(`$('walletCoins').textContent`),'250');
-  const shots=await mkdtemp(join(tmpdir(),'pq-ux-screens-'));
+  assert.equal(await evaluate(`document.querySelector('.topbar .wallet')===null&&document.querySelector('.menu-valuebar .wallet')!==null`),true);
+  const shots=resolve(root,'docs/previews/corrective-redesign');await mkdir(shots,{recursive:true});
   const screenshot=async name=>{
     await pause(280);
     const shot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     await writeFile(join(shots,name+'.png'),Buffer.from(shot.data,'base64'));
   };
-  for(const [width,height] of [[1280,800],[1024,768],[768,1024],[390,844]]){
+  for(const [width,height] of [[2000,1200],[1280,800],[1024,768],[768,1024],[390,844]]){
     await cdp('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
     await screenshot('main-'+width);
     assert.equal(await evaluate(`document.documentElement.scrollWidth<=innerWidth`),true,`menu overflow at ${width}`);
+    if(width===2000)assert.equal(await evaluate(`document.documentElement.scrollHeight<=innerHeight`),true,'main page fits 2000x1200');
   }
   await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   await evaluate(`g.completed=16;g.coins=100000;g.owned=FOOD.map((f,i)=>({uid:i+1,id:f.id,level:1,fusion:0,spent:0}));g.discovered=FOOD.map(f=>f.id);g.uidNext=16;g.activeMenu=[1,4,8];render()`);
+  await evaluate(`g.mastery=18;g.permanentLuck=4;g.board=[{id:880,a:79,b:18,rarity:1,base:304},{id:881,a:248,b:6,rarity:3,base:640},{id:882,a:123,b:24,rarity:4,base:1200}];render()`);
+  for(const [width,height] of [[2000,1200],[1194,834],[1024,768],[768,1024]]){
+    await cdp('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
+    await screenshot('main-progress-'+width);
+    assert.equal(await evaluate(`Array.from(document.querySelectorAll('.food-management')).every(el=>el.getBoundingClientRect().bottom<=el.closest('.food-tile').getBoundingClientRect().bottom)`),true,'management controls stay inside cards');
+    if(width>=1024)assert.equal(await evaluate(`document.documentElement.scrollHeight<=innerHeight`),true,`three-food menu fits ${width}x${height}`);
+  }
+  await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   for(const [name,command] of Object.entries({food:'openFoodItem(1)',inventory:'openMenu()',
-    fusion:'ingredientFusionInfo(1)',ingredients:'openIngredients()',kitchen:'openKitchen()',
+    fusion:'ingredientFusionInfo(1)',copies:'openFusion(1)',ingredients:'openIngredients()',kitchen:'openKitchen()',
     decor:'openDecor()',staff:'openStaff()',index:'openIndex()',modes:'openModes()',
     settings:'openSettings()',luck:'openProbabilities()',sale:'sellFoodPrompt(1)',assign:'chooseFoodForSlot()'})){
     await evaluate(command);await screenshot(name);
     assert.equal(await evaluate(`document.querySelector('.modal').contains(document.activeElement)`),true,`${name} modal focus`);
     await evaluate('closeModal()');
   }
-  await evaluate(`g.board=[{id:808,a:79,b:18,rarity:1,base:304}];startTicket(808)`);
+  const upgradeCost=await evaluate('foodLevelCost(g.owned[0])');
+  await evaluate(`document.querySelector('[data-uid="1"] .card-level:not(:disabled)').click()`);
+  assert.equal(await evaluate('g.owned[0].level'),2);
+  assert.equal(await evaluate(`document.querySelector('.modal')===null`),true,'inline level-up does not open a general popup');
+  assert.equal(await evaluate('g.coins'),100000-upgradeCost);
+  await evaluate(`for(let i=0;i<3;i++)g.owned.push({uid:g.uidNext++,id:'pandesal',level:1,fusion:0,spent:0});openFusion(1,2)`);
+  await screenshot('fusion-quantity');
+  assert.equal(await evaluate(`document.getElementById('fusionQty').value`),'2');
+  const fusionCost=await evaluate('duplicateFusionPlan(g.owned[0],2).fee'),beforeFusion=await evaluate('g.coins');
+  await evaluate(`submitDuplicateFusion();submitDuplicateFusion()`);
+  assert.equal(await evaluate('g.owned[0].fusion'),2);assert.equal(await evaluate('g.coins'),beforeFusion-fusionCost);
+  assert.equal(await evaluate('g.owned[0].level'),2);
+  await evaluate('openFusion(2)');
+  const ingredientCost=await evaluate('fusionFee(g.owned[1])+fusionIngredientCost(g.owned[1])'),beforeIngredients=await evaluate('g.coins');
+  await evaluate(`document.querySelector('.ingredient-alternative button').click();document.querySelector('.modal .primary').click();closeModal()`);
+  assert.equal(await evaluate('g.owned[1].fusion'),1);assert.equal(await evaluate('g.coins'),beforeIngredients-ingredientCost);
+  await evaluate(`$('toasts').innerHTML='';g.board=[{id:808,a:79,b:18,rarity:1,base:304}];startTicket(808);$('toasts').innerHTML=''`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===808`);
   await evaluate(`window.auditFrame=$('worksheetFrame');window.auditChild=auditFrame.contentWindow;void 0`);
-  for(const [width,height] of [[1280,800],[1024,768],[768,1024],[390,844]]){
+  for(const [width,height] of [[2000,1200],[1194,834],[1280,800],[1024,768],[768,1024],[390,844]]){
     await cdp('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
     await screenshot('worksheet-'+width);
     assert.equal(await evaluate(`document.documentElement.scrollWidth<=innerWidth`),true,`worksheet overflow at ${width}`);
     assert.equal(await evaluate(`(()=>{const r=$('prizejar').getBoundingClientRect();return r.top>0&&r.bottom<=innerHeight})()`),true,`prize dock at ${width}`);
     assert.equal(await evaluate(`auditChild.eval("getComputedStyle($('additionLab')).display==='none'&&getComputedStyle(document.querySelector('.multiplication-lab')).display==='none'")`),true);
     assert.ok(await evaluate(`auditChild.document.querySelector('[data-carry="0"]').getBoundingClientRect().height>=44`));
+    if(width===2000){
+      assert.equal(await evaluate(`document.documentElement.scrollHeight<=innerHeight`),true,'worksheet fits 2000x1200');
+      assert.ok(await evaluate(`auditChild.document.querySelector('[data-top="0"]').getBoundingClientRect().width>=85`),'math enlarged at target resolution');
+    }
   }
   await evaluate(`toggleArrows()`);await pause(180);
   assert.equal(await evaluate(`auditChild.eval("!document.querySelector('.guide-target,.guide-dim')&&$('tutorial').innerHTML===''&&$('additionSwipeGuide').innerHTML===''&&$('guidePrompt').hidden")`),true);
@@ -112,7 +142,12 @@ try{
   assert.deepEqual(errors,[],'reward presentation exceptions');
   assert.equal(await evaluate(`$('pendingCoins').textContent`),'🪙 '+Math.floor(coins).toLocaleString('en-US'));
   assert.equal(await evaluate('g.run.pool'),coins,'presentation cannot create rewards');
-  console.log('PASS UX browser: first use, all dialogs, focus/Escape, 4 viewport sizes, visible prize dock, guide OFF, reduced-motion reward arrival');
+  for(const [width,height] of [[2000,1200],[1194,834],[1024,768],[768,1024]]){
+    await cdp('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
+    await screenshot('worksheet-product-'+width);
+    console.log('Layout '+JSON.stringify(await evaluate(`({width:innerWidth,height:innerHeight,cell:auditChild.document.querySelector('[data-top="0"]').getBoundingClientRect().width,prizeBottom:$('prizejar').getBoundingClientRect().bottom,font:getComputedStyle(document.querySelector('.chest-luck-top')).fontFamily})`)));
+  }
+  console.log('PASS UX browser: inline upgrades, duplicate/ingredient fusion, all dialogs, 5 viewport sizes, no scrolling at 2000px, enlarged math, attached prize, guide OFF and reduced-motion arrival');
   console.log('UX screenshots: '+shots);
   assert.deepEqual(errors,[]);
 }finally{

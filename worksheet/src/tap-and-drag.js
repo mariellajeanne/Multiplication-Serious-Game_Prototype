@@ -31,7 +31,8 @@ function convexConnector(start,end){
  const dx=end.x-start.x,dy=end.y-start.y,length=Math.hypot(dx,dy);
  const ux=length>.01?dx/length:0,uy=length>.01?dy/length:1;
  const nx=-uy,ny=ux;
- const radius=connectorStyle==='ribbon'?32:connectorStyle==='slim'?18:26;
+ const cell=parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell'))||52;
+ const radius=(connectorStyle==='ribbon'?32:connectorStyle==='slim'?18:26)*cell/52;
  const bow=connectorStyle==='ribbon'?7:0;
  const cap=radius*4/3;
  const coord=(center,side,forward)=>`${(center.x+nx*side+ux*forward).toFixed(2)} ${(center.y+ny*side+uy*forward).toFixed(2)}`;

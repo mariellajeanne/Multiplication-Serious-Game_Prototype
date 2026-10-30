@@ -2,7 +2,7 @@
 // Run: node tests/browser-worksheet.mjs [path-to-Chromium-or-Edge]
 import assert from 'node:assert/strict';
 import {createServer} from 'node:http';
-import {readFile,mkdtemp} from 'node:fs/promises';
+import {readFile,mkdtemp,mkdir,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {resolve,extname,join,sep} from 'node:path';
 import {spawn} from 'node:child_process';
@@ -53,7 +53,10 @@ try{
     for(let i=0;i<150;i++){if(await evaluate(expression))return;await pause(50);}
     const detail=await evaluate(`({phase:g.run?.phase,errors:g.run?.mistakes,
       bridgeDone:g.run?.bridgeDone,actions:g.run&&Object.keys(g.run.worksheetRewards?.actions||{}),
-      child:window.auditChild&&auditChild.eval('({phase:s.phase,done:s.done,busy,additionStart,complete:s.complete})')})`);
+      child:window.auditChild&&auditChild.eval('({phase:s.phase,done:s.done,busy,additionStart,complete:s.complete,events:window.auditEvents})')})`);
+    const shots=resolve(root,'docs/previews/corrective-redesign');await mkdir(shots,{recursive:true});
+    const failed=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+    await writeFile(join(shots,'browser-failure.png'),Buffer.from(failed.data,'base64'));
     throw Error('Timed out: '+expression+' '+JSON.stringify({detail,errors}));
   };
   await cdp('Runtime.enable');await cdp('Page.enable');
@@ -106,6 +109,7 @@ try{
     const p=await point(selector);
     if(touchMode){
       await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});
+      await pause(70);
       await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
     }else{
       await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...p});
@@ -123,7 +127,7 @@ try{
       else await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',button:'left',buttons:1,...p});
       await pause(20);
     }
-    if(touchMode)await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    if(touchMode){await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await pause(160);}
     else await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...b});
   };
   const flush=async()=>{
@@ -181,9 +185,20 @@ try{
   assert.equal(await evaluate('g.run.chests.length'),1);
   assert.equal(await evaluate('g.run.correct'),9);
   assert.equal(await evaluate('Object.keys(g.run.worksheetRewards.actions).length'),20);
-  await evaluate(`window.completedAttempt=structuredClone(g.run);prizeItems();prizeItems()`);
+  // The claim is durable; a reload before collecting must not strand or repay it.
+  await cdp('Page.reload');
+  await waitFor(`typeof startTicket==='function'&&g.run?.phase==='claim'&&document.querySelector('.claim-screen .primary')!==null`);
+  assert.equal(await evaluate('g.run.pool'),budget);
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.claim-screen')).display!=='none'`),true);
+  const shots=resolve(root,'docs/previews/corrective-redesign');await mkdir(shots,{recursive:true});
+  await cdp('Emulation.setDeviceMetricsOverride',{width:1194,height:834,deviceScaleFactor:1,mobile:false});
+  await pause(250);
+  const completedShot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+  await writeFile(join(shots,'completed-order-1194.png'),Buffer.from(completedShot.data,'base64'));
+  await evaluate(`Math.random=()=>.999;window.completedAttempt=structuredClone(g.run);prizeItems();prizeItems()`);
   assert.equal(await evaluate('g.coins'),initialWallet+budget);
   assert.equal(await evaluate('g.completed'),1);
+  console.log('PASS browser: reload restores the in-page completed-order claim; repeated collection pays once');
   console.log(`PASS browser: 79 × 18 = 1422, click/drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins and one chest claimed exactly once`);
   const levelCost=await evaluate('foodLevelCost(g.owned[0])');
   await evaluate('openFoodItem(1)');await pause(280);
@@ -203,6 +218,7 @@ try{
     g.board=[{id:9002,a:19,b:9,rarity:0,base:130}];startTicket(9002)`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9002`);
   await evaluate(`auditFrame=$('worksheetFrame');auditChild=auditFrame.contentWindow;void 0`);
+  await evaluate(`auditChild.eval("window.auditEvents=[];for(const type of ['click','pointerdown','pointerup'])document.addEventListener(type,e=>{auditEvents.push({type,target:e.target.id||e.target.className,ignoreClick,busy,x:e.clientX,y:e.clientY});if(auditEvents.length>20)auditEvents.shift()},true)")`);
   await click('[data-top="0"]');await click('[data-bottom="0"]');await click('#equationReveal');
   await drag('[data-part="tens"]','[data-carry="1"]');await waitFor(`auditChild.eval('!busy&&s.tensPlaced')`);
   await drag('[data-part="ones"]','[data-slot="0:0"]');await waitFor(`auditChild.eval('!busy&&s.k===1')`);
@@ -216,6 +232,43 @@ try{
   assert.equal(await evaluate('g.run.pool'),await evaluate('g.run.budget'));
   assert.equal(await evaluate('g.run.chests.length'),1);
   console.log('PASS browser: 19 × 9 = 171 at 390px with emulated touch taps/drags, outgoing/incoming carry before placement; tutorial/SFX enabled');
+
+  // Tablet touch completion with both deliveries lost once and broken motion.
+  // All math is still performed through the real touch targets and swipe.
+  await evaluate(`prizeItems();closeModal();Math.random=()=>.999;g.sound=false;g.tutorialArrows=true;
+    g.board=[{id:9003,a:79,b:18,rarity:1,base:304}];startTicket(9003)`);
+  await cdp('Emulation.setDeviceMetricsOverride',{width:1024,height:768,deviceScaleFactor:1,mobile:false});
+  await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9003`);
+  await evaluate(`auditFrame=$('worksheetFrame');auditChild=auditFrame.contentWindow;void 0`);
+  for(let row=0;row<2;row++)for(let col=0;col<2;col++){
+    await drag(`[data-bottom="${row}"]`,`[data-top="${col}"]`);await click('#equationReveal');
+    await waitFor(`auditChild.eval('s.revealed')`);
+    if(await evaluate(`auditChild.eval('s.incoming>0')`)){
+      await drag(`[data-carry="${col}"]`,'[data-part="ones"]');await waitFor(`auditChild.eval('!busy&&s.mixed')`);
+    }
+    if(await evaluate(`auditChild.eval('tens()>0')`)){
+      await drag('[data-part="tens"]',col===1?`[data-slot="${row}:${row+col+1}"]`:`[data-carry="${col+1}"]`);
+      await waitFor(`auditChild.eval('!busy&&s.tensPlaced')`);
+    }
+    await drag('[data-part="ones"]',`[data-slot="${row}:${row+col}"]`);
+    await waitFor(row===1&&col===1?`auditChild.eval("!busy&&s.phase==='sum'")`:`auditChild.eval("!busy&&s.phase==='select'")`);
+  }
+  await evaluate(`window.droppedCompletionMessages=0;
+    window.addEventListener('message',e=>{if(e.data?.source==='pq-worksheet'&&
+      (e.data.type==='complete'||e.data.complete===true)&&droppedCompletionMessages<2){droppedCompletionMessages++;e.stopImmediatePropagation()}},true);
+    auditChild.eval("Array.prototype.findLastIndex=undefined;Element.prototype.animate=()=>{throw Error('Simulated unavailable animation API')}")`);
+  const tabletWallet=await evaluate('g.coins'),tabletBudget=await evaluate('g.run.budget');
+  const tabletSwipe=await point('[data-slot="0:0"]');
+  await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...tabletSwipe,id:1}]});
+  await pause(70);
+  await cdp('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:tabletSwipe.x,y:tabletSwipe.y+75,id:1}]});
+  await pause(70);await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+  await waitFor(`g.run?.phase==='claim'`);
+  assert.equal(await evaluate('droppedCompletionMessages'),2);
+  assert.equal(await evaluate('g.run.pool'),tabletBudget);
+  assert.equal(await evaluate('g.run.chests.length'),1);
+  await evaluate('prizeItems();prizeItems()');assert.equal(await evaluate('g.coins'),tabletWallet+tabletBudget);
+  console.log('PASS browser: 79 × 18 tablet touch/swipe completes with findLastIndex absent, animation APIs throwing, and first two completion deliveries dropped; claim pays once');
   assert.deepEqual(errors,[],'browser runtime exceptions');
 }finally{
   ws?.close();browser.kill();server.closeAllConnections();await new Promise(r=>server.close(r));

@@ -2,11 +2,14 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:0,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},equipment:{oven:0,mixer:0,fridge:0,display:0},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,menuSlots:4,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:0,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},equipment:{oven:0,mixer:0,fridge:0,display:0},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:4,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g;try{g=JSON.parse(localStorage.getItem('panaderyaQuestV2'))||fresh()}catch(_){g=fresh()}
 // Persisted data from older variants is intentionally not imported; this is a fresh prototype.
 if(!g.owned||!g.equipment||!('completed' in g)){g=fresh()}
 if(!Number.isInteger(g.menuSlots))g.menuSlots=4;if(!Array.isArray(g.activeMenu))g.activeMenu=g.owned.slice(0,g.menuSlots).map(x=>x.uid);if(typeof g.tutorialArrows!=='boolean')g.tutorialArrows=true;if(typeof g.musicOn!=='boolean')g.musicOn=false;
+// Old established players keep their saved guide preference.
+if(typeof g.guideGraduated!=='boolean')g.guideGraduated=g.completed>=3;
+function graduateGuideAfterOrder(){if(g.completed>=3&&!g.guideGraduated){g.guideGraduated=true;g.tutorialArrows=false;}}
 let modal=null;let music=null;let musicTimer=null;let animationTimers=[];let modalReturnFocus=null;
 const F=id=>FOOD.find(x=>x.id===id);const infoMode=()=>MODE.find(x=>x.id===g.mode)||MODE[0];
 const rarityTag=(r)=>`<span class="tag ${RARITIES[r].toLowerCase()}">${RARITIES[r]}</span>`;

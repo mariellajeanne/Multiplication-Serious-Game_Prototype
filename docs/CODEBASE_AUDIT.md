@@ -1,5 +1,7 @@
 ﻿# Panaderya Quest — codebase audit
 
+**Latest implementation follow-up:** corrective A/B is recorded in [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md), including 34 passing automated tests, real touch/carry/claim-recovery browser checks, and target-resolution screenshots. Owner visual review is pending before the requested economy/progression overhaul. The findings below are historical snapshots; consult the follow-ups before reimplementing resolved work.
+
 Audit date: 2026-10-30 (Asia/Manila). Scope: all tracked project source, styles, HTML, documentation and tests. This is an analysis snapshot, not authorization to implement changes. No gameplay, balance, visuals, save data, or protocol changes were made.
 
 ## Approved follow-up — stage 1 (2026-10-30)

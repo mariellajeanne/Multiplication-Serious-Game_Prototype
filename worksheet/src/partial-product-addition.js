@@ -22,7 +22,7 @@ function launchDigit(from,to,digit,duration=185,delay=0){
  const el=document.createElement('div');el.className='addition-ghost';el.textContent=digit;el.style.left=(a.x-a.w/2)+'px';el.style.top=(a.y-a.h/2)+'px';el.style.width=a.w+'px';el.style.height=a.h+'px';$('sheet').append(el);
  const dx=b.x-a.x,dy=b.y-a.y;
  return new Promise(resolve=>{setTimeout(()=>{
-  const anim=el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{offset:.78,transform:`translate(${dx*.76}px,${dy*.76}px) scale(.95)`,opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.88)`,opacity:.08}],{duration,easing:'cubic-bezier(.18,.85,.25,1)',fill:'forwards'});
+  const anim=worksheetAnimate(el,[{transform:'translate(0,0) scale(1)',opacity:1},{offset:.78,transform:`translate(${dx*.76}px,${dy*.76}px) scale(.95)`,opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.88)`,opacity:.08}],{duration,easing:'cubic-bezier(.18,.85,.25,1)',fill:'forwards'});
   settleWorksheetAnimation(anim,duration+80).then(()=>{el.remove();resolve()})
  },delay)})
 }
@@ -61,7 +61,7 @@ function mergeIntoLowerColumn(c,vals){
  if(upper)upper.classList.add('addition-consumed');
  if(lower){
   // This is the actual per-column sum, including the carry from the right.
-  const last=vals.findLastIndex(v=>v!==0);
+  let last=vals.length-1;while(last>=0&&vals[last]===0)last--;
   lower.textContent=c>last&&last!==-1?'':vals[c];
   lower.classList.add('filled','addition-merged','merge-landing');
   const q=cellCenter(lower);if(q)sparkleAt(q.x,q.y);
@@ -82,7 +82,7 @@ async function riseMergedRow(token){
  for(let c=0;c<s.cols;c++){
   const el=Q(`[data-slot="1:${c}"]`);if(!el||!el.textContent.trim())continue;
   animations.push(new Promise(resolve=>{
-    const anim=el.animate([
+    const anim=worksheetAnimate(el,[
       {transform:'translateY(0px) scale(1)',opacity:1},
       {offset:.65,transform:`translateY(${travel*.65}px) scale(1.015)`,opacity:1},
       {transform:`translateY(${travel}px) scale(1)`,opacity:1}
@@ -102,6 +102,7 @@ async function playCascadeAddition(){
  if(s.phase!=='sum'||busy)return;
  snapshot();busy=true;additionStart=null;updateAdditionSwipeGuide();
  const token=run,vals=calculateSum(),reduced=window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches;
+ try{
  play('mix');
  // Begin with the ONES column (at the right) and start the next drop before the previous finishes.
  const perColumn=[];
@@ -121,7 +122,7 @@ async function playCascadeAddition(){
    $('operationCue').textContent=`＋ ${above} + ${below}${carryIn?' + '+carryIn:''} = ${above+below+carryIn}`;
    mergeIntoLowerColumn(c,vals);
    // A little impact makes each column feel like a separate, completed addition.
-   if(!reduced&&to)to.animate([
+   if(!reduced&&to)worksheetAnimate(to,[
      {transform:'scale(.96)'},{transform:'scale(1.075)',offset:.48},{transform:'scale(1)'}
    ],{duration:148,easing:'ease-out'});
   })());
@@ -131,7 +132,8 @@ async function playCascadeAddition(){
  if(!reduced)await sleep(90);
  if(token!==run)return;
  await riseMergedRow(token);
- await commitAdditionResult(token,vals);
+ }catch(error){console.warn('Addition feedback interrupted; retaining the verified result.',error)}
+ finally{await commitAdditionResult(token,vals)}
 }
 // Compatibility aliases for older test runners. There is now only one addition animation.
 function playVerticalAddition(){return playCascadeAddition()}

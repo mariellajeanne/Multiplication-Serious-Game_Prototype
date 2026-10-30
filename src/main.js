@@ -1,4 +1,4 @@
-﻿/* Live worksheet identity is preserved across all dialog rendering. */
+﻿/* Header shared by the menu and the focused worksheet. */
 let mountedWorksheetRun=null;
 function render(){
  if(g.run?.phase==='engine'&&mountedWorksheetRun===g.run&&$('worksheetFrame')){
@@ -6,8 +6,9 @@ function render(){
  }
  mountedWorksheetRun=g.run?.phase==='engine'?g.run:null;
  refillBoard();$('app').className=g.run?'playing':'browsing';
- $('app').innerHTML=`<header class="topbar"><div class="brand"><div class="brandlogo" aria-hidden="true">🥖</div><div><h1>Panaderya Quest</h1><div class="tagline">A little math. A lot of delicious.</div></div></div><div class="topstats"><div class="wallet"><span aria-hidden="true">🪙</span><div><small>Your coins</small><strong id="walletCoins">${fmt(g.coins)}</strong></div></div><button class="iconbtn" onclick="openSettings()" aria-label="Settings">⚙</button></div></header><div class="layout">${renderLeft()}${g.run?renderWorksheet():renderMenu()}${renderRight()}</div>`;
+ $('app').innerHTML=`<header class="topbar"><div class="brand"><span class="brandlogo" aria-hidden="true">🥖</span><h1>My Panaderya</h1><button class="iconbtn" onclick="openSettings()" aria-label="Settings">⚙</button></div></header><div class="layout">${renderLeft()}${g.run?renderWorksheet():renderMenu()}${renderRight()}</div>`;
  if(typeof syncRewardPresentation==='function')syncRewardPresentation();
- if(g.run&&g.run.phase==='engine'){const fr=$('worksheetFrame');if(fr)fr.src='worksheet/worksheet-engine.html'}
+ if(g.run&&g.run.phase==='engine'){const fr=$('worksheetFrame');if(fr)fr.src='worksheet/worksheet-engine.html';if(typeof fitWorksheet==='function')fitWorksheet()}
 }
+if(typeof window!=='undefined')window.addEventListener('resize',()=>{if(g.run?.phase==='engine'&&typeof fitWorksheet==='function')fitWorksheet()});
 setInterval(tickStaff,1000);refillBoard();render();save();

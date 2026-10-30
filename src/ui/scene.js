@@ -1,14 +1,14 @@
-﻿/* Bakery scene and order selection. Mathematical input lives in the iframe. */
-function themeLevel(){return g.decor}
-function renderBakery(){return `<div class="bakery-sign"><span class="awning" aria-hidden="true"></span><span class="shop-mark">PQ</span><strong>Panaderya</strong><small>Your little bakery</small><span class="shop-food">${foodArt('pandesal')}</span><span class="shop-level">${['Freshly opened','Cozy bakery','Blooming bakery','Golden bakery','Grand panaderya'][g.decor]}</span></div>`}
+﻿function themeLevel(){return g.decor}
+function renderBakery(){return ''}
 function renderLeft(){
- const links=[['🍞','My foods','openMenu()',0],['📖','Collection','openIndex()',0],['🥣','Kitchen','openKitchen()',2],['🌷','Decor','openDecor()',4],['👩‍🍳','Helper','openStaff()',6],['🎮','Modes','openModes()',3]];
- const next=[[2,'Kitchen'],[3,'Modes'],[4,'Decor'],[5,'Fusion'],[6,'Helpers']].find(([at])=>g.completed<at);
- return `<aside class="leftcol">${renderBakery()}<nav class="bakery-nav" aria-label="Bakery tools">${links.filter(x=>g.completed>=x[3]).map(([icon,label,fn])=>`<button onclick="${fn}"><span aria-hidden="true">${icon}</span>${label}</button>`).join('')}<button onclick="showTutorial()"><span aria-hidden="true">☝</span>Show me</button></nav>${next?`<div class="next-unlock"><span>🔒 ${next[1]}</span><div class="progress"><div class="bar" style="width:${g.completed/next[0]*100}%"></div></div><small>${next[0]-g.completed} more order${next[0]-g.completed===1?'':'s'}</small></div>`:''}</aside>`;
+ const links=[['🥣','Kitchen','openKitchen()',2],['🌷','Decor','openDecor()',4],['👩‍🍳','Helper','openStaff()',6],['🎮','Modes','openModes()',3]];
+ return `<aside class="leftcol"><nav class="bakery-nav" aria-label="Bakery tools">${links.filter(x=>g.completed>=x[3]).map(([icon,label,fn])=>`<button onclick="${fn}"><span aria-hidden="true">${icon}</span>${label}${fn==='openIndex()'?`<small>${g.discovered.length}/${FOOD.length}</small>`:''}</button>`).join('')}<button onclick="showTutorial()"><span aria-hidden="true">☝</span>Guide</button></nav></aside>`;
 }
-function renderTickets(){return `<section class="ticket-board"><div class="board-heading"><span class="eyebrow">FRESH FROM THE COUNTER</span><h2>Pick an order <span aria-hidden="true">↗</span></h2></div>${luckProgress()}<div class="tickets">${g.board.map((t,i)=>{
- const food=orderFood(t),pairs=String(t.a).length*String(t.b).length,coins=Math.round(t.base*bakeryValue()*modeMultiple());
- return `<button class="ticket r${t.rarity} ${g.completed===0&&i===0&&g.tutorialArrows?'first-order':''}" ${g.run?'disabled':''} onclick="startTicket(${t.id})" aria-label="${RARITIES[t.rarity]} order, ${orderStory(t)}, ${coins} base coins"><div class="ticket-top"><span class="rarity-title">${'✦'.repeat(Math.min(3,t.rarity+1))} ${RARITIES[t.rarity]}</span><span class="ticket-arrow" aria-hidden="true">↗</span></div><div class="ticket-order">${foodArt(food.id)}<div><strong class="eq">${t.a} × ${t.b}</strong><span class="order-story">${t.b} trays · ${t.a} each</span><span class="order-food">${food.name}</span></div></div><div class="ticket-bottom"><span class="ticket-coins">🪙 ${fmt(coins)}<small>${['streak','bullseye'].includes(g.mode)?'base coins':'coins'}</small></span><span class="effort" aria-label="${pairs} digit pairs"><span aria-hidden="true">${'●'.repeat(pairs)}</span><small>${pairs} pairs</small></span></div></button>`;
- }).join('')}</div><div class="chest-quality"><span aria-hidden="true">🎁</span><span>Brighter tickets<br><b>Better rare-food chances</b></span></div></section>`}
+const presentedTicketIds=new Set();
+function renderTickets(){return `<section class="ticket-board"><h2 class="order-heading">🎟 Order Tickets</h2>${luckProgress()}<div class="tickets">${g.board.map((t,i)=>{
+ const arriving=!g.run&&!presentedTicketIds.has(t.id);if(!g.run)presentedTicketIds.add(t.id);
+ const food=orderFood(t),coins=Math.round(t.base*bakeryValue()*modeMultiple());
+ return `<button class="ticket r${t.rarity} ${arriving?'ticket-arriving':''} ${g.completed===0&&i===0&&g.tutorialArrows?'first-order':''}" ${g.run?'disabled':''} onclick="startTicket(${t.id})" aria-label="${RARITIES[t.rarity]} order, ${orderStory(t)}, ${coins} base coins"><div class="ticket-top"><div class="ticket-reward"><strong>🪙 ${fmt(coins)}</strong><small>×${(bakeryValue()*modeMultiple()).toFixed(2)}${g.mode==='normal'||g.mode==='lookup'?'':` · ${infoMode().name} bonus`}</small></div><span class="rarity-title">✦ ${RARITIES[t.rarity]}</span></div><div class="ticket-order">${foodArt(food.id)}<div><strong class="order-food">${food.name}</strong><span class="eq">${t.a} × ${t.b} ${trayArt()}</span></div></div></button>`;
+ }).join('')}</div></section>`}
 function renderModePanel(){return ''}
 function renderRight(){return `<aside class="rightcol">${renderTickets()}</aside>`}
