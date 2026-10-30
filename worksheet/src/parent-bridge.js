@@ -11,7 +11,16 @@ function recordWorksheetActions(){
  if(!worksheetAttemptId||!s)return;
  const record=(row,col,kind)=>{
   const id=`${worksheetAttemptId}/${row}/${col}/${kind}`;
-  if(!worksheetActions.has(id))worksheetActions.set(id,{id,row,col,kind});
+  if(worksheetActions.has(id))return;
+  const cc=row+col;
+  let target=kind==='carry-up'?Q(`[data-carry="${col+1}"]`):
+   kind==='connect'?Q(`[data-top="${col}"]`):kind==='reveal'?$('floating'):
+   kind==='carry-down'&&!s.onesPlaced?Q('[data-part="ones"]'):
+   Q(`[data-slot="${row}:${kind==='place-tens'?cc+1:cc}"]`);
+  const rect=target?.getBoundingClientRect();
+  const point=rect&&window.innerWidth&&window.innerHeight?
+   {x:(rect.left+rect.width/2)/window.innerWidth,y:(rect.top+rect.height/2)/window.innerHeight}:undefined;
+  worksheetActions.set(id,{id,row,col,kind,...(point?{point}:{})});
  };
  if(s.phase==='product'){
   record(s.row,s.k,'connect');
@@ -56,7 +65,7 @@ function bridgePoll(){
  if(s.complete&&!bridgeMetrics.sent){
   bridgeMetrics.sent=true;report('complete',{ticket:window.__ACTIVE_WORKSHEET_TICKET||{id:'none'},top:s.a,bottom:s.b,stats:bridgeStats(),actions:[...worksheetActions.values()]});
  }
- const height=Math.ceil(Math.max(document.documentElement.scrollHeight,document.body.scrollHeight));
+ const height=Math.ceil($('app').getBoundingClientRect().height||Math.max(document.documentElement.scrollHeight,document.body.scrollHeight));
  if(Math.abs(height-lastHeight)>24){lastHeight=height;report('height',{height})}
 }
 setInterval(bridgePoll,180);
@@ -68,6 +77,7 @@ function externalStart(ticket,attemptId,forceRestart=false){
  if(worksheetAttemptId!==attemptId){worksheetAttemptId=attemptId;worksheetActions=new Map();}
  lastReport='';lastHeight=0;
  window.__ACTIVE_WORKSHEET_TICKET=ticket;
+ if(document.body.dataset)document.body.dataset.rows=String(String(b).length);
  Object.assign(bridgeMetrics,{errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,startedAt:performance.now()});
  $('customA').value=a;$('customB').value=b;$('tryCustom').click();
  report('started',{a,b});bridgePoll();
@@ -77,6 +87,8 @@ window.addEventListener('message',event=>{
  if(m.type==='start')externalStart(m.ticket,m.attemptId);
  if(m.type==='restart'&&window.__ACTIVE_WORKSHEET_TICKET)externalStart(window.__ACTIVE_WORKSHEET_TICKET,worksheetAttemptId,true);
  if(m.type==='sound'){$('sound').textContent=m.enabled?'♫ Sound on':'♫ Sound off';sound=!!m.enabled;}
+ if(m.type==='theme')document.body.dataset.decor=String(Math.max(0,Math.min(4,Number(m.level)||0)));
+ if(m.type==='feedback'&&m.kind==='chest')play('done');
 });
 setTimeout(()=>report('ready'),0);
 

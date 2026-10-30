@@ -18,6 +18,8 @@ The browser confirmed the pre-existing addition guide still renders with Tutoria
 
 ## Product intent and source of truth
 
+**Subsequent UX work:** see [UX_AUDIT.md](UX_AUDIT.md) for the authorized comprehensive redesign, current test coverage and remaining validation needs. It replaces the packaging UI, reading-based onboarding, inaccessible wallet, hidden reward pool and old dialog presentation; fixes all tutorial layers when OFF; restores optional Lookup facts and visible Survival life selection without changing mode payout rules. Original findings below remain a historical audit, not a claim that those UI issues are still current. Full reload math restoration, retained mastery design and pre-bought ingredient investment accounting remain unresolved.
+
 Read AGENTS.md, every existing docs/*.md file, README.md, START_HERE.txt, worksheet/README.md and tests/worksheet-manual-checklist.md. GAME_VISION.md defines a tablet-first procedural long-multiplication learning game: learners already know facts; digit connections, placement, carrying and addition should feel satisfying. Filipino bakery collection motivates another problem. Management stays simple, active solving dominates passive income, and mistakes/accidental slips receive generous treatment.
 
 REWARDS_AND_PROGRESSION.md separates accepted direction from proposals and prototype numbers. Preserve that distinction: mastery assessment, effort-normalized rewards, unfinished-attempt policy, exact mode mechanics, resale base, content counts and balance remain open. Level/fusion caps in code are prototype choices even where they resemble favored proposals. Do not infer approval for rebirth, EXP, complicated equipment assignment, new currencies or other brainstormed systems.

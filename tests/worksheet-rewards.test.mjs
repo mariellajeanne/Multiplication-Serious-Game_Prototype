@@ -13,7 +13,7 @@ function shell(saved=null){
     document:{getElementById:id=>id==='worksheetFrame'?frame:null},
     window:{addEventListener:()=>{}},setTimeout:()=>{},
     localStorage:{getItem:()=>saved,setItem:(k,v)=>store[k]=v}});
-  for(const f of ['src/data/catalog.js','src/game/state.js','src/game/rewards.js','src/game/economy.js','src/game/worksheet-bridge.js'])
+  for(const f of ['src/data/catalog.js','src/game/state.js','src/game/rewards.js','src/game/economy.js','src/ui/bakery-art.js','src/game/worksheet-bridge.js'])
     vm.runInContext(source(f),context);
   vm.runInContext(`render=()=>{};toast=()=>{};coinFly=()=>{};showModal=()=>{};
     if(!g.run){g.board=[{id:10,a:79,b:18,rarity:1,base:304}];startTicket(10);}`,context);

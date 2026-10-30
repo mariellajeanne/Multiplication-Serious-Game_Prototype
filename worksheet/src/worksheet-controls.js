@@ -9,14 +9,15 @@ $('restart').onclick=reset;$('problem').onchange=reset;$('undo').onclick=undo;$(
 function replayAnimation(){if(s.phase==='product'&&s.revealed&&!s.onesPlaced&&!s.tensPlaced){startMultiplySequence()}}
 $('replayMult').onclick=replayAnimation;
 $('arraySpeed').addEventListener('input',e=>{arraySpeed=Number(e.target.value);$('arraySpeedValue').textContent=arraySpeed.toFixed(2)+'×'});
-$('arraySpeed').addEventListener('change',()=>{if(multMode==='array')replayAnimation()});$('tutorialToggle').onclick=()=>{tutorial=!tutorial;$('tutorialToggle').setAttribute('aria-pressed',String(tutorial));$('tutorialToggle').textContent=tutorial?'➜ Tutorial on':'➜ Tutorial off';requestAnimationFrame(positionFloater)};$('ruleToggle').onclick=()=>{$('rule').hidden=!$('rule').hidden;$('ruleToggle').textContent=$('rule').hidden?'◇ Show rule':'◇ Hide rule'};
+$('arraySpeed').addEventListener('change',()=>{if(multMode==='array')replayAnimation()});$('tutorialToggle').onclick=()=>{tutorial=!tutorial;$('tutorialToggle').setAttribute('aria-pressed',String(tutorial));$('tutorialToggle').textContent=tutorial?'➜ Tutorial on':'➜ Tutorial off';positionFloater();updateAdditionSwipeGuide()};$('ruleToggle').onclick=()=>{$('rule').hidden=!$('rule').hidden;$('ruleToggle').textContent=$('rule').hidden?'◇ Show rule':'◇ Hide rule'};
 document.querySelectorAll('[data-visual]').forEach(btn=>btn.onclick=()=>{visual=btn.dataset.visual;document.querySelectorAll('[data-visual]').forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));render()});window.addEventListener('resize',()=>requestAnimationFrame(positionFloater));$('scroller').addEventListener('scroll',()=>requestAnimationFrame(positionFloater));
 
 // A downward gesture anywhere on the screen initiates the cascade immediately.
-// Controls (select, input and buttons) are excluded so they stay usable.
+// Settings controls stay usable; completed math cells also accept the swipe.
 window.addEventListener('pointerdown',e=>{
  if(s.phase!=='sum'||busy)return;
- if(e.target.closest('button,input,select,textarea,[role="button"]'))return;
+ const control=e.target.closest('button,input,select,textarea,[role="button"]');
+ if(control&&!control.matches('#math .cell'))return;
  additionStart={id:e.pointerId,x:e.clientX,y:e.clientY};
 },{passive:true});
 window.addEventListener('pointermove',e=>{

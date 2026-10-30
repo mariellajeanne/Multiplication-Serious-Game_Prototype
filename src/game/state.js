@@ -7,7 +7,7 @@ let g;try{g=JSON.parse(localStorage.getItem('panaderyaQuestV2'))||fresh()}catch(
 // Persisted data from older variants is intentionally not imported; this is a fresh prototype.
 if(!g.owned||!g.equipment||!('completed' in g)){g=fresh()}
 if(!Number.isInteger(g.menuSlots))g.menuSlots=4;if(!Array.isArray(g.activeMenu))g.activeMenu=g.owned.slice(0,g.menuSlots).map(x=>x.uid);if(typeof g.tutorialArrows!=='boolean')g.tutorialArrows=true;if(typeof g.musicOn!=='boolean')g.musicOn=false;
-let modal=null;let music=null;let musicTimer=null;let animationTimers=[];
+let modal=null;let music=null;let musicTimer=null;let animationTimers=[];let modalReturnFocus=null;
 const F=id=>FOOD.find(x=>x.id===id);const infoMode=()=>MODE.find(x=>x.id===g.mode)||MODE[0];
 const rarityTag=(r)=>`<span class="tag ${RARITIES[r].toLowerCase()}">${RARITIES[r]}</span>`;
 const foodValue=o=>{const f=F(o.id);return f.base*(1+0.20*(o.level-1))*[1,1.6,2.5,4][o.fusion]};
@@ -23,6 +23,21 @@ function makeTicket(){const rarity=ticketRarity();const dims=[[2,1],[2,2],[2,2],
 function refillBoard(){while(g.board.length<3)g.board.push(makeTicket())}
 function save(){try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g))}catch(_){}}
 function toast(text){const el=document.createElement('div');el.className='toast';el.textContent=text;$('toasts').appendChild(el);setTimeout(()=>el.remove(),3200)}
-function showModal(title,html){modal={title,html};paintModal()}
-function closeModal(){modal=null;paintModal();render()}
-function paintModal(){const root=$('modals');if(!modal){root.innerHTML='';return}root.innerHTML=`<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true"><div class="modalhead"><h2>${modal.title}</h2><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`}
+function showModal(title,html){if(!modal)modalReturnFocus=document.activeElement;modal={title,html};paintModal()}
+function closeModal(){modal=null;paintModal();render();if(modalReturnFocus?.isConnected)modalReturnFocus.focus?.({preventScroll:true});modalReturnFocus=null}
+function paintModal(){
+ const root=$('modals');if(!modal){root.innerHTML='';return}
+ root.innerHTML=`<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modalhead"><h2 id="modalTitle">${modal.title}</h2><span class="dialog-wallet">🪙 ${fmt(g.coins)}</span><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`;
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>root.querySelector?.('.modal')?.focus());
+}
+document.addEventListener?.('keydown',event=>{
+ if(!modal)return;
+ if(event.key==='Escape'){event.preventDefault();closeModal();return}
+ if(event.key!=='Tab')return;
+ const root=document.querySelector('.modal');if(!root)return;
+ const targets=[...root.querySelectorAll('button:not(:disabled),input:not(:disabled),select,summary,[tabindex="0"]')].filter(el=>el.getClientRects().length);
+ if(!targets.length){event.preventDefault();root.focus();return}
+ const first=targets[0],last=targets.at(-1);
+ if(event.shiftKey&&(document.activeElement===first||document.activeElement===root)){event.preventDefault();last.focus()}
+ else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===root)){event.preventDefault();first.focus()}
+});

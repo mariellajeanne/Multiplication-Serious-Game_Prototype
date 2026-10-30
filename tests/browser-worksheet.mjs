@@ -20,6 +20,8 @@ await new Promise(r=>server.listen(0,'127.0.0.1',r));
 const profile=await mkdtemp(join(tmpdir(),'pq-worksheet-browser-'));
 const browser=spawn(process.argv[2]||'C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe',[
   '--headless=new','--no-first-run','--no-default-browser-check','--remote-debugging-port=0',
+  '--inprivate','--disable-extensions','--disable-component-extensions-with-background-pages','--disable-sync','--disable-background-networking',
+  '--disable-background-timer-throttling','--disable-renderer-backgrounding','--disable-backgrounding-occluded-windows',
   '--remote-debugging-address=127.0.0.1',`--user-data-dir=${profile}`,'about:blank'
 ],{windowsHide:true,stdio:'ignore'});
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
@@ -32,7 +34,7 @@ try{
   }
   assert.ok(port,'Chromium remote debugging did not start');
   const tabs=await (await fetch(`http://127.0.0.1:${port}/json/list`)).json();
-  ws=new WebSocket(tabs.find(t=>t.type==='page').webSocketDebuggerUrl);
+  ws=new WebSocket(tabs.find(t=>t.type==='page'&&t.url==='about:blank').webSocketDebuggerUrl);
   await new Promise((r,j)=>{ws.onopen=r;ws.onerror=j;});
   ws.onmessage=event=>{
     const m=JSON.parse(event.data);
@@ -55,10 +57,11 @@ try{
     throw Error('Timed out: '+expression+' '+JSON.stringify({detail,errors}));
   };
   await cdp('Runtime.enable');await cdp('Page.enable');
-  await cdp('Emulation.setDeviceMetricsOverride',{width:1600,height:1200,deviceScaleFactor:1,mobile:false});
+  await cdp('Page.bringToFront');
+  await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   await cdp('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/index.html`});
   await waitFor(`typeof startTicket==='function'`);
-  await evaluate(`g.helpSeen=true;closeModal();g.board=[{id:9001,a:79,b:18,rarity:1,base:304}];startTicket(9001);`);
+  await evaluate(`g.helpSeen=true;closeModal();g.board=[{id:9001,a:79,b:18,rarity:1,base:304}];render();document.querySelector('.ticket').click();`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9001`);
   await evaluate(`window.auditFrame=$('worksheetFrame');window.auditChild=auditFrame.contentWindow;
     auditChild.eval("operand('bottom',0)")`);
@@ -86,29 +89,42 @@ try{
 
   // Continue the same actual worksheet with mouse/pointer events and its normal
   // animations. Geometry is measured through both documents; no test-fast mode.
-  const point=async selector=>evaluate(`(()=>{
+  const point=async selector=>{
+    await waitFor(`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
+    await pause(180);
+    return evaluate(`(()=>{
     window.scrollTo(0,auditFrame.getBoundingClientRect().top+scrollY-110);
     const el=auditChild.document.querySelector(${JSON.stringify(selector)});
     if(!el)throw Error('Missing target: '+${JSON.stringify(selector)});
     const a=el.getBoundingClientRect(),b=auditFrame.getBoundingClientRect();
     return {x:b.left+a.left+a.width/2,y:b.top+a.top+a.height/2};
   })()`);
+  };
+  let touchMode=false;
   const click=async selector=>{
     await waitFor(`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
     const p=await point(selector);
-    await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...p});
-    await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...p});
-    await pause(35);
+    if(touchMode){
+      await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});
+      await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    }else{
+      await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...p});
+      await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...p});
+    }
+    await pause(120);
   };
   const drag=async(from,to)=>{
     const a=await point(from),b=await point(to);
-    await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...a});
+    if(touchMode)await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...a,id:1}]});
+    else await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...a});
     for(let i=1;i<=8;i++){
-      await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',button:'left',buttons:1,
-        x:a.x+(b.x-a.x)*i/8,y:a.y+(b.y-a.y)*i/8});
+      const p={x:a.x+(b.x-a.x)*i/8,y:a.y+(b.y-a.y)*i/8};
+      if(touchMode)await cdp('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{...p,id:1}]});
+      else await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',button:'left',buttons:1,...p});
       await pause(20);
     }
-    await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...b});
+    if(touchMode)await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    else await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...b});
   };
   const flush=async()=>{
     await evaluate(`auditChild.eval('bridgePoll()')`);await pause(60);
@@ -118,6 +134,8 @@ try{
   await flush();const previousRewards=await rewardSnapshot();
   await evaluate(`auditChild.eval("report('ready');report('state',JSON.parse(lastReport));report('state',JSON.parse(lastReport))")`);
   await pause(100);await preserve();assert.equal(await rewardSnapshot(),previousRewards);
+  await waitFor('!rewardFlightsPending()');
+  assert.equal(await evaluate(`$('pendingCoins').textContent`),await evaluate(`'🪙 '+fmt(g.run.pool)`));
   console.log('PASS browser: duplicate ready/state messages and parent renders do not add rewards or reset the frame');
   // Fix RNG only in this isolated test profile to guarantee that all earlier
   // chest rolls miss. The last-combo guarantee and the claim can then be exact.
@@ -149,10 +167,10 @@ try{
   assert.deepEqual(await evaluate(`auditChild.eval('[s.rows[0],s.rows[1]]')`),
     [{'0':2,'1':3,'2':6},{'0':0,'1':9,'2':7}]);
   const guideOff=await evaluate(`auditChild.document.querySelectorAll('#additionSwipeGuide .drop-guide').length===0`);
-  console.log(`KNOWN baseline: addition hint respects Tutorial OFF: ${guideOff} (not changed by these stages)`);
-  // Swipe starts on the math surface outside buttons, as required by current UX.
-  const swipe=await evaluate(`(()=>{const a=auditChild.document.getElementById('sheet').getBoundingClientRect(),
-    b=auditFrame.getBoundingClientRect();return {x:b.left+a.left+7,y:b.top+a.top+75}})()`);
+  assert.equal(guideOff,true,'Tutorial OFF must clear addition guidance');
+  console.log('PASS browser: Tutorial OFF clears the addition hint');
+  // Completed partial-product cells accept the same downward swipe as whitespace.
+  const swipe=await point('[data-slot="0:0"]');
   await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...swipe});
   await pause(60);
   await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',buttons:1,x:swipe.x,y:swipe.y+70});
@@ -167,8 +185,20 @@ try{
   assert.equal(await evaluate('g.coins'),initialWallet+budget);
   assert.equal(await evaluate('g.completed'),1);
   console.log(`PASS browser: 79 × 18 = 1422, click/drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins and one chest claimed exactly once`);
+  const levelCost=await evaluate('foodLevelCost(g.owned[0])');
+  await evaluate('openFoodItem(1)');await pause(280);
+  const upgrade=await evaluate(`(()=>{const r=document.querySelector('.modal .primary').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
+  await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...upgrade});
+  await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...upgrade});
+  await waitFor('g.owned[0].level===2');
+  assert.equal(await evaluate('g.coins'),initialWallet+budget-levelCost);
+  assert.equal(await evaluate('JSON.parse(localStorage.getItem("panaderyaQuestV2")).owned[0].level'),2);
+  assert.ok(await evaluate('bakeryValue()>1.2'));
+  console.log('PASS browser: ticket selection → real math → chest claim → food upgrade, saved under the existing key');
 
   // Separate one-row carrying case: incoming carry creates a new leading digit.
+  await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});
+  await cdp('Emulation.setTouchEmulationEnabled',{enabled:true});touchMode=true;
   await evaluate(`closeModal();g.sound=true;g.tutorialArrows=true;
     g.board=[{id:9002,a:19,b:9,rarity:0,base:130}];startTicket(9002)`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9002`);
@@ -185,9 +215,9 @@ try{
   await waitFor(`g.run?.phase==='claim'`);
   assert.equal(await evaluate('g.run.pool'),await evaluate('g.run.budget'));
   assert.equal(await evaluate('g.run.chests.length'),1);
-  console.log('PASS browser: 19 × 9 = 171, direct outgoing carry and incoming carry before placement; tutorial/SFX enabled');
+  console.log('PASS browser: 19 × 9 = 171 at 390px with emulated touch taps/drags, outgoing/incoming carry before placement; tutorial/SFX enabled');
   assert.deepEqual(errors,[],'browser runtime exceptions');
 }finally{
-  ws?.close();browser.kill();await new Promise(r=>server.close(r));
+  ws?.close();browser.kill();server.closeAllConnections();await new Promise(r=>server.close(r));
   // Leave the isolated OS-temp profile to OS cleanup; never touch the user browser profile.
 }

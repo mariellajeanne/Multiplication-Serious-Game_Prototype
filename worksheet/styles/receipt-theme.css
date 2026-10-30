@@ -97,4 +97,4 @@ body{background:radial-gradient(ellipse at 12% 12%,#fff4d9 0%,transparent 48%),r
 .floating.equation-pending .equation-reveal{width:100%;min-height:45px;padding:5px 12px;border:0;border-radius:12px;background:linear-gradient(150deg,#fff9e8,#fbe0ad);color:#785027;font-size:24px;font-weight:1000;letter-spacing:.02em;white-space:nowrap;touch-action:manipulation;box-shadow:none;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;user-select:none}
 .floating.equation-pending .equation-reveal:active{background:#f8d99b;transform:scale(.97)}
 .floating.equation-pending .equation-reveal:focus-visible{outline:3px solid #b87d2e;outline-offset:-3px}
-<style>.addition-lab,.multiplication-lab{display:none!important}.workspace{margin-top:0!important} .shell{padding-top:0!important} 
+.addition-lab,.multiplication-lab{display:none!important}.workspace{margin-top:0!important} .shell{padding-top:0!important}

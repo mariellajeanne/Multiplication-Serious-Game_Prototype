@@ -19,6 +19,8 @@ A Filipino bakery-themed long-multiplication serious game, built as a static web
 ## Tests
 If Node.js is available, from project root: `node --test tests/smoke.test.mjs`. For gestures, tutorials, sound and visual checks, run the browser and use `tests/worksheet-manual-checklist.md`.
 
+The full regression suite is `node --test tests/smoke.test.mjs tests/worksheet-session.test.mjs tests/worksheet-rewards.test.mjs tests/ux.test.mjs`. With Node 22+ and Edge installed, `node tests/browser-worksheet.mjs` tests the complete tablet/phone order flow; `node tests/browser-ux.mjs` checks dialogs, four viewport sizes and reduced-motion feedback. Both accept a Chromium/Edge executable path as their first argument and use isolated private temporary profiles. See [`docs/UX_AUDIT.md`](docs/UX_AUDIT.md) for the redesign rationale, exact validation and remaining physical-device/child-testing needs.
+
 ## GitHub Pages
 This project is static and does not require a build step. Deploy **all** root files and directories via branch `main` and `/(root)` in GitHub Pages. Preserve `.git` when copying files into your existing clone. A new commit does not erase commit history.
 

@@ -23,14 +23,15 @@ function launchDigit(from,to,digit,duration=185,delay=0){
  const dx=b.x-a.x,dy=b.y-a.y;
  return new Promise(resolve=>{setTimeout(()=>{
   const anim=el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{offset:.78,transform:`translate(${dx*.76}px,${dy*.76}px) scale(.95)`,opacity:1},{transform:`translate(${dx}px,${dy}px) scale(.88)`,opacity:.08}],{duration,easing:'cubic-bezier(.18,.85,.25,1)',fill:'forwards'});
-  anim.finished.catch(()=>{}).then(()=>{el.remove();resolve()})
+  settleWorksheetAnimation(anim,duration+80).then(()=>{el.remove();resolve()})
  },delay)})
 }
 function showFinalDigits(vals){for(let c=0;c<s.cols;c++){s.sum[c]=vals[c]}s.sumCol=s.cols;s.sumCarry=0;}
 // Only one gesture hint is shown. It stays outside the mathematics cells' hit areas.
 function updateAdditionSwipeGuide(){
  const guide=$('additionSwipeGuide');if(!guide)return;guide.innerHTML='';
- if(!s||s.phase!=='sum'||busy)return;
+ guide.hidden=!tutorial;
+ if(!tutorial||!s||s.phase!=='sum'||busy)return;
  // Grid displays columns in descending order: the largest column is physically LEFT.
  const leftEl=Q(`[data-slot="0:${s.cols-1}"]`), rightEl=Q('[data-slot="0:0"]');
  const rowTop=leftEl?.closest('.productline'),rowBottom=Q('[data-slot="1:0"]')?.closest('.productline');
@@ -86,7 +87,7 @@ async function riseMergedRow(token){
       {offset:.65,transform:`translateY(${travel*.65}px) scale(1.015)`,opacity:1},
       {transform:`translateY(${travel}px) scale(1)`,opacity:1}
     ],{duration:295,delay:c*47,easing:'cubic-bezier(.36,0,.23,1)',fill:'forwards'});
-    anim.finished.catch(()=>{}).then(resolve);
+    settleWorksheetAnimation(anim,375+c*47).then(resolve);
   }));
  }
  play('done');await Promise.all(animations);

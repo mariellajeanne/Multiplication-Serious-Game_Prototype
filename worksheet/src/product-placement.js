@@ -1,7 +1,15 @@
 'use strict';
+// Some browsers pause compositor completion when a frame is occluded. Keep
+// the existing animation duration, but never leave a placement locked forever.
+function settleWorksheetAnimation(animation,maxMs){
+ return new Promise(resolve=>{
+  const timer=setTimeout(resolve,maxMs);
+  animation.finished.catch(()=>{}).then(()=>{clearTimeout(timer);resolve()});
+ });
+}
 function originFor(part){return Q(`[data-part="${part}"]`)||$('floating')}
 function destinationFor(part,kind){const c=currentCol();return part==='ones'?Q(`[data-slot="${s.row}:${c}"]`):(kind==='slot'||lastDigit())?Q(`[data-slot="${s.row}:${c+1}"]`):Q(`[data-carry="${s.k+1}"]`)}
-function animateMove(from,to,text,kind){if(!from||!to||window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();let base=$('sheet'),root=base.getBoundingClientRect(),a=from.getBoundingClientRect(),b=to.getBoundingClientRect();let el=document.createElement('div');el.className='fly';el.textContent=text;el.style.left=(a.left-root.left)+'px';el.style.top=(a.top-root.top)+'px';el.style.width=a.width+'px';el.style.height=a.height+'px';base.append(el);let dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2),scale=Math.min(1,b.height/Math.max(a.height,1));let anim=el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(${scale})`,opacity:.9}],{duration:kind==='up'?330:270,easing:'cubic-bezier(.15,.85,.27,1)',fill:'forwards'});return anim.finished.catch(()=>{}).then(()=>el.remove());}
+function animateMove(from,to,text,kind){if(!from||!to||window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion: reduce)').matches)return Promise.resolve();let base=$('sheet'),root=base.getBoundingClientRect(),a=from.getBoundingClientRect(),b=to.getBoundingClientRect();let el=document.createElement('div');el.className='fly';el.textContent=text;el.style.left=(a.left-root.left)+'px';el.style.top=(a.top-root.top)+'px';el.style.width=a.width+'px';el.style.height=a.height+'px';base.append(el);let dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2),scale=Math.min(1,b.height/Math.max(a.height,1));let anim=el.animate([{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${dx}px,${dy}px) scale(${scale})`,opacity:.9}],{duration:kind==='up'?330:270,easing:'cubic-bezier(.15,.85,.27,1)',fill:'forwards'});return settleWorksheetAnimation(anim,kind==='up'?410:350).then(()=>el.remove());}
 function spark(el,txt='✦'){if(!el||window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches)return;let base=$('sheet').getBoundingClientRect(),p=el.getBoundingClientRect(),node=document.createElement('span');node.className='spark';node.textContent=txt;node.style.left=p.left+p.width/2-base.left+'px';node.style.top=p.top-base.top+'px';$('sheet').append(node);setTimeout(()=>node.remove(),690)}
 // The tens tile has TWO destinations during a normal column: the carry shelf OR
 // a temporary place in the partial-product row. The latter is not finalized.

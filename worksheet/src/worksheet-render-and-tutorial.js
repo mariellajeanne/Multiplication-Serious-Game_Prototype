@@ -1,7 +1,7 @@
 'use strict';
-function finish(){const arr=s.B.length>1?s.sum:s.rows[0],total=Object.entries(arr).reduce((n,[c,v])=>n+Number(v)*10**Number(c),0);if(total!==s.a*s.b){console.error('Math result mismatch',s,total);status('Calculation check failed.',true);return}s.complete=true;s.phase='complete';money+=50;play('finish');render();$('receiptStamp').classList.add('stamped');$('machineLive').textContent='ORDER COMPLETE';$('cashDisplay').textContent='+₱50';$('cashTerminal').classList.remove('open');void $('cashTerminal').offsetWidth;$('cashTerminal').classList.add('open');$('complete').innerHTML=`<div class="complete"><h3>Order packed and verified!</h3><p>${fmt(s.a)} × ${fmt(s.b)} = <strong>${fmt(total)}</strong> pastries processed.</p><button class="tool" id="again">↻ New order</button></div>`;$('again').onclick=reset;status('Order complete!')}
+function finish(){const arr=s.B.length>1?s.sum:s.rows[0],total=Object.entries(arr).reduce((n,[c,v])=>n+Number(v)*10**Number(c),0);if(total!==s.a*s.b){console.error('Math result mismatch',s,total);status('Calculation check failed.',true);return}s.complete=true;s.phase='complete';money+=50;play('finish');render();$('receiptStamp').classList.add('stamped');$('machineLive').textContent='ORDER COMPLETE';$('cashDisplay').textContent='+₱50';$('cashTerminal').classList.remove('open');void $('cashTerminal').offsetWidth;$('cashTerminal').classList.add('open');$('complete').innerHTML=`<div class="complete"><h3>Order ready!</h3><p>${fmt(s.a)} × ${fmt(s.b)} = <strong>${fmt(total)}</strong> pieces for your customer.</p><button class="tool" id="again">↻ New order</button></div>`;$('again').onclick=reset;status('Order complete!')}
 function undo(){if(!history.length||busy)return;additionCollapsed=false;run++;multiplySerial++;multiplyRunning=false;clearMultiplyFx();clearTimeout(connectionTimer);$('pair').classList.remove('live');document.querySelectorAll('.fly,.addition-ghost,.addition-spark').forEach(x=>x.remove());const h=history.pop();s=h.s;money=h.money;selection=null;s.chosen=null;s.carryArmed=false;$('complete').innerHTML='';render();status('Undone.')}
-function render(){const active=productActive(),last=lastDigit();$('replayMult').disabled=!active||busy||!s.revealed||s.onesPlaced||s.tensPlaced;$('app').className='shell '+visual+(active?' product-focus':'');$('operationCue').textContent=s.phase==='sum'?'＋ ADD PARTIAL PRODUCTS':s.phase==='complete'?'✓ FINISHED':s.phase==='product'?'× MULTIPLY':'× MULTIPLY';$('rowTag').textContent=s.phase==='sum'?'FINAL ADDITION':s.phase==='complete'?'✓ PACKED':`ROW ${s.row+1} / ${s.B.length}`;$('pairs').textContent=`${s.done} / ${s.A.length*s.B.length} PAIRS`;$('equation').textContent=fmt(s.a)+' × '+fmt(s.b);$('category').textContent=allCases.find(o=>o.a===s.a&&o.b===s.b)?.group||'';$('counter').textContent=s.done+' product cycles sealed';$('boxes').textContent=s.boxes;$('meterFill').style.width=100*s.done/(s.A.length*s.B.length)+'%';$('percent').textContent=Math.round(100*s.done/(s.A.length*s.B.length))+'%';$('balance').textContent='₱'+fmt(money);$('undo').disabled=!history.length||busy;$('selectedLabel').classList.toggle('hidden',!s.chosen&&!s.carryArmed);$('selectedLabel').textContent=s.carryArmed?'Carry selected':s.chosen==='tens'?'Tens tile selected':'Ones tile selected';
+function render(){const active=productActive(),last=lastDigit();$('replayMult').disabled=!active||busy||!s.revealed||s.onesPlaced||s.tensPlaced;$('app').className='shell '+visual+(active?' product-focus':'');$('operationCue').textContent=s.phase==='sum'?'＋ ADD PARTIAL PRODUCTS':s.phase==='complete'?'✓ FINISHED':s.phase==='product'?'× MULTIPLY':'× MULTIPLY';$('rowTag').textContent=s.phase==='sum'?'FINAL ADDITION':s.phase==='complete'?'✓ READY':`ROW ${s.row+1} / ${s.B.length}`;$('pairs').textContent=`${s.done} / ${s.A.length*s.B.length} PAIRS`;$('equation').textContent=fmt(s.a)+' × '+fmt(s.b);$('category').textContent=allCases.find(o=>o.a===s.a&&o.b===s.b)?.group||'';$('counter').textContent=s.done+' digit pairs finished';$('boxes').textContent=s.boxes;$('meterFill').style.width=100*s.done/(s.A.length*s.B.length)+'%';$('percent').textContent=Math.round(100*s.done/(s.A.length*s.B.length))+'%';$('balance').textContent='₱'+fmt(money);$('undo').disabled=!history.length||busy;$('selectedLabel').classList.toggle('hidden',!s.chosen&&!s.carryArmed);$('selectedLabel').textContent=s.carryArmed?'Carry selected':s.chosen==='tens'?'Tens tile selected':'Ones tile selected';
  let html='';const box=(klass,txt='',data='',aria='')=>`<button type="button" class="cell ${klass}" ${data} aria-label="${aria}">${txt}</button>`;function line(className,sign,fn){let out=`<div class="line ${className}" style="--cols:${s.cols}">`;if(sign)out+=`<span class="symbol">${sign}</span>`;for(let c=s.cols-1;c>=0;c--)out+=fn(c);return out+'</div>'};const empty=()=>'<span class="cell"></span>';
  html+=line('carryline','',c=>c<s.A.length?box('hold '+(s.carrySlots[c]?'waiting ':'')+(s.carryArmed&&c===s.k?'armed ':'')+(s.carrySlots[c]?.provisional?'provisional ':'')+(s.phase==='select'&&s.first?'':'') ,s.carrySlots[c]?.value??'',`data-carry="${c}"`,`Carry above digit ${s.A[c]}`):empty());
  html+=line('topline','',c=>c<s.A.length?box('number '+((s.first?.kind==='top'&&s.first.c===c)?'first ':'')+(active&&s.k===c?'connecting ':''),s.A[c],`data-top="${c}"`,`Multiplicand ${s.A[c]}`):empty());
@@ -12,7 +12,7 @@ function render(){const active=productActive(),last=lastDigit();$('replayMult').
  for(let r=0;r<s.B.length;r++){if(r>s.row&&s.phase!=='complete'&&s.phase!=='sum')continue;html+=line('productline',r?'＋':'',c=>{let n=s.rows[r][c],filled=n!==undefined,provisional=active&&r===s.row&&!s.mixed&&((s.onesPlaced&&c===currentCol())||(s.tensPlaced&&s.tensLocation==='row'&&c===currentCol()+1));return box('rowcell '+(filled?'filled ':'')+(provisional?'provisional ':'')+(s.carryArmed&&r===s.row&&c===currentCol()&&s.onesPlaced?'targeted ':'')+(active&&r===s.row&&s.tensLocation==='row'&&c===currentCol()+1&&!last?'liftable ':'')+(c<r?'zero ':''),filled?n:'',`data-slot="${r}:${c}"`,`Product row ${r+1} column ${c+1}`)})}
  if(s.B.length>1&&s.phase==='complete')html+=line('finalline','=',c=>box('rowcell '+(s.sum[c]!==undefined?'filled':''),s.sum[c]??'',`data-sum="${c}"`,`Sum column ${c+1}`));
  }
- $('math').innerHTML=html;updateAdditionHelp();requestAnimationFrame(updateAdditionSwipeGuide);$('progressTag').textContent=s.phase==='complete'?'✓ CALIBRATED':`${s.done} PACKING CYCLES`;requestAnimationFrame(positionFloater);
+ $('math').innerHTML=html;updateAdditionHelp();updateAdditionSwipeGuide();$('progressTag').textContent=s.phase==='complete'?'✓ ORDER READY':`${s.done} DIGIT PAIRS`;positionFloater();requestAnimationFrame(positionFloater);
 }
 function positionFloater(){
  const float=$('floating'),svg=$('pair');
@@ -44,7 +44,7 @@ function positionFloater(){
  let x=(typeOnActive?ax-w/2:ax-onesCenter), y=(ay+by)/2-h/2-6;
  x=Math.max(4,Math.min(rect.width-w-4,x));y=Math.max(22,Math.min(rect.height-h-5,y));
  float.style.left=x+'px';float.style.top=y+'px';
- if(s.revealed)updateTutorial(ax,ay,bx,by);else $('tutorial').innerHTML='';
+ updateTutorial();
  fxPosition();
 }
 
@@ -62,5 +62,33 @@ function makeStream(a,b,cls){
  `<span class="stream-chevron" style="animation-delay:${(-i*1.6/count).toFixed(3)}s"></span>`).join('')+'<span class="stream-tip"></span>';
  return stream;
 }
-function updateTutorial(ax=null,ay=null,bx=null,by=null){const layer=$('tutorial');if(!layer)return;layer.innerHTML='';layer.hidden=!tutorial;if(!tutorial)return;if(s.phase==='complete'||s.phase==='sum')return;const topEl=Q(`[data-top="${s.k}"]`),bottomEl=Q(`[data-bottom="${s.row}"]`);const top=topEl?pointOf(topEl):null,bottom=bottomEl?pointOf(bottomEl):null;if(!productActive()){if(top&&bottom){const stream=makeStream(bottom,top,'connect');if(stream)layer.append(stream);}return;}const onesFloating=Q('#floating [data-part="ones"]'),tensFloating=Q('#floating [data-part="tens"]');const onesPlaced=Q(`[data-slot="${s.row}:${currentCol()}"]`),tensRow=Q(`[data-slot="${s.row}:${currentCol()+1}"]`),carryNow=Q(`[data-carry="${s.k}"]`),carryNext=Q(`[data-carry="${s.k+1}"]`);const onesSource=s.onesPlaced?onesPlaced:onesFloating;if(s.incoming&&!s.mixed&&carryNow&&onesSource){const stream=makeStream(pointOf(carryNow),pointOf(onesSource),'carry');if(stream)layer.append(stream);return;}if(!s.onesPlaced&&onesFloating&&onesPlaced){const stream=makeStream(pointOf(onesFloating),pointOf(onesPlaced),'place');if(stream)layer.append(stream);return;}if(tens()>0){let from=null,to=null;if(s.tensLocation==='row'&&tensRow){from=pointOf(tensRow);to=lastDigit()?pointOf(tensRow):(carryNext?pointOf(carryNext):null);}else if(!s.tensPlaced&&tensFloating){from=pointOf(tensFloating);to=lastDigit()?pointOf(tensRow):(carryNext?pointOf(carryNext):null);}if(from&&to){const stream=makeStream(from,to,'lift');if(stream)layer.append(stream);return;}}}
-
+function updateTutorial(){
+ const layer=$('tutorial'),prompt=$('guidePrompt');if(!layer)return;
+ layer.innerHTML='';layer.hidden=!tutorial;
+ document.querySelectorAll('.guide-target,.guide-dim').forEach(el=>el.classList.remove('guide-target','guide-dim'));
+ if(prompt){prompt.hidden=!tutorial;prompt.textContent=''}
+ if(!tutorial||!s||s.phase==='complete')return;
+ let from=null,to=null,text='';
+ const top=Q(`[data-top="${s.k}"]`),bottom=Q(`[data-bottom="${s.row}"]`);
+ if(s.phase==='select'){
+  from=s.first?.kind==='top'?top:bottom;to=s.first?.kind==='top'?bottom:top;
+  text=s.first?'Now touch the other digit.':'Connect these two digits.';
+ }else if(s.phase==='sum'){text='Swipe down to add the rows.';updateAdditionSwipeGuide();}
+ else if(!s.revealed){
+  to=$('equationReveal');text='Tap to see the product.';
+  const p=pointOf(to);if(p){const cue=document.createElement('span');cue.className='tap-cue';cue.style.left=p.x+'px';cue.style.top=p.y+'px';layer.append(cue)}
+ }else{
+  const onesSource=s.onesPlaced?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
+  if(s.incoming&&!s.mixed){from=Q(`[data-carry="${s.k}"]`);to=onesSource;text='Bring the carry into the ones.';}
+  else if(!s.onesPlaced){from=onesSource;to=Q(`[data-slot="${s.row}:${currentCol()}"]`);text='Put the ones digit here.';}
+  else if(tens()>0){
+   from=s.tensLocation==='row'?Q(`[data-slot="${s.row}:${currentCol()+1}"]`):Q('[data-part="tens"]');
+   to=lastDigit()?Q(`[data-slot="${s.row}:${currentCol()+1}"]`):Q(`[data-carry="${s.k+1}"]`);
+   text=lastDigit()?'Place the last digit.':'Lift the tens to the carry shelf.';
+  }
+ }
+ if(prompt)prompt.textContent=text;
+ for(const el of [from,to])el?.classList.add('guide-target');
+ if(s.phase==='select')document.querySelectorAll('.cell.number').forEach(el=>{if(el!==from&&el!==to)el.classList.add('guide-dim')});
+ if(from&&to){const stream=makeStream(pointOf(from),pointOf(to),'next-action');if(stream)layer.append(stream);}
+}
