@@ -9,11 +9,20 @@ function ingredientNeeds(o){const f=F(o.id),qty=[0,3,7,15,30][foodTier(o)]*(1+Ma
 function fusionIngredientCost(o){return ingredientNeeds(o).reduce((s,x)=>s+Math.max(0,x.need-x.have)*x.price,0)}
 function equipmentCost(k){const level=g.equipment[k.id]||0;return Math.max(1,Math.round(economyUnit()*(.85+.22*Math.pow(level,1.15))*(1+.1*KITCHEN.indexOf(k))))}
 function bakeryUpgradeCost(){return Math.max(1,Math.round(economyUnit()*(2.5+.2*Math.pow(g.bakeryLevel-1,1.15))))}
+function refreshFoodProgress(){
+ reconcileAutoEquip();
+ // Values are derived from owned foods, never a stored multiplier snapshot.
+ const contribution=foodSum(),total=bakeryValue();
+ save();render();
+ // Dialogs are a separate mount: refresh open inventory/detail content too.
+ if(modal?.title==='Food Inventory')openMenu(inventoryIntent,true);
+ return {contribution,total};
+}
 function upgradeFood(uid,inline=false){
  if(g.run)return false;const o=g.owned.find(x=>x.uid===uid);if(!o||o.level>=MAX_FOOD_LEVEL)return false;
  const cost=foodLevelPrice(o);if(g.coins<cost){toast('Not enough coins yet — solve another order!');return false}
  g.coins-=cost;o.spent=(o.spent||0)+cost;if(!cost)g.foodLevelCredits[o.id]--;o.level++;
- save();render();if(!inline)openMenu();toast(`${F(o.id).name} is now Level ${o.level}!`);return true;
+ refreshFoodProgress();if(!inline)openMenu();toast(`${F(o.id).name} is now Mastery Lv ${o.level}!`);return true;
 }
 function duplicateFusionPlan(o,donorUid){const donor=g.owned.find(x=>x.uid===Number(donorUid));return fusionPlan(o,donor,fusionFee(o,donor))}
 function fusionFingerprint(foods){return JSON.stringify(foods.map(o=>[o.uid,o.id,o.fusion,o.level,o.spent,o.baseCarry||0,o.resaleBase??null]))}
@@ -28,7 +37,7 @@ function applyDuplicateFusion(plan,fingerprint){
  verified.outputs.forEach((o,i)=>g.owned.push({...o,uid:i===0?primaryUid:g.uidNext++}));
  g.foodLevelCredits[inputs[0].id]=(g.foodLevelCredits[inputs[0].id]||0)+verified.levelCredits;
  g.activeMenu=[...new Set(g.activeMenu.map(uid=>ids.has(uid)?primaryUid:uid))].slice(0,g.menuSlots);
- save();render();toast(`Fused ${F(inputs[0].id).name}! All results are in Food Inventory.`);return true;
+ refreshFoodProgress();toast(`Fused ${F(inputs[0].id).name}! All results are in Food Inventory.`);return true;
 }
 function fuseDuplicate(uid,donorUid){const o=g.owned.find(x=>x.uid===uid),plan=o&&duplicateFusionPlan(o,donorUid);return plan?applyDuplicateFusion(plan,fusionFingerprint(plan.inputs.map(id=>g.owned.find(x=>x.uid===id)))):false}
 function fuseIngredients(uid,expected=null){
@@ -40,7 +49,7 @@ function fuseIngredients(uid,expected=null){
  // Purchased pantry stock is paid investment too; only missing stock is charged now.
  o.spent=(o.spent||0)+fee+needs.reduce((sum,i)=>sum+i.need*i.price,0);
  for(const i of needs)g.ingredients[i.name]=Math.max(0,(g.ingredients[i.name]||0)-i.need);
- o.fusion=foodTier(o)+1;save();render();openMenu();toast(`Ingredients fused into ${F(o.id).name}!`);return true;
+ o.fusion=foodTier(o)+1;refreshFoodProgress();openMenu();toast(`Ingredients fused into ${F(o.id).name}!`);return true;
 }
 function buyIngredient(name,count){
  if(g.run||!Number.isInteger(count)||count<=0)return false;const data=INGREDIENTS.find(x=>x[0]===name);if(!data)return false;

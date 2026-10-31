@@ -62,3 +62,32 @@
 @media(max-width:800px){.equip-best>summary{padding:8px;font-size:12px}.food-navigation>button{font-size:12px}.food-navigation{gap:8px}.equip-options{left:auto;right:0}}
 @media(max-width:560px){.ticket-board .tickets{max-height:none;overflow-y:hidden}.equip-best{order:1;width:100%}.equip-options{left:0;right:auto;width:100%}.fusion-output{gap:6px;padding:7px}.fusion-output .food-art{width:56px;height:50px;flex-basis:56px}.fusion-output b{font-size:13px}.fusion-output span{font-size:12px}.fusion-review .costrow{flex-wrap:wrap;gap:8px}}
 @media(prefers-reduced-motion:reduce){.ticket-arriving,.package-reward{animation:none!important}}
+
+/* Focused Mastery food presentation; preserve paper and rarity palette. */
+.live-order,.paused-menu{min-width:0;width:100%}
+.live-order[hidden],.paused-menu[hidden]{display:none!important}
+.resume-order{width:100%;margin-bottom:14px;min-height:48px}
+/* One fixed outer size for every menu slot, independent of its contents. */
+.menu-grid,.inventory-grid{--food-card-height:360px;grid-auto-rows:var(--food-card-height);align-items:stretch}
+.menu-grid>.food-tile,.inventory-grid>.food-tile{box-sizing:border-box;width:100%;height:var(--food-card-height);min-height:0;max-height:var(--food-card-height);min-width:0;margin:0;overflow:hidden;align-self:stretch}
+.food-tile.mastery-card,.inventory-grid .food-tile.mastery-card{padding:8px 0 0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:22px 26px 46px minmax(0,1fr) 42px 52px 44px;gap:0;align-items:stretch;justify-content:normal}
+.mastery-card .tier-banner,.inventory-grid .mastery-card .tier-banner{position:static;align-self:center;justify-self:stretch;max-width:100%;padding:0 5px;border:0;background:none;box-shadow:none;font-size:13px;line-height:1.2}
+.mastery-card .mastery-stars{width:100%;text-align:center;padding:1px 0;border:0;border-top:1px solid var(--rank-edge);border-bottom:1px solid var(--rank-edge);border-radius:0;background:var(--rank-fill);color:var(--rank-ink);font-size:20px;letter-spacing:2px;line-height:22px}
+.food-tile.mastery-card .food-value{position:static;width:100%;text-align:center;margin:0;padding:3px 0 2px;border:0;border-bottom:1px solid #dbc29c;border-radius:0;box-shadow:none;background:#fff3d6;font-size:26px;line-height:1}
+.mastery-card .food-value small{display:block;font-size:12px;line-height:1.2;margin-top:1px}
+.mastery-card .food-identity{flex:none;min-height:0!important;height:100%;width:100%;padding:2px 7px;margin:0;gap:0;overflow:hidden}
+.mastery-card .food-identity:before{content:none;display:none}
+/* The shared illustration includes a plate; cards retain only its shadow. */
+.mastery-card .food-identity .food-art>ellipse:nth-child(2){display:none}
+.menu-grid>.buy-slot .slot-purchase-line{flex-wrap:wrap;white-space:normal;max-width:100%}
+.menu-grid>.buy-slot .slot-price{max-width:100%;overflow-wrap:anywhere}
+.food-tile.mastery-card .food-identity .food-art{height:80px;width:170px;max-height:calc(100% - 38px);min-height:0;flex:1 1 0;max-width:95%;margin:0;transform:none;filter:drop-shadow(0 3px 3px #97735025)}
+.food-tile.mastery-card .food-name{flex:0 0 auto;font-size:16px;text-align:center;line-height:1.15;margin:1px 0 0;padding:2px 4px;max-width:100%;border:0;background:none;box-shadow:none;border-radius:0}
+.mastery-summary{width:100%;padding:3px 6px;text-align:center;border:0;border-top:1px solid #e5d2b5;border-radius:0;background:#fff9ec}
+.mastery-summary b,.mastery-summary small{display:block;line-height:1.2}.mastery-summary b{font-size:16px}.mastery-summary small{font-size:12px;color:#896c4b}
+.mastery-card .mastery-upgrade{width:calc(100% - 16px);justify-self:center;align-self:center;height:46px;min-height:44px;white-space:normal;font-size:13px;line-height:1.2;margin:0;padding:3px 5px;background:linear-gradient(#dbe8bf,#b9ce94);border:2px solid #94aa75;color:#40552c;box-shadow:0 3px 0 #8c9f71}
+.mastery-upgrade span{display:inline-block;margin-left:4px;white-space:nowrap}
+.mastery-card .food-management{width:100%;height:44px;min-width:0;margin:0;padding:0 4px;align-self:end}.mastery-card .food-management button{min-width:0;min-height:44px;padding:4px;font-size:12px}
+.inventory-grid .food-tile.mastery-card{grid-template-rows:40px 26px 46px minmax(0,1fr) 42px 52px 44px}
+.inventory-grid .mastery-card .inventory-select{top:5px;right:5px;width:36px;height:36px}.inventory-grid .mastery-card .tier-banner{padding:0 42px 15px 6px;font-size:11px}.inventory-grid .mastery-card .equipped-label{position:absolute;top:27px;left:8px;margin:0;padding:0 4px;font-size:9px;line-height:13px}
+@media(max-width:560px){.mastery-card .mastery-stars{font-size:17px;letter-spacing:0}.food-tile.mastery-card .food-name{font-size:14px}.mastery-card .mastery-upgrade{font-size:12px}.mastery-card .tier-banner{font-size:11px}}

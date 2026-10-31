@@ -51,7 +51,7 @@ function fusionPlan(a,b,fee){
 }
 function bestMenu(owned,capacity,mode){
  const sorted=[...owned].filter(o=>FOOD.some(f=>f.id===o.id)).sort((a,b)=>
-  (mode==='base'?tierBase(b)-tierBase(a):individualValue(b)-individualValue(a))||a.uid-b.uid);
+  (mode==='base'?tierBase(b)-tierBase(a):individualValue(b)-individualValue(a))||individualValue(b)-individualValue(a)||a.uid-b.uid);
  const seen=new Set();return sorted.filter(o=>{if(seen.has(o.id))return false;seen.add(o.id);return true}).slice(0,capacity).map(o=>o.uid);
 }
 function pricingMenuBase(){

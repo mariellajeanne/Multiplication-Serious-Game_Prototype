@@ -1,3 +1,7 @@
+# Latest focused update
+
+See [Mastery cards and ticket exit](MASTERY_AND_TICKET_FIX.md) for the current card presentation, equal-base Auto Equip fix and retained live worksheet on Exit/Resume.
+
 # Architecture, code map, and constraints
 
 **Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 and Kitchen Level 20, migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.

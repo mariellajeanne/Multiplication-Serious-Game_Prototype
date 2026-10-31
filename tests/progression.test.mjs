@@ -110,3 +110,37 @@ test('a stale tab save retains the latest refresh deadline',()=>{
  const h=progressionHarness();h.run(`Date.now=()=>1000000;g.orderRefreshAt=1180000;save();g.orderRefreshAt=0;save();again=refreshOrders()`);
  assert.equal(h.run('g.orderRefreshAt'),1180000);assert.equal(h.run('again'),false);
 });
+
+
+test('Mastery upgrade immediately improves equipped value, rendered totals and reload',()=>{
+ const h=progressionHarness();h.run(`g.coins=1e9;before=foodValue(g.owned[0]);total=bakeryValue();ok=upgradeFood(1,true);card=renderFoodCard(g.owned[0]);menu=renderMenu()`);
+ assert.equal(h.run('ok'),true);assert.ok(h.run('foodValue(g.owned[0])>before'));assert.ok(h.run('bakeryValue()>total'));
+ assert.match(h.run('card'),/Mastery Lv 2\/5/);assert.match(h.run('card'),/Current bonus: \+25%/);
+ assert.match(h.run('card'),/Upgrade to Lv 3 \(\+55%\)/);assert.doesNotMatch(h.run('card'),/card-fuse|\u2192/);
+ assert.ok(h.run('menu.includes(multiplierLabel(bakeryValue()))'));
+ const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));
+ assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));assert.equal(r.run('foodValue(g.owned[0])'),h.run('foodValue(g.owned[0])'));
+ h.run('g.owned[0].level=5');assert.match(h.run('renderFoodCard(g.owned[0])'),/Mastery Max/);
+});
+
+test('Base Auto Equip uses improved Mastery to break equal-base ties immediately and after reload',()=>{
+ const h=progressionHarness();h.run(`g.coins=1e9;g.owned.push({uid:2,id:'pandesal',level:1,fusion:1,spent:0});setAutoEquip('base',true);before=bakeryValue();upgradeFood(2,true)`);
+ assert.deepEqual(h.json('g.activeMenu'),[2]);assert.ok(h.run('bakeryValue()>before'));
+ const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.deepEqual(r.json('g.activeMenu'),[2]);assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));
+});
+
+test('both fusion transactions update contribution and total, and retain them in storage',()=>{
+ for(const duplicate of [false,true]){
+  const h=progressionHarness();h.run(`g.coins=1e9;g.completed=5;g.owned.push({uid:2,id:'pandesal',level:1,fusion:1,spent:0});g.uidNext=3;before=bakeryValue();${duplicate?'fuseDuplicate(1,2)':'fuseIngredients(1)'}`);
+  assert.ok(h.run('bakeryValue()>before'));
+  const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));
+ }
+});
+
+test('exit and resume retain ticket identity, board, ledger, rewards and attempt across save',()=>{
+ const h=progressionHarness();h.run(`refillBoard();id=g.board[0].id;board=JSON.stringify(g.board);startTicket(id);g.run.pool=42;g.run.index=1;g.run.chests=[{rarity:2}];attempt=g.run.worksheetRewards.attemptId;active=g.run;abandonTicket();saved=JSON.stringify(g.run)`);
+ assert.equal(h.run('g.run===active'),true);assert.equal(h.run('g.run.paused'),true);assert.equal(h.run('JSON.stringify(g.board)'),h.run('board'));
+ const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.equal(r.run('JSON.stringify(g.run)'),h.run('saved'));
+ h.run('startTicket(id)');assert.equal(h.run('g.run===active'),true);assert.equal(h.run('g.run.paused'),false);assert.equal(h.run('g.run.pool'),42);assert.equal(h.run('g.run.index'),1);assert.equal(h.run('g.run.worksheetRewards.attemptId'),h.run('attempt'));assert.equal(h.run('JSON.stringify(g.board)'),h.run('board'));
+ h.run("g.run.phase='claim';g.run.rewards=[];g.run.correct=0;g.run.mistakes=0;g.run.chests=[];prizeItems();refillBoard()");assert.equal(h.run('g.board.some(t=>t.id===id)'),false);assert.equal(h.run('g.board.length'),5);
+});

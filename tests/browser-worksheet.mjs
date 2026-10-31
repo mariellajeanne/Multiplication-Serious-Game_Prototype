@@ -71,6 +71,13 @@ try{
     auditChild.eval("operand('bottom',0)")`);
   const preserve=async()=>{
     const before=await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound})'))`);
+    const board=await evaluate('JSON.stringify(g.board)');
+    await evaluate('abandonTicket()');
+    assert.ok(await evaluate("g.run.paused&&$('liveOrder').hidden&&!$('pausedMenu').hidden"));
+    await evaluate('startTicket(g.run.ticket.id)');
+    assert.ok(await evaluate("!g.run.paused&&$('worksheetFrame')===auditFrame&&!$('liveOrder').hidden"));
+    assert.equal(await evaluate('JSON.stringify(g.board)'),board);
+    assert.equal(await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound})'))`),before);
     for(const dialog of ['openSettings()','showTutorial(2)','openProbabilities()','openMenu()']){
       await evaluate(`${dialog};closeModal();render()`);
       assert.ok(await evaluate(`$('worksheetFrame')===auditFrame&&auditFrame.contentWindow===auditChild`));
