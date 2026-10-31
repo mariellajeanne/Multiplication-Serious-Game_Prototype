@@ -6,7 +6,7 @@ function render(){
  }
  mountedWorksheetRun=g.run?.phase==='engine'?g.run:null;
  reconcileAutoEquip();refillBoard();$('app').dataset.bakeryStage=bakeryStage(g.bakeryLevel);$('app').className=g.run&&!g.run.paused?'playing':'browsing';
- $('app').innerHTML=`<header class="topbar"><div class="brand"><span class="brandlogo" aria-hidden="true">${bakeryIcon('bakery')}</span><h1>My Panaderya</h1><button class="iconbtn" onclick="openSettings()" aria-label="Settings">${bakeryIcon('settings')}</button></div></header><div class="layout">${renderLeft()}${g.run?`<div id="liveOrder" class="live-order">${renderWorksheet()}</div><div id="pausedMenu" class="paused-menu" hidden></div>`:renderMenu()}${renderRight()}</div>`;
+ $('app').innerHTML=`<header class="topbar"><div class="brand"><span class="brandlogo" aria-hidden="true">${bakeryIcon('bakery')}</span><h1>My Panaderya</h1><button class="iconbtn" onclick="openSettings()" aria-label="Settings">${bakeryIcon('settings')}</button></div></header><div class="layout">${g.run?`<div id="liveOrder" class="live-order">${renderWorksheet()}</div><div id="pausedMenu" class="paused-menu" hidden></div>`:renderMenu()}${renderRight()}</div>`;
  paintPausedOrder();
  if(typeof syncRewardPresentation==='function')syncRewardPresentation();
  if(g.run&&g.run.phase==='engine'){const fr=$('worksheetFrame');if(fr)fr.src='worksheet/worksheet-engine.html';if(typeof fitWorksheet==='function')fitWorksheet()}

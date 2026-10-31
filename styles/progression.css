@@ -91,3 +91,28 @@
 .inventory-grid .food-tile.mastery-card{grid-template-rows:40px 26px 46px minmax(0,1fr) 42px 52px 44px}
 .inventory-grid .mastery-card .inventory-select{top:5px;right:5px;width:36px;height:36px}.inventory-grid .mastery-card .tier-banner{padding:0 42px 15px 6px;font-size:11px}.inventory-grid .mastery-card .equipped-label{position:absolute;top:27px;left:8px;margin:0;padding:0 4px;font-size:9px;line-height:13px}
 @media(max-width:560px){.mastery-card .mastery-stars{font-size:17px;letter-spacing:0}.food-tile.mastery-card .food-name{font-size:14px}.mastery-card .mastery-upgrade{font-size:12px}.mastery-card .tier-banner{font-size:11px}}
+
+/* Focused navigation: menu tools replace the sidebar; order tickets remain. */
+.browsing .layout{grid-template-columns:minmax(0,1fr) 320px}
+.browsing .menu-stage,.browsing .paused-menu{grid-column:1;min-width:0}
+.browsing .rightcol{grid-column:2}
+.playing .live-order{display:flex;justify-content:center;min-width:0;width:100%}
+.playing .live-order>.worksheet-stage{margin-inline:auto;flex:0 1 var(--workspace-width,850px)}
+.bakery-actions{display:grid;gap:8px;min-width:0;align-self:center}
+.bakery-actions>button{width:100%;min-height:44px;margin:0;font-size:13px}
+.bakery-actions .bakery-kitchen{display:flex;align-items:center;justify-content:center;gap:7px;background:#fff4df;border-color:#c7a06b;color:#74512c}
+.bakery-kitchen .bakery-icon{width:26px;height:26px}
+.food-navigation.menu-toolbar{display:flex;flex-wrap:nowrap;align-items:center;justify-content:space-between;gap:14px;width:100%;margin-bottom:16px}
+.menu-toolbar .toolbar-left,.menu-toolbar .toolbar-right{display:flex;align-items:center;gap:8px;min-width:0}
+.menu-toolbar .toolbar-right{margin-left:auto}
+.menu-toolbar button,.menu-toolbar .equip-best>summary{min-height:48px;padding:7px 10px;font-size:13px;line-height:1.2;white-space:normal}
+.menu-toolbar button{display:flex;align-items:center;justify-content:center;gap:5px;flex:0 1 auto}
+.menu-toolbar button .bakery-icon{width:25px;height:25px;flex:0 0 25px}
+.menu-toolbar .equip-best{order:0;flex:0 1 auto;width:auto}
+.menu-toolbar .equip-options{left:auto;right:0}
+.menu-toolbar .equip-options button{display:block;width:100%;text-align:left}
+@media(min-width:1700px){.browsing .layout{grid-template-columns:minmax(0,1fr) 386px}}
+@media(max-width:1200px){.browsing .layout{grid-template-columns:minmax(0,1fr) 276px}.menu-toolbar button,.menu-toolbar .equip-best>summary{padding:6px;font-size:12px}.menu-toolbar .toolbar-left,.menu-toolbar .toolbar-right{gap:6px}.food-navigation.menu-toolbar{gap:10px}}
+@media(max-width:1000px){.browsing .layout{grid-template-columns:minmax(0,1fr)}.browsing .rightcol{grid-column:1;width:100%}}
+@media(max-width:800px){.bakery-actions{grid-column:1/-1}.bakery-actions .bakery-upgrade{grid-column:auto}.menu-toolbar .equip-best{width:auto;order:0}}
+@media(max-width:560px){.menu-toolbar button,.menu-toolbar .equip-best>summary{min-height:44px;padding:5px;font-size:11px}.menu-toolbar button>.bakery-icon,.menu-toolbar button>span{display:none}.food-navigation.menu-toolbar{gap:6px}.menu-toolbar .toolbar-left,.menu-toolbar .toolbar-right{gap:4px}.menu-toolbar button{flex:0 1 auto}.menu-toolbar .equip-best{min-width:0}.menu-toolbar .equip-best>summary{white-space:normal;text-align:center}}

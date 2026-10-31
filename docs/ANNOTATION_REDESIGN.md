@@ -43,3 +43,12 @@ node tests/browser-ux.mjs
 ```
 
 No commit or push. Implementation is saved; final target-resolution visual verification is pending browser-launch approval.
+
+
+## Accepted navigation and worksheet alignment follow-up (2026-10-31)
+
+Layout/navigation only: the main render no longer mounts the feature sidebar. Its rendering function and all deferred feature implementations remain available in source; Modes and Decor sidebar entries are not displayed. Kitchen now sits directly below Upgrade Bakery in a shared action column in the top bakery panel. Existing unlocks remain: Kitchen after two orders, Helper after six, with their relocated controls visible but disabled beforehand.
+
+The toolbar immediately above the menu grid has Guide then Helper on the left, and Equip Best, Food Inventory, Food Index on the right. Each uses its existing handler. Guide and Modes behavior, progression, save data and worksheet protocol were not changed. The browsing grid removes the unused sidebar column; at widths up to 1000px the order rail follows the menu so the toolbar retains a usable single row. The mounted live worksheet wrapper now centers its panel/iframe horizontally, including after Exit/Resume.
+
+Files: src/main.js, src/ui/menu.js, src/ui/scene.js, styles/progression.css. Verification: all five smoke checks plus worksheet-session check passed. Local headless Edge verified toolbar order, single-row alignment, no clipping/overlap, no sidebar, and Kitchen placement at 390, 560, 768, 834, 1024, 1194, 1280 and 2000px. The worksheet panel and iframe were both centered without horizontal overflow at 390, 768, 834, 1024, 1280 and 1920px. Tablet-menu and desktop-worksheet screenshots were visually inspected. The existing headless Edge interaction runner also passed: 79 x 18 carrying with click/drag/swipe, 19 x 9 phone touch, tutorial and sound OFF/ON, live Exit/Resume, saved claims, and exactly-once payouts. No manual Live Server check was performed.
