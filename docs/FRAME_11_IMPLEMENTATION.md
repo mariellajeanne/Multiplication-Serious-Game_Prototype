@@ -1,5 +1,9 @@
 # Frame 11 — My Panaderya
 
+**Frame 12 selection (2026-11-04):** [Current floating controls](FOOD_SELECTION_IMPLEMENTATION.md) replace the food-details sheet without resizing the grid; single and multi-selection use exclusive compact popup states.
+
+**Bakery Power panel (2026-11-04):** [Current wireframe implementation](BAKERY_POWER_PANEL.md) uses a full-height 60/40 Bakery Power/Packages sidebar, a current bakery image, and a vertical progression list; this replaces the earlier 40vh cap.
+
 **Compact Menu header (2026-11-04):** [Current header and counter popups](MENU_HEADER_IMPLEMENTATION.md) supersedes earlier topbar, Boost-banner and Menu-heading descriptions.
 
 **Kitchen removal (2026-11-04):** [Current removal and save compatibility](KITCHEN_REMOVAL.md) supersedes all Kitchen descriptions below. Baker's Boost and proportional prices now use recipes and Bakery Power only.

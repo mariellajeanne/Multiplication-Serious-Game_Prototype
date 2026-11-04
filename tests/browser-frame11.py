@@ -64,7 +64,7 @@ def check_browser(pw, engine):
             g.board=[{id:9001,a:79,b:18,rarity:1,base:304},{id:9002,a:19,b:9,rarity:0,base:130}];
             g.ticketSeq=9002;save();render()""")
         page.locator('[data-uid="1"] .food-card-target').tap()
-        assert page.locator('.sticky-food-panel').is_visible()
+        assert page.locator('.food-selection-single').is_visible()
         page.wait_for_timeout(500)
         page.screenshot(path=str(SHOTS / f'{engine}-collection-2000.png'), full_page=True)
         page.evaluate('closeFoodPanel()')
@@ -85,7 +85,7 @@ def check_browser(pw, engine):
         old_coins,old_power = page.evaluate('[g.coins,g.bakeryLevel]')
         page.locator('.bakery-power-buy').tap()
         assert page.evaluate('g.bakeryLevel') == old_power+1
-        assert page.locator('.power-change').is_visible()
+        assert page.locator('.bakery-row.current').get_attribute('data-upgrade') == str(old_power+1)
         page.locator('#purchaseUndo button').tap()
         assert page.evaluate('[g.coins,g.bakeryLevel]') == [old_coins,old_power]
         page.locator('.collection-toolbar>button').first.tap()
@@ -115,12 +115,14 @@ def check_browser(pw, engine):
             page.get_by_role('button',name='Confirm',exact=False).tap()
         assert page.evaluate('g.coins') == coins-price
         assert page.evaluate('g.packages[0]') == stock+3
+        assert page.locator('#unopenedPackages').inner_text() == page.evaluate('amountLabel(g.packages.reduce((a,b)=>a+b,0))')
         page.evaluate('setPackageQuantity(3)')
         count = page.evaluate('g.owned.length')
         page.get_by_role('button',name='Open Selected Instantly',exact=True).tap()
         assert page.evaluate('g.owned.length') == count
         assert page.evaluate('new Set(g.owned.map(o=>o.id)).size===g.owned.length')
         assert page.evaluate('g.packages[0]') == stock
+        assert page.locator('#unopenedPackages').inner_text() == page.evaluate('amountLabel(g.packages.reduce((a,b)=>a+b,0))')
         page.evaluate('closeModal()')
         for width,height in [(2000,1200),(1194,834),(1024,768),(834,1194),(768,1024)]:
             page.set_viewport_size({'width':width,'height':height})
@@ -173,8 +175,8 @@ def check_browser(pw, engine):
             page.evaluate('scrollTo(0,0)')
         page.locator('[aria-label="Settings"]').click();page.keyboard.press('Escape')
         assert page.evaluate('document.activeElement.getAttribute("aria-label")')=='Settings'
-        page.locator('.package-ad .primary').click();page.keyboard.press('Escape')
-        assert page.evaluate('document.activeElement.matches(".package-ad .primary")')
+        page.locator('.package-panel .primary').click();page.keyboard.press('Escape')
+        assert page.evaluate('document.activeElement.matches(".package-panel .primary")')
         page.evaluate("g.packages[0]=0;g.packages[1]=3;openPackages('unbox',0)")
         assert page.evaluate('packageType')==1
         assert page.locator('#packageOpen').is_enabled()

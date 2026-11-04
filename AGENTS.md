@@ -1,5 +1,11 @@
 # Panaderya Quest — agent instructions
 
+**Frame 12 food selection (2026-11-04):** [Floating popup implementation](docs/FOOD_SELECTION_IMPLEMENTATION.md) replaces sheet references: 75%-width single/multi alternatives overlay the grid without resizing it. Verify with `python tests/browser-food-selection.py` and the browser zoom runner.
+
+**Bakery Power wireframe (2026-11-04):** [Current panel](docs/BAKERY_POWER_PANEL.md) supersedes carousel references. The latest owner correction replaces the 40vh cap: the full-height sidebar uses 60% Bakery Power / 40% Packages, with a current-bakery image and fixed action footers; verify with `python tests/browser-bakery-power.py`.
+
+**Viewport layout (2026-11-04):** [Responsive implementation](docs/VIEWPORT_RESPONSIVENESS.md) supersedes fixed layout caps and panel heights. Preserve independent scrolling and run `python tests/browser-responsive.py` for layout changes.
+
 **Compact Menu header (2026-11-04):** [Current layout](docs/MENU_HEADER_IMPLEMENTATION.md): bakery icon/name/Settings grouped left, clickable Boost/Coins counters right, no standalone topbar or Menu heading.
 
 **Kitchen removed (2026-11-04):** See [removal and migration](docs/KITCHEN_REMOVAL.md). Do not reintroduce Kitchen tools, tabs or bonuses. Existing saves discard obsolete equipment fields; the save key and saved order budgets remain unchanged.

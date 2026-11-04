@@ -84,13 +84,13 @@ test('Undo cannot reverse mastery used by opened packages, sales or changed assi
  }
 });
 
-test('Bakery Power supports 100 configurable purchases, shows only immediate price/gain and wraps history',()=>{
+test('Bakery Power supports 100 configurable purchases, shows a bounded vertical progression list',()=>{
  const h=progressionHarness();h.run('g.coins=1e100');
  for(let i=0;i<100;i++)assert.equal(h.run('upgradeDecor()'),true);
  assert.equal(h.run('upgradeDecor()'),false);assert.equal(h.run('g.bakeryLevel'),101);
- h.run('g.bakeryLevel=20;html=renderBakery();bakeryBrowseIndex=21;browseBakery(1)');
- assert.equal(h.run('bakeryBrowseIndex'),1);assert.doesNotMatch(h.run('html'),/\/100|\/101|Level|progressbar/);
- assert.equal((h.run('html').match(/🪙/g)||[]).length,1);
+ h.run('g.bakeryLevel=20;html=renderBakery()');
+ assert.doesNotMatch(h.run('html'),/\/100|\/101|Level|progressbar/);
+ assert.equal((h.run('html').match(/🪙/g)||[]).length,2);
 });
 
 test('package types are distinct from food rarities; displayed ticket odds match generation; Fate is not guaranteed Crown Jewel',()=>{

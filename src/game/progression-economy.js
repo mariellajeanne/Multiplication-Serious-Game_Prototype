@@ -76,7 +76,7 @@ function upgradeDecor(){
  const price=bakeryUpgradeCost();if(g.coins<price){toast('Not enough coins for this Bakery Power upgrade yet.');return false}
  const before={coins:g.coins,bakeryLevel:g.bakeryLevel,bakerySpent:g.bakerySpent,economyPeakBase:g.economyPeakBase};
  const old=decorBonus();commitPurchaseUndo();g.coins-=price;g.bakerySpent+=price;g.bakeryLevel++;
- powerChange={before:old,after:decorBonus(),until:Date.now()+2200};registerPurchaseUndo('Bakery Power',price,before);bakeryBrowseIndex=g.bakeryLevel;save();render();setTimeout(()=>document.querySelector?.('.power-change')?.remove(),2200);
+ registerPurchaseUndo('Bakery Power',price,before);save();render();
  toast(`Bakery Power ×${multiplierLabel(old)} → ×${multiplierLabel(decorBonus())} · +${multiplierLabel(decorBonus()-old)} 👑 · Baker's Boost +${((decorBonus()/old-1)*100).toFixed(1)}%`);
  const panel=document.querySelector?.('.bakery-power');panel?.classList.add('power-purchased');return true;
 }
@@ -92,7 +92,7 @@ function commitPurchaseUndo(reason=''){if(!g.purchaseUndo)return;g.purchaseUndo=
 function validatePurchaseUndo(){const tx=g.purchaseUndo;if(!tx)return;if(Date.now()>=tx.expires){g.purchaseUndo=null;paintPurchaseUndo()}else if(tx.signature!==undoSignature())commitPurchaseUndo('Your bakery changed after this purchase')}
 function undoPurchase(id){
  validatePurchaseUndo();const tx=g.purchaseUndo;if(!tx||tx.id!==id)return false;
- g.purchaseUndo=null;Object.assign(g,tx.before);if(tx.label==='Bakery Power'){powerChange=null;bakeryBrowseIndex=g.bakeryLevel;}save();render();paintPurchaseUndo();toast(`${tx.label} undone · 🪙 ${fmt(tx.cost)} refunded.`);return true;
+ g.purchaseUndo=null;Object.assign(g,tx.before);save();render();paintPurchaseUndo();toast(`${tx.label} undone · 🪙 ${fmt(tx.cost)} refunded.`);return true;
 }
 function paintPurchaseUndo(){
  const node=$('purchaseUndo');if(!node)return;const tx=g.purchaseUndo;

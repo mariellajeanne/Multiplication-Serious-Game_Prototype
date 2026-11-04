@@ -1,15 +1,35 @@
 /* Frame 11 bakery progression and independent ticket sessions. */
-let bakeryBrowseIndex=null,oddsCollapsed=null,powerChange=null;
+let oddsCollapsed=null;
 function ticketOddsCollapsed(){return oddsCollapsed??(typeof innerWidth!=='undefined'&&innerWidth<1500)}
 function toggleTicketOdds(){oddsCollapsed=!ticketOddsCollapsed();render()}
 function bakeryUpgradeName(index){return BAKERY_STAGES[Math.min(BAKERY_STAGES.length-1,Math.floor((index-1)/10))]}
-function browseBakery(delta){const count=Math.min(BAKERY_POWER_CONFIG.purchases+1,g.bakeryLevel+1);bakeryBrowseIndex=((bakeryBrowseIndex??g.bakeryLevel)-1+delta+count)%count+1;centerBakeryCard()}
-function centerBakeryCard(){const rail=$('bakeryCarousel'),card=rail?.querySelector(`[data-upgrade="${bakeryBrowseIndex??g.bakeryLevel}"]`);if(rail&&card)rail.scrollTo({left:card.offsetLeft-rail.clientWidth/2+card.clientWidth/2,behavior:typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'})}
-function renderBakery(){
- const current=g.bakeryLevel,next=current<=BAKERY_POWER_CONFIG.purchases,power=decorBonus(),gain=next?bakeryFactor(current+1)-power:0;
- return `<section class="bakery-power"><h2>×${powerLabel(power)} 👑<br>BAKERY POWER</h2>${powerChange&&powerChange.until>Date.now()?`<div class="power-change" role="status"><b>×${powerLabel(powerChange.before)} → ×${powerLabel(powerChange.after)}</b><span>Baker's Boost +${((powerChange.after/powerChange.before-1)*100).toFixed(1)}%</span></div>`:''}<p>Multiplies your <b>Menu Boost 💎</b></p><div class="carousel-controls"><button class="secondary" onclick="browseBakery(-1)" aria-label="Previous bakery">‹</button><span>Our bakery journey</span><button class="secondary" onclick="browseBakery(1)" aria-label="Next bakery">›</button></div><div class="bakery-carousel" id="bakeryCarousel" aria-label="Bakery upgrade history">${Array.from({length:current+(next?1:0)},(_,i)=>{const n=i+1,isCurrent=n===current,isNext=n===current+1;return `<article class="bakery-upgrade-card ${isCurrent?'current':isNext?'next':'acquired'}" data-upgrade="${n}"><span>${isNext?`+${powerLabel(gain)} 👑`:isCurrent?`×${powerLabel(power)} 👑`:'✓ Acquired'}</span>${bakeryIcon('bakery')}<strong>${bakeryUpgradeName(n)}</strong><b>${isCurrent?'CURRENT':isNext?'NEXT':'ACQUIRED'}</b></article>`}).join('')}</div><button class="primary bakery-power-buy" ${!next||g.coins<bakeryUpgradeCost()?'disabled':''} onclick="upgradeDecor()">${next?`Upgrade +${((BAKERY_POWER_CONFIG.factor-1)*100).toFixed(1)}% · 🪙 ${amountLabel(bakeryUpgradeCost())}`:'Your bakery is flourishing!'}</button></section>`;
+function bakeryGainLabel(value){return powerLabel(Number(value.toPrecision(12)))}
+function bakeryProgressRows(){
+ const current=g.bakeryLevel,last=BAKERY_POWER_CONFIG.purchases+1;
+ return [current-1,current,current+1,current+2].filter(n=>n>=1&&n<=last).map(index=>{
+  const status=index<current?'unlocked':index===current?'current':index===current+1?'next':'locked';
+  return {index,status,name:status==='locked'?'???':bakeryUpgradeName(index),gain:status==='locked'?null:index===1?bakeryFactor(1):bakeryFactor(index)-bakeryFactor(index-1)};
+ });
 }
-function renderLeft(){return `<aside class="leftcol">${renderBakery()}<section class="package-ad"><div class="package-ad-art" aria-hidden="true">${[7,5,2,0].map(rank=>`<span class="package-type p${rank}">${packageArt()}</span>`).join('')}</div><h2>A little surprise.<br>A new favorite.</h2><p>Find Filipino bakery treats.<br>Duplicates unlock Recipe Mastery.</p><button class="primary" onclick="openPackages()">GET MORE PACKAGES!</button><button class="text-button" onclick="showTutorial()">${bakeryIcon('guide')} How to play</button></section></aside>`}
+function revealCurrentBakery(){
+ const list=$('bakeryProgressList'),current=list?.querySelector('[aria-current="step"]');
+ if(list&&current)list.scrollTop=Math.max(0,current.offsetTop-(list.clientHeight-current.offsetHeight)/2);
+}
+function showBakeryPowerInfo(){showModal('Bakery Power 👑','<p class="bakery-power-help">Boosts the coins you earn from every order!</p>','hud-info-modal')}
+function renderBakery(){
+ const next=g.bakeryLevel<=BAKERY_POWER_CONFIG.purchases,cost=next?bakeryUpgradeCost():null;
+ const gain=next?bakeryFactor(g.bakeryLevel+1)-decorBonus():null;
+ return `<section class="bakery-power" aria-label="Bakery Power"><button class="bakery-power-value" onclick="showBakeryPowerInfo()" aria-label="About Bakery Power" aria-haspopup="dialog">×${powerLabel(decorBonus())} 👑</button><h2 class="bakery-power-heading">BAKERY POWER <button class="text-button" onclick="showBakeryPowerInfo()" aria-label="About Bakery Power" aria-haspopup="dialog">ⓘ</button></h2><figure class="current-bakery-preview">${bakeryIcon('bakery')}<figcaption>${bakeryUpgradeName(g.bakeryLevel)}</figcaption></figure><div class="bakery-progress-list" id="bakeryProgressList" role="list" tabindex="0" aria-label="Bakery progression">${bakeryProgressRows().map(row=>`<article class="bakery-row ${row.status}" data-upgrade="${row.index}" role="listitem" ${row.status==='current'?'aria-current="step"':''}><div class="bakery-row-copy"><strong>${row.name}</strong><div class="bakery-row-status"><b>${row.status==='locked'?'UNLOCK PREVIOUS':row.status.toUpperCase()}</b>${row.status==='next'?`<span class="bakery-unlock-price">${amountLabel(cost)} 🪙</span>`:''}</div></div><strong class="bakery-row-gain">${row.gain===null?'+???':`+${bakeryGainLabel(row.gain)} 👑`}</strong></article>`).join('')}</div><div class="bakery-upgrade-action"><button class="primary bakery-power-buy" ${!next||g.coins<cost?'disabled':''} onclick="upgradeDecor()">${next?`<span>UPGRADE +${bakeryGainLabel(gain)} 👑</span><span>${amountLabel(cost)} 🪙</span>`:'UPGRADE'}</button></div></section>`;
+}
+function possiblePackageReward(){
+ const odds=ticketProbabilities(g.mastery);
+ return [...PACKAGE_SHOP].reverse().find(type=>odds[type.rank]>0)||PACKAGE_SHOP[0];
+}
+function renderPackagePanel(){
+ const unopened=g.packages.reduce((sum,count)=>sum+count,0),reward=possiblePackageReward();
+ return `<section class="package-panel" aria-label="Packages"><header class="package-counter"><span aria-hidden="true">${packageArt()}</span><h2>PACKAGE COUNTER</h2><strong id="unopenedPackages" title="${fmt(unopened)} unopened packages">${amountLabel(unopened)}</strong></header><div class="package-possible"><div class="package-illustration" aria-hidden="true">${packageArt()}</div><div class="package-possible-copy"><p>POSSIBLE REWARD</p><strong>${reward.rank+1}★ ${reward.name.toUpperCase()}</strong></div></div><div class="package-panel-action"><button class="primary" onclick="openPackages('buy')">BUY PACKAGES!</button></div></section>`;
+}
+function renderLeft(){return `<aside class="leftcol">${renderBakery()}${renderPackagePanel()}</aside>`}
 const presentedTicketIds=new Set();
 function highlightOrderFood(id){for(const card of document.querySelectorAll?.('.menu-grid [data-uid]')||[]){const food=g.owned.find(o=>o.uid===Number(card.dataset.uid));card.classList.toggle('order-highlight',food?.id===id)}}
 function ticketProgress(ticket){const r=g.orderRuns[ticket.id];if(!r)return 0;if(r.phase==='claim')return 100;const actions=Object.keys(r.worksheetRewards?.actions||{}).length,total=r.steps.reduce((n,s)=>n+worksheetActionKinds(s).length,1);return Math.min(99,Math.round(actions/total*100))}

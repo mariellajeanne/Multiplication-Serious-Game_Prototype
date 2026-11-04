@@ -19,14 +19,14 @@ test('ticket preview uses actual math, guaranteed coins and named package types 
  assert.match(c.result,/79 \u00d7 18/);assert.match(c.result,/365 base coins/);assert.match(c.result,/1\+ FREE/);assert.match(c.result,/Lucky/);assert.match(c.result,/Ticket Luck/);
 });
 
-test('sticky food preview shows actual contribution, mastery availability and price without ownership changes',()=>{
+test('floating food preview shows actual contribution, mastery availability and price without ownership changes',()=>{
  const c=ui();vm.runInContext(`g.recipeCeilings.pandesal=2;openFoodItem(1);before=JSON.stringify(g.owned);result=renderFoodPanel();cost=foodLevelPrice(g.owned[0]);assignFood(1);after=JSON.stringify(g.owned);active=g.activeMenu.length`,c);
  assert.match(c.result,/1\.20/);assert.match(c.result,/0\.30/);assert.match(c.result,/Available \+2/);assert.equal(c.cost,255);assert.equal(c.before,c.after);assert.equal(c.active,1);
 });
 
 test('main navigation keeps menu, Food Index and packages accessible without exposing future features',()=>{
  const c=ui();vm.runInContext('result=renderLeft();menu=renderMenu();tickets=renderTickets()',c);
- assert.match(c.result,/GET MORE PACKAGES/);assert.match(c.menu,/menu-header/);assert.doesNotMatch(c.menu,/menu-heading|boost-hero/);assert.doesNotMatch(c.menu,/Kitchen|switchMenuTab|role="tab"/);assert.match(c.tickets,/openIndex/);assert.doesNotMatch(c.result,/Helper|Game modes/);
+ assert.match(c.result,/BUY PACKAGES!/);assert.match(c.menu,/menu-header/);assert.doesNotMatch(c.menu,/menu-heading|boost-hero/);assert.doesNotMatch(c.menu,/Kitchen|switchMenuTab|role="tab"/);assert.match(c.tickets,/openIndex/);assert.doesNotMatch(c.result,/Helper|Game modes/);
  vm.runInContext('g.completed=6;openSettings();settings=result.html',c);assert.match(c.settings,/openStaff/);assert.match(c.settings,/openModes/);
 });
 
@@ -56,7 +56,7 @@ test('collection sorts every owned food by rarity and actual contribution, with 
 });
 
 test('collection starts with no selection and uses long-press for the bulk action panel',()=>{
- const c=ui();vm.runInContext('openMenu();empty=renderFoodPanel();multiSelect=true;selectedFoods.add(1);panel=renderFoodPanel()',c);
+ const c=ui();vm.runInContext(`openMenu();empty=renderFoodPanel();g.owned.push({uid:2,id:'monay',fusion:1,level:1});g.menuSlots=2;g.activeMenu=[1,2];multiSelect=true;selectedFoods=new Set([1,2]);panel=renderFoodPanel()`,c);
  assert.equal(c.empty,'');assert.match(c.panel,/Select All/);assert.match(c.panel,/Deselect All/);assert.match(c.panel,/Unequip Selected/);assert.match(c.panel,/Sell/);
 });
 
@@ -174,11 +174,11 @@ test('direct card level-up charges the displayed progression cost without openin
    result={coins:g.coins,level:g.owned[0].level,spent:g.owned[0].spent};`,c);
  assert.deepEqual(JSON.parse(JSON.stringify(c.result)),{coins:1000-c.expected,level:2,spent:c.expected});assert.equal(c.menuOpened,0);
 });
-test('unique recipe details offer ingredient upgrades and route legacy fusion links without creating copies',()=>{
+test('ingredient pantry preserves recipe upgrades and legacy fusion links without creating copies',()=>{
  const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;openFoodItem(1);panel=renderFoodPanel();
- expected=fusionFee(g.owned[0])+fusionIngredientCost(g.owned[0]);openFusion(1);popup=result.html;
+ openIngredients();pantry=result.html;expected=fusionFee(g.owned[0])+fusionIngredientCost(g.owned[0]);openFusion(1);popup=result.html;
  submitIngredientFusion();submitIngredientFusion();result={coins:g.coins,food:g.owned[0],owned:g.owned.length};`,c);
- assert.doesNotMatch(c.panel,/Fuse copies/);assert.match(c.panel,/Use ingredients/);assert.match(c.popup,/Buy missing/);
+ assert.doesNotMatch(c.panel,/Fuse copies/);assert.doesNotMatch(c.panel,/Use ingredients/);assert.match(c.pantry,/ingredientFusionInfo\(1\)/);assert.match(c.popup,/Buy missing/);
  assert.equal(c.result.coins,10000-c.expected);assert.equal(c.result.food.fusion,2);assert.equal(c.result.food.spent,c.expected);assert.equal(c.result.owned,1);
 });
 

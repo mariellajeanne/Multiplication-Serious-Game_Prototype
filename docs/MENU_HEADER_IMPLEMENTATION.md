@@ -1,5 +1,7 @@
 # Compact Menu header — 2026-11-04
 
+**Viewport responsiveness (2026-11-04):** [Current viewport layout](VIEWPORT_RESPONSIVENESS.md) supersedes earlier fixed panel heights, layout caps and header/toolbar breakpoints.
+
 The owner's screenshot and subsequent placement clarification supersede previous header layouts, including the standalone Menu heading described in the Kitchen-removal checkpoint.
 
 - The standalone app topbar, Boost banner, Coins band and redundant Menu heading are removed. A single header belongs to the Menu panel, above its existing toolbar and food grid.
