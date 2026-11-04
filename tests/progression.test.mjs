@@ -81,7 +81,7 @@ test('refresh persists five tickets and deadline, blocks repeat, reload and roll
  const ids=r.json('g.board.map(t=>t.id)');assert.equal(new Set(ids).size,5);
 });
 
-test('bakery supports 100 purchases and preserved kitchen levels expand to 20',()=>{
+test('bakery supports 100 purchases and active income remains stronger than staff',()=>{
  const h=progressionHarness();h.run('g.completed=100;g.coins=1e30');
  for(let level=1;level<=101;level++){
   assert.equal(h.run('g.bakeryLevel'),level);const before=h.run('bakeryValue()'),stage=h.run('bakeryStage(g.bakeryLevel)');
@@ -89,16 +89,15 @@ test('bakery supports 100 purchases and preserved kitchen levels expand to 20',(
    assert.equal(h.run('bakeryStage(g.bakeryLevel)')-stage,[2,3,5,7,10,13,17,21,25,30].includes(level+1)?1:0);}
  }
  assert.equal(h.run('upgradeDecor()'),false);
- for(let n=0;n<20;n++){const before=h.run('bakeryValue()');assert.equal(h.run("upgradeEquipment('oven')"),true);assert.ok(Math.abs(h.run('bakeryValue()')/before-1.055)<1e-12)}
- assert.equal(h.run("upgradeEquipment('oven')"),false);assert.ok(Math.abs(h.run('economyUnit()/90/staffRate()')-4)<1e-12);
+ assert.ok(Math.abs(h.run('economyUnit()/90/staffRate()')-4)<1e-12);
 });
 
 test('unequipping or selling cannot lower global upgrade prices or create a high-rate staff contract',()=>{
- const h=progressionHarness();h.run(`g.completed=20;g.owned.push({uid:2,id:'ube-ensaymada',fusion:4,level:4,spent:5000});g.activeMenu=[1,2];save();price=equipmentCost(KITCHEN[0]);bakeryPrice=bakeryUpgradeCost();slotPrice=slotCost();income=staffRate();g.activeMenu=[];save();`);
- assert.equal(h.run('equipmentCost(KITCHEN[0])'),h.run('price'));assert.equal(h.run('bakeryUpgradeCost()'),h.run('bakeryPrice'));assert.equal(h.run('slotCost()'),h.run('slotPrice'));
+ const h=progressionHarness();h.run(`g.completed=20;g.owned.push({uid:2,id:'ube-ensaymada',fusion:4,level:4,spent:5000});g.activeMenu=[1,2];save();bakeryPrice=bakeryUpgradeCost();slotPrice=slotCost();income=staffRate();g.activeMenu=[];save();`);
+ assert.equal(h.run('bakeryUpgradeCost()'),h.run('bakeryPrice'));assert.equal(h.run('slotCost()'),h.run('slotPrice'));
  assert.ok(h.run('staffRate()')<h.run('income'));
- h.run('g.owned=g.owned.filter(o=>o.uid!==2);save()');assert.equal(h.run('equipmentCost(KITCHEN[0])'),h.run('price'));
- const reloaded=progressionHarness(h.json('g'));assert.equal(reloaded.run('equipmentCost(KITCHEN[0])'),h.run('price'));
+ h.run('g.owned=g.owned.filter(o=>o.uid!==2);save()');
+ const reloaded=progressionHarness(h.json('g'));assert.equal(reloaded.run('bakeryUpgradeCost()'),h.run('bakeryPrice'));
 });
 
 test('a stale tab save retains the latest refresh deadline',()=>{

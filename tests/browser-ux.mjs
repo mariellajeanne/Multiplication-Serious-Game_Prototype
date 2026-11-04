@@ -94,7 +94,7 @@ try{
   }
   await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   for(const [name,command] of Object.entries({food:'openFoodItem(1)',inventory:'openMenu()',
-    fusion:'ingredientFusionInfo(1)',copies:'openFusion(1)',ingredients:'openIngredients()',kitchen:'openKitchen()',
+    fusion:'ingredientFusionInfo(1)',copies:'openFusion(1)',ingredients:'openIngredients()',
     decor:'openDecor()',staff:'openStaff()',index:'openIndex()',modes:'openModes()',
     settings:'openSettings()',luck:'openProbabilities()',sale:'sellFoodPrompt(1)',assign:'chooseFoodForSlot()'})){
     await evaluate(command);await screenshot(name);

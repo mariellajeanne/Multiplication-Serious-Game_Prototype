@@ -1,5 +1,7 @@
 # My Panaderya — annotation-led redesign
 
+**Historical checkpoint:** Kitchen descriptions and verification below record the earlier implementation. [Kitchen removal (2026-11-04)](KITCHEN_REMOVAL.md) supersedes them; Kitchen is no longer present in the game.
+
 **Superseded visual checkpoint:** see [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md) for the subsequent richer presentation, reliability fixes, current tests and actual renders. This document preserves the earlier implementation history; its old pending-launch status is no longer current.
 
 2026-10-30. Source of requirements: the user's “Main Page & Worksheet UX Redesign” request and the two annotated JPGs. The written request defines scope; screenshot annotations guide layout rather than exact pixels. Illustrative screenshot numbers (e.g. a 100-coin level-up or a ×1.00 base) are **not balance changes**.

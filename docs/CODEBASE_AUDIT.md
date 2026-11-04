@@ -1,5 +1,7 @@
 ﻿# Panaderya Quest — codebase audit
 
+**Historical checkpoint:** Kitchen descriptions and verification below record the earlier implementation. [Kitchen removal (2026-11-04)](KITCHEN_REMOVAL.md) supersedes them; Kitchen is no longer present in the game.
+
 **Current progression follow-up:** [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) records the owner-authorized C/D implementation, save migration, formulas, probability/economy simulations and 52 passing automated tests plus desktop/tablet-emulation browser checks. Earlier review holds and prototype caps below are historical.
 
 **Newest visual follow-up:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md) replaces the scenic treatment with component-based bakery objects, self-hosted rounded typography, 41 automated tests and passing browser regressions. Owner review remains pending before Stage C.

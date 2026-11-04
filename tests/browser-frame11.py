@@ -40,6 +40,23 @@ def check_browser(pw, engine):
         assert page.locator('.leftcol').is_visible()
         assert page.locator('.rightcol').is_visible()
         assert page.locator('.food-card-target').count() == 1
+        assert page.locator('.topbar,.menu-heading,.boost-hero,.coin-balance').count() == 0
+        assert page.locator('.collection-stage>.menu-header').count() == 1
+        assert page.locator('.menu-tabs,.kitchen-tab,[onclick*="Kitchen"],[onclick*="Equipment"]').count() == 0
+        assert page.evaluate("typeof KITCHEN==='undefined' && typeof kitchenBonus==='undefined' && typeof upgradeEquipment==='undefined'")
+        # Exercise an old save with purchased tools and an unfinished order.
+        page.evaluate("""g.coins=123456;g.completed=6;refillBoard();startTicket(g.board[0].id);
+            g.run.pool=123;abandonTicket();g.equipment={oven:20,mixer:20,fridge:20,display:20};
+            g.kitchenSpent=98765;g.seenUnlocks=['kitchen','fusion'];
+            window.legacyOrder=JSON.stringify(g.run);save();""")
+        order_progress = 'JSON.stringify([g.run.ticket,g.run.budget,g.run.pool,g.run.worksheetRewards])'
+        legacy_order = page.evaluate(order_progress)
+        page.reload();page.wait_for_function("typeof startTicket==='function'")
+        assert page.evaluate('g.coins') == 123456
+        assert page.evaluate(order_progress) == legacy_order
+        assert page.evaluate("!('equipment' in g)&&!('kitchenSpent' in g)&&!g.seenUnlocks.includes('kitchen')")
+        assert page.evaluate('Math.abs(bakeryValue()-Math.max(1,foodSum())*decorBonus())<1e-10')
+        page.evaluate('g=fresh();save();render()')
         page.screenshot(path=str(SHOTS / f'{engine}-fresh-2000.png'), full_page=True)
         page.evaluate("""g.coins=1e7;g.completed=16;
             for(const f of FOOD)if(f.id!=='pandesal')discoverFood(f);
@@ -110,6 +127,40 @@ def check_browser(pw, engine):
             page.evaluate('scrollTo(0,0);render()')
             page.wait_for_timeout(180)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+1')
+            assert page.locator('.menu-tabs,.kitchen-tab').count() == 0
+            assert page.evaluate('''()=>{
+                const heading=document.querySelector('.menu-header').getBoundingClientRect();
+                const toolbar=document.querySelector('.collection-toolbar').getBoundingClientRect();
+                const grid=document.querySelector('.menu-grid').getBoundingClientRect();
+                return Math.abs(toolbar.top-heading.bottom)<=1 && Math.abs(grid.top-toolbar.bottom)<=1;
+            }''')
+            assert page.locator('.menu-header').evaluate('''e=>{
+                const controls=[...e.querySelectorAll('button')];
+                const brand=e.querySelector('.menu-brand').getBoundingClientRect();
+                const name=e.querySelector('h1').getBoundingClientRect();
+                const icon=e.querySelector('.menu-bakery-icon').getBoundingClientRect();
+                const settings=e.querySelector('.menu-settings').getBoundingClientRect();
+                const boost=e.querySelector('.boost-counter').getBoundingClientRect();
+                const coins=e.querySelector('.coins-counter').getBoundingClientRect();
+                return controls.every(b=>{const r=b.getBoundingClientRect(),p=e.getBoundingClientRect();
+                    return r.width>=44&&r.height>=44&&r.left>=p.left&&r.right<=p.right&&r.top>=p.top&&r.bottom<=p.bottom;
+                }) && e.scrollWidth<=e.clientWidth && icon.right<=name.left && name.right<settings.left
+                && settings.left-name.right>name.left-icon.right && boost.right<coins.left
+                && Math.abs(coins.right-(e.getBoundingClientRect().right-parseFloat(getComputedStyle(e).paddingRight)))<=1
+                && Math.abs(brand.left-(e.getBoundingClientRect().left+parseFloat(getComputedStyle(e).paddingLeft)))<=1;
+            }''')
+            page.locator('.boost-counter').tap()
+            assert page.locator('#modalTitle').inner_text() == "Baker's Boost 💎"
+            assert page.locator('#menuBoostComponent').inner_text() == page.evaluate("boostComponentLabel(Math.max(1,foodSum()))")
+            assert page.locator('#bakeryPowerComponent').inner_text() == page.evaluate("boostComponentLabel(decorBonus())")
+            assert page.locator('.hud-info-modal button').count() == 1
+            assert not page.locator('.hud-info-modal .dialog-wallet').is_visible()
+            page.locator('.modal .close').tap()
+            page.locator('.coins-counter').tap()
+            assert page.locator('#modalTitle').inner_text() == 'Coins 🪙'
+            assert page.locator('.coins-help p').all_text_contents() == ['Complete orders to earn coins!',"Your Baker's Boost multiplies the coins you earn."]
+            assert page.locator('.hud-info-modal button').count() == 1
+            page.locator('.modal .close').tap()
             if width<1500:
                 assert page.locator('.odds-heading [aria-expanded=false]').count()==1
             page.screenshot(path=str(SHOTS / f'{engine}-collection-{width}.png'), full_page=True)

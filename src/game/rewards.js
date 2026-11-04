@@ -107,4 +107,4 @@ function captureActiveWorksheet(){
    ticket:r.ticket,top:state.a,bottom:state.b,complete:state.complete}});
  }}catch(_){}
 }
-function checkUnlocks(){const unlocks=[['kitchen',2,'🔥 Kitchen upgrades are now open!'],['decor',4,'🌷 Decorations unlocked — your worksheet can evolve!'],['fusion',5,'✨ Food fusion and ingredients unlocked!'],['staff',6,'🧑‍🍳 Temporary staff can now help your bakery!'],['challenges',3,'🎮 New challenge modes are appearing!']];for(const [key,at,msg] of unlocks){if(g.completed>=at&&!g.seenUnlocks.includes(key)){g.seenUnlocks.push(key);toast(msg)}}save()}
+function checkUnlocks(){const unlocks=[['decor',4,'🌷 Decorations unlocked — your worksheet can evolve!'],['fusion',5,'✨ Food fusion and ingredients unlocked!'],['staff',6,'🧑‍🍳 Temporary staff can now help your bakery!'],['challenges',3,'🎮 New challenge modes are appearing!']];for(const [key,at,msg] of unlocks){if(g.completed>=at&&!g.seenUnlocks.includes(key)){g.seenUnlocks.push(key);toast(msg)}}save()}

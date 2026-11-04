@@ -31,7 +31,7 @@ function toggleInventoryFood(uid,checked){
  for(const [id,enabled] of [['inventoryAdd',state.canAdd],['inventoryRemove',state.canRemove],['inventorySell',state.canSell]]){const button=$(id);if(button)button.disabled=!enabled;}
  const status=$('inventorySelectionStatus');if(status)status.textContent=inventorySelectionMessage(state);
 }
-function openMenu(intent='manage',keepSelection=false){pendingInventoryAction=null;inventoryIntent=intent==='add'?'add':'manage';if(!keepSelection)inventorySelection.clear();if(modal)closeModal();menuTab='menu';hideUnequipped=false;if(!keepSelection)closeFoodPanel();render();}
+function openMenu(intent='manage',keepSelection=false){pendingInventoryAction=null;inventoryIntent=intent==='add'?'add':'manage';if(!keepSelection)inventorySelection.clear();if(modal)closeModal();hideUnequipped=false;if(!keepSelection)closeFoodPanel();render();}
 function addInventorySelection(){
  const state=inventoryActionState();if(!state.canAdd)return false;
  g.activeMenu.push(...state.adding.map(o=>o.uid));inventorySelection.clear();save();render();
@@ -67,9 +67,6 @@ function ingredientFusionInfo(uid){
 function submitIngredientFusion(){const selection=ingredientFusionSelection;ingredientFusionSelection=null;if(!selection)return false;const applied=fuseIngredients(selection.uid,selection);if(!applied)toast('Ingredients or prices changed. Please review again.');return applied}
 function openIngredients(){if(g.completed<5){toast('Ingredients open after 5 orders.');return}
  showModal('Ingredient pantry',`<p class="dialog-note">For food fusion. Prices stay the same.</p><div class="modalgrid">${INGREDIENTS.map(([name,icon,price])=>`<div class="itemcard"><div class="itemtop"><span style="font-size:32px">${icon}</span><div><h3>${name}</h3><span class="stock-pill">${g.ingredients[name]||0} owned</span></div></div><div class="btnrow"><button class="secondary" ${g.coins<price?'disabled':''} onclick="buyIngredient('${name}',1)">1 · 🪙 ${price}</button><button class="secondary" ${g.coins<price*5?'disabled':''} onclick="buyIngredient('${name}',5)">5 · 🪙 ${price*5}</button></div></div>`).join('')}</div>`);
-}
-function openKitchen(){if(g.completed<2){toast('Kitchen opens after 2 orders.');return}
- showModal('A better kitchen',`<p class="dialog-note">Every tool multiplies the value of all menu foods. Upgrade prices remember your best menu. Levels 0–20.</p><div class="modalgrid">${KITCHEN.map(k=>{const level=g.equipment[k.id]||0,cost=equipmentCost(k),factor=Math.pow(1+k.bonus,level);return `<div class="itemcard"><div class="itemtop"><span style="font-size:36px">${k.icon}</span><div><h3>${k.name}</h3><span>Level ${level}/${MAX_KITCHEN_LEVEL}</span></div></div><div class="tool-preview"><b>+${((factor-1)*100).toFixed(1)}%</b>${level<MAX_KITCHEN_LEVEL?`<small>→ +${((factor*(1+k.bonus)-1)*100).toFixed(1)}%</small>`:''}</div><p>Menu ×${bakeryValue().toFixed(2)}${level<MAX_KITCHEN_LEVEL?` → ×${(bakeryValue()*(1+k.bonus)).toFixed(2)} (+${(k.bonus*100).toFixed(1)}%)`:''}</p><div class="progress"><div class="bar" style="width:${level/MAX_KITCHEN_LEVEL*100}%"></div></div><button class="primary" ${level>=MAX_KITCHEN_LEVEL||g.coins<cost||g.run?'disabled':''} onclick="upgradeEquipment('${k.id}')">${level>=MAX_KITCHEN_LEVEL?'Fully upgraded':`${level?'Upgrade':'Buy'} · ${fmt(cost)} coins`}</button></div>`}).join('')}</div>`);
 }
 function openDecor(){if(modal)closeModal();document.querySelector('.bakery-power')?.scrollIntoView({block:'nearest'});}
 function openStaff(){if(g.completed<6){toast('Helpers open after 6 orders.');return}

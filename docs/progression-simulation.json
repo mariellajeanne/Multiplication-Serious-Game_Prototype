@@ -1,173 +1,546 @@
 {
+  "modelVersion": 3,
+  "seed": 20261104,
+  "trialCount": 60,
+  "orders": 80,
+  "configuration": {
+    "bakery": {
+      "purchases": 100,
+      "factor": 1.085,
+      "priceOrders": 2.5,
+      "priceGrowth": 0.2
+    },
+    "packageShop": [
+      {
+        "name": "Standard",
+        "rank": 0,
+        "unlock": 1,
+        "priceOrders": 0.6
+      },
+      {
+        "name": "Lucky",
+        "rank": 1,
+        "unlock": 11,
+        "priceOrders": 1.2
+      },
+      {
+        "name": "Fortunate",
+        "rank": 2,
+        "unlock": 21,
+        "priceOrders": 2.4
+      },
+      {
+        "name": "Charmed",
+        "rank": 3,
+        "unlock": 31,
+        "priceOrders": 4.8
+      },
+      {
+        "name": "Blessed",
+        "rank": 4,
+        "unlock": 41,
+        "priceOrders": 9.6
+      },
+      {
+        "name": "Miraculous",
+        "rank": 5,
+        "unlock": 51,
+        "priceOrders": 19.2
+      },
+      {
+        "name": "Divine",
+        "rank": 6,
+        "unlock": 61,
+        "priceOrders": 38.4
+      },
+      {
+        "name": "Fate",
+        "rank": 7,
+        "unlock": 71,
+        "priceOrders": 76.8
+      }
+    ],
+    "masteryStep": 0.4
+  },
+  "quotes": [
+    {
+      "scenario": "early",
+      "expectedCoinsPerOrder": 212.6038986404659,
+      "pricesInExpectedOrders": {
+        "nextMastery": 1.1994135649940743,
+        "nextBakery": 2.502305947360186,
+        "standardPackage": 0.6020585738009471,
+        "nextSlot": 1.999022608323457
+      },
+      "gainsPercent": {
+        "masteryOnSelectedFood": 25,
+        "bakery": 8.499999999999996
+      },
+      "activeToHelperRatio": [
+        {
+          "secondsPerOrder": 60,
+          "ratio": 6.000000000000001
+        },
+        {
+          "secondsPerOrder": 90,
+          "ratio": 4
+        },
+        {
+          "secondsPerOrder": 120,
+          "ratio": 3.0000000000000004
+        }
+      ]
+    },
+    {
+      "scenario": "middle",
+      "expectedCoinsPerOrder": 348212.88584228064,
+      "pricesInExpectedOrders": {
+        "nextMastery": 0.18067682891119727,
+        "nextBakery": 8.769233202309112,
+        "standardPackage": 0.600000771064606,
+        "nextSlot": 4.954747713677258
+      },
+      "gainsPercent": {
+        "masteryOnSelectedFood": 17.391304347826075,
+        "bakery": 8.499999999999996
+      },
+      "activeToHelperRatio": [
+        {
+          "secondsPerOrder": 60,
+          "ratio": 5.999999999999999
+        },
+        {
+          "secondsPerOrder": 90,
+          "ratio": 4
+        },
+        {
+          "secondsPerOrder": 120,
+          "ratio": 2.9999999999999996
+        }
+      ]
+    },
+    {
+      "scenario": "late",
+      "expectedCoinsPerOrder": 1269494626.6276886,
+      "pricesInExpectedOrders": {
+        "nextMastery": 0.7402051952722339,
+        "nextBakery": 28.978461155620952,
+        "standardPackage": 0.6000000000184221,
+        "nextSlot": 5.819150346956557
+      },
+      "gainsPercent": {
+        "masteryOnSelectedFood": 8.51063829787233,
+        "bakery": 8.499999999999996
+      },
+      "activeToHelperRatio": [
+        {
+          "secondsPerOrder": 60,
+          "ratio": 6
+        },
+        {
+          "secondsPerOrder": 90,
+          "ratio": 4
+        },
+        {
+          "secondsPerOrder": 120,
+          "ratio": 3
+        }
+      ]
+    }
+  ],
+  "metrics": [
+    {
+      "scenario": "early",
+      "policy": "growth",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 3,
+        "p90": 5
+      },
+      "powerGrowth": {
+        "p10": 365.1428218229833,
+        "p50": 416.7652408931118,
+        "p90": 468.7484182161333
+      },
+      "discoveries": {
+        "p10": 16,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 4.033333333333333,
+        "mastery": 35.6,
+        "bakery": 7.416666666666667,
+        "package": 0
+      }
+    },
+    {
+      "scenario": "early",
+      "policy": "mixed",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 3,
+        "p90": 3
+      },
+      "powerGrowth": {
+        "p10": 259.11938715833327,
+        "p50": 296.13854398020004,
+        "p90": 352.71400286232455
+      },
+      "discoveries": {
+        "p10": 16,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 3.816666666666667,
+        "mastery": 29.1,
+        "bakery": 5.283333333333333,
+        "package": 25.6
+      }
+    },
+    {
+      "scenario": "early",
+      "policy": "collector",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 2
+      },
+      "powerGrowth": {
+        "p10": 19.583333333333336,
+        "p50": 22.5,
+        "p90": 22.5
+      },
+      "discoveries": {
+        "p10": 16,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 0,
+        "mastery": 0,
+        "bakery": 0,
+        "package": 79.61666666666666
+      }
+    },
+    {
+      "scenario": "middle",
+      "policy": "growth",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
+      },
+      "powerGrowth": {
+        "p10": 3.5729600952948184,
+        "p50": 3.863385944014295,
+        "p90": 4.449895771292437
+      },
+      "discoveries": {
+        "p10": 16,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 0.31666666666666665,
+        "mastery": 52.88333333333333,
+        "bakery": 0,
+        "package": 0
+      }
+    },
+    {
+      "scenario": "middle",
+      "policy": "mixed",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
+      },
+      "powerGrowth": {
+        "p10": 3.2988385944014302,
+        "p50": 3.735259082787374,
+        "p90": 4.260199523525909
+      },
+      "discoveries": {
+        "p10": 17,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 0.6166666666666667,
+        "mastery": 47.03333333333333,
+        "bakery": 0.03333333333333333,
+        "package": 25.733333333333334
+      }
+    },
+    {
+      "scenario": "middle",
+      "policy": "collector",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
+      },
+      "powerGrowth": {
+        "p10": 1.2595294818344254,
+        "p50": 1.2595294818344254,
+        "p90": 1.2595294818344254
+      },
+      "discoveries": {
+        "p10": 17,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 0,
+        "mastery": 0.06666666666666667,
+        "bakery": 0,
+        "package": 79.93333333333334
+      }
+    },
+    {
+      "scenario": "late",
+      "policy": "growth",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
+      },
+      "powerGrowth": {
+        "p10": 1.4508844121145934,
+        "p50": 1.4669539949685046,
+        "p90": 1.4899662616767753
+      },
+      "discoveries": {
+        "p10": 13,
+        "p50": 14,
+        "p90": 16
+      },
+      "meanPurchases": {
+        "slot": 0,
+        "mastery": 37.63333333333333,
+        "bakery": 0,
+        "package": 0
+      }
+    },
+    {
+      "scenario": "late",
+      "policy": "mixed",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
+      },
+      "powerGrowth": {
+        "p10": 1.376699104861829,
+        "p50": 1.3990873101000452,
+        "p90": 1.412504631706223
+      },
+      "discoveries": {
+        "p10": 17,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 0,
+        "mastery": 32.11666666666667,
+        "bakery": 0,
+        "package": 25.666666666666668
+      }
+    },
+    {
+      "scenario": "late",
+      "policy": "collector",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
+      },
+      "powerGrowth": {
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
+      },
+      "discoveries": {
+        "p10": 17,
+        "p50": 17,
+        "p90": 17
+      },
+      "meanPurchases": {
+        "slot": 0,
+        "mastery": 0,
+        "bakery": 0,
+        "package": 79.95
+      }
+    }
+  ],
   "probabilities": [
     {
       "mastery": 0,
-      "percent": [
-        75.1447,
-        21.9172,
-        2.7397,
-        0.1903,
-        0.0079,
-        0.0002,
-        0,
-        0
+      "tickets": [
+        0.75144747810816,
+        0.21917218111488004,
+        0.027396522639360005,
+        0.0019025362944000003,
+        0.0000792723456,
+        0.0000019818086400000007,
+        2.7525120000000012e-8,
+        1.6384000000000005e-10
       ]
     },
     {
       "mastery": 40,
-      "percent": [
-        7.6327,
-        23.7314,
-        31.622,
-        23.4091,
-        10.3975,
-        2.7709,
-        0.4103,
-        0.026
+      "tickets": [
+        0.07632709958739634,
+        0.23731367982428717,
+        0.3162204863925863,
+        0.23409100489651707,
+        0.10397542398077705,
+        0.02770945119423476,
+        0.004102538294837994,
+        0.00026031582936346994
       ]
     },
     {
       "mastery": 160,
-      "percent": [
-        0.0986,
-        1.1654,
-        5.9017,
-        16.6032,
-        28.0257,
-        28.3839,
-        15.9704,
-        3.8511
-      ]
-    },
-    {
-      "mastery": 240,
-      "percent": [
-        0.03,
-        0.4591,
-        3.0109,
-        10.9707,
-        23.9839,
-        31.4599,
-        22.9257,
-        7.16
+      "tickets": [
+        0.000986346100457244,
+        0.011654456844897224,
+        0.05901711273555408,
+        0.16603183762394733,
+        0.2802567237910068,
+        0.2838389275964023,
+        0.1597038436943073,
+        0.03851075161342773
       ]
     }
   ],
-  "economy": [
+  "packageProbabilities": [
     {
-      "name": "early",
-      "multiplier": 1.72,
-      "initialOrder": 213,
-      "rates": {
-        "secondsPerOrder": 90,
-        "activePerSecond": 2.362265540449621,
-        "staffPerSecond": 0.5905663851124052,
-        "ratio": 4
-      },
-      "prices": {
-        "foodLevelOrders": 1.1994135649940743,
-        "fusionFeeOrders": 2.1495372517736935,
-        "kitchenOrders": 0.8513484520154017,
-        "bakeryOrders": 2.502305947360186
-      },
-      "purchases": [
-        {
-          "kind": "Food level",
-          "cumulativeOrders": 2,
-          "cost": 255,
-          "nextOrder": 266,
-          "gainPercent": 25
-        },
-        {
-          "kind": "Oven",
-          "cumulativeOrders": 3,
-          "cost": 226,
-          "nextOrder": 280,
-          "gainPercent": 5.5
-        },
-        {
-          "kind": "Bakery",
-          "cumulativeOrders": 5,
-          "cost": 701,
-          "nextOrder": 304,
-          "gainPercent": 8.5
-        }
+      "name": "Standard",
+      "foods": [
+        0.55784660123648,
+        0.33955880075263994,
+        0.08858055671807999,
+        0.012837761843199997,
+        0.0011163271167999997,
+        0.00005824315391999998,
+        0.0000016882073599999996,
+        2.0971519999999993e-8
       ]
     },
     {
-      "name": "middle",
-      "multiplier": 1126.78,
-      "initialOrder": 494601,
-      "rates": {
-        "secondsPerOrder": 90,
-        "activePerSecond": 5495.565939959608,
-        "staffPerSecond": 1373.891484989902,
-        "ratio": 4
-      },
-      "prices": {
-        "foodLevelOrders": 0.10795976364981269,
-        "fusionFeeOrders": 0.030804632450672248,
-        "kitchenOrders": 2.9119839839675583,
-        "bakeryOrders": 5.002699806904461
-      },
-      "purchases": [
-        {
-          "kind": "Food level",
-          "cumulativeOrders": 1,
-          "cost": 53397,
-          "nextOrder": 499191,
-          "gainPercent": 0.928
-        },
-        {
-          "kind": "Oven",
-          "cumulativeOrders": 4,
-          "cost": 1453636,
-          "nextOrder": 526646,
-          "gainPercent": 5.5
-        },
-        {
-          "kind": "Bakery",
-          "cumulativeOrders": 9,
-          "cost": 2634653,
-          "nextOrder": 571411,
-          "gainPercent": 8.5
-        }
+      "name": "Lucky",
+      "foods": [
+        0.2097152,
+        0.3670016,
+        0.27525120000000003,
+        0.114688,
+        0.028671999999999996,
+        0.0043008000000000005,
+        0.0003584,
+        0.0000128
       ]
     },
     {
-      "name": "late",
-      "multiplier": 226084.06,
-      "initialOrder": 202359846,
-      "rates": {
-        "secondsPerOrder": 90,
-        "activePerSecond": 2248442.7309415876,
-        "staffPerSecond": 562110.6827353969,
-        "ratio": 4
-      },
-      "prices": {
-        "foodLevelOrders": null,
-        "fusionFeeOrders": null,
-        "kitchenOrders": 6.570565206964829,
-        "bakeryOrders": 10.231663134406805
-      },
-      "purchases": [
-        {
-          "kind": "Oven",
-          "cumulativeOrders": 7,
-          "cost": 1329618562,
-          "nextOrder": 213489637,
-          "gainPercent": 5.5
-        },
-        {
-          "kind": "Bakery",
-          "cumulativeOrders": 17,
-          "cost": 2184354051,
-          "nextOrder": 231636256,
-          "gainPercent": 8.5
-        }
+      "name": "Fortunate",
+      "foods": [
+        0.06722988818432,
+        0.22146316107776,
+        0.3126538744627201,
+        0.24521872506880005,
+        0.11539704709120004,
+        0.03258269564928002,
+        0.005111011082240003,
+        0.00034359738368000027
+      ]
+    },
+    {
+      "name": "Charmed",
+      "foods": [
+        0.017270948495360008,
+        0.09499021672448002,
+        0.22390551085056004,
+        0.2932095975424,
+        0.2303789694976,
+        0.10860722847743998,
+        0.028444750315519997,
+        0.0031927780966399992
+      ]
+    },
+    {
+      "name": "Blessed",
+      "foods": [
+        0.003192778096640003,
+        0.028444750315520018,
+        0.10860722847744005,
+        0.23037896949760006,
+        0.2932095975424,
+        0.22390551085055996,
+        0.09499021672447996,
+        0.017270948495359987
+      ]
+    },
+    {
+      "name": "Miraculous",
+      "foods": [
+        0.0003435973836800005,
+        0.005111011082240006,
+        0.03258269564928003,
+        0.11539704709120008,
+        0.24521872506880005,
+        0.31265387446271997,
+        0.22146316107775993,
+        0.06722988818431996
+      ]
+    },
+    {
+      "name": "Divine",
+      "foods": [
+        0.00001280000000000003,
+        0.00035840000000000074,
+        0.0043008000000000065,
+        0.028672000000000034,
+        0.11468800000000008,
+        0.2752512000000001,
+        0.36700159999999993,
+        0.20971519999999988
+      ]
+    },
+    {
+      "name": "Fate",
+      "foods": [
+        2.097152000000013e-8,
+        0.0000016882073600000087,
+        0.000058243153920000244,
+        0.0011163271168000038,
+        0.01283776184320003,
+        0.08858055671808013,
+        0.33955880075264017,
+        0.5578466012364797
       ]
     }
   ],
-  "bakeryTrackEquivalentOrders": 197.36,
-  "paceAssumption": "90 seconds per Normal ticket; not a timer or learner target"
+  "assumptions": [
+    "Normal orders only; no speed target",
+    "Strongest menu chosen after rewards; one purchase decision per order",
+    "Only advertised minimum free packages; additional action packages omitted",
+    "No helper income, sales, fusion, refresh spending or optional modes",
+    "Early starts with 250 coins; middle/late are independent snapshots"
+  ],
+  "modelValidation": [
+    "Production price/probability functions used directly",
+    "Each order checks nonnegative coins, unique recipes and Food Index slot cap",
+    "Policies compare marginal gain per coin and collection preferences"
+  ]
 }

@@ -1,5 +1,7 @@
 # Corrective redesign — A/B review checkpoint
 
+**Historical checkpoint:** Kitchen descriptions and verification below record the earlier implementation. [Kitchen removal (2026-11-04)](KITCHEN_REMOVAL.md) supersedes them; Kitchen is no longer present in the game.
+
 **Later visual revision:** the owner requested a warmer direction before approving Stage C. See [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md) for the current implementation, real renders, inventory batches and deferred 3-minute/five-ticket refresh requirement. This document retains the earlier A/B history.
 
 2026-10-30. Implements the user's latest **“My Panaderya — Corrective UI/UX Redesign + Progression Overhaul”** brief. This continues the existing work; it is not a new codebase audit. Earlier uncommitted progress preservation, action deduplication, illustrations, and direct upgrades were retained.

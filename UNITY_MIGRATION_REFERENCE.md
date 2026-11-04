@@ -1,5 +1,7 @@
 # My Panaderya — Unity migration reference
 
+**Kitchen removal (2026-11-04):** [Implementation and save migration](docs/KITCHEN_REMOVAL.md). Kitchen tools and bonuses are retired; do not port them.
+
 Updated 2026-11-04. **The web app remains a functional gameplay and visual prototype. No Unity project or migration has been started.** This file and [tablet implementation notes](docs/TABLET_UX_IMPLEMENTATION.md) supersede Frame 11 wherever they disagree about duplicate ownership, tablet usability or the scope of modes.
 
 ## Finalized scope and player experience
@@ -8,7 +10,7 @@ Grade 2–5 learners practice the **procedure of long multiplication**, includin
 
 Core loop: choose an order → connect digits → reveal the product → place digits/carries → add partial products → collect coins/packages → choose the next order.
 
-Meta loop: discover unique Filipino recipes → buy slots and equip recipes → purchase optional Mastery/Kitchen/Bakery Power improvements → earn larger rewards and pursue discoveries. Collection, learning and short confirming feedback are the intended sources of satisfaction. Avoid bookkeeping and compulsory Mastery completion.
+Meta loop: discover unique Filipino recipes → buy slots and equip recipes → purchase optional Mastery/Bakery Power improvements → earn larger rewards and pursue discoveries. Collection, learning and short confirming feedback are the intended sources of satisfaction. Avoid bookkeeping and compulsory Mastery completion.
 
 **Latest owner correction:** game modes are outside this phase. Existing legacy mode code is retained unchanged; no mode selection, new modes, mode balance or mode penalties form part of this Unity specification. The normal core worksheet is penalty-free: mistakes do not remove coins, packages or progress and do not end an order.
 
@@ -16,7 +18,7 @@ Meta loop: discover unique Filipino recipes → buy slots and equip recipes → 
 
 - A save owns **at most one instance per `FOOD.id`**, irrespective of rarity.
 - First discovery creates that recipe with Mastery 0, Tier 1 and no investment. If an empty purchased slot exists it is placed on the menu.
-- A duplicate increments `recipeCeilings[id]` by exactly one. It does **not** create an inventory/card instance, spend coins, purchase Mastery, change equipment assignment or modify the existing recipe's UID, Tier, Mastery, retained base or investment.
+- A duplicate increments `recipeCeilings[id]` by exactly one. It does **not** create an inventory/card instance, spend coins, purchase Mastery, change menu assignment or modify the existing recipe's UID, Tier, Mastery, retained base or investment.
 - Buying +1 Mastery increments the owned recipe's actual `mastery` and records its exact coin cost in `spent`. Available capacity is `max(0, ceiling − mastery)`. Capacity has no fixed five-step cap and selling does not erase it.
 - Batch results group by recipe; show total newly unlocked Mastery capacity rather than repeated copies. A new recipe and its duplicate capacity can be displayed together.
 - Start with **one** slot. Cap slots at `FOOD.length` (currently 17), including all undiscovered recipes. Never use owned/discovered counts as the cap. Reject purchases at the cap without charging.
@@ -40,25 +42,23 @@ masteryFactor(m >= 5) = 2.3 + 0.4 * (m - 4)
 tierBase = base * tierFactor[t] + max(0, retainedBase)
 foodContribution = tierBase * masteryFactor(m)
 recipeTotal = sum(equipped unique recipe contributions)
-kitchenFactor = product((1 + toolBonus) ^ toolLevel)
 bakeryPower = 1.085 ^ (bakeryLevel - 1)
-bakersBoost = max(1, recipeTotal) * kitchenFactor * bakeryPower
+bakersBoost = max(1, recipeTotal) * bakeryPower
 ```
 
-Kitchen bonuses: Oven 5.5%, Mixer 4.2%, Refrigerator 3.3%, Display Cabinet 2.8% per purchase; each tool retains its existing internal 20-purchase cap. Bakery Power has 100 internal purchases (stored level 1–101); **do not show a 100-level ceiling**. CURRENT is the latest purchased stage; NEXT is the immediate upgrade. Browsing history never equips an old bakery appearance.
+Bakery Power has 100 internal purchases (stored level 1–101); **do not show a 100-level ceiling**. CURRENT is the latest purchased stage; NEXT is the immediate upgrade. Browsing history never equips an old bakery appearance.
 
 ### Pricing and transactions
 
 `expectedBase` is the probability-weighted Normal ticket base below. `pricingBase` is the maximum of 1, the stored historical peak, and the total contributions of the strongest unique owned recipes that fit purchased capacity. Unequipping/selling must not reduce global prices.
 
 ```text
-economyUnit = expectedBase * pricingBase * kitchenFactor * bakeryPower
+economyUnit = expectedBase * pricingBase * bakeryPower
 earningUnit = expectedBase * bakersBoost
-foodShare = expectedBase * thisFoodContribution * kitchenFactor * bakeryPower
+foodShare = expectedBase * thisFoodContribution * bakeryPower
 nextMasteryCost = max(1, round(foodShare * (0.75 + 0.45 * (m + 1)^1.3)))
 nextSlotCost = round(economyUnit * (2 + 0.6 * (slots - 1)^1.15))
 nextBakeryCost = max(1, round(economyUnit * (2.5 + 0.2 * (bakeryLevel - 1)^1.15)))
-nextToolCost = max(1, round(economyUnit * (0.85 + 0.22 * toolLevel^1.15) * (1 + 0.1 * toolIndex)))
 packageCost(rank) = max(1, round(economyUnit * 0.6 * 2^rank))
 packageUnlockLevel(rank) = 1 + 10 * rank
 ```
@@ -129,7 +129,7 @@ The primary web key remains **`panaderyaQuestV2`**. Relevant state:
 | Identity/version | `progressionVersion`, `frame11Version`, `uniqueFoodsVersion`, monotonic `uidNext` and `ticketSeq` |
 | Collection | `owned[]`: unique `id`, `uid`, `mastery`, legacy `level`, `fusion`, `spent`, optional `baseCarry` and `resaleBase` |
 | Discovery | `discovered[]` permanent; `recipeCeilings[id]` permanent unlocked paid-upgrade capacity |
-| Menu/economy | `activeMenu[]` unique recipe UIDs, `menuSlots`, `coins`, `equipment`, `bakeryLevel`, `bakerySpent`, `economyPeakBase`, pantry and legacy investment fields |
+| Menu/economy | `activeMenu[]` unique recipe UIDs, `menuSlots`, `coins`, `bakeryLevel`, `bakerySpent`, `economyPeakBase`, pantry and legacy investment fields |
 | Orders | `board[]`; `orderRuns[ticketId]` independently owns ticket, phase, fixed budget, pool, rewards, mistakes, progress, worksheet session and action ledger |
 | Current view | `g.run` aliases the canonical selected `orderRuns` entry; `paused` permits the bakery view without deleting the run |
 | Worksheet session | Exact arithmetic state, selection/provisional carries, history, metrics, append-only action records and attempt ID |

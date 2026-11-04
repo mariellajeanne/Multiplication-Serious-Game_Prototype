@@ -77,8 +77,8 @@ test('ten second Undo reverses only the latest transaction once, survives reload
  const expired=progressionHarness();expired.run('g.coins=1e9;Date.now=()=>1000;buyMenuSlot();id=g.purchaseUndo.id;Date.now=()=>11001;ok=undoPurchase(id)');assert.equal(expired.run('ok'),false);
 });
 
-test('Undo cannot reverse mastery used by equipment, opened packages, sales or changed assignments',()=>{
- for(const change of ['g.equipment.oven++','g.packages[0]++','g.activeMenu=[]','g.owned[0].spent++','g.coins++']){
+test('Undo cannot reverse mastery used by opened packages, sales or changed assignments',()=>{
+ for(const change of ['g.packages[0]++','g.activeMenu=[]','g.owned[0].spent++','g.coins++']){
   const h=progressionHarness();h.run(`g.coins=1e9;discoverFood(F('pandesal'));buyMastery([1]);id=g.purchaseUndo.id;${change};save();ok=undoPurchase(id)`);
   assert.equal(h.run('ok'),false,change);assert.equal(h.run('g.purchaseUndo'),null);
  }
@@ -151,6 +151,6 @@ test('legacy pending packages retain their earned food rarity rather than being 
 
 test('paused orders keep fixed budgets while bakery purchases update totals; Resume commits Undo',()=>{
  const h=progressionHarness();h.run(`g.coins=1e9;g.completed=6;refillBoard();startTicket(g.board[0].id);budget=g.run.budget;id=g.run.ticket.id;abandonTicket();
- buyMenuSlot();slotTx=g.purchaseUndo.id;startTicket(id);denied=undoPurchase(slotTx);abandonTicket();before=bakeryValue();kitchen=upgradeEquipment('oven')`);
- assert.equal(h.run('denied'),false);assert.equal(h.run('g.run.budget'),h.run('budget'));assert.equal(h.run('kitchen'),true);assert.ok(h.run('bakeryValue()>before'));
+ buyMenuSlot();slotTx=g.purchaseUndo.id;startTicket(id);denied=undoPurchase(slotTx);abandonTicket();before=bakeryValue();upgraded=upgradeDecor()`);
+ assert.equal(h.run('denied'),false);assert.equal(h.run('g.run.budget'),h.run('budget'));assert.equal(h.run('upgraded'),true);assert.ok(h.run('bakeryValue()>before'));
 });

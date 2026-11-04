@@ -1,5 +1,9 @@
 # Latest focused update
 
+**Compact Menu header (2026-11-04):** [Current header and counter popups](MENU_HEADER_IMPLEMENTATION.md) supersedes earlier topbar, Boost-banner and Menu-heading descriptions.
+
+**Kitchen removal (2026-11-04):** [Current removal and save compatibility](KITCHEN_REMOVAL.md) supersedes all Kitchen descriptions below. Baker's Boost and proportional prices now use recipes and Bakery Power only.
+
 **Current owner corrections (2026-11-04):** [Tablet UX implementation](TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](../UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
 
 **Current owner-directed implementation (2026-11-04):** [Frame 11](FRAME_11_IMPLEMENTATION.md) supersedes the older inventory/layout and progression notes below. The app now has one starting menu slot, all owned foods in the center grid, unlimited duplicate-unlocked Recipe Mastery, 100 configurable Bakery Power purchases, coin package buying/saved unboxing, safe purchase Undo, persistent per-ticket worksheets and a retrying WebKit handshake. Preserve the original math interactions and existing save key.
@@ -8,7 +12,7 @@ See [Mastery cards and ticket exit](MASTERY_AND_TICKET_FIX.md) for the current c
 
 # Architecture, code map, and constraints
 
-**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 and Kitchen Level 20, migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
+**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 (Kitchen subsequently removed), migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
 
 **Current component theme:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md). The final theme stylesheet is replaced, not supplemented with another theme layer. Parent and iframe share local Nunito via styles/typography.css. bakeryIcon() in bakery-art.js supplies UI illustrations and must load before main.js; protocol, economy and saved state are unchanged.
 
@@ -42,7 +46,7 @@ Run `node --test tests/smoke.test.mjs tests/worksheet-session.test.mjs tests/wor
 | Food catalog, ingredients, modes, tutorial copy | `src/data/catalog.js` |
 | Store/load progress, menu value, rarity ticket generator | `src/game/state.js` |
 | Action rewards, luck, chest selection, ticket sessions | `src/game/rewards.js` |
-| Food upgrade/fusion/sale, kitchen, decor, staff, mode changes | `src/game/economy.js` |
+| Food upgrade/fusion/sale, decor, staff, mode changes | `src/game/economy.js` |
 | Parent iframe/session state and messaging | `src/game/worksheet-bridge.js` |
 | Main render/bootstrap | `src/main.js` |
 | Center menu, slots, in-progress worksheet wrapper | `src/ui/menu.js` |

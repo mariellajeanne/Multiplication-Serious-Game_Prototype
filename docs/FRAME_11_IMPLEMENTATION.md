@@ -1,5 +1,9 @@
 # Frame 11 — My Panaderya
 
+**Compact Menu header (2026-11-04):** [Current header and counter popups](MENU_HEADER_IMPLEMENTATION.md) supersedes earlier topbar, Boost-banner and Menu-heading descriptions.
+
+**Kitchen removal (2026-11-04):** [Current removal and save compatibility](KITCHEN_REMOVAL.md) supersedes all Kitchen descriptions below. Baker's Boost and proportional prices now use recipes and Bakery Power only.
+
 **Current owner corrections (2026-11-04):** [Tablet UX implementation](TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](../UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
 
 Implemented 2026-11-04 from the owner's pasted Frame 11 request and annotated wireframe. This is current behavior; it supersedes earlier documents' four starting slots, five-step mastery cap, Bakery 30 cap, separate inventory screen, and single unfinished order. The warm paper, light wood, local illustrated foods, rounded type and original worksheet interactions remain.

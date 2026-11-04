@@ -1,5 +1,9 @@
 # Tablet UX, unique foods and Unity-ready prototype
 
+**Compact Menu header (2026-11-04):** [Current header and counter popups](MENU_HEADER_IMPLEMENTATION.md) supersedes earlier topbar, Boost-banner and Menu-heading descriptions.
+
+**Kitchen removal (2026-11-04):** [Current removal and save compatibility](KITCHEN_REMOVAL.md) supersedes all Kitchen descriptions below. Baker's Boost and proportional prices now use recipes and Bakery Power only.
+
 2026-11-04. Implemented from the UI/UX audit, comprehensive checklist, Unity-priority instruction and subsequent owner corrections. **This is a web prototype improvement, not the start of a Unity port.** Authoritative handoff: [UNITY_MIGRATION_REFERENCE.md](../UNITY_MIGRATION_REFERENCE.md).
 
 ## Current rules and scope

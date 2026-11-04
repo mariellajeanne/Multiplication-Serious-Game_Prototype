@@ -1,5 +1,5 @@
 /* Shared, deterministic progression rules. No DOM, random draws or transactions. */
-const PROGRESSION_VERSION=3, MAX_FOOD_LEVEL=5, MAX_FOOD_TIER=5, MAX_KITCHEN_LEVEL=20;
+const PROGRESSION_VERSION=3, MAX_FOOD_LEVEL=5, MAX_FOOD_TIER=5;
 const TIER_FACTORS=[0,1,2,3.5,5.5,8], LEVEL_FACTORS=[0,1,1.25,1.55,1.9,2.3];
 const BAKERY_MILESTONES=[2,3,5,7,10,13,17,21,25,30];
 const BAKERY_STAGES=['Freshly opened','Warm welcome','Cozy counter','Neighborhood bakery','Blooming bakery','Golden counter','Artisan bakery','Celebration bakery','Grand panaderya','Master bakery','Crown panaderya'];

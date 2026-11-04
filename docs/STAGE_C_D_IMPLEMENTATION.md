@@ -1,5 +1,7 @@
 # Stage C/D implementation — 2026-10-31
 
+**Historical checkpoint:** Kitchen descriptions and verification below record the earlier implementation. [Kitchen removal (2026-11-04)](KITCHEN_REMOVAL.md) supersedes them; Kitchen is no longer present in the game.
+
 The owner explicitly authorized C/D after the component-theme review. This supersedes earlier “stop before Stage C” checkpoints. The paper, wood, pastry-box, local illustrations and rounded-font design remains. No scenic image, new game mode, multi-worker panel, worksheet interaction rewrite, commit or push is part of this work.
 
 ## Current systems and files

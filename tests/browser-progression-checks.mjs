@@ -46,7 +46,7 @@ export async function checkProgression({evaluate,cdp,screenshot,waitFor,pause}){
  await evaluate(`window.nowAfterCooldown=g.orderRefreshAt;Date.now=()=>nowAfterCooldown`);assert.equal(await evaluate('refreshOrders()'),true);
  await evaluate(`Date.now=realClock;g.orderClock=Date.now();g.orderRefreshAt=0;localStorage.removeItem('panaderyaQuestV2')`);
  await evaluate(`g.mastery=160;g.permanentLuck=40;g.coins=1e12;g.bakeryLevel=25;g.menuSlots=4;
-  g.owned=FOOD.map((f,i)=>({uid:i+1,id:f.id,fusion:i%5+1,level:i%5+1,spent:100}));g.uidNext=FOOD.length+1;g.discovered=FOOD.map(f=>f.id);g.activeMenu=[15,16,17];g.equipment=Object.fromEntries(KITCHEN.map(k=>[k.id,17]));g.board=Array.from({length:5},(_,i)=>({id:100+i,rarity:i+3,a:1234,b:18,base:ticketBase(i+3)}));render()`);
+  g.owned=FOOD.map((f,i)=>({uid:i+1,id:f.id,fusion:i%5+1,level:i%5+1,spent:100}));g.uidNext=FOOD.length+1;g.discovered=FOOD.map(f=>f.id);g.activeMenu=[15,16,17];g.board=Array.from({length:5},(_,i)=>({id:100+i,rarity:i+3,a:1234,b:18,base:ticketBase(i+3)}));render()`);
  for(const [width,height] of [[2000,1200],[1194,834],[1024,768],[768,1024]]){
   await cdp('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});
   await screenshot('stage-cd-main-'+width);
@@ -69,11 +69,9 @@ export async function checkProgression({evaluate,cdp,screenshot,waitFor,pause}){
  await evaluate(`g.bakeryLevel=29;g.completed=40;g.coins=1e20;openDecor();window.oldBakeryValue=bakeryValue()`);
  await click('.modal .primary');assert.equal(await evaluate('g.bakeryLevel===30&&Math.abs(bakeryValue()/oldBakeryValue-1.085)<1e-10'),true);
  assert.equal(await evaluate(`document.querySelector('.modal .primary').disabled`),true);await evaluate('closeModal()');
- await evaluate(`g.equipment.oven=19;openKitchen();window.oldKitchenValue=bakeryValue()`);await click(`.modal button[onclick="upgradeEquipment('oven')"]`);
- assert.equal(await evaluate('g.equipment.oven===20&&Math.abs(bakeryValue()/oldKitchenValue-1.055)<1e-10'),true);await evaluate('closeModal()');
  await cdp('Emulation.setEmulatedMedia',{features:[{name:'prefers-reduced-motion',value:'reduce'}]});await evaluate('render();openMenu()');
  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.ticket')).animationName==='none'`),true);await evaluate('closeModal()');
  await cdp('Emulation.setEmulatedMedia',{features:[]});
  await evaluate(`g=fresh();localStorage.removeItem('panaderyaQuestV2');save();render()`);
- console.log('PASS C/D browser: Equip Best and Auto/persistence; six fusion recipes, overflow and ingredient preview; refresh cooldown/reload/rollback; eight rarities/five tiers; bakery 30/kitchen 20; four target sizes and reduced motion');
+ console.log('PASS C/D browser: Equip Best and Auto/persistence; six fusion recipes, overflow and ingredient preview; refresh cooldown/reload/rollback; eight rarities/five tiers; bakery 30; four target sizes and reduced motion');
 }

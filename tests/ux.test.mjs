@@ -24,10 +24,24 @@ test('sticky food preview shows actual contribution, mastery availability and pr
  assert.match(c.result,/1\.20/);assert.match(c.result,/0\.30/);assert.match(c.result,/Available \+2/);assert.equal(c.cost,255);assert.equal(c.before,c.after);assert.equal(c.active,1);
 });
 
-test('main navigation keeps menu, kitchen, Food Index and packages accessible without exposing future features',()=>{
+test('main navigation keeps menu, Food Index and packages accessible without exposing future features',()=>{
  const c=ui();vm.runInContext('result=renderLeft();menu=renderMenu();tickets=renderTickets()',c);
- assert.match(c.result,/GET MORE PACKAGES/);assert.match(c.menu,/role="tab"/);assert.match(c.menu,/Kitchen/);assert.match(c.tickets,/openIndex/);assert.doesNotMatch(c.result,/Helper|Game modes/);
+ assert.match(c.result,/GET MORE PACKAGES/);assert.match(c.menu,/menu-header/);assert.doesNotMatch(c.menu,/menu-heading|boost-hero/);assert.doesNotMatch(c.menu,/Kitchen|switchMenuTab|role="tab"/);assert.match(c.tickets,/openIndex/);assert.doesNotMatch(c.result,/Helper|Game modes/);
  vm.runInContext('g.completed=6;openSettings();settings=result.html',c);assert.match(c.settings,/openStaff/);assert.match(c.settings,/openModes/);
+});
+
+test('compact header counters open minimal Boost and Coins dialogs without changing progress',()=>{
+ const c=ui();
+ vm.runInContext(`g.bakeryLevel=14;g.owned[0].mastery=3;before=JSON.stringify(g);
+  menu=renderMenu();showBoostInfo();boost=result;showCoinsInfo();coins=result;after=JSON.stringify(g)`,c);
+ assert.equal(c.before,c.after);
+ assert.equal(c.boost.title,"Baker's Boost 💎");
+ assert.match(c.boost.html,/Total Menu 💎/);assert.match(c.boost.html,/Bakery Power 👑/);
+ assert.match(c.boost.html,/id="menuBoostComponent">2\.28<\/strong>/);assert.match(c.boost.html,/id="bakeryPowerComponent">2\.89<\/strong>/);
+ assert.doesNotMatch(c.boost.html,/Kitchen|<button|recipes|Equipped/);
+ assert.equal(c.coins.title,'Coins 🪙');
+ assert.equal(c.coins.html,'<div class="coins-help"><p>Complete orders to earn coins!</p><p>Your Baker\'s Boost multiplies the coins you earn.</p></div>');
+ assert.match(c.menu,/<div class="menu-brand">.*My Panaderya.*menu-settings.*<div class="menu-counters">/);
 });
 
 test('food illustration and discovery renderers cover all catalog foods with named local art',()=>{

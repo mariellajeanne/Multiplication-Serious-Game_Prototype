@@ -1,10 +1,12 @@
 # Reward economy and progression — design reference
 
+**Kitchen removal (2026-11-04):** [Current removal and save compatibility](KITCHEN_REMOVAL.md) supersedes all Kitchen descriptions below. Baker's Boost and proportional prices now use recipes and Bakery Power only.
+
 **Current owner corrections (2026-11-04):** [Tablet UX implementation](TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](../UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
 
 **Current owner-directed implementation (2026-11-04):** [Frame 11](FRAME_11_IMPLEMENTATION.md) supersedes the older inventory/layout and progression notes below. The app now has one starting menu slot, all owned foods in the center grid, unlimited duplicate-unlocked Recipe Mastery, 100 configurable Bakery Power purchases, coin package buying/saved unboxing, safe purchase Undo, persistent per-ticket worksheets and a retrying WebKit handshake. Preserve the original math interactions and existing save key.
 
-**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 and Kitchen Level 20, migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
+**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 (Kitchen subsequently removed), migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
 
 **Newest review checkpoint:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md). No progression formulas changed. The 30-level milestone component previews the future design using current decor data. After visual approval, Stage C must additionally implement ticket reset/refresh with a 3-minute cooldown, maximum 5 visible tickets and persisted cooldown/functionality. It is not implemented yet.
 
@@ -13,7 +15,7 @@
 **Legend:** **Direction** = explicitly discussed and favored or accepted; **Proposal** = appealing but undecided; **Prototype** = implementation shortcut that must not be presented as a finalized balance/design choice. Numerical values in the code are tunable examples.
 
 ## Core progression (Direction)
-- The main score is the **Bakery Value Multiplier**, displayed clearly. Improving the menu, kitchen, and bakery appearance raises this score, increasing coins earned through active multiplication tickets.
+- The main score is the **Bakery Value Multiplier**, displayed clearly. Improving the menu and Bakery Power raises this score, increasing coins earned through active multiplication tickets.
 - Multiple cheap-to-medium-term upgrade paths and significant milestones should remain within reach, especially early–middle game; avoid one AFK-dependent grind route. Features appear in stages, not all at once.
 - Coins are guaranteed for correctly completing tickets. **Meaningful mathematical actions** cause small coin bursts that visually fly into a **pending prize jar/pool**, where numbers increase; later partial-product rows can create richer coin bursts. Ticket completion and final sum release the pool. The total payout must not reward artificial extra taps.
 - **Passive income** is allowed via **temporary hired staff**, but a student solving at a comfortable pace should earn at least around **3× the staff income rate**. Staff do not independently earn learning-related chests or mastery.
@@ -36,8 +38,7 @@
 - **Sell the ENTIRE owned food item**, including its levels/fusion, removing it from inventory and active menu; keep its Index entry unlocked. Sale is `rarity/base resale value + 50% of actual coin investment` (levels, purchased ingredients, fusion fees). A proposed alternative uses original food base multiplier and maybe a rarity factor to set base resale, **not decided**. Do not double-count upgrade investments.
 - **Menu slots:** existing prototype uses limited assignable slots, an affordable empty slot displays `+` and unpurchased slot displays cost. Broader choice between all-owned and active-food calculation was discussed, but current prototype uses **active menu**; preserve until changed.
 
-## Kitchen, decor, other upgrades (Direction / Proposal)
-- Kitchenware should **benefit ALL foods automatically**, not require food-category matching, duplicate ovens, or equipment assignment slots. Each kitchenware type can be bought and upgraded with coins (initial max level ~5). Give small **additive percentage** bonuses overall, making several affordable parallel upgrade paths without strategic overhead.
+## Decor and other upgrades (Direction / Proposal)
 - Decorations/renovations improve both **bakery appearance AND worksheet styling**. Favor lightweight automatically placed décor and room/theme evolution over manually dragging furniture. Consider **small bakery-wide multipliers** for major visual renovations; individual decor can supply modest bonuses. Exact treatment of per-item decor bonuses is still tunable.
 - Optional musical progression is cosmetic: richer background tracks/layers with bakery prestige, player-selectable and mutable; don't distract from maths.
 - Collection index milestones, mini goals or celebrations might add motivation, but don't automatically implement ideas from unconstrained brainstorming. Optional proposed rewards include aesthetic transformations or small bonuses at milestones.
@@ -58,6 +59,6 @@
 ## Open decisions — don't silently finalize
 - Exact probabilities, rarity classes/counts, ticket generation rules, balancing and rewards; payout normalization by effort/time.
 - Precise rarity-based food resale base formula; fixed base multiplier or randomized variants of same food.
-- Exact multiplier stacking, slot capacity scaling, equipment level caps, decoration implementation, EXP/rebirth (not approved).
+- Exact multiplier stacking, slot capacity scaling, decoration implementation, EXP/rebirth (not approved).
 - Whether or how to discount partial rewards from unfinished orders; whether free retry rules should differ between modes and what resets per retry.
 - Cosmetic music, feature ordering, additional new progression ideas from brainstorming; treat these as options rather than required implementation.

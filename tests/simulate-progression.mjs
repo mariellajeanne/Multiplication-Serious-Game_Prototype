@@ -14,18 +14,18 @@ const report=h.json(`(()=>{
   g.owned=scenario.foods.map((id,i)=>({id,uid:i+1,mastery:scenario.recipeMastery,level:Math.min(5,scenario.recipeMastery+1),fusion:scenario.tier,spent:0}));
   g.discovered=[...scenario.foods];g.uidNext=g.owned.length+1;g.activeMenu=bestMenu(g.owned,g.menuSlots,'final');
   g.recipeCeilings=Object.fromEntries(scenario.foods.map(id=>[id,scenario.recipeMastery+4]));if(scenario.name==='early')g.recipeCeilings.pandesal=0;
-  g.equipment=Object.fromEntries(KITCHEN.map(k=>[k.id,scenario.kitchen]));g.economyPeakBase=pricingMenuBase();
+  g.economyPeakBase=pricingMenuBase();
  };
  const quotes=config.scenarios.map(s=>{
   initialize(s);const income=earningUnit(),o=g.owned.find(o=>g.activeMenu.includes(o.uid));
-  return {scenario:s.name,expectedCoinsPerOrder:income,pricesInExpectedOrders:{nextMastery:foodLevelPrice(o)/income,nextOven:equipmentCost(KITCHEN[0])/income,nextBakery:bakeryUpgradeCost()/income,standardPackage:packagePrice(0)/income,nextSlot:g.menuSlots<FOOD.length?slotCost()/income:null},gainsPercent:{masteryOnSelectedFood:(masteryFactor(recipeMastery(o)+1)/masteryFactor(recipeMastery(o))-1)*100,bakery:(BAKERY_POWER_CONFIG.factor-1)*100,oven:KITCHEN[0].bonus*100},activeToHelperRatio:config.secondsPerOrder.map(seconds=>({secondsPerOrder:seconds,ratio:income/seconds/staffRate()}))};
+  return {scenario:s.name,expectedCoinsPerOrder:income,pricesInExpectedOrders:{nextMastery:foodLevelPrice(o)/income,nextBakery:bakeryUpgradeCost()/income,standardPackage:packagePrice(0)/income,nextSlot:g.menuSlots<FOOD.length?slotCost()/income:null},gainsPercent:{masteryOnSelectedFood:(masteryFactor(recipeMastery(o)+1)/masteryFactor(recipeMastery(o))-1)*100,bakery:(BAKERY_POWER_CONFIG.factor-1)*100},activeToHelperRatio:config.secondsPerOrder.map(seconds=>({secondsPerOrder:seconds,ratio:income/seconds/staffRate()}))};
  });
  const metrics=[];
  for(const scenario of config.scenarios)for(const policy of config.policies){
   const trials=[];
   for(let trial=0;trial<config.trials;trial++){
    Math.random=seedRandom(config.seed+trial);initialize(scenario);const startValue=bakeryValue();
-   const purchases={slot:0,mastery:0,oven:0,bakery:0,package:0};let firstPurchase=null;
+   const purchases={slot:0,mastery:0,bakery:0,package:0};let firstPurchase=null;
    for(let order=1;order<=config.orders;order++){
     const ticket=makeTicket();g.coins+=Math.round(ticket.base*bakeryValue());
     // Only advertised minimum packages; additional per-pair chances are omitted.
@@ -34,7 +34,6 @@ const report=h.json(`(()=>{
     const candidates=[];const add=(kind,cost,apply,gain)=>{if(cost<=g.coins&&gain>0)candidates.push({kind,cost,apply,score:gain/cost})};
     if(g.menuSlots<FOOD.length){const next=bestMenu(g.owned,g.menuSlots+1,'final'),sum=g.owned.filter(o=>next.includes(o.uid)).reduce((n,o)=>n+individualValue(o),0);add('slot',slotCost(),()=>g.menuSlots++,sum/Math.max(1,foodSum())-1)}
     for(const o of g.owned.filter(o=>g.activeMenu.includes(o.uid)&&availableMastery(o)>0))add('mastery',foodLevelPrice(o),()=>{o.spent+=foodLevelPrice(o);o.mastery=recipeMastery(o)+1;o.level=Math.min(5,o.mastery+1)},foodValue(o)/Math.max(1,foodSum())*(masteryFactor(recipeMastery(o)+1)/masteryFactor(recipeMastery(o))-1));
-    if(g.completed>=2&&g.equipment.oven<MAX_KITCHEN_LEVEL)add('oven',equipmentCost(KITCHEN[0]),()=>g.equipment.oven++,KITCHEN[0].bonus);
     if(g.bakeryLevel<=BAKERY_POWER_CONFIG.purchases)add('bakery',bakeryUpgradeCost(),()=>g.bakeryLevel++,BAKERY_POWER_CONFIG.factor-1);
     candidates.sort((a,b)=>b.score-a.score);let choice=candidates[0];
     if((policy==='collector'||policy==='mixed'&&order%3===0)&&g.coins>=packagePrice(0))choice={kind:'package',cost:packagePrice(0),apply:()=>discoverFood(drawFood(0))};

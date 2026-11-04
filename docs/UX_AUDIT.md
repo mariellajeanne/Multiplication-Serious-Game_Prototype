@@ -1,5 +1,7 @@
 # Panaderya Quest — UX audit and redesign
 
+**Historical checkpoint:** Kitchen descriptions and verification below record the earlier implementation. [Kitchen removal (2026-11-04)](KITCHEN_REMOVAL.md) supersedes them; Kitchen is no longer present in the game.
+
 **Current review direction:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md). The references are style inspiration only. The active UI uses no scenic background; its components carry the bakery theme. Real renders and verification are recorded there. Stop before Stage C.
 
 **Newest visual direction:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md) replaces the darker A/B presentation with the supplied cozy bakery mood references and clipboard reward mockup. Implemented and tested; stop for owner approval before Stage C.

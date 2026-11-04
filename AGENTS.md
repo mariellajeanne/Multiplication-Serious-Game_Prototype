@@ -1,5 +1,9 @@
 # Panaderya Quest — agent instructions
 
+**Compact Menu header (2026-11-04):** [Current layout](docs/MENU_HEADER_IMPLEMENTATION.md): bakery icon/name/Settings grouped left, clickable Boost/Coins counters right, no standalone topbar or Menu heading.
+
+**Kitchen removed (2026-11-04):** See [removal and migration](docs/KITCHEN_REMOVAL.md). Do not reintroduce Kitchen tools, tabs or bonuses. Existing saves discard obsolete equipment fields; the save key and saved order budgets remain unchanged.
+
 **Current owner corrections (2026-11-04):** [Tablet UX implementation](docs/TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
 
 Current behavior and verification: [docs/FRAME_11_IMPLEMENTATION.md](docs/FRAME_11_IMPLEMENTATION.md) (2026-11-04). Frame 11 supersedes older layout/cap references: all owned foods, one starting slot, duplicate-unlocked unbounded Recipe Mastery, Bakery Power with 100 internal purchases, coin packages, safe ten-second Undo and persistent independent order worksheets. Keep both bridges in sync. Run `node --test tests/*.test.mjs` and the focused WebKit/Edge runner when changing these paths.
@@ -11,7 +15,7 @@ Panaderya Quest is a tablet-first educational incremental bakery game for practi
 - Read `docs/REWARDS_AND_PROGRESSION.md` for rewards, economy, bakery, levels, mastery, game modes, and unlocks. It distinguishes **agreed direction** from **proposals** and **existing prototype shortcuts**.
 - Read `docs/ARCHITECTURE.md` when refactoring code, debugging, modifying the worksheet or integrating features.
 - Read only relevant files for a focused visual edit; do **not** exhaustively reread all docs for every small task.
-- Latest visual pass: `docs/BAKERY_COMPONENT_REVIEW.md`. References are aesthetic guidance only: no scenic wallpaper or translucent UI over an illustration. Theme the actual components with paper, light wood, pastry-box motifs, illustrated icons and shared rounded sans-serif type. The owner subsequently authorized Stage C/D; see `docs/STAGE_C_D_IMPLEMENTATION.md` for implemented eight ranks, Level/Tier 5 conservation, Auto Equip, five tickets/3-minute refresh, Bakery 30, Kitchen 20, migration and tests. Preserve the accepted component theme.
+- Latest visual pass: `docs/BAKERY_COMPONENT_REVIEW.md`. References are aesthetic guidance only: no scenic wallpaper or translucent UI over an illustration. Theme the actual components with paper, light wood, pastry-box motifs, illustrated icons and shared rounded sans-serif type. The owner subsequently authorized Stage C/D; see `docs/STAGE_C_D_IMPLEMENTATION.md` for implemented eight ranks, Level/Tier 5 conservation, Auto Equip, five tickets/3-minute refresh, Bakery 30, migration and tests. Preserve the accepted component theme.
 
 ## Non-negotiable interaction and UX principles
 - Preserve the **behavior**, not a particular version's appearance, of the long multiplication worksheet: digit tap/drag connection with rounded capsule, floating `M × N` button revealing product tiles, flexible tile placement and carry handling, downward swipe to merge partial-product rows, satisfying sound effects, and guidance arrows only when tutorial is ON.
@@ -35,7 +39,7 @@ Panaderya Quest is a tablet-first educational incremental bakery game for practi
 - Deterministic progression/migration: `src/game/progression.js`; economy transactions/formulas: `src/game/progression-economy.js`.
 - Progress/save/ticket generator: `src/game/state.js`.
 - Coins/chests/gameplay run: `src/game/rewards.js`.
-- Food levels/fusions/sales, kitchen, decor, staff, modes: `src/game/economy.js`.
+- Food levels/fusions/sales, decor, staff, modes: `src/game/economy.js`.
 - Menu/screens: `src/ui/menu.js`, `src/ui/scene.js`, `src/ui/dialogs.js`.
 - Main app entry: `src/main.js`, UI styles: `styles/`.
 - Worksheet entry: `worksheet/worksheet-engine.html`; input, placement, carries, add, SFX, render, tutorial, and iframe protocol in `worksheet/src/`; themes in `worksheet/styles/`.

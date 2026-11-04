@@ -1,5 +1,7 @@
 # Bakery component system — visual review
 
+**Historical checkpoint:** Kitchen descriptions and verification below record the earlier implementation. [Kitchen removal (2026-11-04)](KITCHEN_REMOVAL.md) supersedes them; Kitchen is no longer present in the game.
+
 2026-10-31. Latest owner direction: the bakery references supply **palette, soft shading and atmosphere only**. They are not wallpaper or layout instructions. This pass supersedes [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md).
 
 **Implemented and verified; stop for visual review before Stage C. No commit or push.**

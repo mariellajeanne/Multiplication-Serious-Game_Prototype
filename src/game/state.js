@@ -2,9 +2,9 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},equipment:{oven:0,mixer:0,fridge:0,display:0},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
-if(!g.owned||!g.equipment||!('completed' in g)){g=fresh()}
+if(!g.owned||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
  try{if(previousSave&&!localStorage.getItem('panaderyaQuestV2BeforeProgression'))localStorage.setItem('panaderyaQuestV2BeforeProgression',previousSave)}catch(_){}
  migrateProgression(g);
@@ -36,6 +36,11 @@ function migrateFrame11(state){
 }
 if(previousSave&&g.uniqueFoodsVersion!==1){try{if(!localStorage.getItem('panaderyaQuestV2BeforeUniqueFoods'))localStorage.setItem('panaderyaQuestV2BeforeUniqueFoods',previousSave)}catch(_){} }
 migrateFrame11(g);
+// Retired Kitchen fields never participate in values, prices or save validation.
+// Commit old Undo records: their signatures include the removed equipment field.
+if(Object.prototype.hasOwnProperty.call(g,'equipment')||Object.prototype.hasOwnProperty.call(g,'kitchenSpent'))g.purchaseUndo=null;
+delete g.equipment;delete g.kitchenSpent;
+g.seenUnlocks=(g.seenUnlocks||[]).filter(key=>key!=='kitchen');
 // Old established players keep their saved guide preference.
 if(typeof g.guideGraduated!=='boolean')g.guideGraduated=g.completed>=3;
 function graduateGuideAfterOrder(){if(g.completed>=3&&!g.guideGraduated){g.guideGraduated=true;g.tutorialArrows=false;}}
@@ -45,9 +50,8 @@ const rarityLabel=r=>`★${r+1} · ${RARITIES[r]}`;
 const rarityTag=r=>`<span class="tag rarity-r${r} ${RARITIES[r].toLowerCase().replaceAll(' ','-')}">${rarityLabel(r)}</span>`;
 const foodValue=individualValue;
 const foodSum=()=>{const best={};for(const o of g.owned.filter(x=>g.activeMenu.includes(x.uid)))best[o.id]=Math.max(best[o.id]||0,foodValue(o));return Object.values(best).reduce((a,b)=>a+b,0)};
-const kitchenBonus=()=>KITCHEN.reduce((product,k)=>product*Math.pow(1+k.bonus,g.equipment[k.id]||0),1);
 const decorBonus=()=>bakeryFactor(g.bakeryLevel);
-const bakeryValue=()=>Math.max(1,foodSum())*kitchenBonus()*decorBonus();
+const bakeryValue=()=>Math.max(1,foodSum())*decorBonus();
 const tierLevel=()=>g.completed<2?0:g.completed<4?1:g.completed<7?2:g.completed<11?3:g.completed<16?4:5;
 const masterStage=()=>Math.min(5,Math.floor(g.mastery/4));
 const highestRarity=()=>7;
