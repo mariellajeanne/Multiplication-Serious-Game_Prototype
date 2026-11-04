@@ -1,0 +1,15 @@
+{
+ "modelVersion":3,"seed":20261104,"trials":40,"horizons":[25,50,100,200],
+ "policies":["growth","collector","balanced","younger","power"],
+ "variants":[
+  {"name":"baseline","power":{"base":2.5,"growth":0.2,"exponent":1.15},"packageBase":0.6,"packageFactor":2},
+  {"name":"power-only","power":{"base":2.5,"growth":0.04,"exponent":1},"packageBase":0.6,"packageFactor":2},
+  {"name":"gentle","power":{"base":2.5,"growth":0.04,"exponent":1},"packageBase":0.6,"packageFactor":1.45},
+  {"name":"fast","power":{"base":2.5,"growth":0.02,"exponent":1},"packageBase":0.6,"packageFactor":1.25}
+ ],
+ "scenarios":[
+  {"name":"early","completed":0,"mastery":0,"recipeMastery":0,"tier":1,"kitchen":0,"bakery":1,"slots":1,"foods":["pandesal"]},
+  {"name":"middle","completed":40,"mastery":40,"recipeMastery":4,"tier":2,"kitchen":3,"bakery":21,"slots":5,"foods":["pandesal","pan-de-coco","ensaymada","mamon","buko-pie"]},
+  {"name":"late","completed":160,"mastery":160,"recipeMastery":10,"tier":5,"kitchen":12,"bakery":71,"slots":6,"foods":["mamon","buko-pie","brazo","butter-mamon","celebration-ensaymada","ube-ensaymada"]}
+ ]
+}

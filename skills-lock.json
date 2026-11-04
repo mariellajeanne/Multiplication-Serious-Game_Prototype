@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "create-game-assets": {
+      "source": "gamedev-skills/awesome-gamedev-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/disciplines/create-game-assets/SKILL.md",
+      "computedHash": "3bd438570eeffc5404ce4626c3d6c909be2788d6a5096f04f1aecb10546c6c30"
+    },
     "design-game-design-fundamentals": {
       "source": "fcsouza/agent-skills",
       "sourceType": "github",
@@ -19,6 +25,12 @@
       "skillPath": "skills/game-balance-analysis/SKILL.md",
       "computedHash": "776e2ffd47649d6b5fc4f6b70328149f157827e1fa31f7bb9706826c51364d39"
     },
+    "game-design-review": {
+      "source": "Yuki001/game-dev-skills",
+      "sourceType": "github",
+      "skillPath": "skills/game-design-review/SKILL.md",
+      "computedHash": "c6ccea83be72fd7b6ce56413766af79548b8d60713e95050c7c3b4fa9424d22a"
+    },
     "game-feel": {
       "source": "gamedev-skills/awesome-gamedev-agent-skills",
       "sourceType": "github",
@@ -30,6 +42,12 @@
       "sourceType": "github",
       "skillPath": "skills/game-systems-design/SKILL.md",
       "computedHash": "82f750fe8dc6f6087cec428efb15514a6c55618d9b8a41fa2ffdcceea0209dbb"
+    },
+    "game-ui-ux": {
+      "source": "gamedev-skills/awesome-gamedev-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/disciplines/game-ui-ux/SKILL.md",
+      "computedHash": "490f2da7505775f88c4bbd7c98bc2552ea60821210f5ae8c1e00414161be60f7"
     },
     "ui-ux-pro-max": {
       "source": "nextlevelbuilder/ui-ux-pro-max-skill",

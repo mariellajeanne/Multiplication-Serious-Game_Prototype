@@ -22,12 +22,13 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 
 server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(QuietHandler, directory=str(ROOT)))
 threading.Thread(target=server.serve_forever, daemon=True).start()
-SHOTS = ROOT / 'docs' / 'previews' / 'tablet-ux' / 'after'
+SHOTS = ROOT / 'docs' / 'previews' / 'claude-ux'
 SHOTS.mkdir(parents=True, exist_ok=True)
 
 
 def check_browser(pw, engine):
-    browser = pw.webkit.launch() if engine == 'webkit' else pw.chromium.launch(channel='msedge')
+    edge_options = {'executable_path':os.environ['PQ_EDGE_EXECUTABLE']} if os.environ.get('PQ_EDGE_EXECUTABLE') else {'channel':'msedge'}
+    browser = pw.webkit.launch() if engine == 'webkit' else pw.chromium.launch(**edge_options)
     context = browser.new_context(viewport={'width': 2000, 'height': 1200}, has_touch=True)
     page = context.new_page()
     errors = []
@@ -36,10 +37,16 @@ def check_browser(pw, engine):
         page.goto(f'http://127.0.0.1:{server.server_port}/index.html')
         page.wait_for_function("typeof startTicket==='function'")
         page.evaluate('document.fonts.ready')
+        assert page.evaluate("Array.from(document.fonts).some(f=>f.family==='Panaderya Rounded'&&f.status==='loaded')")
+        assert page.evaluate("['body','.hud','.collection-stage','.bakery-bar','.ticket-board'].every(s=>!getComputedStyle(document.querySelector(s)).backgroundImage.includes('url('))")
         assert page.evaluate('g.menuSlots') == 1
-        assert page.locator('.leftcol').is_visible()
+        assert page.locator('.hud').is_visible()
+        assert page.locator('.bakery-bar').is_visible()
         assert page.locator('.rightcol').is_visible()
         assert page.locator('.food-card-target').count() == 1
+        original_save = page.evaluate("localStorage.getItem('panaderyaQuestV2')")
+        page.reload();page.wait_for_function("typeof renderHud==='function'")
+        assert page.evaluate('g.owned[0].id') == json.loads(original_save)['owned'][0]['id']
         page.screenshot(path=str(SHOTS / f'{engine}-fresh-2000.png'), full_page=True)
         page.evaluate("""g.coins=1e7;g.completed=16;
             for(const f of FOOD)if(f.id!=='pandesal')discoverFood(f);
@@ -110,20 +117,72 @@ def check_browser(pw, engine):
             page.evaluate('scrollTo(0,0);render()')
             page.wait_for_timeout(180)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+1')
-            if width<1500:
-                assert page.locator('.odds-heading [aria-expanded=false]').count()==1
+            assert page.locator('.luck-chip').is_visible()
             page.screenshot(path=str(SHOTS / f'{engine}-collection-{width}.png'), full_page=True)
             page.locator('[data-uid="1"] .food-card-target').tap()
+            page.wait_for_timeout(240)  # Let the details-sheet entrance settle before hit testing.
             page.evaluate("scrollTo(0,Math.max(0,document.querySelector('.collection-stage').getBoundingClientRect().bottom+scrollY-innerHeight+12))")
             assert page.locator('.food-panel-actions').evaluate('''e=>[...e.querySelectorAll('button')].every(b=>{const r=b.getBoundingClientRect(),p=e.closest('.collection-stage').getBoundingClientRect();return r.top>=p.top&&r.bottom<=p.bottom+1&&r.top>=0&&r.bottom<=innerHeight&&b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))})''')
             page.screenshot(path=str(SHOTS / f'{engine}-details-{width}.png'),full_page=True)
             page.locator('.food-panel-close').tap()
             assert page.evaluate('document.activeElement.closest("[data-uid]")?.dataset.uid')=='1'
+            page.evaluate('toggleFoodSelection();selectAllFoods()');page.wait_for_timeout(240)
+            assert page.locator('.food-panel-actions').evaluate('''e=>[...e.querySelectorAll('button')].every(b=>{const r=b.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight&&b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))})'''), (width,'bulk actions')
+            page.screenshot(path=str(SHOTS / f'{engine}-bulk-{width}.png'),full_page=True)
+            page.locator('.food-panel-close').tap()
             page.evaluate('scrollTo(0,0)')
+            # Checkpoint 2: every major popup fits and scrolls inside its header.
+            for name,opener in [('packages',"openPackages('buy',0)"),('index','openIndex()'),
+                                ('settings','openSettings()'),('odds','openProbabilities()'),
+                                ('journey','openBakeryJourney()'),('kitchen','openKitchen()'),
+                                ('mastery','openFoodItem(1);requestSelectedMastery()'),
+                                ('fusion','ingredientFusionInfo(1)')]:
+                page.evaluate(opener);page.wait_for_timeout(260)
+                assert page.locator('.modal').is_visible(), (name,width)
+                assert page.locator('.modal').evaluate('''e=>{const r=e.getBoundingClientRect();return r.top>=-1&&r.left>=-1&&r.bottom<=innerHeight+1&&r.right<=innerWidth+1}'''), (name,width,'viewport')
+                assert page.locator('.modalbody').evaluate('e=>e.scrollWidth<=e.clientWidth+1'), (name,width,'overflow')
+                if name=='packages':
+                    page.locator('#packageQuantity').scroll_into_view_if_needed()
+                    assert page.locator('#packageQuantity').evaluate('''e=>{const r=e.getBoundingClientRect();return [0.1,0.5,0.9].every(p=>document.elementFromPoint(r.x+r.width*p,r.y+r.height/2)===e)}'''), (name,width,'slider covered')
+                    page.locator('#packageQuantity').focus();page.keyboard.press('ArrowRight')
+                    assert page.evaluate('packageQuantity')==2
+                    page.locator('#packageMax').tap()
+                    assert page.evaluate('packageQuantity===packageQuantityMaximum()')
+                    page.locator('#packageBuy').scroll_into_view_if_needed()
+                    assert page.locator('#packageBuy').evaluate('''e=>{const r=e.getBoundingClientRect(),s=document.querySelector('#packageQuantity').getBoundingClientRect();return r.top>=s.bottom&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))}''')
+                page.screenshot(path=str(SHOTS / f'{engine}-popup-{name}-{width}.png'),full_page=True)
+                page.evaluate('closeModal();closeFoodPanel()')
+            page.evaluate("switchMenuTab('kitchen')")
+            assert page.locator('.kitchen-tab .itemcard').count()==page.evaluate('KITCHEN.length')
+            assert page.locator('.kitchen-tab').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+            page.screenshot(path=str(SHOTS / f'{engine}-kitchen-{width}.png'),full_page=True)
+            page.evaluate("switchMenuTab('menu')")
+        # Confirm/cancel controls use actual quotes without spending on cancel.
+        page.evaluate('openFoodItem(1);requestSelectedSale()')
+        before_cancel=page.evaluate('JSON.stringify([g.coins,g.owned,g.activeMenu])')
+        page.get_by_role('button',name='Keep foods',exact=True).tap()
+        assert page.evaluate('JSON.stringify([g.coins,g.owned,g.activeMenu])')==before_cancel
+        page.evaluate('closeFoodPanel()')
+        page.set_viewport_size({'width':2000,'height':1200})
+        page.evaluate("openPackages('buy',2);setPackageQuantity(2);requestPackagePurchase()")
+        before_cancel=page.evaluate('[g.coins,...g.packages]')
+        assert page.locator('.modalhead h2').inner_text()=='Buy these packages?'
+        assert page.locator('.modalbody>.secondary').evaluate('''e=>{const a=e.getBoundingClientRect(),b=e.nextElementSibling.getBoundingClientRect();return Math.abs(a.top-b.top)<2&&a.right<=b.left&&b.bottom<=innerHeight}''')
+        page.screenshot(path=str(SHOTS / f'{engine}-purchase-confirm-2000.png'),full_page=True)
+        page.get_by_role('button',name='Cancel',exact=True).tap()
+        assert page.evaluate('[g.coins,...g.packages]')==before_cancel
+        page.evaluate('closeModal();openFoodItem(1);ingredientFusionInfo(1)')
+        coins,tier,mastery,cost=page.evaluate('[g.coins,foodTier(g.owned[0]),recipeMastery(g.owned[0]),ingredientFusionSelection.total]')
+        page.locator('.modalbody>.primary').tap()
+        assert page.evaluate('g.coins')==coins-cost
+        assert page.evaluate('foodTier(g.owned[0])')==tier+1
+        assert page.evaluate('recipeMastery(g.owned[0])')==mastery
+        page.reload();page.wait_for_function("typeof foodTier==='function'")
+        assert page.evaluate('[g.coins,foodTier(g.owned[0]),recipeMastery(g.owned[0])]')==[coins-cost,tier+1,mastery]
         page.locator('[aria-label="Settings"]').click();page.keyboard.press('Escape')
         assert page.evaluate('document.activeElement.getAttribute("aria-label")')=='Settings'
-        page.locator('.package-ad .primary').click();page.keyboard.press('Escape')
-        assert page.evaluate('document.activeElement.matches(".package-ad .primary")')
+        page.locator('.hud-packages').click();page.keyboard.press('Escape')
+        assert page.evaluate('document.activeElement.matches(".hud-packages")')
         page.evaluate("g.packages[0]=0;g.packages[1]=3;openPackages('unbox',0)")
         assert page.evaluate('packageType')==1
         assert page.locator('#packageOpen').is_enabled()
@@ -137,6 +196,8 @@ def check_browser(pw, engine):
         page.evaluate("window.bridgeDebug=[];window.addEventListener('message',e=>bridgeDebug.push({type:e.data?.type,source:e.data?.source,same:e.source===$('worksheetFrame')?.contentWindow}))")
         page.evaluate('g.sound=true;g.tutorialArrows=true;Math.random=()=>.999;startTicket(9001)')
         page.wait_for_function("document.getElementById('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9001")
+        page.evaluate("$('worksheetFrame').contentDocument.fonts.ready")
+        assert page.evaluate("Array.from($('worksheetFrame').contentDocument.fonts).some(f=>f.family==='Panaderya Rounded'&&f.status==='loaded')")
         frame = page.frame_locator('#worksheetFrame')
         cdp = context.new_cdp_session(page) if engine=='edge' else None
         page.evaluate("$('worksheetFrame').contentWindow.eval(\"document.addEventListener('click',e=>{if(e.pointerType==='touch')e.stopImmediatePropagation()},true)\")")
@@ -184,6 +245,7 @@ def check_browser(pw, engine):
         tap('[data-bottom="0"]')
         tap('[data-top="0"]')
         tap('#equationReveal')
+        assert frame.locator('.ftile.count-reveal').first.evaluate("e=>getComputedStyle(e).animationName==='product-reveal'")
         assert frame.locator('#guidePrompt').evaluate("e=>getComputedStyle(e).clipPath==='none'&&e.textContent.length>0")
         before_error=frame.locator('#math').bounding_box()
         prize_before=page.locator('#prizejar').bounding_box()
@@ -202,6 +264,12 @@ def check_browser(pw, engine):
         snapshot = state('JSON.stringify(s)')
         attempt = page.evaluate('g.run.worksheetRewards.attemptId')
         pool = page.evaluate('g.run.pool')
+        # Purchases refresh the new HUD while the mounted worksheet stays intact.
+        page.evaluate("abandonTicket();window.savedFrame=$('worksheetFrame');upgradeDecor()")
+        assert page.evaluate("$('worksheetFrame')===savedFrame")
+        assert page.locator('.hud-boost strong').inner_text()==page.evaluate("'×'+multiplierLabel(bakeryValue())+' 💎'")
+        page.evaluate('undoPurchase();startTicket(9001)')
+        assert state('JSON.stringify(s)')==snapshot
         page.evaluate('abandonTicket();startTicket(9002)')
         page.wait_for_function("$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9002")
         tap('[data-bottom="0"]')
@@ -258,6 +326,14 @@ def check_browser(pw, engine):
         before = page.evaluate('g.coins')
         page.locator('#collectRewards').tap()
         assert page.evaluate('g.coins') == before+budget
+        for width,height in [(2000,1200),(1194,834),(1024,768),(834,1194),(768,1024)]:
+            page.set_viewport_size({'width':width,'height':height});page.wait_for_timeout(260)
+            assert page.locator('.order-reward-modal').evaluate('''e=>{const r=e.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth+1&&r.top>=0&&r.bottom<=innerHeight+1}''')
+            assert page.locator('.order-reward-modal .modalbody').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+            assert page.locator('.order-reward-modal .close').evaluate('''e=>{const a=e.getBoundingClientRect(),b=e.parentElement.querySelector('h2').getBoundingClientRect();return !(a.left<b.right&&a.right>b.left&&a.top<b.bottom&&a.bottom>b.top)}''')
+            page.locator('.back-to-bakery').scroll_into_view_if_needed()
+            page.screenshot(path=str(SHOTS / f'{engine}-claimed-packages-{width}.png'),full_page=True)
+        page.set_viewport_size({'width':1194,'height':834})
         page.evaluate('prizeItems();closeModal();startTicket(9001)')
         assert page.evaluate('g.run===null')
         assert page.evaluate('g.coins') == before+budget
@@ -268,6 +344,7 @@ def check_browser(pw, engine):
         for width,height in [(2000,1200),(1194,834),(1024,768),(834,1194),(768,1024)]:
             page.set_viewport_size({'width':width,'height':height});page.wait_for_timeout(180)
             assert page.locator('#prizejar').evaluate('e=>e.getBoundingClientRect().bottom<=innerHeight+2')
+            assert frame.locator('#undo').evaluate('e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1}'), (width,'worksheet Undo')
             page.screenshot(path=str(SHOTS / f'{engine}-worksheet-{width}.png'),full_page=True)
         page.set_viewport_size({'width':1024,'height':768});page.emulate_media(reduced_motion='reduce')
         for row in [0,1]:
@@ -277,11 +354,61 @@ def check_browser(pw, engine):
         wait("s.phase==='sum'")
         assert frame.locator('#addRows').is_visible()
         page.screenshot(path=str(SHOTS / f'{engine}-add-rows.png'),full_page=True)
+        page.evaluate("window.reducedSparks=0")
+        state("window.motionSparks=0;window.sparkObserver=new MutationObserver(records=>{for(const r of records)for(const n of r.addedNodes)if(n.classList?.contains('addition-spark')){motionSparks++;parent.reducedSparks++}});sparkObserver.observe($('sheet'),{childList:true,subtree:true})")
         tap('#addRows');page.wait_for_function("g.run?.phase==='claim'")
         assert page.evaluate('g.run.ticket.a*g.run.ticket.b')==144
+        assert page.evaluate('reducedSparks')==0
         page.locator('.save-order-packages').tap()
         assert page.evaluate('g.claimedOrders[9003]!==undefined')
         assert page.evaluate('!!g.orderRuns[9002]')
+        # Contextual reward actions use actual UIDs and never re-grant rewards.
+        page.evaluate("closeModal();g=fresh();g.coins=0;const rewards=[discoverFood(F('monay')),discoverFood(F('monay')),discoverFood(F('pandesal'))];save();render();showModal('Fresh from your packages!',renderOrderRewards(rewards,0,0,'packages'),'order-reward-modal')")
+        assert page.locator('.reward-menu-opportunity').is_visible()
+        assert page.locator('.reward-recipe').count()==2
+        page.screenshot(path=str(SHOTS / f'{engine}-reward-follow-through.png'),full_page=True)
+        coins,boost=page.evaluate('[g.coins,bakeryValue()]')
+        page.locator('.reward-menu-opportunity button').tap()
+        assert page.evaluate('g.coins')==coins
+        assert page.evaluate('bakeryValue()')>boost
+        page.locator('.bakery-idea').tap()
+        assert page.locator('.sticky-food-panel').is_visible()
+        page.evaluate('closeFoodPanel();g.coins=1e8;g.bakeryLevel=10;save();render()')
+        page.locator('.bakery-power-buy').tap()
+        assert page.evaluate('g.bakeryLevel')==11
+        assert page.locator('.power-change').inner_text().find('Lucky packages unlocked')>=0
+        page.locator('#purchaseUndo button').tap()
+        assert page.evaluate('g.bakeryLevel')==10
+        assert not page.evaluate('packageUnlocked(1)')
+        page.reload();page.wait_for_function("typeof renderBakeryIdea==='function'")
+        assert page.evaluate('g.coins')==1e8
+        page.set_viewport_size({'width':2000,'height':1200})
+        page.emulate_media(reduced_motion='no-preference')
+        page.screenshot(path=str(SHOTS / f'{engine}-progression-goals.png'),full_page=True)
+        # Fresh wallet: two real short orders, saved packages, then the first kitchen improvement.
+        page.evaluate("g=fresh();g.board=[{id:9010,a:12,b:3,rarity:0,base:130,packages:1},{id:9011,a:12,b:3,rarity:0,base:130,packages:1}];g.ticketSeq=9011;save();render()")
+        for count,ticket_id in enumerate([9010,9011],1):
+            page.locator(f'.ticket[onclick="startTicket({ticket_id})"]').tap()
+            page.wait_for_function(f"$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id==={ticket_id}")
+            for col in [0,1]:
+                tap('[data-bottom="0"]');tap(f'[data-top="{col}"]');tap('#equationReveal')
+                tap('[data-part="ones"]');tap(f'[data-slot="0:{col}"]')
+            page.wait_for_function("g.run?.phase==='claim'")
+            page.locator('.save-order-packages').tap()
+            page.locator('.back-to-bakery').tap()
+            assert page.evaluate('g.completed')==count
+        assert page.evaluate('g.coins')==562
+        assert page.evaluate('g.packages.reduce((a,b)=>a+b,0)')>=2
+        coins,boost,cost=page.evaluate('[g.coins,bakeryValue(),equipmentCost(KITCHEN[0])]')
+        page.locator('.menu-tabs button').last.tap()
+        page.locator('.kitchen-tab .primary').first.tap()
+        assert page.evaluate('g.equipment.oven')==1
+        assert not page.evaluate("performance.getEntriesByType('resource').some(e=>e.name.includes('bakery-interior-cozy'))")
+        assert page.evaluate('g.coins')==coins-cost
+        assert abs(page.evaluate('bakeryValue()')/boost-1.055)<1e-9
+        page.screenshot(path=str(SHOTS / f'{engine}-fresh-first-upgrade.png'),full_page=True)
+        page.reload();page.wait_for_function("typeof bakeryValue==='function'")
+        assert page.evaluate('g.equipment.oven')==1
         assert errors == [], errors
         print(f'PASS {engine}: layout, long-press/mixed selection, purchase/Undo/reload, mastery, package buy/unbox, responsive widths, native touch taps, pointer drags, touch drags ({"native CDP" if cdp else "synthetic pointer"}), carrying 79x18, swipe, order switching/reload, reward claim exactly once',flush=True)
     except Exception:

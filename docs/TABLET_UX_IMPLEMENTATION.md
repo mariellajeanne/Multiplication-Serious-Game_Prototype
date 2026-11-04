@@ -1,3 +1,7 @@
+**Current presentation:** [Claude Checkpoint 2 integration](CLAUDE_UX_INTEGRATION.md) supersedes this document's older layout descriptions with a HUD/two-column home, compact food sheet, Kitchen grid and refined popups. It preserves the current game-design rules and save logic.
+
+**Historical baseline:** This document records the preceding tablet pass. The subsequent [game design implementation](GAME_DESIGN_IMPROVEMENTS.md) changes Power prices and adds reward follow-through and collection-aware package odds; the original simulation results below remain preserved.
+
 # Tablet UX, unique foods and Unity-ready prototype
 
 2026-11-04. Implemented from the UI/UX audit, comprehensive checklist, Unity-priority instruction and subsequent owner corrections. **This is a web prototype improvement, not the start of a Unity port.** Authoritative handoff: [UNITY_MIGRATION_REFERENCE.md](../UNITY_MIGRATION_REFERENCE.md).

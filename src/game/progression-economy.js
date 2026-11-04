@@ -4,6 +4,7 @@ function earningUnit(){return expectedTicketBase(g.mastery)*bakeryValue()}
 function slotCost(){return Math.round(economyUnit()*(2+.6*Math.pow(Math.max(0,g.menuSlots-1),1.15)))}
 function packagePrice(rank){return Math.max(1,Math.round(economyUnit()*PACKAGE_SHOP[rank].priceOrders))}
 function packageUnlocked(rank){return g.bakeryLevel>=PACKAGE_SHOP[rank].unlock}
+function packageDiscoveryChance(rank){return packageProbabilities(rank).reduce((sum,p,r)=>{const foods=FOOD.filter(f=>f.rarity===r);return sum+p*foods.filter(f=>!g.discovered.includes(f.id)).length/foods.length},0)}
 function foodEarningShare(o){return expectedTicketBase(g.mastery)*foodValue(o)*kitchenBonus()*decorBonus()}
 function foodLevelCost(o){return Math.max(1,Math.round(foodEarningShare(o)*(.75+.45*Math.pow(recipeMastery(o)+1,1.3))))}
 function foodLevelPrice(o){return foodLevelCost(o)}
@@ -11,7 +12,25 @@ function fusionFee(o,other=null){const tier=other?Math.max(foodTier(o),foodTier(
 function ingredientNeeds(o){const f=F(o.id),qty=[0,3,7,15,30][foodTier(o)]*(1+Math.floor(f.rarity/2));return f.ingredients.map((name,i)=>({name,need:Math.round(qty*(i===1?.7:1)),have:g.ingredients[name]||0,price:INGREDIENTS.find(x=>x[0]===name)[2]}))}
 function fusionIngredientCost(o){return ingredientNeeds(o).reduce((s,x)=>s+Math.max(0,x.need-x.have)*x.price,0)}
 function equipmentCost(k){const level=g.equipment[k.id]||0;return Math.max(1,Math.round(economyUnit()*(.85+.22*Math.pow(level,1.15))*(1+.1*KITCHEN.indexOf(k))))}
-function bakeryUpgradeCost(){return Math.max(1,Math.round(economyUnit()*(BAKERY_POWER_CONFIG.priceOrders+BAKERY_POWER_CONFIG.priceGrowth*Math.pow(g.bakeryLevel-1,1.15))))}
+function bakeryUpgradeCost(){return Math.max(1,Math.round(economyUnit()*(BAKERY_POWER_CONFIG.priceOrders+BAKERY_POWER_CONFIG.priceGrowth*Math.pow(g.bakeryLevel-1,BAKERY_POWER_CONFIG.priceExponent))))}
+// Counterfactual previews use derived values and never mutate a save or consume RNG.
+function masteryPreview(o){
+ const improved={...o,mastery:recipeMastery(o)+1},foods=g.owned.map(x=>x.uid===o.uid?improved:x);
+ const ids=g.autoEquip==='final'?bestMenu(foods,g.menuSlots,'final'):g.autoEquip==='base'?bestMenu(foods,g.menuSlots,'base'):g.activeMenu;
+ const after=Math.max(1,foods.filter(x=>ids.includes(x.uid)).reduce((n,x)=>n+foodValue(x),0))*kitchenBonus()*decorBonus();
+ return {before:bakeryValue(),after,contribution:foodValue(improved)-foodValue(o),cost:foodLevelPrice(o)};
+}
+function bestMenuGain(){const ids=bestMenu(g.owned,g.menuSlots,'final');return Math.max(1,g.owned.filter(o=>ids.includes(o.uid)).reduce((n,o)=>n+foodValue(o),0))*kitchenBonus()*decorBonus()-bakeryValue()}
+function nextPackageUnlock(){return PACKAGE_SHOP.find(t=>!packageUnlocked(t.rank))||null}
+function bakeryIdeas(){
+ const ideas=[];const add=(kind,label,cost,gain,uid=null)=>{if(gain>1e-9&&(cost===0||gain/bakeryValue()>=.005))ideas.push({kind,label,cost,gain,uid})};
+ add('equip','Put your strongest foods on the menu',0,bestMenuGain());
+ for(const o of g.owned.filter(o=>availableMastery(o)>0)){const p=masteryPreview(o);add('mastery',`${F(o.id).name} Mastery`,p.cost,p.after-p.before,o.uid)}
+ if(g.completed>=2)for(const k of KITCHEN)if((g.equipment[k.id]||0)<MAX_KITCHEN_LEVEL)add('kitchen',`${k.name} upgrade`,equipmentCost(k),bakeryValue()*k.bonus);
+ if(g.bakeryLevel<=BAKERY_POWER_CONFIG.purchases)add('power','Bakery Power',bakeryUpgradeCost(),bakeryValue()*(BAKERY_POWER_CONFIG.factor-1));
+ if(g.menuSlots<FOOD.length&&g.owned.length>g.menuSlots){const ids=bestMenu(g.owned,g.menuSlots+1,'final'),sum=g.owned.filter(o=>ids.includes(o.uid)).reduce((n,o)=>n+foodValue(o),0);add('slot','Room for another recipe',slotCost(),Math.max(0,sum-foodSum())*kitchenBonus()*decorBonus())}
+ return ideas.sort((a,b)=>a.cost-b.cost||b.gain-a.gain);
+}
 function refreshFoodProgress(){
  reconcileAutoEquip();
  // Values are derived from owned foods, never a stored multiplier snapshot.
@@ -30,12 +49,14 @@ function buyMastery(uids,expected=null){
  const fingerprint=JSON.stringify(foods.map(o=>[o.uid,recipeMastery(o),g.recipeCeilings[o.id],foodLevelPrice(o)]));
  if(expected&&(expected.cost!==cost||expected.fingerprint!==fingerprint)){toast('Mastery or prices changed. Review the purchase again.');return false}
  if(g.coins<cost){toast(`Need ${fmt(cost-g.coins)} more coins for this mastery purchase.`);return false}
- const before={coins:g.coins,owned:JSON.parse(JSON.stringify(g.owned)),activeMenu:[...g.activeMenu],economyPeakBase:g.economyPeakBase};
+ const boostBefore=bakeryValue(),before={coins:g.coins,owned:JSON.parse(JSON.stringify(g.owned)),activeMenu:[...g.activeMenu],economyPeakBase:g.economyPeakBase};
  commitPurchaseUndo();g.coins-=cost;
  for(const o of foods){o.mastery=recipeMastery(o)+1;o.level=Math.min(5,o.mastery+1)}
  // Charge the quoted pre-upgrade cost, including the exact investment per item.
  for(const original of before.owned){const o=foods.find(x=>x.uid===original.uid);if(o)o.spent=(original.spent||0)+foodLevelPrice(original)}
- registerPurchaseUndo('Recipe Mastery',cost,before);refreshFoodProgress();return true;
+ registerPurchaseUndo('Recipe Mastery',cost,before);refreshFoodProgress();
+ if(typeof feedbackPulse==='function')feedbackPulse(document.querySelector?.('.boost-hero'));
+ toast(bakeryValue()>boostBefore?`Recipe Mastery! Baker's Boost ×${multiplierLabel(boostBefore)} → ×${multiplierLabel(bakeryValue())}`:'Recipe improved! Put it on your menu when you like.');return true;
 }
 function duplicateFusionPlan(o,donorUid){const donor=g.owned.find(x=>x.uid===Number(donorUid));return fusionPlan(o,donor,fusionFee(o,donor))}
 function fusionFingerprint(foods){return JSON.stringify(foods.map(o=>[o.uid,o.id,o.fusion,o.level,o.spent,o.baseCarry||0,o.resaleBase??null]))}
@@ -81,13 +102,14 @@ function upgradeDecor(){
  if(g.run&&!g.run.paused||g.bakeryLevel>BAKERY_POWER_CONFIG.purchases)return false;
  const price=bakeryUpgradeCost();if(g.coins<price){toast('Not enough coins for this Bakery Power upgrade yet.');return false}
  const before={coins:g.coins,bakeryLevel:g.bakeryLevel,bakerySpent:g.bakerySpent,economyPeakBase:g.economyPeakBase};
- const old=decorBonus();commitPurchaseUndo();g.coins-=price;g.bakerySpent+=price;g.bakeryLevel++;
- powerChange={before:old,after:decorBonus(),until:Date.now()+2200};registerPurchaseUndo('Bakery Power',price,before);bakeryBrowseIndex=g.bakeryLevel;save();render();setTimeout(()=>document.querySelector?.('.power-change')?.remove(),2200);
+ const old=decorBonus(),nextUnlock=nextPackageUnlock();commitPurchaseUndo();g.coins-=price;g.bakerySpent+=price;g.bakeryLevel++;
+ const unlock=nextUnlock&&packageUnlocked(nextUnlock.rank)?nextUnlock.name:null;
+ const duration=unlock?6000:2200,transition=powerChange={before:old,after:decorBonus(),unlock,until:Date.now()+duration};registerPurchaseUndo('Bakery Power',price,before);bakeryBrowseIndex=g.bakeryLevel;save();render();setTimeout(()=>{if(powerChange===transition)document.querySelector?.('.power-change')?.remove()},duration);
  toast(`Bakery Power ×${multiplierLabel(old)} → ×${multiplierLabel(decorBonus())} · +${multiplierLabel(decorBonus()-old)} 👑 · Baker's Boost +${((decorBonus()/old-1)*100).toFixed(1)}%`);
  const panel=document.querySelector?.('.bakery-power');panel?.classList.add('power-purchased');return true;
 }
 function staffRate(){return earningUnit()/360}
-function equipBest(mode){if(g.run&&!g.run.paused||!['final','base'].includes(mode))return false;if(g.autoEquip!=='off')g.autoEquip=mode;g.activeMenu=bestMenu(g.owned,g.menuSlots,mode);save();render();return true}
+function equipBest(mode){if(g.run&&!g.run.paused||!['final','base'].includes(mode))return false;const before=bakeryValue();if(g.autoEquip!=='off')g.autoEquip=mode;g.activeMenu=bestMenu(g.owned,g.menuSlots,mode);save();render();if(bakeryValue()>before){if(typeof feedbackPulse==='function')feedbackPulse(document.querySelector?.('.boost-hero'));toast(`Menu improved! Baker's Boost ×${multiplierLabel(before)} → ×${multiplierLabel(bakeryValue())}`)}return true}
 function setAutoEquip(mode,enabled){if(g.run||!['final','base'].includes(mode))return false;g.autoEquip=enabled?mode:g.autoEquip===mode?'off':g.autoEquip;save();render();return true}
 function manualMenuAllowed(){if(g.run)return false;if(g.autoEquip!=='off'){toast('Turn Auto Equip off to choose your own menu.');return false}return true}
 

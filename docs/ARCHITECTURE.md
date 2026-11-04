@@ -1,4 +1,8 @@
+**Game design implementation (2026-11-04):** [Game design improvements](GAME_DESIGN_IMPROVEMENTS.md) and the Unity reference supersede earlier price curves. Power now costs `economyUnit * (2.5 + .04 * purchases)`; package prices remain `.6 * 2^rank` after cheaper candidates underperformed. Educational interactions, unique ownership, optional duplicate capacity, saved budgets and legacy modes are preserved.
+
 # Latest focused update
+
+**Current UX integration (2026-11-04):** [Claude Checkpoint 2 integration](CLAUDE_UX_INTEGRATION.md) adds a shared HUD, two-column collection/orders, compact food sheet, Kitchen grid and one-row worksheet header. `styles/tablet-ux.css` loads last. Game rules, saved data and both bridge protocol handlers remain unchanged; the report records comparison, conflicts, recovery archive and regression coverage.
 
 **Current owner corrections (2026-11-04):** [Tablet UX implementation](TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](../UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
 

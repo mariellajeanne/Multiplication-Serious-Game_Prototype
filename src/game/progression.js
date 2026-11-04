@@ -6,9 +6,10 @@ const BAKERY_STAGES=['Freshly opened','Warm welcome','Cozy counter','Neighborhoo
 const TICKET_DIMS=[[2,1],[2,2],[2,2],[3,2],[3,2],[4,2],[4,2],[4,2]];
 const ORDER_LIMIT=5, ORDER_REFRESH_MS=180000;
 // Frame 11: tune progression and shop economy here, independently of presentation.
-const BAKERY_POWER_CONFIG={purchases:100,factor:1.085,priceOrders:2.5,priceGrowth:.2};
+const BAKERY_POWER_CONFIG={purchases:100,factor:1.085,priceOrders:2.5,priceGrowth:.04,priceExponent:1};
 const PACKAGE_TYPES=['Standard','Lucky','Fortunate','Charmed','Blessed','Miraculous','Divine','Fate'];
-const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:1+rank*10,priceOrders:.6*Math.pow(2,rank)}));
+const PACKAGE_PRICE_CONFIG={baseOrders:.6,rankFactor:2};
+const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:1+rank*10,priceOrders:PACKAGE_PRICE_CONFIG.baseOrders*Math.pow(PACKAGE_PRICE_CONFIG.rankFactor,rank)}));
 const MASTERY_STEP=.4, PURCHASE_UNDO_MS=10000;
 function recipeMastery(o){return Math.max(0,Math.floor(o.mastery??((o.level||1)-1)))}
 function masteryFactor(n){return n<5?LEVEL_FACTORS[n+1]:2.3+(n-4)*MASTERY_STEP}

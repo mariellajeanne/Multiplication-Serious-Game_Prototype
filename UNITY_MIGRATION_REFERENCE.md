@@ -25,7 +25,7 @@ Meta loop: discover unique Filipino recipes → buy slots and equip recipes → 
 
 ## Authoritative calculations
 
-Sources: `src/data/catalog.js`, `src/game/progression.js`, `src/game/progression-economy.js`, `src/game/state.js` and `src/game/rewards.js`. Prices formerly in menu/dialog rendering are now in progression-economy. None of the price factors or probability distributions changed in this pass.
+Sources: `src/data/catalog.js`, `src/game/progression.js`, `src/game/progression-economy.js`, `src/game/state.js` and `src/game/rewards.js`. Prices formerly in menu/dialog rendering are now in progression-economy. The game-design pass tunes Power prices below; coin reward formulas and probability distributions remain unchanged.
 
 Use double precision for calculations; round at the same transaction boundaries. JavaScript `Math.round` for these nonnegative amounts is equivalent to `floor(x + 0.5)`; do not silently use a different midpoint rule in C#. UI formatting never feeds back into calculations.
 
@@ -57,13 +57,13 @@ earningUnit = expectedBase * bakersBoost
 foodShare = expectedBase * thisFoodContribution * kitchenFactor * bakeryPower
 nextMasteryCost = max(1, round(foodShare * (0.75 + 0.45 * (m + 1)^1.3)))
 nextSlotCost = round(economyUnit * (2 + 0.6 * (slots - 1)^1.15))
-nextBakeryCost = max(1, round(economyUnit * (2.5 + 0.2 * (bakeryLevel - 1)^1.15)))
+nextBakeryCost = max(1, round(economyUnit * (2.5 + 0.04 * (bakeryLevel - 1))))
 nextToolCost = max(1, round(economyUnit * (0.85 + 0.22 * toolLevel^1.15) * (1 + 0.1 * toolIndex)))
 packageCost(rank) = max(1, round(economyUnit * 0.6 * 2^rank))
 packageUnlockLevel(rank) = 1 + 10 * rank
 ```
 
-Pricing knobs live in `BAKERY_POWER_CONFIG`, `PACKAGE_SHOP`, `MASTERY_STEP` and the calculation functions. Config should become a versioned data asset in Unity, independent of views. The stronger foods selected by Equip Best use actual final contributions, not raw base values.
+Pricing knobs live in `BAKERY_POWER_CONFIG`, `PACKAGE_PRICE_CONFIG`, `PACKAGE_SHOP`, `MASTERY_STEP` and the calculation functions. Config should become a versioned data asset in Unity, independent of views. The stronger foods selected by Equip Best use actual final contributions, not raw base values.
 
 The retained helper rate is `earningUnit / 360` coins/second, with a 120-second contract and fee `ceil(rate * 36)`. Gross active earnings exceed the helper by 6×, 4× and 3× at illustrative 60-, 90- and 120-second order paces. These are analysis assumptions, **not learner timers**.
 
@@ -171,6 +171,16 @@ Commit/invalidate an old reversible transaction if its current or prior owned st
 
 Respect reduced motion. Keep sound optional. No screen shake, hit-stop or particle barrage is needed for this educational game. The addition cascade is an explanatory arithmetic sequence, not a new reward rule. New effects must not gate valid input.
 
+### Game design feedback additions (2026-11-04)
+
+Reward groups show unique recipe progress, optional saved duplicate capacity, next Mastery contribution/cost/coin gap, and direct recipe access. When Equip Best would increase earnings, show the actual combined boost before/after and a free Equip Best action. Do not auto-buy upgrades or grant additional rewards from these controls. Food details and Mastery review use a pure counterfactual preview, including possible Auto Equip changes. The package shop displays the exact chance of an undiscovered recipe for the current collection: sum(foodRarityProbability * undiscoveredCountAtRarity / recipeCountAtRarity). A collected recipe unlocks optional capacity instead; this disclosure does not change the draw.
+
+One optional bakery idea links to the cheapest useful improvement. Free menu improvements qualify; paid suggestions must increase the combined boost by at least 0.5% (a presentation assumption to playtest). A slot suggestion describes its potential with the best menu, not an immediate boost from empty capacity. Power persistently shows the nearest package unlock and upgrades remaining; crossing it names the newly unlocked type for up to six seconds without blocking input. Undo reverses the unlock and retains the exact amount originally paid.
+
+Product reveal uses a 180ms ease-out settle (0.96 → 1.035 → 1 scale), independently of accepted input. Extra packages have a quieter 740/880Hz two-note synthesized cue, with ~52ms spacing and 0.024 peak gain versus the routine 0.042; mute applies. New recipes of rarity 5+ have one 480ms eased reveal, without implying high-Luck packages guarantee rare food. Reduced motion suppresses reveal motion and addition sparks. Preserve the existing distinct connect, placement, carry, merge and final completion sounds.
+
+No save schema or key migration is required for these price/presentation changes. Preserve paid investment, claimed-order identities, existing package stock, recipe ceilings and fixed in-progress budgets. A price reduction is not a retroactive currency refund; an existing valid Undo refunds its actual recorded cost.
+
 ## Reproduce directly vs rebuild in Unity
 
 | Reproduce directly | Reimplement using Unity facilities |
@@ -186,10 +196,10 @@ Export golden input/output fixtures from the deterministic functions before the 
 
 ## Evidence and remaining validation
 
-Run `node --test tests/*.test.mjs`, `python tests/browser-frame11.py edge webkit`, and `node tests/simulate-progression.mjs docs/TABLET_PROGRESSION_RESULTS.json`.
+Run `node --test tests/*.test.mjs`, `python tests/browser-frame11.py edge webkit`, and `node tests/simulate-progression.mjs docs/GAME_DESIGN_RESULTS.json tests/game-design-validation.json`. Full candidate comparison: `node tests/simulate-progression.mjs docs/GAME_DESIGN_COMPARISON.json tests/game-design-scenarios.json`. Omitting the validation config uses 40 seeds for future tuning.
 
-The simulation uses seed 20261104, 60 trials per early/middle/late × growth/mixed/collector policy, 80 orders per trace (540 traces / 43,200 orders). It uses actual config/prices/distributions, allows at most one purchase decision per order and omits extra per-pair packages. It assumes choosing the strongest menu; this is not a learner study or a prediction of session duration.
+The original v2 simulation and tablet report remain historical baseline evidence (540 traces / 43,200 orders); `docs/GAME_DESIGN_LEGACY_BASELINE.json` preserves its exact output. Model v3 includes production per-pair package opportunities and claims, the five-ticket board, all kitchen tools, ingredient upgrades and advanced package purchases. It compares growth, collection, balanced, reasonable nonoptimal and Power-focused policies at 25/50/100/200 orders. Middle/late snapshots and one purchase per order are explicit model assumptions, not measured session lengths.
 
-Current price quotes in expected Normal orders: Standard package about 0.60; first Bakery Power 2.50; middle snapshot next Power 8.77; late snapshot next Power 28.98. The early growth policy's median first purchase occurs after two orders. Greedy marginal-growth policies prefer Mastery to later Power; their model excludes the future value of unlocking package types. **No price/probability tuning is justified from this alone.** Preserve the values pending learner evidence on later Power pacing and goal comprehension.
+Current Power quotes in expected Normal orders are 2.50 initially, 3.30 at 20 purchases and 5.30 at 70; the last purchase costs 6.46 instead of the former 41.95. Package prices remain 0.60 through 76.8 orders; the cheaper-package candidates were rejected after simulation showed extra duplicate spending and weaker middle-game growth. Benefits, coin payout amounts, upgrade counts, package unlock thresholds and all probability distributions are unchanged. See [implemented decisions and comparative evidence](docs/GAME_DESIGN_IMPROVEMENTS.md) for rationale, limitations and playtest questions.
 
 Physical iPad Safari gestures/rotation/browser chrome, audible SFX, background/resume and Grade 2–5 playtesting remain pending. Windows WebKit touch taps and synthetic touch drags are not a claim of physical-iPad validation. See [implementation evidence and continuation notes](docs/TABLET_UX_IMPLEMENTATION.md) for the fifteen-fix checklist, tested screens and exact remaining tasks.

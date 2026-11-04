@@ -168,3 +168,16 @@ button:not(:disabled){transition:background-color var(--feedback-press),box-shad
  .food-panel-actions{gap:6px}.food-panel-actions button{font-size:12px;padding:6px}.food-action-status{font-size:12px}
 }
 @media(prefers-reduced-motion:reduce){.ui-pulse,.package-reward,.package-type::after{animation:none!important;transition:none!important}}
+
+/* Optional, contextual goals; these never award or purchase anything on render. */
+.bakery-idea{display:flex;align-items:center;justify-content:space-between;gap:8px;flex:none;margin:4px 12px;padding:8px 12px;min-height:48px;border:1px solid #c9d2ad;border-radius:12px;background:#f1f4e5;color:#52613e;text-align:left;font-size:14px;line-height:1.25;box-shadow:none}
+.bakery-idea small{display:block;font-size:12px;margin-top:3px}.bakery-idea>span:last-child{font-size:25px}.collection-stage:has(#foodPanel:not(:empty)) .bakery-idea{display:none}
+.power-goal{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:44px;margin:5px 10px 0;font-size:13px;line-height:1.3;white-space:normal}.power-goal span{font-size:12px}
+.reward-headline{text-align:center;padding:8px 12px;color:#775332}.reward-headline b,.reward-headline span{display:block}.reward-headline b{font-size:23px}.reward-headline span{font-size:14px}.reward-headline.has-discovery{color:#53653d}
+.reward-use{font-size:14px;line-height:1.4}.reward-use small{display:block;margin-top:5px}.reward-recipe{min-height:44px;margin-top:6px}.reward-menu-opportunity{background:#eef2df;border:1px solid #cbd4ad;border-radius:14px;padding:12px;margin:12px 0;text-align:center}.reward-menu-opportunity p{margin:0 0 8px}.reward-menu-opportunity b{white-space:nowrap}.reward-menu-opportunity button{min-height:48px}
+.package-reward.rare-discovery{animation:recipe-discovery 480ms cubic-bezier(.2,.7,.25,1) both;animation-delay:var(--reward-delay,0s)}
+@keyframes recipe-discovery{from{opacity:0;transform:translateY(10px) scale(.96)}65%{opacity:1;transform:translateY(0) scale(1.025)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.package-reward.rare-discovery{animation:none!important}}
+@media(max-width:1100px){.bakery-idea{margin:3px 8px;padding:6px 8px;font-size:12px}.bakery-idea small{font-size:11px}.power-goal{font-size:12px;margin:4px 6px 0}}
+
+.package-discovery-chance{padding:10px 12px;border:1px solid #d3d9bd;border-radius:10px;background:#f1f4e8;font-size:15px}.package-discovery-chance small{display:block;font-size:13px;margin-top:3px}.mastery-outcome{display:block;line-height:1.4;margin-top:5px}

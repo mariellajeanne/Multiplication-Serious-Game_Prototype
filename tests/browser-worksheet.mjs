@@ -104,9 +104,9 @@ try{
     await waitFor(`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
     await pause(180);
     return evaluate(`(()=>{
-    window.scrollTo(0,auditFrame.getBoundingClientRect().top+scrollY-110);
     const el=auditChild.document.querySelector(${JSON.stringify(selector)});
     if(!el)throw Error('Missing target: '+${JSON.stringify(selector)});
+    auditFrame.scrollIntoView({block:'nearest'});el.scrollIntoView({block:'nearest',inline:'nearest'});
     const a=el.getBoundingClientRect(),b=auditFrame.getBoundingClientRect();
     return {x:b.left+a.left+a.width/2,y:b.top+a.top+a.height/2};
   })()`);
@@ -209,8 +209,9 @@ try{
   assert.equal(await evaluate('g.completed'),1);
   console.log('PASS browser: reload restores the in-page completed-order claim; repeated collection pays once');
   console.log(`PASS browser: 79 × 18 = 1422, click/drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins and one chest claimed exactly once`);
-  const levelCost=await evaluate('foodLevelCost(g.owned[0])');
-  await evaluate('openFoodItem(1)');await pause(280);
+  const levelCost=await evaluate('foodLevelPrice(g.owned[0])');
+  // Duplicate discoveries unlock paid Mastery; they no longer add food copies.
+  await evaluate("discoverFood(F('pandesal'));openFoodItem(1);requestSelectedMastery()");await pause(280);
   const upgrade=await evaluate(`(()=>{const r=document.querySelector('.modal .primary').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
   await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...upgrade});
   await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...upgrade});

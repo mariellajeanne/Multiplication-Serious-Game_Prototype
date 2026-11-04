@@ -1,0 +1,244 @@
+/* Tablet UX pass — loaded last. Two-zone home (collection + orders), HUD header,
+   bottom-sheet food details, one-bar worksheet, larger touch targets and calmer popups. */
+:root{--ux-ink:#4d3217;--ux-edge:#c9a878;--ux-paper:#fff9ec;--ux-gold:#f0b440;--ux-tap:52px}
+body{font-size:18px;color:var(--ux-ink);-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{min-height:var(--ux-tap);touch-action:manipulation}
+
+/* ---------- HUD header ---------- */
+.topbar.hud{position:sticky;top:0;z-index:30;height:76px;display:flex;align-items:center;gap:14px;padding:8px 20px;background:#fff9e9;border-bottom:3px solid var(--ux-edge);box-shadow:0 3px 0 #ead9b8}
+.topbar.hud::after{display:none}
+.hud .brand{display:flex;align-items:center;gap:10px;min-width:0;margin-right:auto}
+.hud .brandlogo{width:48px;height:48px;flex:none}
+.hud .brand h1{font-size:26px;margin:0;white-space:nowrap}
+.hud-boost{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:4px 22px;border-radius:16px;border:3px solid #7bb3c9;background:linear-gradient(#f2fbff,#d6eefa);color:#1e5a75;box-shadow:0 3px 0 #5a96ae;min-width:170px}
+.hud-boost small{font-size:13px;font-weight:800;letter-spacing:.5px;text-transform:uppercase}
+.hud-boost strong{font-size:30px;font-weight:900;margin-top:2px}
+.hud-coins{display:flex;align-items:center;gap:8px;min-height:52px;padding:4px 18px;border-radius:26px;border:3px solid #dcb36a;background:linear-gradient(#fff6d2,#ffe9a3);box-shadow:0 3px 0 #c89a4a}
+.hud-coins strong{font-size:28px;font-weight:900}.hud-coins span{font-size:26px}
+.hud-actions{display:flex;gap:10px;align-items:center}
+.hud-btn{display:flex;align-items:center;gap:8px;min-height:56px;padding:6px 18px;border-radius:16px;border:3px solid var(--ux-edge);background:#fffdf5;color:var(--ux-ink);font:800 18px/1 "Panaderya Rounded",sans-serif;box-shadow:0 3px 0 #b8935f}
+.hud-btn:active{transform:translateY(2px);box-shadow:0 1px 0 #b8935f}
+.hud-btn.hud-packages{background:linear-gradient(#ffcf6b,#f0a830);border-color:#b97a1c;box-shadow:0 3px 0 #92600f}
+.hud-btn.hud-icon{width:56px;padding:0;justify-content:center}.hud-btn .bakery-icon{width:30px;height:30px}
+.playing .topbar.hud{display:none}
+
+/* ---------- Home layout: collection + orders ---------- */
+.browsing .layout,.layout{display:grid!important;grid-template-columns:minmax(0,1fr) clamp(330px,31vw,430px)!important;gap:16px!important;padding:14px 16px 16px!important;max-width:2000px;margin:0 auto;align-items:stretch}
+.leftcol{display:none!important}
+.browsing .rightcol{grid-column:2!important;display:block}.menu-stage.collection-stage,.paused-menu{grid-column:1}
+.collection-stage{position:relative;display:flex;flex-direction:column;height:calc(100dvh - 108px)!important;min-height:520px!important;border-radius:20px;overflow:hidden}
+.menu-grid{scroll-padding-bottom:200px}
+
+/* Bakery bar */
+.bakery-bar{display:flex;align-items:center;gap:14px;padding:10px 14px;margin:12px 14px 0;border-radius:16px;background:#fff4d6;border:2px solid #e2c27f}
+.bakery-bar.can-upgrade{background:#fff0bd;border-color:#e0a62d;animation:uxGlow 2.4s ease-in-out infinite}
+@keyframes uxGlow{50%{box-shadow:0 0 0 5px #ffd77a66}}
+.bakery-bar-icon{width:64px;height:64px;min-height:0;padding:4px;border-radius:14px;border:2px solid #d3b27a;background:#fffaf0;flex:none}
+.bakery-bar-icon .bakery-icon{width:100%;height:100%}
+.bakery-bar-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.bakery-bar-text b{font-size:20px}.bakery-bar-text small{font-size:15px;color:#7a5a36}
+.bakery-bar .primary{min-height:56px;font-size:19px;padding:8px 22px;white-space:nowrap}
+.bakery-bar .power-change b{color:#17655e}
+.bakery-idea{margin:10px 14px 0!important;min-height:56px;font-size:16px;padding:8px 14px!important}
+.bakery-idea small{font-size:14px!important}
+
+/* Tabs and toolbar */
+.menu-tabs{display:flex;gap:8px;margin:12px 14px 0;padding:0}
+.menu-tabs button{flex:1;min-height:56px;font-size:22px;font-weight:900;border-radius:14px 14px 0 0}
+.collection-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;flex-wrap:nowrap;overflow-x:auto}
+.collection-toolbar>button{min-height:52px;font-size:17px;white-space:nowrap;flex:none}
+.slot-chip{font-size:19px;white-space:nowrap;padding:0 6px}.toolbar-spacer{flex:1}
+.collection-toolbar [aria-pressed="true"]{background:#ffe4a1;border-color:#d19a2c}
+
+/* Food grid */
+.collection-stage .menu-grid{grid-template-columns:repeat(auto-fill,minmax(168px,1fr))!important;grid-auto-rows:218px!important;gap:12px!important;padding:6px 14px 14px!important}
+.collection-stage .menu-grid>.food-tile{height:218px!important;max-height:218px!important}
+.food-tile.empty{border:3px dashed #cfb48a;background:#fffdf6;color:#9a7a50;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+.food-tile.empty strong{font-size:56px;line-height:1}.food-tile.empty small{font-size:16px}
+.collection-stage .food-card-top{font-size:16px}.collection-stage .menu-grid strong{font-size:19px}
+
+/* Food bottom sheet */
+#foodPanel:not(:empty){display:flex;flex:0 1 auto;height:auto;max-height:46%;min-height:0;overflow:hidden}
+.sticky-food-panel{position:relative!important;height:auto!important;max-height:none;min-width:0;flex:1;z-index:6;display:flex;flex-direction:column;gap:8px;padding:14px 16px 14px!important;border-top:4px solid #c7a47a!important;border-radius:22px 22px 0 0;background:#fffbf2!important;box-shadow:0 -8px 22px #6b4a2229;animation:uxSheet .18s ease-out}
+@keyframes uxSheet{from{transform:translateY(24px);opacity:.4}}
+.sticky-food-panel .food-panel-close{position:absolute;top:8px;right:10px;width:52px;height:52px;border-radius:50%;font-size:30px;z-index:2}
+.food-panel-scroll{overflow:auto;max-height:100%;padding-right:56px}
+.recipe-detail{display:flex;align-items:center;gap:16px}
+.recipe-detail .food-art{width:96px;height:80px;flex:none;margin:0}
+.recipe-detail-text{display:flex;flex-direction:column;gap:3px;min-width:0}
+.recipe-detail h2{font-size:26px;margin:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.recipe-detail .detail-contribution{font-size:30px;color:#1e6a8a}
+.recipe-detail small{font-size:16px}.mastery-ready-text{color:#17655e}
+.recipe-detail .mastery-outcome{font-size:15px;color:#17655e}
+.food-action-area{display:flex;flex-direction:column;gap:6px}
+.food-action-status{margin:0;font-size:15px;color:#7a5a36;min-height:0}
+.food-panel-actions{display:flex;gap:10px}
+.food-panel-actions button{flex:1;min-height:60px;font-size:19px;font-weight:900;border-radius:16px}
+.food-panel-actions small{display:none}
+.selection-tools{display:flex;align-items:center;gap:10px}.selection-tools button{min-height:48px}
+.selected-food-list{display:flex;gap:10px;overflow-x:auto;padding:6px 0}
+.recipe-more summary{min-height:44px;font-size:16px;display:flex;align-items:center}
+
+/* ---------- Orders rail ---------- */
+.ticket-board{display:flex;flex-direction:column;height:calc(100dvh - 108px);min-height:520px;padding:12px!important;border-radius:20px;overflow:hidden}
+.ticket-board-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 8px}
+.ticket-board-heading h2{font-size:26px;margin:0;display:flex;align-items:center;gap:8px}
+.ticket-board-heading .refresh-controls{display:flex;gap:6px;margin:0;flex-wrap:wrap;justify-content:flex-end}
+.ticket-board .refresh-controls button{min-height:46px;font-size:15px;padding:4px 12px;white-space:nowrap}
+.ticket-board .tickets{flex:1;min-height:0;overflow:auto;display:flex!important;flex-direction:column;gap:12px;padding:4px 4px 8px;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+.ticket{display:flex!important;flex-direction:column;gap:8px;width:100%;min-height:0;height:auto!important;padding:12px 14px!important;text-align:left;border-radius:18px;flex:none}
+.ticket-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ticket-food{display:flex;align-items:center;gap:8px;min-width:0}.ticket-food .food-art{width:44px;height:36px;flex:none}
+.ticket-food b{font-size:17px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ticket-package{display:flex;flex-direction:row;width:auto;flex:0 1 auto;border:0;align-items:center;gap:6px;font-size:15px;white-space:nowrap;padding:3px 10px 3px 4px;border-radius:14px;background:#ffffff99}
+.ticket-package>b{background:none;border:0;padding:0}
+.ticket-pkg-art{display:inline-block;width:30px;height:30px}.ticket-pkg-art svg,.ticket-pkg-art .package-art{width:100%;height:100%}
+.ticket-package .ticket-pkg-art .package-art{width:30px;height:30px}
+.ticket-sum{display:flex;align-items:center;gap:10px;font-size:38px;line-height:1.05;font-weight:900}
+.ticket-sum svg{height:30px;width:auto}
+.ticket .ticket-progress{display:block;height:10px;border-radius:6px;background:#00000014;overflow:hidden}
+.ticket .ticket-progress>span{display:block;height:100%;background:#e9a62a;border-radius:6px}
+.ticket-foot{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ticket-coins{font-size:18px}
+.ticket-start{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:6px 24px;border-radius:26px;font-size:21px;font-weight:900;background:#fffdf5;border:3px solid #9b7a45;box-shadow:0 3px 0 #7e5f31;white-space:nowrap}
+.ticket:active .ticket-start{transform:translateY(2px);box-shadow:0 1px 0 #7e5f31}
+.ticket-first .ticket-start{animation:uxNudge 1.4s ease-in-out infinite}
+@keyframes uxNudge{50%{transform:scale(1.08)}}
+.ticket-odds{margin:6px 0 0;padding:0;border:0;background:none;flex:none}
+.luck-chip{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:50px;font-size:17px;font-weight:800;border-radius:14px;border:2px dashed #cdb08a;background:#fffaf0;color:#5a3a1c}
+
+/* ---------- Order (worksheet) screen ---------- */
+.playing .layout{display:block!important;max-width:1280px!important;padding:10px 14px 12px!important}
+.worksheet-stage{display:flex!important;flex-direction:column;gap:8px;min-height:calc(100dvh - 24px)}
+.ws-bar{display:flex;align-items:center;gap:12px;padding:6px 8px;flex:none}
+.ws-bar .worksheet-exit{min-height:60px;padding:6px 22px;font-size:20px;font-weight:900;border-radius:16px;border:3px solid #9b7a45;background:#fffdf5;box-shadow:0 3px 0 #7e5f31;white-space:nowrap}
+.ws-bar .worksheet-order{flex:1;display:flex!important;align-items:center;justify-content:center;gap:14px;margin:0!important;padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
+.ws-bar .worksheet-order .food-art{width:72px;height:58px}
+.ws-bar .worksheet-order h2{display:none}
+.ws-bar .order-equation{font-size:38px;line-height:1;font-weight:900}.ws-bar .worksheet-order small{font-size:16px}
+.ws-bar .worksheet-toolbar{display:flex!important;margin:0!important;padding:0!important}
+.ws-bar .worksheet-controls{display:flex;gap:8px}.ws-bar .worksheet-controls button{min-height:60px;font-size:17px;padding:6px 16px}
+.worksheet-frame{flex:1 1 auto;min-height:300px}
+.worksheet-prize{display:flex!important;align-items:center;gap:14px;flex:none}
+.worksheet-prize .chest-luck-top{order:3;position:static!important;margin:0!important;flex:0 1 270px;padding:6px 10px!important;transform:none!important;min-height:0!important}
+.worksheet-prize .package-luck-copy small{font-size:13px}
+.claim-screen{font-size:20px}.claim-screen button{min-height:64px;font-size:21px}
+
+/* ---------- Popups ---------- */
+.backdrop{padding:20px;background:#3a250f8c}
+.modal{width:min(820px,94vw)!important;max-width:94vw;max-height:min(90dvh,900px)!important;display:flex;flex-direction:column;border-radius:24px;font-size:19px}
+.modal .modalhead{display:flex;align-items:center;gap:12px;padding:14px 18px;flex:none}
+.modal .modalhead h2{font-size:28px;margin:0;flex:1}
+.modal .dialog-wallet{font-size:19px;padding:6px 12px;border-radius:16px;background:#ffe9a3;font-weight:800}
+.modal .close{width:56px;height:56px;min-height:56px;border-radius:50%;font-size:32px;flex:none}
+.modal .modalbody{overflow:auto;padding:16px 20px 20px;line-height:1.4;-webkit-overflow-scrolling:touch}
+.modal .modalbody p{font-size:18px}.modal .dialog-note{font-size:16px;color:#7a5a36}
+.modal .modalbody button{min-height:56px;font-size:19px}
+/* Keep actions in the scrolling flow: a sticky Buy button covered the quantity
+   slider before the end of the package shop could be scrolled into view. */
+.modal .modalbody>.primary{position:static}
+.modal .modalgrid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr))!important;gap:12px}
+.settings-row{min-height:64px;font-size:20px}.settings-row button{min-width:92px;min-height:56px}
+.bakery-carousel{display:flex;gap:12px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 12px}
+.bakery-carousel .bakery-upgrade-card{flex:0 0 190px;scroll-snap-align:center}
+
+/* ---------- Responsive ---------- */
+@media(max-width:1100px){
+ .topbar.hud{gap:8px;padding:6px 12px;height:68px}.hud .brand h1{display:none}.hud-boost{min-width:130px;padding:4px 12px}.hud-boost strong{font-size:26px}
+ .hud-btn{padding:6px 12px;font-size:16px}.hud-coins strong{font-size:24px}
+ .layout,.browsing .layout{grid-template-columns:minmax(0,1fr) 320px!important;gap:10px!important;padding:10px!important}
+ .collection-stage,.ticket-board{height:calc(100dvh - 90px)!important}
+ .ticket-sum{font-size:32px}.collection-stage .menu-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;grid-auto-rows:204px!important}
+ .collection-stage .menu-grid>.food-tile{height:204px!important;max-height:204px!important}
+}
+@media(max-width:820px){
+ .layout,.browsing .layout{grid-template-columns:1fr!important}
+ .browsing .rightcol{grid-column:1!important}
+ .collection-stage{height:auto!important;min-height:0!important}.collection-stage .menu-grid{max-height:60dvh}
+ .ticket-board{height:auto;min-height:0}.hud-btn:not(.hud-icon):not(.hud-packages) span+*{display:none}
+ #foodPanel:not(:empty){max-height:55dvh}
+}
+@media(prefers-reduced-motion:reduce){.bakery-bar.can-upgrade,.ticket-first .ticket-start,.sticky-food-panel{animation:none}}
+
+/* fixes after first visual pass */
+.bakery-bar .primary.bakery-power-buy{flex:0 0 auto!important;width:auto!important;min-width:0;margin:0!important}
+.bakery-bar-text{flex:1 1 0!important;width:auto!important}
+.bakery-bar-icon{flex:0 0 64px!important}
+
+/* worksheet fills the viewport; iframe takes whatever is left between bar and prize dock */
+[hidden]{display:none!important}
+.worksheet-stage{height:calc(100dvh - 24px);min-height:0!important;box-sizing:border-box}
+.worksheet-stage .worksheet-frame{flex:1 1 0!important;height:auto!important;min-height:0!important}
+.live-order{min-width:0}
+/* paused state: compact resume bar + collection fill the left zone */
+.paused-menu{display:flex;flex-direction:column;gap:10px;min-width:0}
+.paused-menu .resume-order{min-height:60px;font-size:21px;flex:none;border-radius:16px}
+.paused-menu>.collection-stage{height:auto!important;flex:1;min-height:0!important}
+
+/* beat legacy grid placement rules */
+.browsing .menu-stage,.browsing .paused-menu,.browsing .live-order{grid-column:1!important}
+.browsing .rightcol{grid-column:2!important}
+.bakery-bar{flex-wrap:wrap}.bakery-bar-text{min-width:150px}
+@media(max-width:820px){.browsing .rightcol{grid-column:1!important}}
+.paused-menu{height:calc(100dvh - 108px)}
+.paused-menu>.collection-stage{flex:1 1 0!important}
+.paused-menu .resume-order{min-height:56px}
+@media(max-width:1100px){.paused-menu{height:calc(100dvh - 90px)}}
+@media(max-width:820px){.paused-menu{height:auto}}
+
+/* Large tablets (design target 2000x1200): scale the browsing UI up so touch targets stay generous. */
+@media(min-width:1700px) and (min-height:1000px){
+ #app.browsing{zoom:1.4;--ux-vh:calc(100dvh / 1.4)}
+ #app.browsing .collection-stage,#app.browsing .ticket-board{height:calc(var(--ux-vh) - 108px)!important}
+ #app.browsing .paused-menu{height:calc(var(--ux-vh) - 108px)}
+ .backdrop .modal{zoom:1.3;max-height:min(900px,calc((100dvh - 40px)/1.3))!important}
+}
+
+/* Checkpoint 2 presentation refinements. */
+
+/* popups: action buttons stay in flow (no overlap), confirm buttons side by side */
+.modal .modalbody>.primary,.modal .fusion-actions{position:static!important;bottom:auto}
+.modal .modalbody>.primary{display:block;width:100%;margin-top:14px}
+.modal .modalbody>.secondary+.primary{display:inline-block;width:auto;min-width:180px}
+.modal .modalbody>.secondary{min-width:150px;margin:12px 10px 0 0}
+.modal .fusion-actions{display:flex;gap:10px;margin-top:14px}.modal .fusion-actions button{flex:1}
+.modal .modalbody input[type=range]{min-height:44px;width:100%}
+.modal.order-reward-modal .modalhead{display:block;padding:28px 78px 18px}
+/* food sheet: one compact row (info left, actions right); grid keeps the selected tile visible */
+.sticky-food-panel{display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;column-gap:16px;max-height:none;padding:12px 76px 12px 16px!important}
+.sticky-food-panel .food-panel-scroll{padding-right:0;overflow:visible;grid-column:1}
+.sticky-food-panel .food-action-area{grid-column:2;display:flex;flex-direction:column;gap:4px}
+.sticky-food-panel .food-panel-actions{flex-wrap:nowrap}
+.sticky-food-panel .food-panel-actions button{flex:0 0 auto;min-width:130px;padding:6px 14px}
+.sticky-food-panel .food-action-status{font-size:14px;text-align:center}
+.sticky-food-panel .recipe-detail .food-art{width:84px;height:68px}
+.sticky-food-panel .recipe-more{margin-top:2px}
+.sticky-food-panel .selection-tools,.sticky-food-panel .selected-food-list{grid-column:1/-1}
+.collection-stage:has(.sticky-food-panel) .menu-grid{padding-bottom:170px!important}
+.collection-stage:has(.sticky-food-panel) .menu-grid{scroll-padding-bottom:170px}
+@media(max-width:1100px){.sticky-food-panel{grid-template-columns:1fr}.sticky-food-panel .food-action-area{grid-column:1}.sticky-food-panel .food-panel-actions button{flex:1;min-width:0}.collection-stage:has(.sticky-food-panel) .menu-grid{padding-bottom:230px!important}}
+/* paused state: the ticket already says Resume */
+.paused-menu .resume-order{display:none}
+/* kitchen: two tools per row */
+.kitchen-tab{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px;padding:12px 14px;overflow:auto;align-content:start}
+.kitchen-tab>p{grid-column:1/-1;margin:0;font-size:17px}
+.kitchen-tab .itemcard button{min-height:56px;width:100%}
+.sticky-food-panel .recipe-detail-text{gap:2px}
+.sticky-food-panel .recipe-detail h2{font-size:24px;white-space:nowrap}
+.sticky-food-panel .recipe-detail h2 .tag{display:none}
+.sticky-food-panel .detail-contribution{white-space:nowrap;font-size:28px}
+.sticky-food-panel .recipe-detail small{white-space:nowrap}
+.sticky-food-panel .food-panel-actions button{min-width:112px;font-size:18px}
+.sticky-food-panel .recipe-more summary{min-height:36px;font-size:15px;color:#7a5a36}
+
+/* Integration: retain independently scrolling details and reachable actions. */
+.sticky-food-panel .food-panel-scroll{overflow:auto;min-width:0}
+.sticky-food-panel .recipe-detail h2,.sticky-food-panel .recipe-detail small{white-space:normal}
+.sticky-food-panel .food-panel-actions{flex-wrap:wrap}
+.selected-food-list>div{flex:none}
+@media(max-width:1699px){
+ .sticky-food-panel{grid-template-columns:minmax(0,1fr);padding:12px 16px!important}
+ .sticky-food-panel .food-panel-scroll{padding-right:56px}
+ .sticky-food-panel .food-action-area{grid-column:1}
+ .sticky-food-panel .food-panel-actions button{flex:1;min-width:0}
+}
