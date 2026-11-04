@@ -2,6 +2,18 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {progressionHarness} from './progression-harness.mjs';
 
+test('single-food Mastery taps buy immediately, recalculate the next price, and preserve latest-purchase Undo',()=>{
+ const h=progressionHarness();h.run(`g.coins=10000;g.recipeCeilings.pandesal=3;selectedFoods=new Set([1]);
+  firstPrice=foodLevelPrice(g.owned[0]);first=requestSelectedMastery();afterFirst=g.coins;
+  secondPrice=foodLevelPrice(g.owned[0]);second=requestSelectedMastery();afterSecond=g.coins;level=recipeMastery(g.owned[0]);
+  undone=undoPurchase(g.purchaseUndo.id)`);
+ assert.equal(h.run('typeof popup'),'undefined');assert.equal(h.run('first&&second&&undone'),true);
+ assert.equal(h.run('10000-afterFirst'),h.run('firstPrice'));
+ assert.equal(h.run('afterFirst-afterSecond'),h.run('secondPrice'));
+ assert.equal(h.run('level'),2);assert.equal(h.run('recipeMastery(g.owned[0])'),1);
+ assert.equal(h.run('g.coins'),h.run('afterFirst'));assert.deepEqual(h.json('[...selectedFoods]'),[1]);
+});
+
 test('one selected food uses the detailed popup even in multi-select mode; multiple foods use only compact actions',()=>{
  const h=progressionHarness();h.run(`discoverFood(F('monay'));g.recipeCeilings.pandesal=4;
   multiSelect=true;selectedFoods=new Set([1]);single=renderFoodPanel();

@@ -39,6 +39,15 @@ def check_popup(page,kind):
     }''',kind)
 
 
+def check_feedback(page):
+    assert page.locator('#notificationDock').evaluate('''dock=>{
+        const r=dock.getBoundingClientRect();
+        const controls=document.querySelectorAll('.food-panel-actions button,.food-panel-close,.collection-toolbar button,.bakery-power button,.package-panel button');
+        return r.left>=0&&r.right<=innerWidth&&r.top>=0&&r.bottom<=innerHeight&&
+            [...controls].every(button=>{const b=button.getBoundingClientRect();return !b.width||r.right<=b.left||r.left>=b.right||r.bottom<=b.top||r.top>=b.bottom});
+    }'''),'feedback overlaps a frequently used control'
+
+
 def check(pw,engine):
     browser=pw.webkit.launch() if engine=='webkit' else pw.chromium.launch(channel='msedge')
     page=browser.new_page(has_touch=True)
@@ -55,7 +64,7 @@ def check(pw,engine):
             window.secondFood=sortedMenuFoods(g.owned)[1].uid;''')
         for width,height in [(2000,1200),(1194,834),(1024,768)]:
             page.set_viewport_size({'width':width,'height':height})
-            page.evaluate('closeFoodPanel();render();document.querySelector(".menu-grid").scrollTop=0')
+            page.evaluate('closeFoodPanel();for(const o of g.owned)g.recipeCeilings[o.id]=recipeMastery(o)+3;render();document.querySelector(".menu-grid").scrollTop=0')
             page.wait_for_timeout(100)
             page.locator('[data-uid]').first.locator('.food-card-target').focus()
             before=geometry(page)
@@ -73,8 +82,18 @@ def check(pw,engine):
             page.locator('.action-sell').tap()
             page.get_by_role('button',name='Keep foods',exact=True).tap()
             assert page.locator('.food-selection-single').count()==1
+            page.evaluate('toast("Ready to upgrade!")')
+            check_feedback(page)
+            mastery=page.evaluate('recipeMastery(g.owned.find(o=>o.uid===firstFood))')
             page.locator('.action-mastery').tap()
-            page.keyboard.press('Escape')
+            assert page.locator('.modal').count()==0
+            assert page.evaluate('recipeMastery(g.owned.find(o=>o.uid===firstFood))')==mastery+1
+            assert page.locator('#purchaseUndo').is_visible()
+            check_feedback(page)
+            page.locator('.action-mastery').tap()
+            assert page.evaluate('recipeMastery(g.owned.find(o=>o.uid===firstFood))')==mastery+2
+            page.locator('#purchaseUndo button').tap()
+            assert page.evaluate('recipeMastery(g.owned.find(o=>o.uid===firstFood))')==mastery+1
             assert page.locator('.food-selection-single').count()==1
             page.locator('.action-equip').tap()
             assert page.evaluate('g.activeMenu.includes(firstFood)')
@@ -113,6 +132,15 @@ def check(pw,engine):
             assert page.locator('.food-selection-single').count()==1
             page.keyboard.press('Escape')
             assert page.locator('.food-selection-popup').count()==0
+        for width,height in [(834,1194),(390,844),(597,417)]:
+            page.set_viewport_size({'width':width,'height':height})
+            page.evaluate('''selectedFoods=new Set([firstFood]);multiSelect=false;
+                const food=g.owned.find(o=>o.uid===firstFood);g.recipeCeilings[food.id]=recipeMastery(food)+2;render()''')
+            page.locator('.action-mastery').tap()
+            check_feedback(page)
+            page.screenshot(path=str(shots/f'{engine}-feedback-{width}.png'))
+            page.locator('#purchaseUndo button').tap()
+            assert page.locator('.modal').count()==0
         assert errors==[],errors
         print('PASS floating food selection',engine,flush=True)
     finally:

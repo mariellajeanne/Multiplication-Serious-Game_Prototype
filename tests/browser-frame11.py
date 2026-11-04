@@ -98,7 +98,7 @@ def check_browser(pw, engine):
         quoted = page.evaluate('foodLevelPrice(g.owned[0])')
         coins = page.evaluate('g.coins')
         page.locator('.food-panel-actions .primary').tap()
-        page.locator('.modal .primary').tap()
+        assert page.locator('.modal').count() == 0
         assert page.evaluate('recipeMastery(g.owned[0])') == 1
         assert page.evaluate('g.coins') == coins-quoted
         page.locator('#purchaseUndo button').tap()

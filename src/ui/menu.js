@@ -70,14 +70,14 @@ function paintFoodPanel(){
  const button=document.querySelector?.('[data-focus="select-foods"]');button?.setAttribute('aria-pressed',String(multiSelect));if(button)button.textContent=multiSelect?'Done selecting':'Select Foods';
  for(const card of document.querySelectorAll?.('.menu-grid [data-uid]')||[]){const selected=selectedFoods.has(Number(card.dataset.uid));card.classList.toggle('is-selected',selected);card.querySelector('button')?.setAttribute('aria-pressed',String(selected))}
 }
-let masteryConfirmation=null,saleConfirmation=null;
+let saleConfirmation=null;
 function requestSelectedMastery(){
- const {eligible}=selectionState();if(!eligible.length)return;
- const cost=eligible.reduce((sum,o)=>sum+foodLevelPrice(o),0);
- masteryConfirmation={uids:eligible.map(o=>o.uid),cost,fingerprint:JSON.stringify(eligible.map(o=>[o.uid,recipeMastery(o),g.recipeCeilings[o.id],foodLevelPrice(o)]))};
- showModal('Buy Recipe Mastery?',`<p>+1 Mastery for ${eligible.length} eligible ${eligible.length===1?'food':'foods'}. Other selected foods stay as they are.</p><p>Total: <b>🪙 ${fmt(cost)}</b></p><button class="primary" ${g.coins<cost?'disabled':''} onclick="confirmSelectedMastery()">Buy +1 Mastery · 🪙 ${fmt(cost)}</button>`);
+ const {eligible}=selectionState();if(!eligible.length)return false;
+ clearNotifications();
+ const ok=buyMastery(eligible.map(o=>o.uid));
+ if(ok&&typeof feedbackPulse==='function')feedbackPulse(document.querySelector('.detail-contribution'));
+ return ok;
 }
-function confirmSelectedMastery(){const pending=masteryConfirmation;masteryConfirmation=null;if(!pending)return false;const ok=buyMastery(pending.uids,pending);if(ok){closeModal();if(typeof feedbackPulse==='function')feedbackPulse(document.querySelector('.detail-contribution'))}return ok}
 function requestSelectedSale(){
  const {foods}=selectionState();if(!foods.length)return;
  saleConfirmation={uids:foods.map(o=>o.uid),fingerprint:inventoryFingerprint(foods)};

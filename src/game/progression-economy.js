@@ -97,4 +97,5 @@ function undoPurchase(id){
 function paintPurchaseUndo(){
  const node=$('purchaseUndo');if(!node)return;const tx=g.purchaseUndo;
  node.hidden=!tx;if(tx)node.innerHTML=`<span>${tx.label} · 🪙 ${fmt(tx.cost)} <small>${Math.max(0,Math.ceil((tx.expires-Date.now())/1000))}s</small></span><button onclick="undoPurchase('${tx.id}')">Undo</button>`;
+ positionNotifications();
 }

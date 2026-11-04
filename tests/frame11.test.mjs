@@ -58,13 +58,15 @@ test('all owned foods display; hide is a view filter; mixed selection has both o
  h.run('selectionEquip(false)');assert.equal(h.run('g.owned.length'),3);assert.equal(h.run('g.activeMenu.length'),0);
 });
 
-test('bulk mastery quotes the exact eligible total and rejects stale confirmations and repeated purchases',()=>{
+test('bulk mastery buys immediately at the exact eligible total, retaining affordability and capacity guards',()=>{
  const h=progressionHarness();h.run(`g.coins=1e8;discoverFood(F('pandesal'));discoverFood(F('monay'));g.recipeCeilings.monay=0;
- selectedFoods=new Set([1,2,3]);requestSelectedMastery();quote=masteryConfirmation.cost;before=g.coins;ok=confirmSelectedMastery();again=confirmSelectedMastery()`);
+ selectedFoods=new Set([1,2,3]);quote=foodLevelPrice(g.owned[0]);before=g.coins;ok=requestSelectedMastery();again=requestSelectedMastery()`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('before-g.coins'),h.run('quote'));
+ assert.equal(h.run('typeof popup'),'undefined');
  assert.deepEqual(h.json('g.owned.map(recipeMastery)'),[1,0]);
- h.run(`g.recipeCeilings.pandesal++;requestSelectedMastery();g.owned[0].mastery++;before=g.coins;stale=confirmSelectedMastery()`);
- assert.equal(h.run('stale'),false);assert.equal(h.run('g.coins'),h.run('before'));
+ h.run(`g.recipeCeilings.pandesal++;g.coins=0;before=JSON.stringify(g.owned);unaffordable=requestSelectedMastery()`);
+ assert.equal(h.run('unaffordable'),false);assert.equal(h.run('JSON.stringify(g.owned)'),h.run('before'));
+ h.run(`g.coins=1e8;g.run={paused:false};busy=requestSelectedMastery()`);assert.equal(h.run('busy'),false);
 });
 
 test('ten second Undo reverses only the latest transaction once, survives reload, and commits on dependencies',()=>{

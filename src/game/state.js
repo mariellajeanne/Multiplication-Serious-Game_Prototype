@@ -124,12 +124,27 @@ function save(){
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}if((stored?.packageRevision||0)>(g.packageRevision||0)){toast('Packages changed in another tab. Reload to continue.');return false}}catch(_){}
  reconcileAutoEquip();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
 let toastTimer=null;
+function positionNotifications(){
+ const dock=$('notificationDock');if(!dock||(!g.purchaseUndo&&!$('toasts')?.childElementCount))return;
+ // Prefer noninteractive illustration areas, keeping repeated purchase controls clear.
+ for(const selector of ['.package-possible','.current-bakery-preview','.food-panel-scroll','.menu-grid','.order-narrative']){
+  const anchor=document.querySelector(selector);if(!anchor)continue;
+  const r=anchor.getBoundingClientRect(),top=Math.max(8,r.top),bottom=Math.min(innerHeight-8,r.bottom);
+  if(r.width<160||r.left<0||r.right>innerWidth||bottom-top<60)continue;
+  dock.style.width=Math.min(280,r.width-16)+'px';
+  if(dock.offsetHeight>bottom-top-8)continue;
+  dock.style.left=(r.left+8)+'px';
+  dock.style.top=(selector==='.menu-grid'?top+4:bottom-dock.offsetHeight-4)+'px';
+  return;
+ }
+ dock.style.left='12px';dock.style.width='min(280px, calc(100vw - 24px))';dock.style.top=Math.max(8,innerHeight-dock.offsetHeight-12)+'px';
+}
 function clearNotifications(){clearTimeout(toastTimer);const root=$('toasts');if(root)root.replaceChildren()}
 function toast(text){
  const root=$('toasts');if(!root)return;
  clearNotifications();
  if(modal){let note=document.querySelector?.('.modal .dialog-notice');if(!note){note=document.createElement('p');note.className='dialog-notice';note.setAttribute('role','status');document.querySelector?.('.modalbody')?.appendChild(note)}note.textContent=text;return}
- const el=document.createElement('div');el.className='toast';el.textContent=text;root.appendChild(el);toastTimer=setTimeout(()=>el.remove(),2800);
+ const el=document.createElement('div');el.className='toast';el.textContent=text;root.appendChild(el);positionNotifications();toastTimer=setTimeout(()=>el.remove(),2800);
 }
 function captureFocus(el){return el?{node:el,id:el.id,key:el.getAttribute?.('data-focus'),action:el.getAttribute?.('onclick'),label:el.getAttribute?.('aria-label')}:null}
 function restoreFocus(target){

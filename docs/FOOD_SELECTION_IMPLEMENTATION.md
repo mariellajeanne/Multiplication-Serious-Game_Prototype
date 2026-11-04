@@ -1,5 +1,7 @@
 # Frame 12 — floating food selection controls
 
+**Immediate Mastery and safe feedback (2026-11-05):** Single and bulk Mastery buttons buy immediately at the current eligible price; the redundant Buy Recipe Mastery confirmation is removed. Affordability, duplicate capacity, active-order guards and the ten-second latest-purchase Undo remain. Sale confirmations are unchanged. Notifications and Undo share a compact dock over noninteractive package/bakery artwork on tablets, or the details area on narrow screens; it repositions on render, resize and scrolling without moving the food grid or action buttons. Older transient notices clear before a new Mastery purchase.
+
 Implemented 2026-11-04 against the owner's Frame 12 wireframe. This supersedes food-details bottom-sheet layouts in earlier implementation notes. The two drawn popup examples are alternative states, never simultaneous overlays.
 
 ## Layout and visual hierarchy
@@ -28,7 +30,7 @@ One selected food always shows the larger state, including after the first long-
 
 The existing 500ms long-press, pointer-movement cancellation, suppressed follow-up tap and Shift+Space/Enter behavior remain. Escape first closes a real confirmation modal; with no modal it closes the floating selection controls and restores card/toolbar focus. Starting a new selection clears transient notifications so they cannot obscure the controls at high zoom.
 
-Sales retain review, stale-state fingerprint checks and discovery/ceiling preservation. Mastery retains the exact eligible total and confirmation/quote validation. Equip/Unequip retain duplicate, capacity and active-worksheet guards, saved assignments and existing Auto Equip handling. No prices, progression formulas, save fields or worksheet/bridge code changed.
+Sales retain review, stale-state fingerprint checks and discovery/ceiling preservation. Mastery applies immediately using the exact eligible total and current transaction validation; Undo remains available. Equip/Unequip retain duplicate, capacity and active-worksheet guards, saved assignments and existing Auto Equip handling. No prices, progression formulas, save fields or worksheet/bridge code changed.
 
 The old “More recipe options → Use ingredients” entry is omitted from the popup to match the wireframe's three-action structure. Its existing recipe-upgrade entry is preserved in **Settings → Ingredient pantry → Use ingredients for recipes**, with the same eligibility, costs and confirmation behavior. No ingredient gameplay was removed.
 
@@ -40,7 +42,7 @@ At genuinely small Menu widths, the popup widens to leave 16px side clearances. 
 - `src/ui/dialogs.js`: relocates the existing ingredient-upgrade entry to the existing pantry.
 - `styles/progression.css`: replaces the sheet and its legacy breakpoint overrides with one floating component definition and targeted container queries. Other panels retain their accepted layout/theme.
 - `tests/food-selection.test.mjs`, `tests/ux.test.mjs`: state switching, actual stats, preserved recipe upgrade access and model regressions.
-- `tests/browser-food-selection.py`: WebKit and Edge at all three requested resolutions; actual tap/long-press, exclusive states, popup ratios, unchanged grid bounds/scroll, text/button fit, sale cancellation, Mastery confirmation, Equip/Unequip, Select All/Deselect All, mixed actions and keyboard closing. Screenshots in ignored `.test-tools/food-selection-shots/` were visually compared with the wireframe.
+- `tests/browser-food-selection.py`: WebKit and Edge at all three requested resolutions; actual tap/long-press, exclusive states, popup ratios, unchanged grid bounds/scroll, text/button fit, sale cancellation, immediate/repeated Mastery purchases, Undo, nonoverlapping feedback, Equip/Unequip, Select All/Deselect All, mixed actions and keyboard closing. Screenshots in ignored `.test-tools/food-selection-shots/` were visually compared with the wireframe.
 - `tests/browser-frame11.py`: updated selector for the new single-food popup; existing WebKit/Edge carrying 79×18, tap/drag/swipe, sound/tutorial, saved worksheets, purchase/Undo, packages and exactly-once claim checks passed.
 - `tests/browser-responsive.py`: actual Edge per-tab browser zoom at 80%, 100%, 125%, 150% and 200% now checks both popup states, Menu containment, stable grid geometry and button text/touch sizing. Native zoom screenshots use the browser surface to avoid Playwright's zoomed viewport cropping. `--zoom-only` runs this focused check. Subpixel touch-target bounds allow 0.1px rounding while checking the 44px CSS minimum.
 
