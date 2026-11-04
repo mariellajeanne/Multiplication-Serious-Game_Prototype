@@ -122,7 +122,7 @@ window.addEventListener('message',event=>{
  if(m.type==='sound'){$('sound').textContent=m.enabled?'♫ Sound on':'♫ Sound off';sound=!!m.enabled;}
  if(m.type==='theme')document.body.dataset.decor=String(Math.max(0,Math.min(4,Number(m.level)||0)));
  if(m.type==='layout'&&s)applyWorksheetLayout(m);
- if(m.type==='feedback'&&m.kind==='chest')play('package');
+ if(m.type==='feedback'&&m.kind==='chest')play('done');
 });
 setTimeout(()=>report('ready'),0);
 

@@ -14,7 +14,7 @@ function startAdditionLab(){
 }
 function calculateSum(){let carry=0,vals=[];for(let c=0;c<s.cols;c++){const amount=s.rows.reduce((t,r)=>t+(r[c]||0),carry);vals.push(amount%10);carry=Math.floor(amount/10)}return vals;}
 function cellCenter(el){if(!el)return null;let rr=el.getBoundingClientRect(),root=$('sheet').getBoundingClientRect();return{x:rr.left-root.left+rr.width/2,y:rr.top-root.top+rr.height/2,w:rr.width,h:rr.height};}
-function sparkleAt(x,y){if(window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches)return;const el=document.createElement('div');el.className='addition-spark';el.textContent='✦';el.style.left=x+'px';el.style.top=y+'px';$('sheet').append(el);setTimeout(()=>el.remove(),520)}
+function sparkleAt(x,y){if(window.__BATCH_TEST_FAST)return;const el=document.createElement('div');el.className='addition-spark';el.textContent='✦';el.style.left=x+'px';el.style.top=y+'px';$('sheet').append(el);setTimeout(()=>el.remove(),520)}
 function sleep(ms){return window.__BATCH_TEST_FAST?Promise.resolve():new Promise(r=>setTimeout(r,ms))}
 function launchDigit(from,to,digit,duration=185,delay=0){
  if(!from||!to||window.__BATCH_TEST_FAST||matchMedia('(prefers-reduced-motion:reduce)').matches)return Promise.resolve();

@@ -14,7 +14,7 @@ test('dialogs and repeated renders retain the live frame and all child state',()
     localStorage:{getItem:()=>null,setItem:()=>{}},setInterval:()=>{},setTimeout:()=>{},clearTimeout:()=>{}});
   for(const file of ['src/data/catalog.js','src/game/progression.js','src/game/state.js','src/ui/bakery-art.js'])
     vm.runInContext(readFileSync(resolve(root,file),'utf8'),context);
-  vm.runInContext(`g.helpSeen=true;function renderHud(){return ''}function renderLeft(){return ''}function renderRight(){return ''}
+  vm.runInContext(`g.helpSeen=true;function renderLeft(){return ''}function renderRight(){return ''}
     function renderMenu(){return ''}function renderWorksheet(){return '<iframe id="worksheetFrame"></iframe>'}
     function tickStaff(){}`,context);
   vm.runInContext(readFileSync(resolve(root,'src/main.js'),'utf8'),context);

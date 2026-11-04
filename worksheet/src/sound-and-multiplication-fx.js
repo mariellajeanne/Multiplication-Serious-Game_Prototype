@@ -35,7 +35,7 @@ function flyOperand(el,end,duration=240,delay=0){if(!el)return Promise.resolve()
  const x=end.x-(r.left+r.width/2-sheet.left),y=end.y-(r.top+r.height/2-sheet.top);
  const motion=clone.animate([{transform:'translate(0,0) scale(1)',opacity:1},{offset:.7,transform:`translate(${x*.72}px,${y*.72}px) scale(.83)`,opacity:.96},{transform:`translate(${x}px,${y}px) scale(.55)`,opacity:0}],{duration,delay,fill:'forwards',easing:'cubic-bezier(.32,.05,.18,1)'});
  return motion.finished.catch(()=>{}).then(()=>clone.remove());}
-function pulseFloatTiles(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;const tiles=[...document.querySelectorAll('#floating .ftile')];tiles.forEach(t=>{t.classList.remove('count-reveal');void t.offsetWidth;t.classList.add('count-reveal')})}
+function pulseFloatTiles(){const tiles=[...document.querySelectorAll('#floating .ftile')];tiles.forEach(t=>{t.classList.remove('count-reveal');void t.offsetWidth;t.classList.add('count-reveal')})}
 function setArrayCount(n){
  const f=$('floating'),left=f.querySelector('[data-part="tens"]'),right=f.querySelector('[data-part="ones"]');
  if(!right)return;
@@ -114,7 +114,6 @@ function revealProduct(){
  $('pair').classList.remove('live');
  playMultiplyStamp();
  render();
- pulseFloatTiles();
  status('Place either product digit, or add a waiting carry.');
 }
 

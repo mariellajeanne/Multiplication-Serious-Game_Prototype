@@ -98,8 +98,7 @@ test('package types are distinct from food rarities; displayed ticket odds match
  h.run('Math.random=()=>0;low=drawFood(7);Math.random=()=>.999999999;high=drawFood(7);g.mastery=80;html=renderTicketOdds()');
  assert.equal(h.run('low.rarity'),0);assert.equal(h.run('high.rarity'),7);
  const probabilities=h.json('ticketProbabilities(80)');assert.ok(Math.abs(probabilities.reduce((a,b)=>a+b)-1)<1e-12);
- assert.match(h.run('html'),/Ticket Luck/);assert.match(h.run('html'),/openProbabilities/);
- const odds=h.run('openProbabilities();popup.title+popup.html');assert.match(odds,/Ticket Package Odds/);assert.match(odds,/Fate/);assert.doesNotMatch(odds,/Crown Jewel/);
+ assert.match(h.run('html'),/Ticket Package Odds/);assert.match(h.run('html'),/Fate/);assert.doesNotMatch(h.run('html'),/Crown Jewel/);
 });
 
 test('coin package purchases save stock, charge exactly once, reject stale pricing and reveal only next locked type',()=>{
