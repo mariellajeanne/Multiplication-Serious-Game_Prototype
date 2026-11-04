@@ -1,5 +1,5 @@
 {
-  "modelVersion": 3,
+  "modelVersion": 4,
   "seed": 20261104,
   "trialCount": 60,
   "orders": 80,
@@ -65,12 +65,12 @@
   "quotes": [
     {
       "scenario": "early",
-      "expectedCoinsPerOrder": 212.6038986404659,
+      "expectedCoinsPerOrder": 205.285357560791,
       "pricesInExpectedOrders": {
-        "nextMastery": 1.1994135649940743,
-        "nextBakery": 2.502305947360186,
-        "standardPackage": 0.6020585738009471,
-        "nextSlot": 1.999022608323457
+        "nextMastery": 1.198331936203254,
+        "nextBakery": 2.498960501106786,
+        "standardPackage": 0.599165968101627,
+        "nextSlot": 2.0020911617054367
       },
       "gainsPercent": {
         "masteryOnSelectedFood": 25,
@@ -79,7 +79,7 @@
       "activeToHelperRatio": [
         {
           "secondsPerOrder": 60,
-          "ratio": 6.000000000000001
+          "ratio": 6
         },
         {
           "secondsPerOrder": 90,
@@ -87,18 +87,18 @@
         },
         {
           "secondsPerOrder": 120,
-          "ratio": 3.0000000000000004
+          "ratio": 3
         }
       ]
     },
     {
       "scenario": "middle",
-      "expectedCoinsPerOrder": 348212.88584228064,
+      "expectedCoinsPerOrder": 583321.8055485799,
       "pricesInExpectedOrders": {
-        "nextMastery": 0.18067682891119727,
-        "nextBakery": 8.769233202309112,
-        "standardPackage": 0.600000771064606,
-        "nextSlot": 4.954747713677258
+        "nextMastery": 0.18067728481517004,
+        "nextBakery": 8.769233296858113,
+        "standardPackage": 0.599999857147209,
+        "nextSlot": 4.954747058155876
       },
       "gainsPercent": {
         "masteryOnSelectedFood": 17.391304347826075,
@@ -107,7 +107,7 @@
       "activeToHelperRatio": [
         {
           "secondsPerOrder": 60,
-          "ratio": 5.999999999999999
+          "ratio": 6
         },
         {
           "secondsPerOrder": 90,
@@ -115,18 +115,18 @@
         },
         {
           "secondsPerOrder": 120,
-          "ratio": 2.9999999999999996
+          "ratio": 3
         }
       ]
     },
     {
       "scenario": "late",
-      "expectedCoinsPerOrder": 1269494626.6276886,
+      "expectedCoinsPerOrder": 4881644529.938447,
       "pricesInExpectedOrders": {
-        "nextMastery": 0.7402051952722339,
-        "nextBakery": 28.978461155620952,
-        "standardPackage": 0.6000000000184221,
-        "nextSlot": 5.819150346956557
+        "nextMastery": 0.7402051955728046,
+        "nextBakery": 28.978461155544995,
+        "standardPackage": 0.6000000000075655,
+        "nextSlot": 5.819150346729197
       },
       "gainsPercent": {
         "masteryOnSelectedFood": 8.51063829787233,
@@ -154,51 +154,51 @@
       "policy": "growth",
       "trials": 60,
       "firstPurchaseOrder": {
-        "p10": 1,
-        "p50": 3,
-        "p90": 5
-      },
-      "powerGrowth": {
-        "p10": 365.1428218229833,
-        "p50": 416.7652408931118,
-        "p90": 468.7484182161333
-      },
-      "discoveries": {
-        "p10": 16,
-        "p50": 17,
-        "p90": 17
-      },
-      "meanPurchases": {
-        "slot": 4.033333333333333,
-        "mastery": 35.6,
-        "bakery": 7.416666666666667,
-        "package": 0
-      }
-    },
-    {
-      "scenario": "early",
-      "policy": "mixed",
-      "trials": 60,
-      "firstPurchaseOrder": {
-        "p10": 1,
+        "p10": 2,
         "p50": 3,
         "p90": 3
       },
       "powerGrowth": {
-        "p10": 259.11938715833327,
-        "p50": 296.13854398020004,
-        "p90": 352.71400286232455
+        "p10": 3.1334035749503335,
+        "p50": 3.399742878821112,
+        "p90": 3.6887210235209063
       },
       "discoveries": {
-        "p10": 16,
-        "p50": 17,
-        "p90": 17
+        "p10": 1,
+        "p50": 1,
+        "p90": 1
       },
       "meanPurchases": {
-        "slot": 3.816666666666667,
-        "mastery": 29.1,
-        "bakery": 5.283333333333333,
-        "package": 25.6
+        "slot": 0,
+        "mastery": 0,
+        "bakery": 15.15,
+        "package": 0
+      }
+    },
+    {
+      "scenario": "early",
+      "policy": "mixed",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 2,
+        "p50": 3,
+        "p90": 3
+      },
+      "powerGrowth": {
+        "p10": 33.947724303956115,
+        "p50": 42.06479590773304,
+        "p90": 50.933880553399604
+      },
+      "discoveries": {
+        "p10": 7,
+        "p50": 8,
+        "p90": 9
+      },
+      "meanPurchases": {
+        "slot": 4.533333333333333,
+        "mastery": 12.883333333333333,
+        "bakery": 8.416666666666666,
+        "package": 25.133333333333333
       }
     },
     {
@@ -208,23 +208,23 @@
       "firstPurchaseOrder": {
         "p10": 1,
         "p50": 1,
-        "p90": 2
+        "p90": 1
       },
       "powerGrowth": {
-        "p10": 19.583333333333336,
-        "p50": 22.5,
-        "p90": 22.5
+        "p10": 4.25,
+        "p50": 6.166666666666667,
+        "p90": 11.666666666666668
       },
       "discoveries": {
-        "p10": 16,
-        "p50": 17,
-        "p90": 17
+        "p10": 9,
+        "p50": 10,
+        "p90": 11
       },
       "meanPurchases": {
         "slot": 0,
         "mastery": 0,
         "bakery": 0,
-        "package": 79.61666666666666
+        "package": 79.88333333333334
       }
     },
     {
@@ -237,19 +237,19 @@
         "p90": 1
       },
       "powerGrowth": {
-        "p10": 3.5729600952948184,
-        "p50": 3.863385944014295,
-        "p90": 4.449895771292437
+        "p10": 2.349934318451087,
+        "p50": 2.549678735519429,
+        "p90": 2.7664014280385802
       },
       "discoveries": {
-        "p10": 16,
-        "p50": 17,
-        "p90": 17
+        "p10": 5,
+        "p50": 5,
+        "p90": 5
       },
       "meanPurchases": {
-        "slot": 0.31666666666666665,
-        "mastery": 52.88333333333333,
-        "bakery": 0,
+        "slot": 0,
+        "mastery": 20,
+        "bakery": 4.816666666666666,
         "package": 0
       }
     },
@@ -263,20 +263,20 @@
         "p90": 1
       },
       "powerGrowth": {
-        "p10": 3.2988385944014302,
-        "p50": 3.735259082787374,
-        "p90": 4.260199523525909
+        "p10": 1.8846783799880884,
+        "p50": 1.9809812388326387,
+        "p90": 2.2251322894952352
       },
       "discoveries": {
-        "p10": 17,
-        "p50": 17,
-        "p90": 17
+        "p10": 10,
+        "p50": 10,
+        "p90": 11
       },
       "meanPurchases": {
-        "slot": 0.6166666666666667,
-        "mastery": 47.03333333333333,
-        "bakery": 0.03333333333333333,
-        "package": 25.733333333333334
+        "slot": 3.1333333333333333,
+        "mastery": 32.516666666666666,
+        "bakery": 0.65,
+        "package": 24.716666666666665
       }
     },
     {
@@ -289,20 +289,20 @@
         "p90": 1
       },
       "powerGrowth": {
-        "p10": 1.2595294818344254,
-        "p50": 1.2595294818344254,
-        "p90": 1.2595294818344254
+        "p10": 1.0071471113758188,
+        "p50": 1.018463371054199,
+        "p90": 1.0869565217391306
       },
       "discoveries": {
-        "p10": 17,
-        "p50": 17,
-        "p90": 17
+        "p10": 11,
+        "p50": 11,
+        "p90": 12
       },
       "meanPurchases": {
         "slot": 0,
-        "mastery": 0.06666666666666667,
+        "mastery": 1.55,
         "bakery": 0,
-        "package": 79.93333333333334
+        "package": 78.36666666666666
       }
     },
     {
@@ -310,77 +310,77 @@
       "policy": "growth",
       "trials": 60,
       "firstPurchaseOrder": {
+        "p10": 2,
+        "p50": 2,
+        "p90": 2
+      },
+      "powerGrowth": {
+        "p10": 1.3404255319148937,
+        "p50": 1.3404255319148937,
+        "p90": 1.4543617021276596
+      },
+      "discoveries": {
+        "p10": 6,
+        "p50": 6,
+        "p90": 6
+      },
+      "meanPurchases": {
+        "slot": 0,
+        "mastery": 24,
+        "bakery": 0.4166666666666667,
+        "package": 0
+      }
+    },
+    {
+      "scenario": "late",
+      "policy": "mixed",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 2,
+        "p50": 2,
+        "p90": 2
+      },
+      "powerGrowth": {
+        "p10": 1.3411080991477662,
+        "p50": 1.3421807047994228,
+        "p90": 1.3442954443512687
+      },
+      "discoveries": {
+        "p10": 13,
+        "p50": 13,
+        "p90": 15
+      },
+      "meanPurchases": {
+        "slot": 1.5,
+        "mastery": 24.966666666666665,
+        "bakery": 0,
+        "package": 23.65
+      }
+    },
+    {
+      "scenario": "late",
+      "policy": "collector",
+      "trials": 60,
+      "firstPurchaseOrder": {
+        "p10": 2,
+        "p50": 2,
+        "p90": 2
+      },
+      "powerGrowth": {
         "p10": 1,
         "p50": 1,
         "p90": 1
       },
-      "powerGrowth": {
-        "p10": 1.4508844121145934,
-        "p50": 1.4669539949685046,
-        "p90": 1.4899662616767753
-      },
       "discoveries": {
-        "p10": 13,
-        "p50": 14,
+        "p10": 14,
+        "p50": 15,
         "p90": 16
       },
       "meanPurchases": {
         "slot": 0,
-        "mastery": 37.63333333333333,
-        "bakery": 0,
-        "package": 0
-      }
-    },
-    {
-      "scenario": "late",
-      "policy": "mixed",
-      "trials": 60,
-      "firstPurchaseOrder": {
-        "p10": 1,
-        "p50": 1,
-        "p90": 1
-      },
-      "powerGrowth": {
-        "p10": 1.376699104861829,
-        "p50": 1.3990873101000452,
-        "p90": 1.412504631706223
-      },
-      "discoveries": {
-        "p10": 17,
-        "p50": 17,
-        "p90": 17
-      },
-      "meanPurchases": {
-        "slot": 0,
-        "mastery": 32.11666666666667,
-        "bakery": 0,
-        "package": 25.666666666666668
-      }
-    },
-    {
-      "scenario": "late",
-      "policy": "collector",
-      "trials": 60,
-      "firstPurchaseOrder": {
-        "p10": 1,
-        "p50": 1,
-        "p90": 1
-      },
-      "powerGrowth": {
-        "p10": 1,
-        "p50": 1,
-        "p90": 1
-      },
-      "discoveries": {
-        "p10": 17,
-        "p50": 17,
-        "p90": 17
-      },
-      "meanPurchases": {
-        "slot": 0,
         "mastery": 0,
         "bakery": 0,
-        "package": 79.95
+        "package": 78.81666666666666
       }
     }
   ],
@@ -392,9 +392,9 @@
         0.21917218111488004,
         0.027396522639360005,
         0.0019025362944000003,
-        0.0000792723456,
-        0.0000019818086400000007,
-        2.7525120000000012e-8,
+        7.92723456e-05,
+        1.9818086400000007e-06,
+        2.7525120000000012e-08,
         1.6384000000000005e-10
       ]
     },
@@ -434,9 +434,9 @@
         0.08858055671807999,
         0.012837761843199997,
         0.0011163271167999997,
-        0.00005824315391999998,
-        0.0000016882073599999996,
-        2.0971519999999993e-8
+        5.824315391999998e-05,
+        1.6882073599999996e-06,
+        2.0971519999999993e-08
       ]
     },
     {
@@ -449,7 +449,7 @@
         0.028671999999999996,
         0.0043008000000000005,
         0.0003584,
-        0.0000128
+        1.28e-05
       ]
     },
     {
@@ -507,7 +507,7 @@
     {
       "name": "Divine",
       "foods": [
-        0.00001280000000000003,
+        1.280000000000003e-05,
         0.00035840000000000074,
         0.0043008000000000065,
         0.028672000000000034,
@@ -520,9 +520,9 @@
     {
       "name": "Fate",
       "foods": [
-        2.097152000000013e-8,
-        0.0000016882073600000087,
-        0.000058243153920000244,
+        2.097152000000013e-08,
+        1.6882073600000087e-06,
+        5.8243153920000244e-05,
         0.0011163271168000038,
         0.01283776184320003,
         0.08858055671808013,
@@ -534,7 +534,7 @@
   "assumptions": [
     "Normal orders only; no speed target",
     "Strongest menu chosen after rewards; one purchase decision per order",
-    "Only advertised minimum free packages; additional action packages omitted",
+    "Orders award coins only; all food draws require a purchased package",
     "No helper income, sales, fusion, refresh spending or optional modes",
     "Early starts with 250 coins; middle/late are independent snapshots"
   ],

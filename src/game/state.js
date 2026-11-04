@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
 if(!g.owned||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
@@ -24,6 +24,9 @@ function migrateFrame11(state){
   }
   state.frame11Version=1;
  }
+ for(const id of Object.keys(state.orderRuns))if(state.claimedOrders[id])delete state.orderRuns[id];
+ if(state.run&&state.claimedOrders[state.run.ticket.id])state.run=null;
+ state.board=state.board.filter(ticket=>!state.claimedOrders[ticket.id]);
  if(state.run){const existing=state.orderRuns[state.run.ticket.id];state.run=existing||state.run;state.orderRuns[state.run.ticket.id]=state.run;}
  for(const r of Object.values(state.orderRuns))if(!state.claimedOrders[r.ticket.id]&&!state.board.some(t=>t.id===r.ticket.id))state.board.unshift(r.ticket);
  const started=state.board.filter(t=>state.orderRuns[t.id]);
@@ -32,7 +35,36 @@ function migrateFrame11(state){
  // Retain unique recipes and consolidate older multiple-copy investments before assignment validation.
  consolidateOwnedFoods(state);
  const seen=new Set();state.activeMenu=state.activeMenu.filter(uid=>{const o=state.owned.find(x=>x.uid===uid);if(!o||seen.has(o.id))return false;seen.add(o.id);return true}).slice(0,state.menuSlots);
+ migrateCoinRewards(state);
  return state;
+}
+// Convert already-earned package promises to counter stock once. No reward RNG
+// runs during migration; guaranteed legacy food ranks stay attached to that stock.
+function migrateCoinRewards(state){
+ state.legacyPackageFoods=Array.from({length:8},(_,i)=>state.legacyPackageFoods?.[i]||[]);
+ const runs=Object.values(state.orderRuns);
+ for(const ticket of [...state.board,...runs.map(r=>r.ticket)]){
+  ticket.coinTier=ticketCoinTier(ticket);ticket.orderLabel=ticketOrderLabel(ticket);
+  ticket.orderIcon=ticket.orderIcon||COIN_ORDER_ICONS[ticket.coinTier];
+  if(!Number.isFinite(ticket.base))ticket.base=ticketBase(ticket.coinTier);
+  delete ticket.packages;
+ }
+ for(const r of runs){
+  if(r.coinRewardsVersion!==1){
+   if(!state.claimedOrders[r.ticket.id])for(const chest of r.chests||[]){
+    const rank=clamp(typeof chest==='number'?chest:chest.rarity||0,0,7);state.packages[rank]++;
+    if(Number.isInteger(chest.legacyFoodRarity))state.legacyPackageFoods[rank].push(chest.legacyFoodRarity);
+   }
+   // Older saves contain a fixed budget, but no original boost snapshot.
+   // Preserve the promised budget (and completed pool) without recalculation.
+   r.baseCoins=r.ticket.base;r.bakersBoost=(r.phase==='claim'?r.pool:r.budget)/r.baseCoins;
+   if(!Number.isFinite(r.bakersBoost))r.bakersBoost=1;
+   r.budget=Number.isFinite(r.budget)?r.budget:Math.round(r.baseCoins*r.bakersBoost);
+   r.savedReward=true;r.coinRewardsVersion=1;
+  }
+  delete r.chests;delete r.luck;delete r.guaranteedPackages;
+ }
+ state.coinRewardsVersion=1;
 }
 if(previousSave&&g.uniqueFoodsVersion!==1){try{if(!localStorage.getItem('panaderyaQuestV2BeforeUniqueFoods'))localStorage.setItem('panaderyaQuestV2BeforeUniqueFoods',previousSave)}catch(_){} }
 migrateFrame11(g);
@@ -45,7 +77,7 @@ g.seenUnlocks=(g.seenUnlocks||[]).filter(key=>key!=='kitchen');
 if(typeof g.guideGraduated!=='boolean')g.guideGraduated=g.completed>=3;
 function graduateGuideAfterOrder(){if(g.completed>=3&&!g.guideGraduated){g.guideGraduated=true;g.tutorialArrows=false;}}
 let modal=null;let music=null;let musicTimer=null;let animationTimers=[];let modalReturnFocus=null;
-const F=id=>FOOD.find(x=>x.id===id);const infoMode=()=>MODE.find(x=>x.id===g.mode)||MODE[0];
+const F=id=>FOOD.find(x=>x.id===id);
 const rarityLabel=r=>`★${r+1} · ${RARITIES[r]}`;
 const rarityTag=r=>`<span class="tag rarity-r${r} ${RARITIES[r].toLowerCase().replaceAll(' ','-')}">${rarityLabel(r)}</span>`;
 const foodValue=individualValue;
@@ -55,8 +87,9 @@ const bakeryValue=()=>Math.max(1,foodSum())*decorBonus();
 const tierLevel=()=>g.completed<2?0:g.completed<4?1:g.completed<7?2:g.completed<11?3:g.completed<16?4:5;
 const masterStage=()=>Math.min(5,Math.floor(g.mastery/4));
 const highestRarity=()=>7;
-function ticketRarity(){return drawRank(ticketProbabilities(g.mastery))}
-function makeTicket(){const rarity=ticketRarity(),dims=TICKET_DIMS[rarity];const aMin=10**(dims[0]-1),aMax=10**dims[0]-1,bMin=10**(dims[1]-1),bMax=10**dims[1]-1;const a=aMin+Math.floor(Math.random()*(aMax-aMin+1)),b=bMin+Math.floor(Math.random()*(bMax-bMin+1));const id=++g.ticketSeq;return {id,rarity,a,b,base:ticketBase(rarity),packages:1+Math.floor(rarity/3)}}
+function ticketLuckMastery(){return Math.max(g.mastery||0,(g.permanentLuck||0)*4)}
+function ticketRarity(){return drawRank(ticketProbabilities(ticketLuckMastery()))}
+function makeTicket(){const rarity=ticketRarity(),dims=TICKET_DIMS[rarity];const aMin=10**(dims[0]-1),aMax=10**dims[0]-1,bMin=10**(dims[1]-1),bMax=10**dims[1]-1;const a=aMin+Math.floor(Math.random()*(aMax-aMin+1)),b=bMin+Math.floor(Math.random()*(bMax-bMin+1));const id=++g.ticketSeq;return {id,rarity,coinTier:rarity,orderLabel:pick(COIN_ORDER_LABELS[rarity]),orderIcon:COIN_ORDER_ICONS[rarity],a,b,base:ticketBase(rarity)}}
 function refillBoard(){while(g.board.length<ORDER_LIMIT)g.board.push(makeTicket())}
 function reconcileAutoEquip(){if((!g.run||g.run.paused)&&['final','base'].includes(g.autoEquip)){const next=bestMenu(g.owned,g.menuSlots,g.autoEquip);if(JSON.stringify(next)!==JSON.stringify(g.activeMenu))g.activeMenu=next}}
 function orderNow(){g.orderClock=Math.max(g.orderClock||0,Date.now());return g.orderClock}
@@ -77,7 +110,10 @@ function refreshOrders(paid=false){
 function refreshSkipCost(){return Math.max(1,Math.round(economyUnit()*.5))}
 function requestRefreshSkip(){const cost=refreshSkipCost();showModal('Refresh untouched orders?',`<p>Saved orders and their rewards stay exactly where they are.</p><button class="primary" ${g.coins<cost?'disabled':''} onclick="if(refreshOrders(true))closeModal()">Skip · 🪙 ${fmt(cost)}</button>`)}
 function updateOrderRefresh(){const button=$('refreshOrders');if(!button)return;const remaining=refreshRemaining(),seconds=Math.ceil(remaining/1000);button.disabled=remaining>0;button.textContent=remaining?`Refresh in ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`:'Refresh Orders';}
-function save(){reconcileAutoEquip();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
+function save(){
+ // Refuse to overwrite a newer claim receipt from another tab with stale progress.
+ try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}}catch(_){}
+ reconcileAutoEquip();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
 let toastTimer=null;
 function clearNotifications(){clearTimeout(toastTimer);const root=$('toasts');if(root)root.replaceChildren()}
 function toast(text){

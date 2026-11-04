@@ -52,11 +52,16 @@ function binomialRanks(p){
 }
 // Increasing p couples seven Bernoulli draws: every upper tail is nondecreasing.
 function ticketProbabilities(mastery){return binomialRanks(.04+.68*(1-Math.exp(-Math.max(0,mastery||0)/80)))}
-function packageProbabilities(ticketRank){return binomialRanks(.08+.84*clamp(ticketRank,0,7)/7)}
+function packageProbabilities(packageRank){return binomialRanks(.08+.84*clamp(packageRank,0,7)/7)}
 function drawRank(probabilities,random=Math.random()){
  let cumulative=0;for(let i=0;i<probabilities.length;i++){cumulative+=probabilities[i];if(random<cumulative)return i}return probabilities.length-1;
 }
-function ticketBase(rank){const d=TICKET_DIMS[rank];return Math.round((70+30*d[0]*d[1])*(1+rank*.6))}
+const COIN_TIERS=['Coin Stack','Coin Jar','Coin Bag','Coin Bucket','Coin Cart','Treasure Chest','Golden Vault','Divine Treasury'];
+const COIN_ORDER_LABELS=[['Snack Order','Breakfast Order'],['Family Order','Picnic Order'],['School Order','Party Order'],['Cafe Order','Market Order'],['Hotel Order','Festival Order'],['Town Order','Banquet Order'],['Palace Order','Royal Order'],['Grand Feast','Celebration Order']];
+const COIN_ORDER_ICONS=['🏠','🧺','🏫','☕','🏨','🏘️','🏰','🌟'];
+function ticketCoinTier(ticket){return clamp(Number.isInteger(ticket.coinTier)?ticket.coinTier:ticket.rarity||0,0,7)}
+function ticketOrderLabel(ticket){return ticket.orderLabel||COIN_ORDER_LABELS[ticketCoinTier(ticket)][Math.abs(Number(ticket.id)||0)%2]}
+function ticketBase(rank){return 130*2**clamp(rank,0,7)}
 function expectedTicketBase(mastery){return ticketProbabilities(mastery).reduce((sum,p,i)=>sum+p*ticketBase(i),0)}
 function tierRecipe(a,b){
  if(!Number.isInteger(a)||!Number.isInteger(b)||a<1||b<1||a>=5||b>=5)return null;

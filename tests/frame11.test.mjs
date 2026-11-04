@@ -98,7 +98,7 @@ test('package types are distinct from food rarities; displayed ticket odds match
  h.run('Math.random=()=>0;low=drawFood(7);Math.random=()=>.999999999;high=drawFood(7);g.mastery=80;html=renderTicketOdds()');
  assert.equal(h.run('low.rarity'),0);assert.equal(h.run('high.rarity'),7);
  const probabilities=h.json('ticketProbabilities(80)');assert.ok(Math.abs(probabilities.reduce((a,b)=>a+b)-1)<1e-12);
- assert.match(h.run('html'),/Ticket Package Odds/);assert.match(h.run('html'),/Fate/);assert.doesNotMatch(h.run('html'),/Crown Jewel/);
+ assert.match(h.run('html'),/Coin Reward Tier Odds/);assert.match(h.run('html'),/Divine Treasury/);assert.doesNotMatch(h.run('html'),/Crown Jewel/);
 });
 
 test('coin package purchases save stock, charge exactly once, reject stale pricing and reveal only next locked type',()=>{
@@ -124,12 +124,12 @@ test('completed orders pay once across stale attempts, reload, switching and mis
  const reload=progressionHarness(h.json('g'));reload.run(`startTicket(${h.run('id')})`);assert.equal(reload.run('g.run'),null);
 });
 
-test('free packages can be saved instead of opened and persist without repeating the claim',()=>{
+test('coin-only claims never add packages or discover foods, even if obsolete fields are present',()=>{
  const h=progressionHarness();h.run(`refillBoard();startTicket(g.board[0].id);g.run.phase='claim';g.run.pool=100;g.run.chests=[{rarity:7},{rarity:7}];
- before=g.owned.length;old=g.coins;ok=prizeItems(false);again=prizeItems(false)`);
+ before=g.owned.length;old=g.coins;ok=prizeItems();again=prizeItems()`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('g.owned.length'),h.run('before'));
- assert.equal(h.run('g.packages[7]'),2);assert.equal(h.run('g.coins'),h.run('old+100'));
- assert.equal(progressionHarness(h.json('g')).run('g.packages[7]'),2);
+ assert.equal(h.run('g.packages[7]'),0);assert.equal(h.run('g.coins'),h.run('old+100'));
+ assert.equal(progressionHarness(h.json('g')).run('g.packages[7]'),0);
 });
 
 test('failed claim and package writes retain their original coins, foods, stock and claim eligibility',()=>{
@@ -144,8 +144,8 @@ test('failed claim and package writes retain their original coins, foods, stock 
 test('legacy pending packages retain their earned food rarity rather than being downgraded by new Luck odds',()=>{
  const old=progressionHarness().json('g');delete old.frame11Version;
  old.run={ticket:{id:123,rarity:7},phase:'claim',chests:[{rarity:7}],pool:500,correct:1,mistakes:0,mode:'normal'};
- const h=progressionHarness(old);h.run('Math.random=()=>0;cannotDefer=prizeItems(false);ok=prizeItems()');
- assert.equal(h.run('cannotDefer'),false);assert.equal(h.run('ok'),true);
+ const h=progressionHarness(old);assert.equal(h.run('g.packages[7]'),1);h.run('Math.random=()=>0;ok=prizeItems();unboxPackages(7,1,true)');
+ assert.equal(h.run('ok'),true);
  assert.equal(h.run("g.owned.at(-1).id"),'ube-ensaymada');
 });
 

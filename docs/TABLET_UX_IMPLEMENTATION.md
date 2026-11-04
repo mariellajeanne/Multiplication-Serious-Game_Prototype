@@ -1,5 +1,7 @@
 # Tablet UX, unique foods and Unity-ready prototype
 
+**Coin-only orders (2026-11-04):** [Order Ticket tiers and rewards](ORDER_COIN_TIERS.md) supersedes package drops, temporary Package Luck and challenge coin modifiers below. New orders pay base coins times saved Baker's Boost; packages come from the Package Counter. Preserve migration of already-earned packages and fixed legacy budgets. Verify with `python tests/browser-order-coins.py` and the full worksheet runner.
+
 **Frame 12 selection (2026-11-04):** [Current floating controls](FOOD_SELECTION_IMPLEMENTATION.md) replace the food-details sheet without resizing the grid; single and multi-selection use exclusive compact popup states.
 
 **Viewport responsiveness (2026-11-04):** [Current viewport layout](VIEWPORT_RESPONSIVENESS.md) supersedes earlier fixed panel heights, layout caps and header/toolbar breakpoints.

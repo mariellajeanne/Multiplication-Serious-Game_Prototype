@@ -14,14 +14,14 @@ function ui(){
    closeModal=()=>{};Math.random=()=>{throw Error('Presentation must not consume reward RNG')}`,c);
  return c;
 }
-test('ticket preview uses actual math, guaranteed coins and named package types without consuming RNG',()=>{
+test('ticket preview uses saved math and coin tiers without consuming RNG',()=>{
  const c=ui();vm.runInContext(`g.board=[{id:8,a:79,b:18,rarity:1,base:304}];result=renderTickets()`,c);
- assert.match(c.result,/79 \u00d7 18/);assert.match(c.result,/365 base coins/);assert.match(c.result,/1\+ FREE/);assert.match(c.result,/Lucky/);assert.match(c.result,/Ticket Luck/);
+ assert.match(c.result,/79 \u00d7 18/);assert.match(c.result,/COIN JAR/);assert.match(c.result,/PROGRESS/);assert.match(c.result,/Permanent Luck/);assert.doesNotMatch(c.result,/FREE|Luck type/);
 });
 
 test('floating food preview shows actual contribution, mastery availability and price without ownership changes',()=>{
  const c=ui();vm.runInContext(`g.recipeCeilings.pandesal=2;openFoodItem(1);before=JSON.stringify(g.owned);result=renderFoodPanel();cost=foodLevelPrice(g.owned[0]);assignFood(1);after=JSON.stringify(g.owned);active=g.activeMenu.length`,c);
- assert.match(c.result,/1\.20/);assert.match(c.result,/0\.30/);assert.match(c.result,/Available \+2/);assert.equal(c.cost,255);assert.equal(c.before,c.after);assert.equal(c.active,1);
+ assert.match(c.result,/1\.20/);assert.match(c.result,/0\.30/);assert.match(c.result,/Available \+2/);assert.equal(c.cost,246);assert.equal(c.before,c.after);assert.equal(c.active,1);
 });
 
 test('main navigation keeps menu, Food Index and packages accessible without exposing future features',()=>{
@@ -104,14 +104,14 @@ test('inventory batch mutations remain blocked during a live worksheet',()=>{
  assert.equal(c.before,c.after);assert.equal(c.add,false);assert.equal(c.remove,false);assert.equal(c.sale,false);
 });
 
-test('resolved packages consolidate duplicate discoveries and report actual Mastery capacity and Ticket Luck',()=>{
- const c=ui();vm.runInContext(`Math.random=()=>0;g.mastery=3;g.owned.push({uid:2,id:'monay',level:1,fusion:0,spent:0});
-   g.run={ticket:{id:31,a:79,b:18},phase:'claim',chests:[{rarity:0},{rarity:1},{rarity:0}],pool:3004,correct:6,mistakes:0,mode:'normal'};
+test('resolved orders show the saved coin tier, base, boost and total without food rewards',()=>{
+ const c=ui();vm.runInContext(`g.mastery=3;
+   g.run={ticket:{id:31,a:79,b:18,coinTier:2,base:520},baseCoins:520,bakersBoost:2,phase:'claim',pool:1040,correct:6,mistakes:0,mode:'normal'};
    before=g.coins;prizeItems();popup=result;prizeItems();after=g.coins;`,c);
- assert.equal(c.popup.title,'Order Ticket Resolved!');assert.match(c.popup.html,/Mastery unlocked!/);assert.match(c.popup.html,/\+3 Recipe Mastery upgrades unlocked/);
- assert.equal((c.popup.html.match(/>NEW!</g)||[]).length,0);
- assert.match(c.popup.html,/\+3,004/);assert.match(c.popup.html,/resolved-luck.*?<strong>\+1<\/strong>/);
- assert.match(c.popup.html,/Back to Bakery/);assert.equal(c.after,c.before+3004);
+ assert.equal(c.popup.title,'Order complete!');assert.match(c.popup.html,/Coin Bag/);
+ assert.match(c.popup.html,/Base coins/);assert.match(c.popup.html,/520/);assert.match(c.popup.html,/Baker's Boost/);
+ assert.match(c.popup.html,/Total coins earned/);assert.match(c.popup.html,/1,040/);
+ assert.doesNotMatch(c.popup.html,/Package|Recipe Mastery/);assert.equal(c.after,c.before+1040);
 });
 
 test('unequipping preserves food copies, upgrades and discovery',()=>{
@@ -158,7 +158,7 @@ test('reward arrival updates display even without animation promises and never c
  vm.runInContext(readFileSync(resolve(root,'src/ui/reward-feedback.js'),'utf8'),c);
  vm.runInContext(`animateReward({attemptId:'a',coins:12,luck:1,pool:12,totalLuck:1,chests:[],index:0})`,c);
  assert.equal(nodes.get('pendingCoins').textContent,'');
- for(let i=0;i<4;i++){
+ while(timers.size){
    const [id,fn]=timers.entries().next().value;timers.delete(id);fn();
  }
  assert.equal(nodes.get('pendingCoins').textContent,'🪙 12');
@@ -214,7 +214,7 @@ test('a paused compositor cannot leave worksheet placement waiting forever',asyn
  assert.equal(cleared,true,'normal completion cancels the fallback');
 });
 
-test('separate coin and luck paths stay clear of the mathematical surface at wide and narrow widths',()=>{
+test('coin reward flights stay clear of the mathematical surface at wide and narrow widths',()=>{
  for(const width of [1280,390]){
   const timers=new Map(),created=[];let sequence=0;
   const rect=(left,top,w,h)=>({left,top,width:w,height:h,right:left+w,bottom:top+h});
@@ -232,14 +232,14 @@ test('separate coin and luck paths stay clear of the mathematical surface at wid
   vm.runInContext(`const $=id=>document.getElementById(id),fmt=String;const RARITIES=['Common'];const g={run:{worksheetRewards:{attemptId:'a'}}}`,c);
   vm.runInContext(readFileSync(resolve(root,'src/ui/reward-feedback.js'),'utf8'),c);
   vm.runInContext(`animateReward({attemptId:'a',coins:50,luck:1,point:{x:.5,y:.5}})`,c);
-  assert.equal(created.length,2);assert.match(created[0].textContent,/50/);assert.match(created[1].textContent,/1/);
+  assert.equal(created.length,1);assert.match(created[0].textContent,/50/);
   const area=vm.runInContext(`rewardProtectedArea($('worksheetFrame'))`,c);
   const overlaps=(x,y,w,h)=>x<area.right&&x+w>area.left&&y<area.bottom&&y+h>area.top;
   for(const el of created){
     const x=parseFloat(el.style.left),y=parseFloat(el.style.top);
     assert.equal(overlaps(x,y,78,28),false,'recognition pause must not cover math');
   }
-  for(let i=0;i<2;i++){const [id,fn]=timers.entries().next().value;timers.delete(id);fn();}
+  for(let i=0;i<created.length;i++){const [id,fn]=timers.entries().next().value;timers.delete(id);fn();}
   for(const el of created){
     const keyframes=el.animations.at(-1).frames;
     const parse=k=>{const t=/translate\(([-\d.]+)(?:px)?,\s*([-\d.]+)(?:px)?\)/.exec(k.transform||'');return {x:t?Number(t[1]):0,y:t?Number(t[2]):0,s:Number(/scale\(([\d.]+)\)/.exec(k.transform||'')?.[1]||1)}};

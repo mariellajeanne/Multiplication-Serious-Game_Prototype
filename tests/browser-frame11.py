@@ -332,7 +332,7 @@ def check_browser(pw, engine):
         page.screenshot(path=str(SHOTS / f'{engine}-add-rows.png'),full_page=True)
         tap('#addRows');page.wait_for_function("g.run?.phase==='claim'")
         assert page.evaluate('g.run.ticket.a*g.run.ticket.b')==144
-        page.locator('.save-order-packages').tap()
+        page.locator('#collectRewards').tap()
         assert page.evaluate('g.claimedOrders[9003]!==undefined')
         assert page.evaluate('!!g.orderRuns[9002]')
         assert errors == [], errors

@@ -1,5 +1,7 @@
 # Panaderya Quest — agent instructions
 
+**Coin-only orders (2026-11-04):** [Order Ticket tiers and rewards](docs/ORDER_COIN_TIERS.md) supersedes package drops, temporary Package Luck and challenge coin modifiers below. New orders pay base coins times saved Baker's Boost; packages come from the Package Counter. Preserve migration of already-earned packages and fixed legacy budgets. Verify with `python tests/browser-order-coins.py` and the full worksheet runner.
+
 **Frame 12 food selection (2026-11-04):** [Floating popup implementation](docs/FOOD_SELECTION_IMPLEMENTATION.md) replaces sheet references: 75%-width single/multi alternatives overlay the grid without resizing it. Verify with `python tests/browser-food-selection.py` and the browser zoom runner.
 
 **Bakery Power wireframe (2026-11-04):** [Current panel](docs/BAKERY_POWER_PANEL.md) supersedes carousel references. The latest owner correction replaces the 40vh cap: the full-height sidebar uses 60% Bakery Power / 40% Packages, with a current-bakery image and fixed action footers; verify with `python tests/browser-bakery-power.py`.

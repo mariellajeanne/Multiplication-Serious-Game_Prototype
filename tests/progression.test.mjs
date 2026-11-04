@@ -74,7 +74,7 @@ test('Equip Best chooses unique foods deterministically, modes differ and Auto u
 });
 
 test('refresh persists five tickets and deadline, blocks repeat, reload and rollback, preserves active/claim objects',()=>{
- const h=progressionHarness();h.run(`Date.now=()=>1000000;g.run={phase:'engine',ticket:{id:55}};active=g.run;ok=refreshOrders();board=JSON.stringify(g.board);again=refreshOrders();same=g.run===active;`);
+ const h=progressionHarness();h.run(`Date.now=()=>1000000;g.run={phase:'engine',ticket:{id:55,coinTier:0,rarity:0,orderLabel:'Snack Order',orderIcon:'home',base:130}};active=g.run;ok=refreshOrders();board=JSON.stringify(g.board);again=refreshOrders();same=g.run===active;`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('same'),true);assert.equal(h.run('g.board.length'),5);
  const saved=h.json('g'),r=progressionHarness(saved);r.run(`Date.now=()=>999999;ok=refreshOrders()`);assert.equal(r.run('ok'),false);assert.equal(r.run('JSON.stringify(g.board)'),h.run('board'));
  r.run(`Date.now=()=>1180000;g.run.phase='claim';claim=g.run;ok=refreshOrders();same=g.run===claim`);assert.equal(r.run('ok'),true);assert.equal(r.run('same'),true);
@@ -130,9 +130,9 @@ test('ingredient fusion updates the unique recipe contribution and retains its i
 });
 
 test('exit and resume retain ticket identity, board, ledger, rewards and attempt across save',()=>{
- const h=progressionHarness();h.run(`refillBoard();id=g.board[0].id;board=JSON.stringify(g.board);startTicket(id);g.run.pool=42;g.run.index=1;g.run.chests=[{rarity:2}];attempt=g.run.worksheetRewards.attemptId;active=g.run;abandonTicket();saved=JSON.stringify(g.run)`);
+ const h=progressionHarness();h.run(`refillBoard();id=g.board[0].id;board=JSON.stringify(g.board);startTicket(id);g.run.pool=42;g.run.index=1;attempt=g.run.worksheetRewards.attemptId;active=g.run;abandonTicket();saved=JSON.stringify(g.run)`);
  assert.equal(h.run('g.run===active'),true);assert.equal(h.run('g.run.paused'),true);assert.equal(h.run('JSON.stringify(g.board)'),h.run('board'));
  const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.equal(r.run('JSON.stringify(g.run)'),h.run('saved'));
  h.run('startTicket(id)');assert.equal(h.run('g.run===active'),true);assert.equal(h.run('g.run.paused'),false);assert.equal(h.run('g.run.pool'),42);assert.equal(h.run('g.run.index'),1);assert.equal(h.run('g.run.worksheetRewards.attemptId'),h.run('attempt'));assert.equal(h.run('JSON.stringify(g.board)'),h.run('board'));
- h.run("g.run.phase='claim';g.run.rewards=[];g.run.correct=0;g.run.mistakes=0;g.run.chests=[];prizeItems();refillBoard()");assert.equal(h.run('g.board.some(t=>t.id===id)'),false);assert.equal(h.run('g.board.length'),5);
+ h.run("g.run.phase='claim';g.run.rewards=[];g.run.correct=0;g.run.mistakes=0;prizeItems();refillBoard()");assert.equal(h.run('g.board.some(t=>t.id===id)'),false);assert.equal(h.run('g.board.length'),5);
 });

@@ -10,14 +10,9 @@ function toggleSfx(){g.sound=!g.sound;save();sendEngine('sound',{enabled:g.sound
 
 function renderWorksheet(){
  const r=g.run,food=orderFood(r.ticket),claim=r.phase==='claim',failed=r.phase==='failed';
- return `<main class="worksheet-stage ${claim?'order-complete':''}"><div class="worksheet-toolbar"><div class="worksheet-controls"><button id="arrowToggle" aria-pressed="${g.tutorialArrows}" class="secondary" onclick="toggleArrows()">${worksheetGuideLabel()}</button><button id="sfxToggle" aria-pressed="${g.sound}" class="secondary" onclick="toggleSfx()">${worksheetSoundLabel()}</button></div><button class="worksheet-exit" onclick="abandonTicket()">${claim?'Back to orders':'Save & Exit'}</button></div><div class="worksheet-order">${foodArt(food.id)}<div><h2>${food.name}</h2><div class="order-equation">${r.ticket.a} × ${r.ticket.b} ${trayArt()}</div><small>${r.ticket.b} trays · ${r.ticket.a} each</small></div></div>${renderChestLuck(r)}<div class="reward-shelf" aria-hidden="true"></div>${failed?`<div class="claim-screen"><h2>Let's try again</h2><div class="btnrow"><button class="secondary" onclick="retryRun()" ${r.retriesLeft<=0?'disabled':''}>Retry (${r.retriesLeft})</button><button class="primary" onclick="retryNormal()">Play Normal</button></div></div>`:claim?`<section class="claim-screen" role="region" aria-label="Completed order" aria-live="polite"><div class="claim-art">📦</div><h2>Order ready!</h2><p><strong>${fmt(r.ticket.a*r.ticket.b)} ${food.name}</strong> for your customer</p><div class="claim-coins">🪙 ${fmt(r.pool)}</div><p>${r.chests.length} package${r.chests.length===1?'':'s'} to open</p><button id="collectRewards" class="primary" onclick="prizeItems()">Collect & open packages</button><button class="secondary save-order-packages" ${r.chests.some(c=>Number.isInteger(c.legacyFoodRarity))?'disabled title="Open these legacy rewards to retain their guaranteed food rarity"':''} onclick="prizeItems(false)">Collect & save packages</button><small class="claim-saved">Your prize is saved until you collect it.</small></section>`:`<iframe id="worksheetFrame" class="worksheet-frame" title="Work out your customer's order" sandbox="allow-scripts allow-same-origin"></iframe><span id="bridgeStatus" hidden></span>${r.mode==='lookup'?`<details class="lookup-aid"><summary>🔢 Multiplication facts</summary><div class="lookup">${Array.from({length:81},(_,i)=>`<div>${Math.floor(i/9)+1}×${i%9+1}=${(Math.floor(i/9)+1)*(i%9+1)}</div>`).join('')}</div></details>`:''}`}${renderPrizeDock(r)}</main>`;
+ return `<main class="worksheet-stage ${claim?'order-complete':''}"><div class="worksheet-toolbar"><div class="worksheet-controls"><button id="arrowToggle" aria-pressed="${g.tutorialArrows}" class="secondary" onclick="toggleArrows()">${worksheetGuideLabel()}</button><button id="sfxToggle" aria-pressed="${g.sound}" class="secondary" onclick="toggleSfx()">${worksheetSoundLabel()}</button></div><button class="worksheet-exit" onclick="abandonTicket()">${claim?'Back to orders':'Save & Exit'}</button></div><div class="worksheet-order">${foodArt(food.id)}<div><h2>${food.name}</h2><div class="order-equation">${r.ticket.a} × ${r.ticket.b} ${trayArt()}</div><small>${r.ticket.b} trays · ${r.ticket.a} each</small></div></div><div class="reward-shelf" aria-hidden="true"></div>${failed?`<div class="claim-screen"><h2>Let's try again</h2><div class="btnrow"><button class="secondary" onclick="retryRun()" ${r.retriesLeft<=0?'disabled':''}>Retry (${r.retriesLeft})</button><button class="primary" onclick="retryNormal()">Play Normal</button></div></div>`:claim?`<section class="claim-screen" role="region" aria-label="Completed order" aria-live="polite"><h2>Order ready!</h2>${coinRewardMarkup(r)}<button id="collectRewards" class="primary" onclick="prizeItems()">Collect coins</button><small class="claim-saved">Your coins are saved until you collect them.</small></section>`:`<iframe id="worksheetFrame" class="worksheet-frame" title="Work out your customer's order" sandbox="allow-scripts allow-same-origin"></iframe><span id="bridgeStatus" hidden></span>${r.mode==='lookup'?`<details class="lookup-aid"><summary>🔢 Multiplication facts</summary><div class="lookup">${Array.from({length:81},(_,i)=>`<div>${Math.floor(i/9)+1}×${i%9+1}=${(Math.floor(i/9)+1)*(i%9+1)}</div>`).join('')}</div></details>`:''}`}${renderPrizeDock(r)}</main>`;
 }
-function renderChestLuck(r){
- const row=r.steps[Math.min(r.index,r.steps.length-1)]?.row||0,chance=Math.round(clamp(.12+r.luck*.013+row*.03,.06,.83)*100);
- return `<div class="chest-luck-top" aria-label="Temporary Package Luck"><span class="package-luck-icon">${packageArt()}</span><div class="package-luck-copy"><div><span>Package Luck</span><strong id="pendingLuck">+${r.luck}</strong><div class="progress"><div id="chestChanceBar" class="bar" style="width:${chance}%"></div></div></div><small id="chestChance">This order · ${chance}% next pair · ${r.guaranteedPackages||1}+ ${PACKAGE_TYPES[r.ticket.rarity]} guaranteed</small></div></div>`;
-}
-function renderPrizeDock(r){return `<div class="worksheet-prize" id="prizejar" aria-label="Order prize pool"><div class="pool-totals"><div class="pool-coins"><small>YOUR ORDER PRIZE</small><strong id="pendingCoins">🪙 ${fmt(r.pool)}</strong></div><div class="pool-chests"><span aria-hidden="true">${packageArt()}</span><div><strong id="pendingChests">${r.chests.length}</strong><small>packages</small></div><div class="chest-tokens" id="chestTokens">${renderChestTokens(r.chests)}</div></div></div></div>`}
-function renderChestTokens(chests){return chests.slice(-4).map(c=>`<span class="chest-token package-type p${c.rarity}" title="${PACKAGE_TYPES[c.rarity]} package">${packageArt()}</span>`).join('')}
+function renderPrizeDock(r){return `<div class="worksheet-prize" id="prizejar" aria-label="Order coin pool"><div class="pool-totals"><div class="pool-coins"><small>YOUR ORDER COINS</small><strong id="pendingCoins">\u{1fa99} ${fmt(r.pool)}</strong></div><span class="pool-coin-tier">${COIN_TIERS[ticketCoinTier(r.ticket)]}</span></div></div>`}
 function fitWorksheet(){
  if(!g.run||g.run.phase!=='engine'||typeof document.querySelector!=='function'||typeof innerWidth==='undefined')return;
  const stage=document.querySelector('.worksheet-stage');if(!stage)return;
@@ -29,7 +24,7 @@ function fitWorksheet(){
  const margins=el=>{const st=getComputedStyle(el);return parseFloat(st.marginTop)+parseFloat(st.marginBottom)};
  const header=['.worksheet-toolbar','.worksheet-order'].map(selector=>stage.querySelector(selector)?.getBoundingClientRect()).filter(Boolean);
  const headerHeight=header.length?Math.max(...header.map(r=>r.bottom))-Math.min(...header.map(r=>r.top)):0;
- const chrome=headerHeight+['.chest-luck-top','.reward-shelf','#prizejar'].reduce((height,selector)=>{
+ const chrome=headerHeight+['.reward-shelf','#prizejar'].reduce((height,selector)=>{
   const el=stage.querySelector(selector);return height+(el?el.getBoundingClientRect().height+margins(el):0);
  },0);
  const style=getComputedStyle(stage),padding=parseFloat(style.paddingTop)+parseFloat(style.paddingBottom)+4;
@@ -58,17 +53,10 @@ function applyWorksheetActions(r,actions){
   ledger.actions[id]=true;
   r.index=index;
   if(action.kind==='combo'){
-   const last=index===r.steps.length-1;
-   const chance=clamp(.12+r.luck*.013+step.row*.03,.06,.83);
-   if(Math.random()<chance||(last&&!r.chests.length)){
-    const grade=rollChestRarity(r.ticket.rarity);r.chests.push({rarity:grade});
-    r.luck=Math.round(r.luck*.3);
-    if(typeof animateChestReward==='function')animateChestReward(grade,action.point);
-   }
    r.bridgeDone=Math.max(r.bridgeDone||0,index+1);r.correct+=2;
   }
   const carry=action.kind==='carry-up'||action.kind==='carry-down';
-  earnCoin(carry||action.kind==='combo'?1.2:.65,carry?2:1,{point:action.point});
+  earnCoin(carry||action.kind==='combo'?1.2:.65,{point:action.point});
  }
 }
 function updateWorksheetPool(){
@@ -77,8 +65,7 @@ function updateWorksheetPool(){
   if(!rewardFlightsPending())paintRewardDock(r);
   return;
  }
- const pc=$('pendingCoins'),pl=$('pendingLuck'),ph=$('pendingChests');
- if(pc)pc.textContent='🪙 '+fmt(r.pool);if(pl)pl.textContent='+'+r.luck;if(ph)ph.textContent=String(r.chests.length);
+ const pc=$('pendingCoins');if(pc)pc.textContent='\u{1fa99} '+fmt(r.pool);
  const st=$('bridgeStatus');if(st)st.textContent=g.tutorialArrows?'Use the animated arrow for the next action.':'Tutorial arrows are off. Keep solving!';
 }
 function handleWorksheetMessage(ev){
@@ -124,8 +111,7 @@ function handleWorksheetMessage(ev){
   if(ledger.actions[id])return;
   ledger.actions[id]=true;
   sendEngine('completion-ack',{attemptId:ledger.attemptId});
-  if(!r.chests.length)r.chests.push({rarity:rollChestRarity(r.ticket.rarity)});
-  r.correct+=1;earnCoin(.65,1);finishSum();return;
+  r.correct+=1;earnCoin(.65);finishSum();return;
  }
  updateWorksheetPool();save();
 }

@@ -1,5 +1,5 @@
 {
- "modelVersion":3,"seed":20261104,"trials":60,"orders":80,"secondsPerOrder":[60,90,120],
+ "modelVersion":4,"seed":20261104,"trials":60,"orders":80,"secondsPerOrder":[60,90,120],
  "policies":["growth","mixed","collector"],
  "scenarios":[
   {"name":"early","completed":0,"mastery":0,"recipeMastery":0,"tier":1,"bakery":1,"slots":1,"foods":["pandesal"]},

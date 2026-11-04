@@ -6,14 +6,7 @@ function animateRewardElement(node,frames,options){try{return node.animate?.(fra
 function rewardFlightsPending(){return rewardPresentation.pending>0}
 function paintRewardDock(r){
  if(!r)return;
- const pc=$('pendingCoins'),pl=$('pendingLuck'),ph=$('pendingChests');
- if(pc)pc.textContent='🪙 '+fmt(r.pool);if(pl)pl.textContent='+'+r.luck;if(ph)ph.textContent=String(r.chests.length);
- const tokens=$('chestTokens');if(tokens)tokens.innerHTML=renderChestTokens(r.chests);
- const row=r.steps[Math.min(r.index,r.steps.length-1)]?.row||0;
- const chance=Math.round(clamp(.12+r.luck*.013+row*.03,.06,.83)*100);
- const bar=$('chestChanceBar'),label=$('chestChance');
- if(bar)bar.style.width=chance+'%';
- if(label)label.textContent=r.phase==='claim'?'Ready to collect!':`This order · ${chance}% next pair · ${r.guaranteedPackages||1}+ ${PACKAGE_TYPES[r.ticket.rarity]} guaranteed`;
+ const pc=$('pendingCoins');if(pc)pc.textContent='\u{1fa99} '+fmt(r.pool);
 }
 function bumpPrizeDock(){const dock=$('prizejar');if(!dock)return;dock.classList.remove('dock-bump');void dock.offsetWidth;dock.classList.add('dock-bump')}
 function syncRewardPresentation(){
@@ -32,31 +25,28 @@ function animateReward(data){
  const r=g.run,dock=$('prizejar');if(!r||!dock)return;
  if(!data){bumpPrizeDock();return}
  if(data.attemptId!==r.worksheetRewards?.attemptId)return;
- const gains=data.chest?[{kind:'chest',text:`📦 ${PACKAGE_TYPES[data.rarity]}!`}]:[
-  ...(data.coins?[{kind:'coin',text:`+${fmt(data.coins)} 🪙`}]:[]),
-  ...(data.luck?[{kind:'luck',text:`+${data.luck} ✨`}]:[])
- ];
+ const gains=data.coins?[{kind:'coin',text:`+${fmt(data.coins)} \u{1fa99}`}]:[];
  for(const gain of gains)animateRewardGain(data,gain);
 }
 function animateRewardGain(data,gain){
  const frame=$('worksheetFrame'),fr=frame?.getBoundingClientRect(),area=rewardProtectedArea(frame);
  const epoch=rewardPresentation.epoch,attempt=data.attemptId;
- const destination=gain.kind==='luck'?document.querySelector?.('.chest-luck-top')||$('prizejar'):$('prizejar');
+ const destination=$('prizejar');
  const target=destination.getBoundingClientRect(),point=data.point;
  const valid=point&&Number.isFinite(point.x)&&Number.isFinite(point.y)&&point.x>=0&&point.x<=1&&point.y>=0&&point.y<=1;
  const sourceY=valid&&fr?fr.top+fr.height*point.y:fr?fr.top+fr.height*.5:innerHeight*.4;
- const node=document.createElement('div');node.className='reward-flight reward-'+gain.kind+(gain.kind==='chest'?` package-type p${data.rarity}`:'');node.textContent=gain.text;
+ const node=document.createElement('div');node.className='reward-flight reward-'+gain.kind;node.textContent=gain.text;
  node.style.transformOrigin='0 0';document.body.appendChild(node);
  const size=node.getBoundingClientRect(),w=size.width||80,h=size.height||28;
  const left=area?area.left-w-10:12,right=area?area.right+10:innerWidth-w-12;
- let x=gain.kind==='luck'?right:left,y=sourceY-h-8,side=gain.kind==='luck'?'right':'left';
+ let x=left,y=sourceY-h-8,side='left';
  if(x<8||x+w>innerWidth-8){
-  x=gain.kind==='luck'?left:right;side=side==='left'?'right':'left';
+  x=right;side=side==='left'?'right':'left';
  }
  if(x<8||x+w>innerWidth-8){
   const shelf=document.querySelector?.('.reward-shelf')?.getBoundingClientRect();
   y=Math.min(shelf?.top??Infinity,Math.max(70,(area?.top||140)-h-10));
-  x=Math.max(8,Math.min(innerWidth-w-8,innerWidth*.5+(gain.kind==='luck'?12:-w-12)));side='left';
+  x=Math.max(8,Math.min(innerWidth-w-8,innerWidth*.5+(-w-12)));side='left';
  }
  y=Math.max(65,Math.min(innerHeight-h-8,y));
  node.style.left=x+'px';node.style.top=y+'px';
@@ -82,17 +72,11 @@ function animateRewardGain(data,gain){
    if(epoch!==rewardPresentation.epoch)return;
    rewardPresentation.pending=Math.max(0,rewardPresentation.pending-1);
    if(g.run?.worksheetRewards?.attemptId!==attempt)return;
-   paintRewardDock({...g.run,pool:data.pool,luck:data.totalLuck,chests:data.chests,index:data.index});
-   if(gain.kind==='luck'){destination.classList.remove('dock-bump');void destination.offsetWidth;destination.classList.add('dock-bump')}else bumpPrizeDock();
+   paintRewardDock({...g.run,pool:data.pool,index:data.index});
+   bumpPrizeDock();
    if(!rewardPresentation.pending)paintRewardDock(g.run);
   },reduced?110:FEEDBACK_TIMING.flight+20);
   rewardPresentation.timers.add(arrival);
  },FEEDBACK_TIMING.hold);
  rewardPresentation.timers.add(timer);
-}
-function animateChestReward(rarity,point){
- const r=g.run;if(!r)return;
- sendEngine('feedback',{kind:'chest'});
- animateReward({chest:true,rarity,point,attemptId:r.worksheetRewards?.attemptId,
-  pool:r.pool,totalLuck:r.luck,chests:r.chests.map(c=>({...c})),index:r.index});
 }

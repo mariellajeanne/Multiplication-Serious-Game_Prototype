@@ -27,20 +27,20 @@ function shell(saved=null){
 
 test('unique domain actions reward once despite stages, repeated messages and reversed snapshots',()=>{
   const h=shell(),r=h.run(),step=r.steps[0];
-  h.state([], {step:'connect'});assert.equal(r.pool,0);assert.equal(r.luck,0);
+  h.state([], {step:'connect'});assert.equal(r.pool,0);assert.equal(r.luck,undefined);
   const connect=h.actions(step,['connect']);h.state(connect);
-  const earned={pool:r.pool,luck:r.luck};assert.ok(earned.pool>0);assert.equal(earned.luck,1);
+  const earned={pool:r.pool,luck:r.luck};assert.ok(earned.pool>0);assert.equal(earned.luck,undefined);
   for(const stage of ['connect','fact','place','connect'])h.state(connect,{step:stage,carryUp:99});
   assert.equal(r.pool,earned.pool);assert.equal(r.luck,earned.luck);
   const rest=h.actions(step,['reveal','place-ones','carry-up']);h.state([...connect,...rest]);
-  assert.equal(r.luck,5,'carry-up receives its own two Luck');
-  const more=r.pool;h.state([...connect,...rest]);assert.equal(r.pool,more);assert.equal(r.luck,5);
+  assert.equal(r.luck,undefined,'carry-up awards coins only');
+  const more=r.pool;h.state([...connect,...rest]);assert.equal(r.pool,more);assert.equal(r.luck,undefined);
   h.state(h.actions(step,['combo']));assert.equal(r.correct,2);assert.equal(r.bridgeDone,1);
-  const sealed={pool:r.pool,luck:r.luck,chests:r.chests.length,correct:r.correct};
+  const sealed={pool:r.pool,luck:r.luck,chests:r.chests,correct:r.correct};
   h.state([],{done:0});h.state([...connect,...rest,...h.actions(step,['combo'])],{done:1});
-  assert.deepEqual({pool:r.pool,luck:r.luck,chests:r.chests.length,correct:r.correct},sealed);
+  assert.deepEqual({pool:r.pool,luck:r.luck,chests:r.chests,correct:r.correct},sealed);
   const second=r.steps[1];h.state(h.actions(second,['connect','reveal','carry-down','place-ones','place-tens']));
-  assert.equal(r.luck,sealed.luck+6,'distinct incoming carry and final tens retain their rewards');
+  assert.ok(r.pool>sealed.pool,'distinct incoming carry and final tens earn coins');assert.equal(r.luck,undefined);
 });
 
 test('invalid, stale-attempt and foreign-window actions cannot award or finish an order',()=>{
@@ -50,7 +50,7 @@ test('invalid, stale-attempt and foreign-window actions cannot award or finish a
   h.state([{...valid[0],id:'bad-id'},...h.actions(r.steps[0],['carry-down','combo'])]);
   h.message({type:'complete',ticket:r.ticket,top:79,bottom:18,actions:[]});
   h.message({type:'complete',ticket:{id:-1},top:79,bottom:18,actions:valid});
-  assert.equal(r.pool,0);assert.equal(r.luck,0);assert.equal(r.correct,0);assert.equal(r.phase,'engine');
+  assert.equal(r.pool,0);assert.equal(r.luck,undefined);assert.equal(r.correct,0);assert.equal(r.phase,'engine');
 });
 
 test('ready/started retries do not reset rewards; reload retains ledger; retry gets a fresh attempt',()=>{
@@ -59,28 +59,29 @@ test('ready/started retries do not reset rewards; reload retains ledger; retry g
   assert.equal(h.sent.filter(m=>m.type==='start').length,2,'retry start until child confirms receipt');
   h.message({type:'started'});h.message({type:'started'});h.message({type:'ready'});h.state(list);
   assert.equal(h.sent.filter(m=>m.type==='start').length,2,'acknowledged frames do not restart');
-  assert.equal(r.luck,2);
+  assert.equal(r.luck,undefined);
   const restored=shell(h.store.panaderyaQuestV2),rr=restored.run();restored.state(list);
-  assert.equal(rr.luck,2);assert.equal(rr.pool,r.pool);
+  assert.equal(rr.luck,undefined);assert.equal(rr.pool,r.pool);
   const old=rr.worksheetRewards.attemptId;rr.phase='failed';rr.retriesLeft=2;
   restored.context.retryRun();assert.notEqual(rr.worksheetRewards.attemptId,old);
-  restored.state(restored.actions(rr.steps[0],['connect']));assert.equal(rr.luck,1);
-  restored.message({type:'state',actions:list,attemptId:old});assert.equal(rr.luck,1);
+  restored.state(restored.actions(rr.steps[0],['connect']));assert.equal(rr.luck,undefined);
+  restored.message({type:'state',actions:list,attemptId:old});assert.equal(rr.luck,undefined);
 });
 
-test('completion flushes unpolled actions, rolls each combo once and claims full budget exactly once',()=>{
+test('completion flushes unpolled actions without package RNG and claims full coin budget exactly once',()=>{
   const h=shell(),r=h.run();
   const list=r.steps.flatMap(step=>h.actions(step,vm.runInContext(`worksheetActionKinds(g.run.steps[${r.steps.indexOf(step)}])`,h.context)));
   const complete={type:'complete',ticket:r.ticket,top:79,bottom:18,actions:list};
+  h.context.Math.random=()=>{throw Error('Math actions must never roll package rewards')};
   h.message(complete);
   assert.equal(r.phase,'claim');assert.equal(r.pool,r.budget);assert.equal(r.correct,9);
-  assert.equal(r.chests.length,1,'last combo guarantees a chest with deterministic missed earlier rolls');
-  const luck=r.luck;h.message(complete);h.state(list);assert.equal(r.luck,luck);assert.equal(r.chests.length,1);
+  assert.equal(r.chests,undefined,'completed combos never award packages');
+  const luck=r.luck;h.message(complete);h.state(list);assert.equal(r.luck,luck);assert.equal(r.chests,undefined);
   const coins=vm.runInContext('g.coins',h.context),owned=vm.runInContext('g.owned.length',h.context);
   h.context.prizeItems();h.context.prizeItems();h.message(complete);
   assert.equal(vm.runInContext('g.coins',h.context),coins+r.budget);
   assert.equal(vm.runInContext('g.completed',h.context),1);
-  assert.equal(vm.runInContext('g.owned.length',h.context),owned+1);
+  assert.equal(vm.runInContext('g.owned.length',h.context),owned);assert.equal(vm.runInContext('g.packages.reduce((a,b)=>a+b,0)',h.context),0);
 });
 
 test('legacy aggregates are retained and conservatively baselined without changing the save key',()=>{
@@ -98,7 +99,7 @@ test('completed state recovers a lost complete event; saved claims survive reloa
   h.state(list,{complete:true,ticket:{id:-1},top:79,bottom:18});
   assert.equal(r.phase,'engine','wrong ticket cannot finish through the fallback');
   h.state(list,{complete:true,ticket:r.ticket,top:79,bottom:18});
-  assert.equal(r.phase,'claim');assert.equal(r.pool,r.budget);assert.equal(r.chests.length,1);
+  assert.equal(r.phase,'claim');assert.equal(r.pool,r.budget);assert.equal(r.chests,undefined);
   assert.equal(h.sent.filter(m=>m.type==='completion-ack').length,1);
   const restored=shell(h.store.panaderyaQuestV2),rr=restored.run();
   assert.equal(rr.phase,'claim');assert.equal(rr.pool,r.budget);

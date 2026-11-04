@@ -1,13 +1,13 @@
 /* Prices are measured against expected Normal-order earnings, not challenge modes. */
-function economyUnit(){return expectedTicketBase(g.mastery)*pricingMenuBase()*decorBonus()}
-function earningUnit(){return expectedTicketBase(g.mastery)*bakeryValue()}
+function economyUnit(){return expectedTicketBase(ticketLuckMastery())*pricingMenuBase()*decorBonus()}
+function earningUnit(){return expectedTicketBase(ticketLuckMastery())*bakeryValue()}
 function slotCost(){return Math.round(economyUnit()*(2+.6*Math.pow(Math.max(0,g.menuSlots-1),1.15)))}
 function packagePrice(rank){return Math.max(1,Math.round(economyUnit()*PACKAGE_SHOP[rank].priceOrders))}
 function packageUnlocked(rank){return g.bakeryLevel>=PACKAGE_SHOP[rank].unlock}
-function foodEarningShare(o){return expectedTicketBase(g.mastery)*foodValue(o)*decorBonus()}
+function foodEarningShare(o){return expectedTicketBase(ticketLuckMastery())*foodValue(o)*decorBonus()}
 function foodLevelCost(o){return Math.max(1,Math.round(foodEarningShare(o)*(.75+.45*Math.pow(recipeMastery(o)+1,1.3))))}
 function foodLevelPrice(o){return foodLevelCost(o)}
-function fusionFee(o,other=null){const tier=other?Math.max(foodTier(o),foodTier(other)):foodTier(o);return Math.max(1,Math.round(expectedTicketBase(g.mastery)*F(o.id).base*decorBonus()*(1.5+.65*Math.pow(tier,1.25))))}
+function fusionFee(o,other=null){const tier=other?Math.max(foodTier(o),foodTier(other)):foodTier(o);return Math.max(1,Math.round(expectedTicketBase(ticketLuckMastery())*F(o.id).base*decorBonus()*(1.5+.65*Math.pow(tier,1.25))))}
 function ingredientNeeds(o){const f=F(o.id),qty=[0,3,7,15,30][foodTier(o)]*(1+Math.floor(f.rarity/2));return f.ingredients.map((name,i)=>({name,need:Math.round(qty*(i===1?.7:1)),have:g.ingredients[name]||0,price:INGREDIENTS.find(x=>x[0]===name)[2]}))}
 function fusionIngredientCost(o){return ingredientNeeds(o).reduce((s,x)=>s+Math.max(0,x.need-x.have)*x.price,0)}
 function bakeryUpgradeCost(){return Math.max(1,Math.round(economyUnit()*(BAKERY_POWER_CONFIG.priceOrders+BAKERY_POWER_CONFIG.priceGrowth*Math.pow(g.bakeryLevel-1,1.15))))}

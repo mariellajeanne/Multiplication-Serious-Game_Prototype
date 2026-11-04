@@ -52,7 +52,7 @@ test('sidebar shows the current bakery illustration and exact saved unopened sto
  assert.doesNotMatch(h.run('html'),/bakery-row-art|How to play|surprise|favorite|Mastery\.|GET MORE/);
 });
 
-test('possible package reward follows actual obtainable package ranks rather than fixed example text',()=>{
+test('possible package reward follows the package catalog independently of ticket luck',()=>{
  const h=progressionHarness();h.run('ticketProbabilities=()=>[.5,.5,0,0,0,0,0,0];html=renderPackagePanel()');
- assert.match(h.run('html'),/2★ LUCKY/);assert.doesNotMatch(h.run('html'),/8★|FATE/);
+ assert.match(h.run('html'),/8★ FATE/);assert.equal(h.run('possiblePackageReward().rank'),h.run('PACKAGE_SHOP.at(-1).rank'));
 });
