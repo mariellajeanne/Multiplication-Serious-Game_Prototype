@@ -56,8 +56,9 @@ test('invalid, stale-attempt and foreign-window actions cannot award or finish a
 test('ready/started retries do not reset rewards; reload retains ledger; retry gets a fresh attempt',()=>{
   const h=shell(),r=h.run(),list=h.actions(r.steps[0],['connect','reveal']);h.state(list);
   h.message({type:'ready'});h.message({type:'ready'});
-  assert.equal(h.sent.filter(m=>m.type==='start').length,1);
-  h.message({type:'started'});h.message({type:'started'});h.state(list);
+  assert.equal(h.sent.filter(m=>m.type==='start').length,2,'retry start until child confirms receipt');
+  h.message({type:'started'});h.message({type:'started'});h.message({type:'ready'});h.state(list);
+  assert.equal(h.sent.filter(m=>m.type==='start').length,2,'acknowledged frames do not restart');
   assert.equal(r.luck,2);
   const restored=shell(h.store.panaderyaQuestV2),rr=restored.run();restored.state(list);
   assert.equal(rr.luck,2);assert.equal(rr.pool,r.pool);

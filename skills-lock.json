@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "skills": {
+    "design-game-design-fundamentals": {
+      "source": "fcsouza/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/game-design-fundamentals/SKILL.md",
+      "computedHash": "98e2844537d5d94a22193d904c65a163e52c92a6826be836d2575fc2addded8e"
+    },
+    "design-ui-ux-game": {
+      "source": "fcsouza/agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/ui-ux-game/SKILL.md",
+      "computedHash": "b7c630ba3583bb366a20166ddf2b47ef9aa6bb6e22e6c14255cecc2aefedd105"
+    },
+    "game-balance-analysis": {
+      "source": "yuki001/game-dev-skills",
+      "sourceType": "github",
+      "skillPath": "skills/game-balance-analysis/SKILL.md",
+      "computedHash": "776e2ffd47649d6b5fc4f6b70328149f157827e1fa31f7bb9706826c51364d39"
+    },
+    "game-feel": {
+      "source": "gamedev-skills/awesome-gamedev-agent-skills",
+      "sourceType": "github",
+      "skillPath": "skills/disciplines/game-feel/SKILL.md",
+      "computedHash": "01752d01f59e08e583b79fa58a247d9b16774fde3d6716f9894f093d1072ee9b"
+    },
+    "game-systems-design": {
+      "source": "pbzona/godot-skills",
+      "sourceType": "github",
+      "skillPath": "skills/game-systems-design/SKILL.md",
+      "computedHash": "82f750fe8dc6f6087cec428efb15514a6c55618d9b8a41fa2ffdcceea0209dbb"
+    },
+    "ui-ux-pro-max": {
+      "source": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "sourceType": "github",
+      "skillPath": ".claude/skills/ui-ux-pro-max/SKILL.md",
+      "computedHash": "1c584be8d06885d32534d2db379d4a86475dde1239137c8374a972100859b87f"
+    }
+  }
+}

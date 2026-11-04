@@ -11,7 +11,7 @@ function paintRewardDock(r){
  const chance=Math.round(clamp(.12+r.luck*.013+row*.03,.06,.83)*100);
  const bar=$('chestChanceBar'),label=$('chestChance');
  if(bar)bar.style.width=chance+'%';
- if(label)label.textContent=r.phase==='claim'?'Ready to collect!':`This order · ${chance}% next pair · 1+ package guaranteed`;
+ if(label)label.textContent=r.phase==='claim'?'Ready to collect!':`This order · ${chance}% next pair · ${r.guaranteedPackages||1}+ ${PACKAGE_TYPES[r.ticket.rarity]} guaranteed`;
 }
 function bumpPrizeDock(){const dock=$('prizejar');if(!dock)return;dock.classList.remove('dock-bump');void dock.offsetWidth;dock.classList.add('dock-bump')}
 function syncRewardPresentation(){
@@ -30,7 +30,7 @@ function animateReward(data){
  const r=g.run,dock=$('prizejar');if(!r||!dock)return;
  if(!data){bumpPrizeDock();return}
  if(data.attemptId!==r.worksheetRewards?.attemptId)return;
- const gains=data.chest?[{kind:'chest',text:`📦 ${RARITIES[data.rarity]}!`}]:[
+ const gains=data.chest?[{kind:'chest',text:`📦 ${PACKAGE_TYPES[data.rarity]}!`}]:[
   ...(data.coins?[{kind:'coin',text:`+${fmt(data.coins)} 🪙`}]:[]),
   ...(data.luck?[{kind:'luck',text:`+${data.luck} ✨`}]:[])
  ];

@@ -1,5 +1,7 @@
 # Panaderya Quest — game vision and interaction goals
 
+**Current owner-directed implementation (2026-11-04):** [Frame 11](FRAME_11_IMPLEMENTATION.md) supersedes the older inventory/layout and progression notes below. The app now has one starting menu slot, all owned foods in the center grid, unlimited duplicate-unlocked Recipe Mastery, 100 configurable Bakery Power purchases, coin package buying/saved unboxing, safe purchase Undo, persistent per-ticket worksheets and a retrying WebKit handshake. Preserve the original math interactions and existing save key.
+
 **Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 and Kitchen Level 20, migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
 
 **Current review:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md) follows the newest owner direction: the components themselves carry the bakery theme, using paper, light wood, display labels, pastry boxes, matching illustrations and rounded sans-serif typography. The background is subtle; scenic wallpaper is not part of the active UI. Stop for owner review before Stage C.

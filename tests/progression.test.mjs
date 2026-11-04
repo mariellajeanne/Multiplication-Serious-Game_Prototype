@@ -36,8 +36,8 @@ test('fusion transaction is exact once, keeps overflow in inventory and same-foo
   plan=duplicateFusionPlan(g.owned[0],2);fingerprint=fusionFingerprint(g.owned);before=g.coins;ok=applyDuplicateFusion(plan,fingerprint);again=applyDuplicateFusion(plan,fingerprint);`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);
  assert.equal(h.run('g.coins'),h.run('before-plan.fee'));assert.equal(h.run('g.foodLevelCredits.pandesal'),4);
- h.run(`g.owned.push({uid:g.uidNext++,id:'pandesal',fusion:1,level:1,spent:0});creditUid=g.uidNext-1;upgradeFood(creditUid,true)`);
- assert.equal(h.run('g.foodLevelCredits.pandesal'),3);assert.equal(h.run('g.owned.at(-1).spent'),0);
+ h.run(`g.owned.push({uid:g.uidNext++,id:'pandesal',fusion:1,level:1,spent:0});creditUid=g.uidNext-1;g.recipeCeilings.pandesal=4;price=foodLevelPrice(g.owned.at(-1));upgradeFood(creditUid,true)`);
+ assert.equal(h.run('g.foodLevelCredits.pandesal'),4);assert.equal(h.run('g.owned.at(-1).spent'),h.run('price'));
  h.run(`g.owned=[{uid:8,id:'monay',fusion:4,level:3,spent:110},{uid:9,id:'monay',fusion:4,level:4,spent:201}];g.activeMenu=[9];plan=duplicateFusionPlan(g.owned[0],9);applyDuplicateFusion(plan,fusionFingerprint(g.owned));`);
  assert.equal(h.run('g.owned.length'),2);assert.deepEqual(h.json('g.activeMenu'),[8]);assert.equal(h.run('g.owned[1].fusion'),3);
 });
@@ -65,7 +65,7 @@ test('legacy six and identifiable seven-rank saves migrate once, preserving owne
  assert.deepEqual(json('g.run.worksheetRewards'),base.run.worksheetRewards);assert.equal(run('g.run.budget'),500);assert.equal(run('g.run.ticket.id'),20);
  assert.equal(store.get('panaderyaQuestV2BeforeProgression'),JSON.stringify(base));
  run('before=JSON.stringify(g);migrateProgression(g)');assert.equal(run('JSON.stringify(g)'),run('before'));
- base.rarityCount=7;base.board[0].rarity=5;base.run.ticket.rarity=6;const seven=progressionHarness(base);assert.equal(seven.run('g.board[0].rarity'),6);assert.equal(seven.run('g.run.ticket.rarity'),7);
+ base.rarityCount=7;base.board[0].rarity=5;base.run.ticket.rarity=6;const seven=progressionHarness(base);assert.equal(seven.run('g.board.find(t=>t.id===9).rarity'),6);assert.equal(seven.run('g.run.ticket.rarity'),7);
  base.owned[0].fusion=0;assert.equal(progressionHarness(base).run('g.owned[0].fusion'),1);
 });
 
@@ -86,11 +86,11 @@ test('refresh persists five tickets and deadline, blocks repeat, reload and roll
  const ids=r.json('g.board.map(t=>t.id)');assert.equal(new Set(ids).size,5);
 });
 
-test('bakery has exact visual milestones, 30 real levels and preserved kitchen levels expand to 20',()=>{
+test('bakery supports 100 purchases and preserved kitchen levels expand to 20',()=>{
  const h=progressionHarness();h.run('g.completed=100;g.coins=1e30');
- for(let level=1;level<=30;level++){
+ for(let level=1;level<=101;level++){
   assert.equal(h.run('g.bakeryLevel'),level);const before=h.run('bakeryValue()'),stage=h.run('bakeryStage(g.bakeryLevel)');
-  if(level<30){assert.equal(h.run('upgradeDecor()'),true);assert.ok(Math.abs(h.run('bakeryValue()')/before-1.085)<1e-12);
+  if(level<101){assert.equal(h.run('upgradeDecor()'),true);assert.ok(Math.abs(h.run('bakeryValue()')/before-1.085)<1e-12);
    assert.equal(h.run('bakeryStage(g.bakeryLevel)')-stage,[2,3,5,7,10,13,17,21,25,30].includes(level+1)?1:0);}
  }
  assert.equal(h.run('upgradeDecor()'),false);
@@ -113,18 +113,18 @@ test('a stale tab save retains the latest refresh deadline',()=>{
 
 
 test('Mastery upgrade immediately improves equipped value, rendered totals and reload',()=>{
- const h=progressionHarness();h.run(`g.coins=1e9;before=foodValue(g.owned[0]);total=bakeryValue();ok=upgradeFood(1,true);card=renderFoodCard(g.owned[0]);menu=renderMenu()`);
+ const h=progressionHarness();h.run(`g.coins=1e9;g.recipeCeilings.pandesal=12;before=foodValue(g.owned[0]);total=bakeryValue();ok=upgradeFood(1,true);card=renderFoodCard(g.owned[0]);menu=renderMenu()`);
  assert.equal(h.run('ok'),true);assert.ok(h.run('foodValue(g.owned[0])>before'));assert.ok(h.run('bakeryValue()>total'));
- assert.match(h.run('card'),/Mastery Lv 2\/5/);assert.match(h.run('card'),/Current bonus: \+25%/);
- assert.match(h.run('card'),/Upgrade to Lv 3 \(\+55%\)/);assert.doesNotMatch(h.run('card'),/card-fuse|\u2192/);
+ assert.match(h.run('card'),/Mastery 1/);assert.match(h.run('card'),/1\.50/);
+ assert.match(h.run('card'),/mastery-ready/);assert.doesNotMatch(h.run('card'),/card-fuse|\u2192/);
  assert.ok(h.run('menu.includes(multiplierLabel(bakeryValue()))'));
  const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));
  assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));assert.equal(r.run('foodValue(g.owned[0])'),h.run('foodValue(g.owned[0])'));
- h.run('g.owned[0].level=5');assert.match(h.run('renderFoodCard(g.owned[0])'),/Mastery Max/);
+ h.run('g.owned[0].mastery=12');assert.doesNotMatch(h.run('renderFoodCard(g.owned[0])'),/class="mastery-ready"/);
 });
 
 test('Base Auto Equip uses improved Mastery to break equal-base ties immediately and after reload',()=>{
- const h=progressionHarness();h.run(`g.coins=1e9;g.owned.push({uid:2,id:'pandesal',level:1,fusion:1,spent:0});setAutoEquip('base',true);before=bakeryValue();upgradeFood(2,true)`);
+ const h=progressionHarness();h.run(`g.coins=1e9;g.recipeCeilings.pandesal=1;g.owned.push({uid:2,id:'pandesal',level:1,fusion:1,spent:0});setAutoEquip('base',true);before=bakeryValue();upgradeFood(2,true)`);
  assert.deepEqual(h.json('g.activeMenu'),[2]);assert.ok(h.run('bakeryValue()>before'));
  const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.deepEqual(r.json('g.activeMenu'),[2]);assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));
 });

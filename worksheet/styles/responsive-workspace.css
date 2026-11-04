@@ -22,3 +22,10 @@ body[data-rows='2'] .sheet{min-height:0!important}
 .status.error{font-size:12px}.guide-target{outline-width:3px!important;outline-offset:4px}.tap-cue{width:70px;height:70px}
 @media(max-width:500px){.math{padding-left:30px!important;padding-right:12px!important}.symbol{left:-27px}.actions #undo{min-width:80px}.floating{gap:4px;padding:4px}.ftile{padding:0 6px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+
+/* Safari must retain the gesture on the math surface instead of starting page scroll. */
+#sheet,#sheet .scroller,#sheet .math{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+#sheet button{touch-action:none;-webkit-user-select:none;user-select:none}
+body.addition-active .workspace{touch-action:none}
+.tool,.actions button{background:linear-gradient(#fff4dc,#edd5aa)!important;border-color:#c8a275!important;color:#76502d!important}
+.complete{background:#fff1d0;border-color:#c5a06b}.sheethead #operationCue{background:#f2dfbd!important;color:#805c32!important}

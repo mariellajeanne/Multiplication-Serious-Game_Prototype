@@ -19,12 +19,14 @@ window.addEventListener('pointerdown',e=>{
  const control=e.target.closest('button,input,select,textarea,[role="button"]');
  if(control&&!control.matches('#math .cell'))return;
  additionStart={id:e.pointerId,x:e.clientX,y:e.clientY};
+ try{$('sheet').setPointerCapture(e.pointerId)}catch(_){}
 },{passive:true});
 window.addEventListener('pointermove',e=>{
  if(!additionStart||additionStart.id!==e.pointerId||s.phase!=='sum'||busy)return;
+ if(e.cancelable)e.preventDefault();
  const dx=e.clientX-additionStart.x,dy=e.clientY-additionStart.y;
  if(dy>32&&Math.abs(dy)>Math.abs(dx)*.67){additionStart=null;playCascadeAddition()}
-},{passive:true});
+},{passive:false});
 window.addEventListener('pointerup',e=>{
  if(!additionStart||additionStart.id!==e.pointerId)return;
  const p=additionStart;additionStart=null;
@@ -36,5 +38,5 @@ window.addEventListener('pointercancel',()=>{additionStart=null});
 $('jumpAddition').addEventListener('click',startAdditionLab);
 $('runMerge').addEventListener('click',()=>playCascadeAddition());
 
-window.__BATCH_FREEFLOW__={liftTens,get:()=>structuredClone(s),reset:()=>reset(),jumpAddition:startAdditionLab,setAdditionMode,playVerticalAddition,playHorizontalAddition,playCascadeAddition,cases:allCases,setVisual:v=>{visual=v;render()},setProblem:(a,b)=>{$('problem').value=`${a},${b}`;reset()},toggleTutorial:()=>{$('tutorialToggle').click()},setMultMode:v=>{document.querySelector(`[data-mult-mode="${v}"]`)?.click()},replayMult:()=>{$('replayMult').click()},revealProduct,setArraySpeed:v=>{const slider=$('arraySpeed');slider.value=String(v);slider.dispatchEvent(new Event('input',{bubbles:true}));slider.dispatchEvent(new Event('change',{bubbles:true}))},select:(kind,c)=>operand(kind,c),choose:part=>chooseTile(part),place:(part,kind,c)=>place(part,kind,c),mix:addCarry,armCarry,sum};
+window.__BATCH_FREEFLOW__={liftTens,get:()=>cloneWorksheetState(s),reset:()=>reset(),jumpAddition:startAdditionLab,setAdditionMode,playVerticalAddition,playHorizontalAddition,playCascadeAddition,cases:allCases,setVisual:v=>{visual=v;render()},setProblem:(a,b)=>{$('problem').value=`${a},${b}`;reset()},toggleTutorial:()=>{$('tutorialToggle').click()},setMultMode:v=>{document.querySelector(`[data-mult-mode="${v}"]`)?.click()},replayMult:()=>{$('replayMult').click()},revealProduct,setArraySpeed:v=>{const slider=$('arraySpeed');slider.value=String(v);slider.dispatchEvent(new Event('input',{bubbles:true}));slider.dispatchEvent(new Event('change',{bubbles:true}))},select:(kind,c)=>operand(kind,c),choose:part=>chooseTile(part),place:(part,kind,c)=>place(part,kind,c),mix:addCarry,armCarry,sum};
 

@@ -14,60 +14,36 @@ function ui(){
    closeModal=()=>{};Math.random=()=>{throw Error('Presentation must not consume reward RNG')}`,c);
  return c;
 }
-test('order narrative and reward preview use real quantities without consuming reward RNG',()=>{
- const c=ui();
- vm.runInContext(`g.board=[{id:8,a:79,b:18,rarity:1,base:304}];result=renderTickets()`,c);
- assert.match(c.result,/79 × 18/);assert.match(c.result,/18 trays · 79 .* each/);
- assert.match(c.result,/365/);assert.match(c.result,/×1\.20/);
- assert.match(c.result,/Ticket luck/);
+test('ticket preview uses actual math, guaranteed coins and named package types without consuming RNG',()=>{
+ const c=ui();vm.runInContext(`g.board=[{id:8,a:79,b:18,rarity:1,base:304}];result=renderTickets()`,c);
+ assert.match(c.result,/79 \u00d7 18/);assert.match(c.result,/365 base coins/);assert.match(c.result,/1\+ FREE/);assert.match(c.result,/Lucky/);assert.match(c.result,/Ticket Luck/);
 });
-test('food preview shows actual next value and cost without changing saved ownership',()=>{
- const c=ui();vm.runInContext(`openFoodItem(1);before=JSON.stringify(g.owned)`,c);
- assert.match(c.result.html,/×1\.20/);assert.match(c.result.html,/×1\.50/);assert.match(c.result.html,/255/);
- assert.doesNotMatch(c.result.html,/Fusion ·/,'advanced controls stay hidden at first');
- vm.runInContext(`assignFood(1);after=JSON.stringify(g.owned);active=g.activeMenu.length`,c);
- assert.equal(c.before,c.after);assert.equal(c.active,1,'same copy cannot occupy two slots');
+
+test('sticky food preview shows actual contribution, mastery availability and price without ownership changes',()=>{
+ const c=ui();vm.runInContext(`g.recipeCeilings.pandesal=2;openFoodItem(1);before=JSON.stringify(g.owned);result=renderFoodPanel();cost=foodLevelPrice(g.owned[0]);assignFood(1);after=JSON.stringify(g.owned);active=g.activeMenu.length`,c);
+ assert.match(c.result,/1\.20/);assert.match(c.result,/0\.30/);assert.match(c.result,/Available \+2/);assert.equal(c.cost,255);assert.equal(c.before,c.after);assert.equal(c.active,1);
 });
-test('navigation introduces systems at existing thresholds and keeps collection accessible',()=>{
- const c=ui();vm.runInContext('result=renderLeft()',c);
- assert.doesNotMatch(c.result,/openIndex|openMenu/);
- vm.runInContext('menu=renderMenu()',c);
- assert.match(c.menu,/Food Inventory/);assert.match(c.menu,/Food Index/);
- assert.ok(c.menu.indexOf('food-navigation')<c.menu.indexOf('menu-grid'));
- assert.doesNotMatch(c.result,/onclick="openKitchen/);
- assert.doesNotMatch(c.result,/onclick="openModes/);
- vm.runInContext('g.completed=6;result=renderLeft()',c);
- for(const fn of ['openKitchen','openDecor','openStaff','openModes'])assert.ok(c.result.includes(fn));
+
+test('main navigation keeps menu, kitchen, Food Index and packages accessible without exposing future features',()=>{
+ const c=ui();vm.runInContext('result=renderLeft();menu=renderMenu();tickets=renderTickets()',c);
+ assert.match(c.result,/GET MORE PACKAGES/);assert.match(c.menu,/role="tab"/);assert.match(c.menu,/Kitchen/);assert.match(c.tickets,/openIndex/);assert.doesNotMatch(c.result,/Helper|Game modes/);
+ vm.runInContext('g.completed=6;openSettings();settings=result.html',c);assert.match(c.settings,/openStaff/);assert.match(c.settings,/openModes/);
 });
+
 test('food illustration and discovery renderers cover all catalog foods with named local art',()=>{
  const c=ui();vm.runInContext('result=FOOD.map(f=>({id:f.id,name:f.name,art:foodArt(f.id)}))',c);
  assert.equal(c.result.length,17);
  for(const food of c.result){assert.ok(food.art.includes(`aria-label="${food.name}"`));assert.match(food.art,/<svg/);}
 });
 
-test('menu sorts rarity then actual value, and puts slot controls before equipped foods',()=>{
- const c=ui();vm.runInContext(`g.owned.push({uid:2,id:'pandesal',level:2,fusion:0,spent:145},
-   {uid:3,id:'ensaymada',level:1,fusion:0,spent:0});g.activeMenu=[1,2,3];
-   result=renderMenu();order=sortedMenuFoods(g.owned).map(o=>o.uid);original=[...g.activeMenu];`,c);
- assert.deepEqual([...c.order],[3,2,1]);assert.deepEqual([...c.original],[1,2,3]);
- assert.ok(c.result.indexOf('Add Item')<c.result.indexOf('data-uid="3"'));
- assert.ok(c.result.indexOf('Buy Slot')<c.result.indexOf('data-uid="3"'));
- assert.ok(c.result.indexOf('data-uid="3"')<c.result.indexOf('data-uid="2"'));
- assert.match(c.result,/food-management/);assert.match(c.result,/removeFoodPrompt\(3\)/);
- assert.match(c.result,/sellFoodPrompt\(3\)/);
- assert.ok(c.result.indexOf('buy-slot')<c.result.indexOf('slot-help'));
- assert.equal((c.result.match(/>\+ Add Item</g)||[]).length,1);
- assert.match(c.result,/1 Slot Left/);assert.doesNotMatch(c.result,/menu-slots/);
- assert.ok(c.result.indexOf('walletCoins')<c.result.indexOf('food-navigation'));
+test('collection sorts every owned food by rarity and actual contribution, with slots counted separately',()=>{
+ const c=ui();vm.runInContext(`g.owned.push({uid:2,id:'pandesal',level:2,fusion:1,spent:145},{uid:3,id:'ensaymada',level:1,fusion:1,spent:0});result=renderMenu();order=sortedMenuFoods(g.owned).map(o=>o.uid);`,c);
+ assert.deepEqual([...c.order],[3,2,1]);assert.equal((c.result.match(/data-uid=/g)||[]).length,3);assert.match(c.result,/1\/1 Slots Used/);assert.match(c.result,/is-unequipped/);assert.match(c.result,/is-equipped/);assert.match(c.result,/Hide Unequipped/);assert.match(c.result,/Equip Best/);
 });
 
-test('inventory opens with explicit unchecked boxes and disabled batch actions',()=>{
- const c=ui();vm.runInContext('openMenu();result=result.html;state=inventoryActionState()',c);
- for(const id of ['inventoryAdd','inventoryRemove','inventorySell'])assert.match(c.result,new RegExp(`id="${id}"[^>]*disabled`));
- assert.match(c.result,/type="checkbox"/);assert.doesNotMatch(c.result,/type="checkbox" checked/);
- assert.equal(c.state.selected.length,0);assert.equal(c.state.canSell,false);
- vm.runInContext('toggleInventoryFood(1);openMenu();state=inventoryActionState()',c);
- assert.equal(c.state.selected.length,0,'normal opening starts with no selection');
+test('collection starts with no selection and uses long-press for the bulk action panel',()=>{
+ const c=ui();vm.runInContext('openMenu();empty=renderFoodPanel();multiSelect=true;selectedFoods.add(1);panel=renderFoodPanel()',c);
+ assert.equal(c.empty,'');assert.match(c.panel,/Select All/);assert.match(c.panel,/Deselect All/);assert.match(c.panel,/Unequip Selected/);assert.match(c.panel,/Sell/);
 });
 
 test('multi-add is capacity checked as a whole and ignores already equipped copies',()=>{
@@ -116,24 +92,17 @@ test('inventory batch mutations remain blocked during a live worksheet',()=>{
 
 test('resolved packages report new discoveries, correct copy numbers and actual Ticket Luck',()=>{
  const c=ui();vm.runInContext(`Math.random=()=>0;g.mastery=3;g.owned.push({uid:2,id:'monay',level:1,fusion:0,spent:0});
-   g.run={phase:'claim',chests:[{rarity:0},{rarity:1},{rarity:0}],pool:3004,correct:6,mistakes:0,mode:'normal'};
+   g.run={ticket:{id:31,a:79,b:18},phase:'claim',chests:[{rarity:0},{rarity:1},{rarity:0}],pool:3004,correct:6,mistakes:0,mode:'normal'};
    before=g.coins;prizeItems();popup=result;prizeItems();after=g.coins;`,c);
  assert.equal(c.popup.title,'Order Ticket Resolved!');assert.match(c.popup.html,/2nd Copy!/);assert.match(c.popup.html,/3rd Copy!/);
- assert.equal((c.popup.html.match(/>NEW!</g)||[]).length,1);
+ assert.equal((c.popup.html.match(/>NEW!</g)||[]).length,0);
  assert.match(c.popup.html,/\+3,004/);assert.match(c.popup.html,/resolved-luck.*?<strong>\+1<\/strong>/);
  assert.match(c.popup.html,/Back to Bakery/);assert.equal(c.after,c.before+3004);
 });
 
-test('inventory distinguishes equipped copies; removal confirms and preserves food investment',()=>{
- const c=ui();vm.runInContext(`g.owned.push({uid:2,id:'monay',level:2,fusion:1,spent:400});
-   openMenu();inventory=result;removeFoodPrompt(1);prompt=result;before=JSON.stringify(g.owned);
-   stillEquipped=g.activeMenu.includes(1);unassignFood(1);after=JSON.stringify(g.owned);`,c);
- assert.equal(c.inventory.title,'Food Inventory');
- assert.match(c.inventory.html,/On menu/);assert.match(c.inventory.html,/In inventory/);
- assert.equal((c.inventory.html.match(/data-uid=/g)||[]).length,2);
- assert.equal(c.prompt.title,'Remove from the menu?');assert.equal(c.stillEquipped,true);
- assert.match(c.prompt.html,/all its upgrades stay/);assert.equal(c.before,c.after);
- assert.equal(vm.runInContext('g.activeMenu.length',c),0);
+test('unequipping preserves food copies, upgrades and discovery',()=>{
+ const c=ui();vm.runInContext(`g.owned.push({uid:2,id:'monay',level:2,fusion:1,spent:400});before=JSON.stringify(g.owned);cards=g.owned.map(o=>renderFoodCard(o)).join('');unassignFood(1);after=JSON.stringify(g.owned);`,c);
+ assert.match(c.cards,/On menu/);assert.match(c.cards,/Unequipped/);assert.equal(c.before,c.after);assert.equal(vm.runInContext('g.activeMenu.length',c),0);
 });
 
 test('selling requires its consequence prompt and never removes the food discovery',()=>{
@@ -170,8 +139,8 @@ test('reward arrival updates display even without animation promises and never c
    innerWidth:1000,innerHeight:800,matchMedia:()=>({matches:true}),
    setTimeout:fn=>{timers.set(++sequence,fn);return sequence},clearTimeout:id=>timers.delete(id)});
  vm.runInContext(`const $=id=>document.getElementById(id),fmt=n=>String(n),clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-   const RARITIES=['Common'];function renderChestTokens(){return ''}
-   const g={run:{phase:'engine',pool:12,luck:1,chests:[],steps:[{row:0}],index:0,worksheetRewards:{attemptId:'a'}}}`,c);
+   const RARITIES=['Classic'],PACKAGE_TYPES=['Standard'];function renderChestTokens(){return ''}
+   const g={run:{ticket:{rarity:0},phase:'engine',pool:12,luck:1,chests:[],steps:[{row:0}],index:0,worksheetRewards:{attemptId:'a'}}}`,c);
  vm.runInContext(readFileSync(resolve(root,'src/ui/reward-feedback.js'),'utf8'),c);
  vm.runInContext(`animateReward({attemptId:'a',coins:12,luck:1,pool:12,totalLuck:1,chests:[],index:0})`,c);
  assert.equal(nodes.get('pendingCoins').textContent,'');
@@ -187,7 +156,7 @@ test('reward arrival updates display even without animation promises and never c
 });
 
 test('direct card level-up charges the displayed progression cost without opening inventory',()=>{
- const c=ui();vm.runInContext(`g.coins=1000;expected=foodLevelCost(g.owned[0]);menuOpened=0;openMenu=()=>menuOpened++;upgradeFood(1,true);
+ const c=ui();vm.runInContext(`g.coins=1000;g.recipeCeilings.pandesal=1;expected=foodLevelCost(g.owned[0]);menuOpened=0;openMenu=()=>menuOpened++;upgradeFood(1,true);
    result={coins:g.coins,level:g.owned[0].level,spent:g.owned[0].spent};`,c);
  assert.deepEqual(JSON.parse(JSON.stringify(c.result)),{coins:1000-c.expected,level:2,spent:c.expected});assert.equal(c.menuOpened,0);
 });
@@ -210,9 +179,9 @@ test('fusion refuses missing donors and previews the ingredient route at its act
 });
 
 test('guide graduates once at the third claimed order and respects later opt-in',()=>{
- const c=ui();vm.runInContext(`g.completed=2;g.run={phase:'claim',chests:[],pool:100,correct:1,mistakes:0,mode:'normal'};
+ const c=ui();vm.runInContext(`g.completed=2;g.run={ticket:{id:31,a:79,b:18},phase:'claim',chests:[],pool:100,correct:1,mistakes:0,mode:'normal'};
    prizeItems();off=!g.tutorialArrows&&g.guideGraduated;
-   g.tutorialArrows=true;g.run={phase:'claim',chests:[],pool:100,correct:1,mistakes:0,mode:'normal'};
+   g.tutorialArrows=true;g.run={ticket:{id:31,a:79,b:18},phase:'claim',chests:[],pool:100,correct:1,mistakes:0,mode:'normal'};
    prizeItems();on=g.tutorialArrows;roundtrip=JSON.parse(JSON.stringify(g));`,c);
  assert.equal(c.off,true);assert.equal(c.on,true);assert.equal(c.roundtrip.guideGraduated,true);assert.equal(c.roundtrip.tutorialArrows,true);
 });

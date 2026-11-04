@@ -19,3 +19,17 @@ After changing worksheet CSS, drag/drop handling, sound, or carry logic:
 15. Check the prize dock at tablet and phone sizes; swipe down starting both on whitespace and directly on a completed partial-product digit. Guide OFF must clear prompts, target outlines and all arrow layers immediately.
 
 Tip: if you are editing appearance alone, most of the worksheet behavior should remain unchanged; still check hitbox alignment after tile size/position changes.
+
+
+## Frame 11 physical iPad Safari follow-up
+
+- Use a physical iPad in landscape, with Safari chrome visible, then rotate and return. Confirm the correct ticket operands load every time.
+- Complete 79 times 18: tap and drag connections, reveal, place ones/tens in either permitted order, lift provisional tens, merge an incoming carry, then swipe down over a completed cell.
+- Toggle Guide and Sound ON/OFF. OFF removes guidance; sound needs an actual listening check after the first trusted touch.
+- Exit mid-product, start another ticket, resume the first, reload, background Safari, then resume. Check both problems, partial digits/carries, undo history, progress, coins and package ledgers.
+- Complete an order; scroll to both Collect actions. Collect once, double-tap, close the reward dialog, reload, and verify no duplicate coins or foods. Test saving free packages and opening them later.
+- Verify touch scrolling of the collection, sticky selected-food list, dialogs, tickets and carousel without accidental selections. Check long-press and mixed bulk actions.
+- Buy Power, a slot and Mastery; use Undo before ten seconds and after a reload. Starting an order must commit Undo. Open packages in a batch and verify no discarded foods.
+- Enable reduced motion and repeat purchase, package and addition feedback.
+
+Windows WebKit and Edge emulation do not replace these device checks.

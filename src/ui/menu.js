@@ -1,42 +1,94 @@
-﻿/* Active food menu: identity, next upgrade, and collection slots. */
-function slotCost(){return Math.round(economyUnit()*(2+.6*Math.pow(Math.max(0,g.menuSlots-4),1.15)))}
-function buyMenuSlot(){if(g.run){toast('Finish your order first.');return}if(g.coins<slotCost()){toast('Earn more coins from an order.');return}g.coins-=slotCost();g.menuSlots++;save();render();toast('A new spot for something delicious!')}
-function openFoodItem(uid){
- const o=g.owned.find(x=>x.uid===uid);if(!o)return;const f=F(o.id),cost=foodLevelPrice(o),next=foodValue({...o,level:Math.min(5,o.level+1)});
- showModal(f.name,`<div class="food-detail r${f.rarity}">${foodArt(f.id)}<div>${rarityTag(f.rarity)}<h2>${f.name}</h2><div class="level-dots" aria-label="Level ${o.level} of 5">${[1,2,3,4,5].map(i=>`<span class="${i<=o.level?'filled':''}">★</span>`).join('')}</div><div class="value-preview"><strong>×${foodValue(o).toFixed(2)}</strong>${o.level<5?`<span>→</span><strong>×${next.toFixed(2)}</strong>`:'<span>Max level!</span>'}</div></div></div><p class="upgrade-explanation">Tier ${foodTier(o)} base ×${tierBase(o).toFixed(2)} +${Math.round((LEVEL_FACTORS[o.level]-1)*100)}% Level bonus = ×${foodValue(o).toFixed(2)}.${o.level<5?` Next: ×${next.toFixed(2)} (+${((next/foodValue(o)-1)*100).toFixed(1)}%).`:""}${(g.foodLevelCredits[o.id]||0)>0?` ${g.foodLevelCredits[o.id]} saved Level credits for this food.`:""}</p><button class="primary wide" ${o.level>=5||g.coins<cost||g.run?'disabled':''} onclick="upgradeFood(${uid})">${o.level>=5?'★ Fully leveled':`Level up · 🪙 ${fmt(cost)}`}</button>${o.level<5&&g.coins<cost?`<p class="need-coins">🪙 ${fmt(cost-g.coins)} more coins · try an order!</p>`:''}${g.completed>=5?`<details class="fusion-options"><summary>✦ Fusion · ${foodTier(o)}/5</summary><p>Combine to make this food stronger.</p><div class="btnrow"><button class="secondary" ${foodTier(o)>=5?'disabled':''} onclick="ingredientFusionInfo(${uid})">🧺 Use ingredients</button><button class="secondary" ${foodTier(o)>=5?'disabled':''} onclick="openFusion(${uid})">Same food + 🪙 ${fmt(fusionFee(o))}</button></div></details>`:''}<div class="detail-secondary"><button class="tertiary" onclick="${g.activeMenu.includes(uid)?`removeFoodPrompt(${uid})`:`assignFood(${uid})`}" ${g.autoEquip!=='off'||!g.activeMenu.includes(uid)&&g.activeMenu.length>=g.menuSlots?'disabled':''}>${g.activeMenu.includes(uid)?'Remove from menu':'Add to menu'}</button><button class="tertiary" onclick="sellFoodPrompt(${uid})">Sell…</button></div>`);
+/* Owned collection and sticky recipe details; selection is presentation state only. */
+let selectedFoods=new Set(),multiSelect=false,hideUnequipped=false,menuTab='menu',foodHold=null,suppressFoodTap=null;
+function slotCost(){return Math.round(economyUnit()*(2+.6*Math.pow(Math.max(0,g.menuSlots-1),1.15)))}
+function buyMenuSlot(){
+ if(g.menuSlots>=FOOD.length||g.run&&!g.run.paused)return false;
+ const cost=slotCost();if(g.coins<cost){toast(`Need ${fmt(cost-g.coins)} more coins for a menu slot.`);return false}
+ const before={coins:g.coins,menuSlots:g.menuSlots,economyPeakBase:g.economyPeakBase};commitPurchaseUndo();g.coins-=cost;g.menuSlots++;
+ registerPurchaseUndo('Menu slot',cost,before);save();render();return true;
 }
-function unassignFood(uid){if(!manualMenuAllowed())return;if(g.run){toast('Finish your order first.');return}g.activeMenu=g.activeMenu.filter(x=>x!==uid);save();closeModal();toast('Food kept in your collection.')}
-function chooseFoodForSlot(){
- openMenu('add');
-}
-function assignFood(uid){if(!manualMenuAllowed())return;if(g.run){toast('Finish your order first.');return}if(g.activeMenu.length>=g.menuSlots||g.activeMenu.includes(uid))return;const o=g.owned.find(x=>x.uid===uid);if(!o)return;g.activeMenu.push(uid);save();closeModal();toast(`${F(o.id).name} is on the menu!`)}
 function sortedMenuFoods(foods){return [...foods].sort((a,b)=>F(b.id).rarity-F(a.id).rarity||foodValue(b)-foodValue(a)||a.uid-b.uid)}
 function renderFoodCard(o,inventory=false){
- const f=F(o.id),cost=foodLevelPrice(o),max=o.level>=MAX_FOOD_LEVEL;
- const selected=inventory&&inventorySelection.has(o.uid);
- const bonus=level=>Math.round((LEVEL_FACTORS[level]-1)*100);
- return `<article class="food-tile mastery-card r${f.rarity}${selected?' is-selected':''}" data-uid="${o.uid}" data-tier="${foodTier(o)}" aria-label="${f.name}">
- <div class="tier-banner">${f.rarity+1}★ ${RARITIES[f.rarity]}</div>
- ${inventory?`<label class="inventory-select"><input type="checkbox" ${selected?'checked':''} aria-label="Select ${f.name}" onchange="toggleInventoryFood(${o.uid},this.checked)"></label><span class="equipped-label ${g.activeMenu.includes(o.uid)?'equipped':''}">${g.activeMenu.includes(o.uid)?'On menu':'In inventory'}</span>`:''}
- <div class="mastery-stars" aria-label="${f.rarity+1} rarity stars">${'★'.repeat(f.rarity+1)}</div>
- <div class="food-value">×${foodValue(o).toFixed(2)}<small>Base ×${tierBase(o).toFixed(2)}</small></div>
- <button class="food-identity" onclick="${inventory?`toggleInventoryFood(${o.uid})`:`openFoodItem(${o.uid})`}" aria-label="${inventory?'Select':'More options for'} ${f.name}">${foodArt(f.id)}<strong class="food-name">${f.name}</strong></button>
- <div class="mastery-summary"><b>Mastery Lv ${o.level}/${MAX_FOOD_LEVEL}</b><small>Current bonus: +${bonus(o.level)}%</small></div>
- <button class="primary mastery-upgrade" ${max||g.coins<cost||g.run?'disabled':''} onclick="upgradeFood(${o.uid},true);${inventory?'openMenu(inventoryIntent,true)':''}">${max?'Mastery Max':`Upgrade to Lv ${o.level+1} (+${bonus(o.level+1)}%) <span>🪙 ${amountLabel(cost)}</span>`}</button>
- <div class="food-management"><button ${g.run||g.autoEquip!=='off'||!g.activeMenu.includes(o.uid)&&g.activeMenu.length>=g.menuSlots?'disabled':''} onclick="${g.activeMenu.includes(o.uid)?`removeFoodPrompt(${o.uid})`:`assignFood(${o.uid})`}">${g.activeMenu.includes(o.uid)?'Remove':'Add to menu'}</button><button ${g.run?'disabled':''} onclick="sellFoodPrompt(${o.uid})">Sell…</button></div></article>`;
+ const f=F(o.id),equipped=g.activeMenu.includes(o.uid),available=availableMastery(o),selected=selectedFoods.has(o.uid);
+ return `<article class="food-tile compact-food r${f.rarity} ${equipped?'is-equipped':'is-unequipped'} ${selected?'is-selected':''}" data-uid="${o.uid}" aria-label="${f.name}">
+ <button class="food-card-target" aria-pressed="${selected}" onclick="selectFood(${o.uid})" aria-label="${f.name}, ${rarityLabel(f.rarity)}, contribution ${foodValue(o).toFixed(2)}, Mastery ${recipeMastery(o)}, ${equipped?'equipped':'unequipped'}">
+ <span class="food-card-top"><b>×${multiplierLabel(foodValue(o))} 💎</b><span>${f.rarity+1}★</span></span>
+ ${foodArt(f.id)}<strong>${f.name}</strong><span class="food-card-rarity">${RARITIES[f.rarity]}</span>
+ <span class="food-card-bottom"><span>${equipped?'On menu':'Unequipped'}</span><b>♛ ${recipeMastery(o)} ${available?`<span class="mastery-ready" title="${available} unlocked mastery upgrades" aria-label="${available} mastery upgrades available">↑</span>`:''}</b></span></button></article>`;
 }
-function removeFoodPrompt(uid){
- const o=g.owned.find(x=>x.uid===uid);if(!o||!g.activeMenu.includes(uid)||g.run)return;
- showModal('Remove from the menu?',`<div class="food-detail">${foodArt(o.id)}<div><h2>${F(o.id).name}</h2><strong>×${foodValue(o).toFixed(2)}</strong></div></div><p class="warning">This copy stops contributing to your Menu multiplier. Your food and all its upgrades stay in Food Inventory. You can add it again any time.</p><div class="btnrow"><button class="primary" onclick="closeModal()">Keep on menu</button><button class="secondary" onclick="unassignFood(${uid})">Remove from menu</button></div>`);
+function selectFood(uid){
+ if(suppressFoodTap===uid){suppressFoodTap=null;return}
+ if(!g.owned.some(o=>o.uid===uid))return;
+ if(multiSelect){selectedFoods.has(uid)?selectedFoods.delete(uid):selectedFoods.add(uid)}else selectedFoods=new Set([uid]);
+ paintFoodPanel();
 }
+function openFoodItem(uid){menuTab='menu';if(modal)closeModal();if(!$('foodPanel'))render();selectedFoods=new Set([uid]);multiSelect=false;paintFoodPanel();}
+function closeFoodPanel(){selectedFoods.clear();multiSelect=false;paintFoodPanel()}
+function selectAllFoods(){multiSelect=true;selectedFoods=new Set(g.owned.filter(o=>!hideUnequipped||g.activeMenu.includes(o.uid)).map(o=>o.uid));paintFoodPanel()}
+function selectionState(){const foods=g.owned.filter(o=>selectedFoods.has(o.uid));return {foods,adding:foods.filter(o=>!g.activeMenu.includes(o.uid)),removing:foods.filter(o=>g.activeMenu.includes(o.uid)),eligible:foods.filter(o=>availableMastery(o)>0)}}
+function selectionEquip(equip){
+ if(g.run&&!g.run.paused)return false;
+ const {adding,removing}=selectionState(),target=equip?adding:removing;if(!target.length)return false;
+ if(equip){
+  const ids=[...g.activeMenu.map(uid=>g.owned.find(o=>o.uid===uid)?.id),...adding.map(o=>o.id)];
+  if(new Set(ids).size!==ids.length){toast('Equip one copy of each recipe. Unequip its other copy first.');return false}
+  if(g.activeMenu.length+adding.length>g.menuSlots){toast(`Need ${g.activeMenu.length+adding.length-g.menuSlots} more menu slot(s) to equip this selection.`);return false}
+ }
+ commitPurchaseUndo('Equipped recipes changed');g.autoEquip='off';
+ g.activeMenu=equip?[...g.activeMenu,...adding.map(o=>o.uid)]:g.activeMenu.filter(uid=>!removing.some(o=>o.uid===uid));save();render();return true;
+}
+function assignFood(uid){selectedFoods=new Set([uid]);return selectionEquip(true)}
+function unassignFood(uid){selectedFoods=new Set([uid]);return selectionEquip(false)}
+function removeFoodPrompt(uid){return unassignFood(uid)}
+function chooseFoodForSlot(){hideUnequipped=false;render();toast('Tap a food, then Equip. Long-press to select several.')}
+function renderSelectionActions(state){
+ const {adding,removing,eligible}=state,total=eligible.reduce((sum,o)=>sum+foodLevelPrice(o),0),mixed=adding.length&&removing.length;
+ return `<div class="food-panel-actions"><button class="secondary" onclick="requestSelectedSale()">Sell…</button><button class="primary" ${!eligible.length||g.coins<total?'disabled':''} onclick="requestSelectedMastery()">+1 ♛ ${multiSelect?'Selected':'Mastery'} · 🪙 ${fmt(total)}</button>${adding.length?`<button class="secondary" onclick="selectionEquip(true)">${mixed?`Equip (${adding.length})`:multiSelect?'Equip Selected':'Equip'}</button>`:''}${removing.length?`<button class="secondary" onclick="selectionEquip(false)">${mixed?`Unequip (${removing.length})`:multiSelect?'Unequip Selected':'Unequip'}</button>`:''}</div>`;
+}
+function renderFoodPanel(){
+ const state=selectionState(),{foods}=state;if(!foods.length&&!multiSelect)return '';
+ return `<section class="sticky-food-panel" aria-label="Selected food details"><button class="close food-panel-close" onclick="closeFoodPanel()" aria-label="Close food details">×</button>${multiSelect?`<div class="selection-tools"><button class="secondary" onclick="selectedFoods.clear();paintFoodPanel()">Deselect All</button><button class="secondary" onclick="selectAllFoods()">Select All</button><strong>${foods.length} selected</strong></div><div class="selected-food-list">${foods.map(o=>`<div>${foodArt(o.id)}<span><b>${F(o.id).name}</b><small>Mastery ${recipeMastery(o)} ♛ Available +${availableMastery(o)}</small></span><strong>×${multiplierLabel(foodValue(o))} 💎</strong></div>`).join('')}</div>`:foods.map(o=>{const f=F(o.id),next=foodValue({...o,mastery:recipeMastery(o)+1})-foodValue(o);return `<div class="recipe-detail"><div>${foodArt(o.id)}${rarityTag(f.rarity)}</div><div><h2>${f.name}</h2><strong class="detail-contribution">×${multiplierLabel(foodValue(o))} 💎</strong><small>Base ×${multiplierLabel(tierBase(o))} 💎</small><p><b>Recipe Mastery: ${recipeMastery(o)} ♛</b><br>Mastery bonus +${multiplierLabel(foodValue(o)-tierBase(o))} 💎</p><div class="mastery-availability">Available +${availableMastery(o)} ♛ · Next +${multiplierLabel(next)} 💎</div></div></div>`}).join('')}${!multiSelect&&g.completed>=5&&foods[0]?`<details class="recipe-more"><summary>More recipe options</summary><div class="btnrow"><button class="secondary" onclick="openFusion(${foods[0].uid})">Fuse copies</button><button class="secondary" onclick="ingredientFusionInfo(${foods[0].uid})">Use ingredients</button></div></details>`:''}${!multiSelect?'<p class="selection-hint">☝ Long-press any food to select several.</p>':''}${foods.length?renderSelectionActions(state):''}</section>`;
+}
+function paintFoodPanel(){
+ selectedFoods=new Set([...selectedFoods].filter(uid=>g.owned.some(o=>o.uid===uid)));
+ const panel=$('foodPanel');if(panel)panel.innerHTML=renderFoodPanel();
+ for(const card of document.querySelectorAll?.('.menu-grid [data-uid]')||[]){const selected=selectedFoods.has(Number(card.dataset.uid));card.classList.toggle('is-selected',selected);card.querySelector('button')?.setAttribute('aria-pressed',String(selected))}
+}
+let masteryConfirmation=null,saleConfirmation=null;
+function requestSelectedMastery(){
+ const {eligible}=selectionState();if(!eligible.length)return;
+ const cost=eligible.reduce((sum,o)=>sum+foodLevelPrice(o),0);
+ masteryConfirmation={uids:eligible.map(o=>o.uid),cost,fingerprint:JSON.stringify(eligible.map(o=>[o.uid,recipeMastery(o),g.recipeCeilings[o.id],foodLevelPrice(o)]))};
+ showModal('Buy Recipe Mastery?',`<p>+1 Mastery for ${eligible.length} eligible ${eligible.length===1?'food':'foods'}. Other selected foods stay as they are.</p><p>Total: <b>🪙 ${fmt(cost)}</b></p><button class="primary" ${g.coins<cost?'disabled':''} onclick="confirmSelectedMastery()">Buy +1 Mastery · 🪙 ${fmt(cost)}</button>`);
+}
+function confirmSelectedMastery(){const pending=masteryConfirmation;masteryConfirmation=null;if(!pending)return false;const ok=buyMastery(pending.uids,pending);if(ok)closeModal();return ok}
+function requestSelectedSale(){
+ const {foods}=selectionState();if(!foods.length)return;
+ saleConfirmation={uids:foods.map(o=>o.uid),fingerprint:inventoryFingerprint(foods)};
+ const total=foods.reduce((sum,o)=>sum+resalePrice(o),0);
+ showModal(`Sell ${foods.length} food${foods.length===1?'':'s'}?`,`<p>This permanently removes these copies and their purchased mastery. Your discoveries and unlocked recipe ceilings stay.</p><div class="selection-review">${foods.map(o=>`<div><b>${F(o.id).name}</b><strong>🪙 ${fmt(resalePrice(o))}</strong></div>`).join('')}</div><button class="secondary" onclick="closeModal()">Keep foods</button><button class="primary" onclick="confirmSelectedSale()">Sell · 🪙 ${fmt(total)}</button>`);
+}
+function confirmSelectedSale(){
+ const tx=saleConfirmation;saleConfirmation=null;if(!tx||g.run&&!g.run.paused)return false;
+ const foods=tx.uids.map(uid=>g.owned.find(o=>o.uid===uid));if(foods.some(o=>!o)||inventoryFingerprint(foods)!==tx.fingerprint){toast('Foods changed. Review the sale again.');return false}
+ commitPurchaseUndo('Foods sold');g.coins+=foods.reduce((sum,o)=>sum+resalePrice(o),0);g.owned=g.owned.filter(o=>!tx.uids.includes(o.uid));g.activeMenu=g.activeMenu.filter(uid=>!tx.uids.includes(uid));selectedFoods.clear();save();closeModal();return true;
+}
+function renderKitchenTab(){return `<div class="kitchen-tab"><p>Kitchen tools multiply every equipped recipe.</p>${KITCHEN.map(k=>{const level=g.equipment[k.id]||0,cost=equipmentCost(k);return `<div class="itemcard"><h3>${k.icon} ${k.name}</h3><p>Level ${level}/${MAX_KITCHEN_LEVEL} · +${(k.bonus*100).toFixed(1)}% next upgrade</p><button class="primary" ${g.completed<2||level>=MAX_KITCHEN_LEVEL||g.coins<cost?'disabled':''} onclick="upgradeEquipment('${k.id}')">${g.completed<2?'Opens after 2 orders':`Upgrade · 🪙 ${fmt(cost)}`}</button></div>`}).join('')}</div>`}
 function renderMenu(){
- const items=sortedMenuFoods(g.activeMenu.map(uid=>g.owned.find(x=>x.uid===uid)).filter(Boolean));
- const tiles=items.map(o=>renderFoodCard(o)).join('');
- const emptySlots=Math.max(0,g.menuSlots-items.length);
- const addCard=`<button class="food-tile empty" onclick="chooseFoodForSlot()" ${!emptySlots||g.autoEquip!=='off'?'disabled':''}><span class="slot-illustration" aria-hidden="true">${bakeryIcon('inventory')}</span><span class="slot-help">+ Add Item</span><small class="slots-left">${emptySlots} ${emptySlots===1?'Slot':'Slots'} Left</small></button>`;
- return `<main class="menu-stage">${renderBakery()}<div class="value-hero menu-valuebar"><div class="menu-value"><h2>Menu</h2><span class="menu-divider" aria-hidden="true"></span><strong class="number" aria-label="Bakery Value Multiplier ${bakeryValue().toFixed(2)}">×${multiplierLabel(bakeryValue())} <span aria-hidden="true">🪙</span></strong></div><div class="wallet" aria-label="Coin balance"><span aria-hidden="true">🪙</span><strong id="walletCoins" title="${fmt(g.coins)} coins">${amountLabel(g.coins)}</strong></div></div><nav class="food-navigation menu-toolbar" aria-label="Menu tools"><div class="toolbar-left"><button onclick="showTutorial()">${bakeryIcon('guide')} Guide</button><button onclick="openStaff()" ${g.completed<6?'disabled title="Opens after 6 orders"':''}>${bakeryIcon('helper')} Helper</button></div><div class="toolbar-right">${renderEquipBest()}<button onclick="openMenu()">${bakeryIcon('inventory')} Food Inventory <span>${g.owned.length}</span></button><button onclick="openIndex()">${bakeryIcon('index')} Food Index <span>${g.discovered.length}/${FOOD.length}</span></button></div></nav><div class="menu-grid"><button class="food-tile buy-slot" onclick="buyMenuSlot()"><span class="slot-illustration" aria-hidden="true">${bakeryIcon('display')}</span><span class="slot-purchase-line"><span class="plus-mark">+</span><strong>Buy Slot</strong><span class="slot-price">🪙 ${fmt(slotCost())}</span></span></button>${addCard}${tiles}</div></main>`;
+ const items=sortedMenuFoods(g.owned.filter(o=>!hideUnequipped||g.activeMenu.includes(o.uid)));
+ return `<main class="menu-stage collection-stage"><section class="boost-hero"><small>Menu Boost ×${multiplierLabel(Math.max(1,foodSum())*kitchenBonus())} 💎 × Bakery Power ×${multiplierLabel(decorBonus())} 👑 =</small><strong aria-label="Baker's Boost ${bakeryValue().toFixed(2)}">×${multiplierLabel(bakeryValue())} 💎</strong><h2>BAKER'S BOOST <button class="text-button" onclick="showBoostInfo()" aria-label="About Baker's Boost">ⓘ</button></h2></section><div class="coin-balance" aria-label="Coin balance"><strong id="walletCoins" title="${fmt(g.coins)} coins">${amountLabel(g.coins)}</strong> 🪙</div><div class="menu-tabs" role="tablist"><button role="tab" aria-selected="${menuTab==='menu'}" onclick="menuTab='menu';render()">🍽 Menu</button><button role="tab" aria-selected="${menuTab==='kitchen'}" onclick="menuTab='kitchen';render()">🍳 Kitchen</button></div>${menuTab==='kitchen'?renderKitchenTab():`<div class="collection-toolbar"><b>${g.activeMenu.length}/${g.menuSlots} Slots Used</b><button class="secondary" ${g.menuSlots>=FOOD.length?'disabled':''} onclick="buyMenuSlot()">${g.menuSlots>=FOOD.length?'All recipe slots owned':`+1 Slot · 🪙 ${amountLabel(slotCost())}`}</button><button class="secondary" aria-pressed="${hideUnequipped}" onclick="hideUnequipped=!hideUnequipped;render()">${hideUnequipped?'Show All':'Hide Unequipped'}</button><button class="secondary" onclick="equipBest('final')">Equip Best</button></div><div class="menu-grid" tabindex="0" aria-label="Owned foods, scroll to browse">${items.map(o=>renderFoodCard(o)).join('')}${g.activeMenu.length<g.menuSlots?'<button class="food-tile empty" onclick="chooseFoodForSlot()"><strong>+</strong><small>Choose a food to equip</small></button>':''}${!items.length?'<p>No foods in this view. Show all foods or open a package.</p>':''}</div><div id="foodPanel">${renderFoodPanel()}</div>`}</main>`;
 }
-function renderEquipBest(){return `<details class="equip-best"><summary>Equip Best ▾${g.autoEquip!=='off'?`<small>Auto: ${g.autoEquip==='final'?'Final':'Base'}</small>`:''}</summary><div class="equip-options" role="group" aria-label="Equip Best options">${['final','base'].map(mode=>`<div><button onclick="equipBest('${mode}');document.querySelector('.equip-best')?.removeAttribute('open')" ${g.run?'disabled':''}>Equip by ${mode==='final'?'Final':'Base'} Multiplier</button><label><input type="checkbox" ${g.autoEquip===mode?'checked':''} ${g.run?'disabled':''} onchange="setAutoEquip('${mode}',this.checked)"> Auto Equip</label></div>`).join('')}<small>One copy per food. Auto chooses your menu; switch it off to choose manually.</small></div></details>`}
+function renderEquipBest(){return `<button class="secondary" onclick="equipBest('final')">Equip Best</button>`}
+function showBoostInfo(){showModal("Baker's Boost",`<p>Equipped recipe contributions add up to Menu Boost. Kitchen tools improve that total. Bakery Power multiplies it to make Baker's Boost.</p><p>×${foodSum().toFixed(2)} recipes × ${kitchenBonus().toFixed(3)} kitchen × ${decorBonus().toFixed(3)} Bakery Power = <b>×${bakeryValue().toFixed(2)} 💎</b></p>`)}
+document.addEventListener?.('pointerdown',event=>{
+ const card=event.target.closest?.('.menu-grid [data-uid]');if(!card)return;
+ const uid=Number(card.dataset.uid);foodHold={x:event.clientX,y:event.clientY,uid,timer:setTimeout(()=>{multiSelect=true;selectedFoods.add(uid);suppressFoodTap=uid;paintFoodPanel()},500)};
+});
+function cancelFoodHold(){if(foodHold)clearTimeout(foodHold.timer);foodHold=null}
+document.addEventListener?.('pointermove',event=>{if(foodHold&&Math.hypot(event.clientX-foodHold.x,event.clientY-foodHold.y)>12)cancelFoodHold()},{passive:true});
+document.addEventListener?.('pointerup',cancelFoodHold);document.addEventListener?.('pointercancel',cancelFoodHold);
+document.addEventListener?.('keydown',event=>{const card=event.target.closest?.('.menu-grid [data-uid]');if(card&&event.shiftKey&&(event.key===' '||event.key==='Enter')){event.preventDefault();multiSelect=true;selectedFoods.add(Number(card.dataset.uid));paintFoodPanel()}});
+document.addEventListener?.('contextmenu',event=>{if(event.target.closest?.('.menu-grid [data-uid]'))event.preventDefault()});
 let fusionSelection=null;
 function outputPreview(o){return `<div class="fusion-output">${foodArt(o.id)}<div><b>${F(o.id).name}</b><span>Tier ${foodTier(o)} · Level ${o.level}</span><span>Base ×${tierBase(o).toFixed(2)} +${Math.round((LEVEL_FACTORS[o.level]-1)*100)}% = <b>×${foodValue(o).toFixed(2)}</b></span><small>Paid investment: ${fmt(o.spent||0)} coins${o.baseCarry>0?` · includes ×${o.baseCarry.toFixed(2)} retained base`:''}</small></div></div>`}
 function openFusion(uid,donorUid=null){

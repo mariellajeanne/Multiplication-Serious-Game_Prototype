@@ -5,12 +5,21 @@ const BAKERY_MILESTONES=[2,3,5,7,10,13,17,21,25,30];
 const BAKERY_STAGES=['Freshly opened','Warm welcome','Cozy counter','Neighborhood bakery','Blooming bakery','Golden counter','Artisan bakery','Celebration bakery','Grand panaderya','Master bakery','Crown panaderya'];
 const TICKET_DIMS=[[2,1],[2,2],[2,2],[3,2],[3,2],[4,2],[4,2],[4,2]];
 const ORDER_LIMIT=5, ORDER_REFRESH_MS=180000;
+// Frame 11: tune progression and shop economy here, independently of presentation.
+const BAKERY_POWER_CONFIG={purchases:100,factor:1.085,priceOrders:2.5,priceGrowth:.2};
+const PACKAGE_TYPES=['Standard','Lucky','Fortunate','Charmed','Blessed','Miraculous','Divine','Fate'];
+const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:1+rank*10,priceOrders:.6*Math.pow(2,rank)}));
+const MASTERY_STEP=.4, PURCHASE_UNDO_MS=10000;
+function recipeMastery(o){return Math.max(0,Math.floor(o.mastery??((o.level||1)-1)))}
+function masteryFactor(n){return n<5?LEVEL_FACTORS[n+1]:2.3+(n-4)*MASTERY_STEP}
+function availableMastery(o){return Math.max(0,(g.recipeCeilings?.[o.id]||0)-recipeMastery(o))}
 function foodTier(o){return clamp(Math.floor(Number(o.fusion)||1),1,MAX_FOOD_TIER)}
 function amountLabel(value){return Math.abs(value)<1e6?fmt(value):new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(value)}
 function multiplierLabel(value){return Math.abs(value)<1e4?value.toFixed(2):new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(value)}
 function tierBase(o){return (FOOD.find(f=>f.id===o.id)?.base||0)*TIER_FACTORS[foodTier(o)]+Math.max(0,Number(o.baseCarry)||0)}
-function individualValue(o){return tierBase(o)*LEVEL_FACTORS[clamp(Math.floor(Number(o.level)||1),1,MAX_FOOD_LEVEL)]}
-function bakeryFactor(level){return Math.pow(1.085,clamp(level||1,1,30)-1)}
+function individualValue(o){return tierBase(o)*masteryFactor(recipeMastery(o))}
+function bakeryFactor(level){return Math.pow(BAKERY_POWER_CONFIG.factor,clamp(level||1,1,BAKERY_POWER_CONFIG.purchases+1)-1)}
+function powerLabel(value){return new Intl.NumberFormat('en-US',{maximumFractionDigits:6}).format(value)}
 function bakeryStage(level){return BAKERY_MILESTONES.filter(n=>n<=level).length}
 function binomialRanks(p){
  const coefficients=[1,7,21,35,35,21,7,1];

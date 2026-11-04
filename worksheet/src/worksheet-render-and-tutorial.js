@@ -16,7 +16,7 @@ function render(){const active=productActive(),last=lastDigit();$('replayMult').
 }
 function positionFloater(){
  const float=$('floating'),svg=$('pair');
- if(!productActive()){$('pair').classList.remove('live');float.classList.remove('show','multiply-running');float.innerHTML='';updateTutorial();return}
+ if(!productActive()){$('pair').classList.remove('live');float.classList.remove('show','multiply-running');float.innerHTML='';delete float.dataset.markup;updateTutorial();return}
  const ta=Q(`[data-top="${s.k}"]`),bo=Q(`[data-bottom="${s.row}"]`);if(!ta||!bo)return;
  const rect=$('sheet').getBoundingClientRect(),a=ta.getBoundingClientRect(),b=bo.getBoundingClientRect();
  const ax=a.left+a.width/2-rect.left,ay=a.top+a.height/2-rect.top,bx=b.left+b.width/2-rect.left,by=b.top+b.height/2-rect.top;
@@ -28,10 +28,13 @@ function positionFloater(){
  float.dataset.equation=`${s.B[s.row]} × ${s.A[s.k]} =`;
  float.setAttribute('aria-label',`Product ${value()}; select either digit`);
  const leftVisible=T>0;
- float.innerHTML=`${leftVisible?`<button class="ftile ${s.tensPlaced?'done ':''}${s.chosen==='tens'?'selected ':''}${!s.mixed?'pretend ':''}" data-part="tens" aria-label="Tens digit ${T}">${T}</button>`:''}<button class="ftile ${s.onesPlaced?'done ':''}${s.chosen==='ones'?'selected ':''}${s.carryArmed?'targeted ':''}${!s.mixed?'pretend ':''}" data-part="ones" aria-label="Ones digit ${O}">${O}</button>`;
+ let markup=`${leftVisible?`<button class="ftile ${s.tensPlaced?'done ':''}${s.chosen==='tens'?'selected ':''}${!s.mixed?'pretend ':''}" data-part="tens" aria-label="Tens digit ${T}">${T}</button>`:''}<button class="ftile ${s.onesPlaced?'done ':''}${s.chosen==='ones'?'selected ':''}${s.carryArmed?'targeted ':''}${!s.mixed?'pretend ':''}" data-part="ones" aria-label="Ones digit ${O}">${O}</button>`;
  if(!s.revealed){
-   float.innerHTML=`<button type="button" id="equationReveal" class="equation-reveal" aria-label="Multiply ${s.B[s.row]} by ${s.A[s.k]} and show the product">${s.B[s.row]} × ${s.A[s.k]}</button>`;
+   markup=`<button type="button" id="equationReveal" class="equation-reveal" aria-label="Multiply ${s.B[s.row]} by ${s.A[s.k]} and show the product">${s.B[s.row]} × ${s.A[s.k]}</button>`;
  }
+ // A scroll/resize or the next animation frame must not detach a live touch
+ // target between pointerdown and click. Only actual state changes replace it.
+ if(float.dataset.markup!==markup){float.dataset.markup=markup;float.innerHTML=markup}
  float.classList.add('show');float.classList.remove('multiply-running');float.classList.toggle('equation-pending',!s.revealed);
  const typeOnActive=!s.revealed;
  float.classList.toggle('typeon-sized',typeOnActive);

@@ -1,5 +1,7 @@
 # Panaderya Quest — agent instructions
 
+Current behavior and verification: [docs/FRAME_11_IMPLEMENTATION.md](docs/FRAME_11_IMPLEMENTATION.md) (2026-11-04). Frame 11 supersedes older layout/cap references: all owned foods, one starting slot, duplicate-unlocked unbounded Recipe Mastery, Bakery Power with 100 internal purchases, coin packages, safe ten-second Undo and persistent independent order worksheets. Keep both bridges in sync. Run `node --test tests/*.test.mjs` and the focused WebKit/Edge runner when changing these paths.
+
 ## The project and the goal
 Panaderya Quest is a tablet-first educational incremental bakery game for practicing **long multiplication procedure** after students have learned basic multiplication facts. The user is both designer and product owner. Their priority is a delightful, approachable learning experience, not a complicated bakery-management simulator.
 

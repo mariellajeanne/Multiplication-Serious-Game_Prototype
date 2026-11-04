@@ -16,10 +16,14 @@ A Filipino bakery-themed long-multiplication serious game, built as a static web
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — file map, messaging and saved-data contracts, tests.
 - [`worksheet/README.md`](worksheet/README.md) — worksheet breakdown and manual test expectations.
 
+## Current implementation
+
+See [Frame 11 implementation and verification](docs/FRAME_11_IMPLEMENTATION.md) for the latest collection UI, Bakery Power, Recipe Mastery, package shop, Undo, independent saved orders and Safari fixes.
+
 ## Tests
 If Node.js is available, from project root: `node --test tests/smoke.test.mjs`. For gestures, tutorials, sound and visual checks, run the browser and use `tests/worksheet-manual-checklist.md`.
 
-The full regression suite is `node --test tests/smoke.test.mjs tests/worksheet-session.test.mjs tests/worksheet-rewards.test.mjs tests/ux.test.mjs`. With Node 22+ and Edge installed, `node tests/browser-worksheet.mjs` tests the complete tablet/phone order flow; `node tests/browser-ux.mjs` checks dialogs, four viewport sizes and reduced-motion feedback. Both accept a Chromium/Edge executable path as their first argument and use isolated private temporary profiles. See [`docs/UX_AUDIT.md`](docs/UX_AUDIT.md) for the redesign rationale, exact validation and remaining physical-device/child-testing needs.
+Run all current regression tests with `node --test tests/*.test.mjs`. The focused browser runner is `python tests/browser-frame11.py webkit edge` (Python Playwright plus a downloaded WebKit browser; Edge installed locally). It hosts the static checkout on loopback and uses isolated contexts. Its screenshots are saved in `docs/previews/frame11/`. See the Frame 11 handoff for exact coverage and physical-device limits. The older CDP runners preserve earlier UI fixtures; use the Frame 11 runner for the current collection and purchase flow.
 
 ## GitHub Pages
 This project is static and does not require a build step. Deploy **all** root files and directories via branch `main` and `/(root)` in GitHub Pages. Preserve `.git` when copying files into your existing clone. A new commit does not erase commit history.

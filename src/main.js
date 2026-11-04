@@ -2,17 +2,21 @@
 let mountedWorksheetRun=null;
 function render(){
  if(g.run?.phase==='engine'&&mountedWorksheetRun===g.run&&$('worksheetFrame')){
-  const wasPaused=$('liveOrder')?.hidden;paintPausedOrder();if(wasPaused&&!g.run.paused&&typeof fitWorksheet==='function')fitWorksheet();const wallet=$('walletCoins');if(wallet)wallet.textContent=amountLabel(g.coins);return;
+  const wasPaused=$('liveOrder')?.hidden,scroll=document.querySelector?.('.menu-grid')?.scrollTop||0;paintPausedOrder();
+  const grid=document.querySelector?.('.menu-grid');if(grid)grid.scrollTop=scroll;
+  if(g.run.paused){const left=document.querySelector?.('.leftcol'),right=document.querySelector?.('.rightcol');if(left)left.outerHTML=renderLeft();if(right)right.outerHTML=renderRight();if(typeof centerBakeryCard==='function')centerBakeryCard()}
+  if(wasPaused&&!g.run.paused&&typeof fitWorksheet==='function')fitWorksheet();const wallet=$('walletCoins');if(wallet)wallet.textContent=amountLabel(g.coins);if(typeof paintPurchaseUndo==='function')paintPurchaseUndo();return;
  }
  mountedWorksheetRun=g.run?.phase==='engine'?g.run:null;
+ const gridScroll=document.querySelector?.('.menu-grid')?.scrollTop||0;
  reconcileAutoEquip();refillBoard();$('app').dataset.bakeryStage=bakeryStage(g.bakeryLevel);$('app').className=g.run&&!g.run.paused?'playing':'browsing';
- $('app').innerHTML=`<header class="topbar"><div class="brand"><span class="brandlogo" aria-hidden="true">${bakeryIcon('bakery')}</span><h1>My Panaderya</h1><button class="iconbtn" onclick="openSettings()" aria-label="Settings">${bakeryIcon('settings')}</button></div></header><div class="layout">${g.run?`<div id="liveOrder" class="live-order">${renderWorksheet()}</div><div id="pausedMenu" class="paused-menu" hidden></div>`:renderMenu()}${renderRight()}</div>`;
- paintPausedOrder();
+ $('app').innerHTML=`<header class="topbar"><div class="brand"><span class="brandlogo" aria-hidden="true">${bakeryIcon('bakery')}</span><h1>My Panaderya</h1><button class="iconbtn" onclick="openSettings()" aria-label="Settings">${bakeryIcon('settings')}</button></div></header><div class="layout">${renderLeft()}${g.run?`<div id="liveOrder" class="live-order">${renderWorksheet()}</div><div id="pausedMenu" class="paused-menu" hidden></div>`:renderMenu()}${renderRight()}</div>`;
+ paintPausedOrder();const grid=document.querySelector?.('.menu-grid');if(grid)grid.scrollTop=gridScroll;if(typeof centerBakeryCard==='function')centerBakeryCard();if(typeof paintPurchaseUndo==='function')paintPurchaseUndo();
  if(typeof syncRewardPresentation==='function')syncRewardPresentation();
- if(g.run&&g.run.phase==='engine'){const fr=$('worksheetFrame');if(fr)fr.src='worksheet/worksheet-engine.html';if(typeof fitWorksheet==='function')fitWorksheet()}
+ if(g.run&&g.run.phase==='engine'){const fr=$('worksheetFrame');if(fr){fr.onload=()=>sendEngine('hello');fr.src='worksheet/worksheet-engine.html'}if(typeof fitWorksheet==='function')fitWorksheet()}
 }
-if(typeof window!=='undefined')window.addEventListener('resize',()=>{if(g.run?.phase==='engine'&&typeof fitWorksheet==='function')fitWorksheet()});
-setInterval(()=>{tickStaff();updateOrderRefresh()},1000);refillBoard();render();save();
+if(typeof window!=='undefined')window.addEventListener('resize',()=>{if(g.run?.phase==='engine'&&typeof fitWorksheet==='function')fitWorksheet();if(typeof centerBakeryCard==='function')centerBakeryCard()});
+setInterval(()=>{tickStaff();updateOrderRefresh();validatePurchaseUndo();paintPurchaseUndo()},1000);refillBoard();render();save();
 
 function paintPausedOrder(){
  const live=$('liveOrder'),menu=$('pausedMenu');if(!live||!menu)return;

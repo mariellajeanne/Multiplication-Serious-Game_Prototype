@@ -48,7 +48,7 @@ liftTens=function(...args){if(s&&s.phase==='product'&&!busy&&s.tensLocation==='r
 const baseAddCarry=addCarry;
 addCarry=function(target){if(s&&s.phase==='product'&&!busy&&!s.mixed&&s.incoming&&((target==='placed'&&s.onesPlaced)||(target==='floating'&&!s.onesPlaced))) bridgeMetrics.carryDown++;return baseAddCarry(target)};
 function bridgeStats(){return {cycles:bridgeMetrics.cycles,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,errors:bridgeMetrics.errors,lookup:0,recall:0,tempo:1};}
-let lastReport='',lastHeight=0;
+let lastReport='',lastHeight=0,lastReadyReport=0;
 function worksheetSurface(){
  if(!window.innerWidth||!window.innerHeight)return null;
  const rect=el=>{if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left/window.innerWidth,y:r.top/window.innerHeight,w:r.width/window.innerWidth,h:r.height/window.innerHeight}};
@@ -67,6 +67,9 @@ function applyWorksheetLayout(layout){
 }
 function bridgePoll(){
  if(!s)return;
+ // WebKit can deliver the first ready message during iframe WindowProxy setup.
+ // Keep retrying until an authenticated start arrives, just like completion ACKs.
+ if(!worksheetAttemptId&&performance.now()-lastReadyReport>=400){lastReadyReport=performance.now();report('ready')}
  recordWorksheetActions();
  if(s.done!==bridgeMetrics.lastDone){
   if(s.done>bridgeMetrics.lastDone){for(let i=bridgeMetrics.lastDone;i<s.done;i++){bridgeMetrics.cycles++;bridgeMetrics.currentCombo++;bridgeMetrics.bestCombo=Math.max(bridgeMetrics.bestCombo,bridgeMetrics.currentCombo)}}
@@ -76,8 +79,8 @@ function bridgePoll(){
  if(s.row!==bridgeMetrics.lastRow){bridgeMetrics.currentCombo=0;bridgeMetrics.lastRow=s.row;}
  const stage=s.phase==='select'?'connect':s.phase==='product'?(s.revealed?(s.onesPlaced?(s.incoming&&!s.mixed?'applyCarry':(tens()>0&&(!s.tensPlaced||s.tensLocation==='row')?'liftCarry':'rowFinish')):'place'):'fact'):s.phase==='sum'?'addDigit':s.phase==='complete'?'result':s.phase;
  const completion={complete:s.complete===true,ticket:window.__ACTIVE_WORKSHEET_TICKET||{id:'none'},top:s.a,bottom:s.b};
- const dat={...completion,surface:worksheetSurface(),actions:[...worksheetActions.values()],step:stage,combo:bridgeMetrics.currentCombo,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,row:s.row,done:s.done,phase:s.phase,factLookups:s.done+(s.phase==='product'&&s.revealed?1:0),factRecalls:s.done,hadOld:!!s.incoming,errors:bridgeMetrics.errors};
- const signature=JSON.stringify(dat);
+ const dat={session:window.getWorksheetSession(),...completion,surface:worksheetSurface(),actions:[...worksheetActions.values()],step:stage,combo:bridgeMetrics.currentCombo,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,row:s.row,done:s.done,phase:s.phase,factLookups:s.done+(s.phase==='product'&&s.revealed?1:0),factRecalls:s.done,hadOld:!!s.incoming,errors:bridgeMetrics.errors};
+ const signature=JSON.stringify({...dat,session:{...dat.session,metrics:undefined}});
  if(signature!==lastReport){lastReport=signature;report('state',dat)}
  if(s.complete&&!bridgeMetrics.completionAck&&(!bridgeMetrics.sent||performance.now()-bridgeMetrics.lastCompleteReport>=500)){
   bridgeMetrics.sent=true;bridgeMetrics.lastCompleteReport=performance.now();
@@ -86,8 +89,10 @@ function bridgePoll(){
  const height=Math.ceil($('app').getBoundingClientRect().height||Math.max(document.documentElement.scrollHeight,document.body.scrollHeight));
  if(Math.abs(height-lastHeight)>24){lastHeight=height;report('height',{height})}
 }
+window.getWorksheetSession=()=>({version:1,attemptId:worksheetAttemptId,state:cloneWorksheetState(s),
+ history:cloneWorksheetState(history),money,metrics:{...bridgeMetrics},actions:[...worksheetActions.values()]});
 setInterval(bridgePoll,180);
-function externalStart(ticket,attemptId,forceRestart=false){
+function externalStart(ticket,attemptId,forceRestart=false,session=null){
  if(!ticket)return;const a=Number(ticket.a),b=Number(ticket.b);
  if(!Number.isInteger(a)||a<1||a>99999||!Number.isInteger(b)||b<1||b>99){report('unsupported',{a,b});return;}
  if(typeof attemptId!=='string'||!attemptId)return;
@@ -98,11 +103,18 @@ function externalStart(ticket,attemptId,forceRestart=false){
  if(document.body.dataset)document.body.dataset.rows=String(String(b).length);
  Object.assign(bridgeMetrics,{errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,completionAck:false,lastCompleteReport:0,startedAt:performance.now()});
  $('customA').value=a;$('customB').value=b;$('tryCustom').click();
+ if(session?.attemptId===attemptId&&session.state?.a===a&&session.state?.b===b){
+  s=cloneWorksheetState(session.state);history=cloneWorksheetState(session.history||[]);money=session.money||0;
+  worksheetActions=new Map((session.actions||[]).map(action=>[action.id,action]));
+  Object.assign(bridgeMetrics,session.metrics||{},{sent:false,completionAck:false});
+  additionCollapsed=s.complete===true;busy=false;selection=s.chosen;render();
+ }
  report('started',{a,b});bridgePoll();
 }
 window.addEventListener('message',event=>{
  const m=event.data;if(event.source!==window.parent||!m||m.source!=='bc-shell')return;
- if(m.type==='start')externalStart(m.ticket,m.attemptId);
+ if(m.type==='hello')report('ready');
+ if(m.type==='start')externalStart(m.ticket,m.attemptId,false,m.session);
  if(m.type==='completion-ack'&&m.attemptId===worksheetAttemptId)bridgeMetrics.completionAck=true;
  if(m.type==='restart'&&window.__ACTIVE_WORKSHEET_TICKET)externalStart(window.__ACTIVE_WORKSHEET_TICKET,worksheetAttemptId,true);
  if(m.type==='sound'){$('sound').textContent=m.enabled?'♫ Sound on':'♫ Sound off';sound=!!m.enabled;}

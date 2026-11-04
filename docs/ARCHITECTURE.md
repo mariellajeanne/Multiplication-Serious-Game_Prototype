@@ -1,5 +1,7 @@
 # Latest focused update
 
+**Current owner-directed implementation (2026-11-04):** [Frame 11](FRAME_11_IMPLEMENTATION.md) supersedes the older inventory/layout and progression notes below. The app now has one starting menu slot, all owned foods in the center grid, unlimited duplicate-unlocked Recipe Mastery, 100 configurable Bakery Power purchases, coin package buying/saved unboxing, safe purchase Undo, persistent per-ticket worksheets and a retrying WebKit handshake. Preserve the original math interactions and existing save key.
+
 See [Mastery cards and ticket exit](MASTERY_AND_TICKET_FIX.md) for the current card presentation, equal-base Auto Equip fix and retained live worksheet on Exit/Resume.
 
 # Architecture, code map, and constraints
