@@ -4,7 +4,7 @@
  font-style:normal;font-weight:200 749;font-display:swap;
 }
 @font-face{font-family:'Panaderya Rounded';src:url('../assets/fonts/Nunito-Bold.ttf') format('truetype');font-style:normal;font-weight:750 1000;font-display:swap}
-:root{--game-font:'Panaderya Rounded','Arial Rounded MT Bold',Arial,sans-serif}
+:root{--feedback-press:100ms;--feedback-routine:180ms;--feedback-gain:280ms;--feedback-milestone:480ms;--ease-settle:cubic-bezier(.2,.75,.25,1);--game-font:'Panaderya Rounded','Arial Rounded MT Bold',Arial,sans-serif}
 html,body,button,input,select,textarea,#app *,#modals *,#toasts *{
  font-family:var(--game-font)!important;
 }

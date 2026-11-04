@@ -22,7 +22,7 @@ class QuietHandler(http.server.SimpleHTTPRequestHandler):
 
 server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(QuietHandler, directory=str(ROOT)))
 threading.Thread(target=server.serve_forever, daemon=True).start()
-SHOTS = ROOT / 'docs' / 'previews' / 'frame11'
+SHOTS = ROOT / 'docs' / 'previews' / 'tablet-ux' / 'after'
 SHOTS.mkdir(parents=True, exist_ok=True)
 
 
@@ -100,14 +100,39 @@ def check_browser(pw, engine):
         assert page.evaluate('g.packages[0]') == stock+3
         page.evaluate('setPackageQuantity(3)')
         count = page.evaluate('g.owned.length')
-        page.get_by_role('button',name='Skip Animation',exact=True).tap()
-        assert page.evaluate('g.owned.length') == count+3
+        page.get_by_role('button',name='Open Selected Instantly',exact=True).tap()
+        assert page.evaluate('g.owned.length') == count
+        assert page.evaluate('new Set(g.owned.map(o=>o.id)).size===g.owned.length')
         assert page.evaluate('g.packages[0]') == stock
         page.evaluate('closeModal()')
-        for width,height in [(1194,834),(1024,768),(768,1024),(390,844)]:
+        for width,height in [(2000,1200),(1194,834),(1024,768),(834,1194),(768,1024)]:
             page.set_viewport_size({'width':width,'height':height})
+            page.evaluate('scrollTo(0,0);render()')
+            page.wait_for_timeout(180)
             assert page.evaluate('document.documentElement.scrollWidth <= innerWidth+1')
+            if width<1500:
+                assert page.locator('.odds-heading [aria-expanded=false]').count()==1
             page.screenshot(path=str(SHOTS / f'{engine}-collection-{width}.png'), full_page=True)
+            page.locator('[data-uid="1"] .food-card-target').tap()
+            page.evaluate("scrollTo(0,Math.max(0,document.querySelector('.collection-stage').getBoundingClientRect().bottom+scrollY-innerHeight+12))")
+            assert page.locator('.food-panel-actions').evaluate('''e=>[...e.querySelectorAll('button')].every(b=>{const r=b.getBoundingClientRect(),p=e.closest('.collection-stage').getBoundingClientRect();return r.top>=p.top&&r.bottom<=p.bottom+1&&r.top>=0&&r.bottom<=innerHeight&&b.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2))})''')
+            page.screenshot(path=str(SHOTS / f'{engine}-details-{width}.png'),full_page=True)
+            page.locator('.food-panel-close').tap()
+            assert page.evaluate('document.activeElement.closest("[data-uid]")?.dataset.uid')=='1'
+            page.evaluate('scrollTo(0,0)')
+        page.locator('[aria-label="Settings"]').click();page.keyboard.press('Escape')
+        assert page.evaluate('document.activeElement.getAttribute("aria-label")')=='Settings'
+        page.locator('.package-ad .primary').click();page.keyboard.press('Escape')
+        assert page.evaluate('document.activeElement.matches(".package-ad .primary")')
+        page.evaluate("g.packages[0]=0;g.packages[1]=3;openPackages('unbox',0)")
+        assert page.evaluate('packageType')==1
+        assert page.locator('#packageOpen').is_enabled()
+        page.wait_for_timeout(250)
+        page.screenshot(path=str(SHOTS / f'{engine}-available-unbox.png'),full_page=True)
+        page.evaluate("openPackages('buy',0)")
+        page.locator('.package-type-list .locked').tap()
+        assert '10 more Bakery Power upgrades' in page.locator('.modalbody').inner_text()
+        page.evaluate('closeModal()')
         page.set_viewport_size({'width':1194,'height':834})
         page.evaluate("window.bridgeDebug=[];window.addEventListener('message',e=>bridgeDebug.push({type:e.data?.type,source:e.data?.source,same:e.source===$('worksheetFrame')?.contentWindow}))")
         page.evaluate('g.sound=true;g.tutorialArrows=true;Math.random=()=>.999;startTicket(9001)')
@@ -159,6 +184,16 @@ def check_browser(pw, engine):
         tap('[data-bottom="0"]')
         tap('[data-top="0"]')
         tap('#equationReveal')
+        assert frame.locator('#guidePrompt').evaluate("e=>getComputedStyle(e).clipPath==='none'&&e.textContent.length>0")
+        before_error=frame.locator('#math').bounding_box()
+        prize_before=page.locator('#prizejar').bounding_box()
+        tap('[data-part="ones"]');tap('[data-slot="0:1"]')
+        page.wait_for_timeout(160)
+        assert frame.locator('#status').evaluate("e=>e.classList.contains('error')")
+        after_error=frame.locator('#math').bounding_box()
+        assert abs(before_error['y']-after_error['y'])<1
+        assert abs(page.locator('#prizejar').bounding_box()['y']-prize_before['y'])<1
+        page.screenshot(path=str(SHOTS / f'{engine}-worksheet-error.png'),full_page=True)
         drag('[data-part="ones"]','[data-slot="0:0"]')
         wait('!busy && s.onesPlaced')
         state('bridgePoll()')
@@ -226,6 +261,26 @@ def check_browser(pw, engine):
         page.evaluate('prizeItems();closeModal();startTicket(9001)')
         assert page.evaluate('g.run===null')
         assert page.evaluate('g.coins') == before+budget
+        assert page.evaluate('!!g.orderRuns[9002]')
+        # Add Rows shares the verified addition path, with no forced resume of the other order.
+        page.evaluate("g.board.unshift({id:9003,a:12,b:12,rarity:0,base:190});g.ticketSeq=9003;g.tutorialArrows=true;startTicket(9003)")
+        page.wait_for_function("$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9003")
+        for width,height in [(2000,1200),(1194,834),(1024,768),(834,1194),(768,1024)]:
+            page.set_viewport_size({'width':width,'height':height});page.wait_for_timeout(180)
+            assert page.locator('#prizejar').evaluate('e=>e.getBoundingClientRect().bottom<=innerHeight+2')
+            page.screenshot(path=str(SHOTS / f'{engine}-worksheet-{width}.png'),full_page=True)
+        page.set_viewport_size({'width':1024,'height':768});page.emulate_media(reduced_motion='reduce')
+        for row in [0,1]:
+            for col in [0,1]:
+                tap(f'[data-bottom="{row}"]');tap(f'[data-top="{col}"]');tap('#equationReveal')
+                tap('[data-part="ones"]');tap(f'[data-slot="{row}:{row+col}"]')
+        wait("s.phase==='sum'")
+        assert frame.locator('#addRows').is_visible()
+        page.screenshot(path=str(SHOTS / f'{engine}-add-rows.png'),full_page=True)
+        tap('#addRows');page.wait_for_function("g.run?.phase==='claim'")
+        assert page.evaluate('g.run.ticket.a*g.run.ticket.b')==144
+        page.locator('.save-order-packages').tap()
+        assert page.evaluate('g.claimedOrders[9003]!==undefined')
         assert page.evaluate('!!g.orderRuns[9002]')
         assert errors == [], errors
         print(f'PASS {engine}: layout, long-press/mixed selection, purchase/Undo/reload, mastery, package buy/unbox, responsive widths, native touch taps, pointer drags, touch drags ({"native CDP" if cdp else "synthetic pointer"}), carrying 79x18, swipe, order switching/reload, reward claim exactly once',flush=True)

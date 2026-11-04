@@ -3,8 +3,10 @@
 html,body,button,input,h1,h2,h3,.workspace .head h2{font-family:var(--game-font)!important}
 html,body{background:transparent!important;min-height:0!important}
 #app.shell{padding:3px 5px 4px!important;max-width:none!important}
-.head,.sheethead,.statusbar .status:not(.error),.notice{display:none!important}
-.guide-prompt{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%);padding:0!important;margin:0!important;white-space:nowrap}
+.head,.sheethead,.notice{display:none!important}
+.guide-prompt{position:static!important;width:auto!important;height:36px!important;min-height:36px;overflow:hidden!important;clip-path:none;padding:4px 8px!important;margin:0!important;white-space:normal;font-size:15px;line-height:1.4;font-weight:900;color:#76502d;display:flex;align-items:center;justify-content:center}.guide-prompt:before{content:none}.guide-prompt[hidden]{display:flex!important;visibility:hidden}
+.statusbar{height:48px!important;min-height:48px!important;margin:0!important;padding:3px 8px!important;display:flex;align-items:center}.statusbar .status{display:block!important;font-size:14px!important;line-height:1.35;margin:0!important;max-height:42px;overflow:hidden;padding:5px 8px;visibility:hidden}.statusbar .status.error{visibility:visible;background:#fff0dd;border:1px solid #c99a78;color:#98502e;border-radius:8px}
+
 .sheet{background:transparent!important;padding:3px 0 0!important;border:0!important;box-shadow:none!important;min-height:0!important;overflow:hidden}
 body[data-rows='2'] .sheet{min-height:0!important}
 .scroller{padding:4px 0 4px!important;overflow-x:auto;overflow-y:visible}
@@ -29,3 +31,8 @@ body[data-rows='2'] .sheet{min-height:0!important}
 body.addition-active .workspace{touch-action:none}
 .tool,.actions button{background:linear-gradient(#fff4dc,#edd5aa)!important;border-color:#c8a275!important;color:#76502d!important}
 .complete{background:#fff1d0;border-color:#c5a06b}.sheethead #operationCue{background:#f2dfbd!important;color:#805c32!important}
+
+.actions .add-rows{min-height:44px;min-width:120px;margin-left:auto;padding:7px 14px;font-size:15px;font-weight:900}
+.actions .add-rows[hidden]{display:none!important}.ftile{color:#704b2d!important}
+.feedback-error{animation:error-border 220ms ease-out}@keyframes error-border{45%{box-shadow:inset 0 0 0 3px #d6a17d}}
+@media(prefers-reduced-motion:reduce){.feedback-error{animation:none}}

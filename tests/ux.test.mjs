@@ -90,11 +90,11 @@ test('inventory batch mutations remain blocked during a live worksheet',()=>{
  assert.equal(c.before,c.after);assert.equal(c.add,false);assert.equal(c.remove,false);assert.equal(c.sale,false);
 });
 
-test('resolved packages report new discoveries, correct copy numbers and actual Ticket Luck',()=>{
+test('resolved packages consolidate duplicate discoveries and report actual Mastery capacity and Ticket Luck',()=>{
  const c=ui();vm.runInContext(`Math.random=()=>0;g.mastery=3;g.owned.push({uid:2,id:'monay',level:1,fusion:0,spent:0});
    g.run={ticket:{id:31,a:79,b:18},phase:'claim',chests:[{rarity:0},{rarity:1},{rarity:0}],pool:3004,correct:6,mistakes:0,mode:'normal'};
    before=g.coins;prizeItems();popup=result;prizeItems();after=g.coins;`,c);
- assert.equal(c.popup.title,'Order Ticket Resolved!');assert.match(c.popup.html,/2nd Copy!/);assert.match(c.popup.html,/3rd Copy!/);
+ assert.equal(c.popup.title,'Order Ticket Resolved!');assert.match(c.popup.html,/Mastery unlocked!/);assert.match(c.popup.html,/\+3 Recipe Mastery upgrades unlocked/);
  assert.equal((c.popup.html.match(/>NEW!</g)||[]).length,0);
  assert.match(c.popup.html,/\+3,004/);assert.match(c.popup.html,/resolved-luck.*?<strong>\+1<\/strong>/);
  assert.match(c.popup.html,/Back to Bakery/);assert.equal(c.after,c.before+3004);
@@ -160,21 +160,19 @@ test('direct card level-up charges the displayed progression cost without openin
    result={coins:g.coins,level:g.owned[0].level,spent:g.owned[0].spent};`,c);
  assert.deepEqual(JSON.parse(JSON.stringify(c.result)),{coins:1000-c.expected,level:2,spent:c.expected});assert.equal(c.menuOpened,0);
 });
-test('fusion preview lists every deterministic result and paid investment before consuming',()=>{
- const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;g.owned[0].level=2;g.owned[0].spent=145;
-   g.owned.push({uid:2,id:'pandesal',level:2,fusion:2,spent:100});g.uidNext=3;
-   openFusion(1,2);preview=duplicateFusionPlan(g.owned[0],2);popup=result.html;
-   submitDuplicateFusion();submitDuplicateFusion();result={coins:g.coins,food:g.owned.find(o=>o.uid===1),owned:g.owned.length};`,c);
- assert.match(c.popup,/All results/);assert.match(c.popup,/Transfers 245 paid coins/);
- assert.equal(c.result.coins,10000-c.preview.fee);assert.equal(c.result.food.level,3);assert.equal(c.result.food.fusion,3);
- assert.equal(c.result.food.spent,245+c.preview.fee);assert.equal(c.result.owned,1);
+test('unique recipe details offer ingredient upgrades and route legacy fusion links without creating copies',()=>{
+ const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;openFoodItem(1);panel=renderFoodPanel();
+ expected=fusionFee(g.owned[0])+fusionIngredientCost(g.owned[0]);openFusion(1);popup=result.html;
+ submitIngredientFusion();submitIngredientFusion();result={coins:g.coins,food:g.owned[0],owned:g.owned.length};`,c);
+ assert.doesNotMatch(c.panel,/Fuse copies/);assert.match(c.panel,/Use ingredients/);assert.match(c.popup,/Buy missing/);
+ assert.equal(c.result.coins,10000-c.expected);assert.equal(c.result.food.fusion,2);assert.equal(c.result.food.spent,c.expected);assert.equal(c.result.owned,1);
 });
 
 test('fusion refuses missing donors and previews the ingredient route at its actual cost',()=>{
- const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;openMenu=()=>{};openFusion(1);
+ const c=ui();vm.runInContext(`g.completed=5;g.coins=10000;openMenu=()=>{};ingredientFusionInfo(1);
    popup=result.html;bad=duplicateFusionPlan(g.owned[0],999);expected=fusionFee(g.owned[0])+fusionIngredientCost(g.owned[0]);
    ingredientFusionInfo(1);submitIngredientFusion();again=submitIngredientFusion();result={coins:g.coins,tier:g.owned[0].fusion,spent:g.owned[0].spent};`,c);
- assert.match(c.popup,/ingredientFusionInfo\(1\)/);assert.equal(c.bad,null);assert.equal(c.again,false);
+ assert.match(c.popup,/Buy missing/);assert.equal(c.bad,null);assert.equal(c.again,false);
  assert.equal(c.result.coins,10000-c.expected);assert.equal(c.result.tier,2);assert.equal(c.result.spent,c.expected);
 });
 

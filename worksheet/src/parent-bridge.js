@@ -1,3 +1,5 @@
+// Guide instructions and Add Rows are local presentation/input alternatives.
+// They retain the same state/action ledger and completion protocol as swipe addition.
 'use strict';
 // Worksheet bridge. This adapter preserves the worksheet interaction functions.
 const bridgeMetrics={errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,completionAck:false,lastCompleteReport:0,startedAt:performance.now(),pausedSince:0};

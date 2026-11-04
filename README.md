@@ -18,6 +18,8 @@ A Filipino bakery-themed long-multiplication serious game, built as a static web
 
 ## Current implementation
 
+See [Tablet UX implementation](docs/TABLET_UX_IMPLEMENTATION.md) for current unique-food ownership, all fifteen audit fixes and browser evidence. The final platform is Unity; [UNITY_MIGRATION_REFERENCE.md](UNITY_MIGRATION_REFERENCE.md) is the tested behavior/formula handoff. No Unity migration has started.
+
 See [Frame 11 implementation and verification](docs/FRAME_11_IMPLEMENTATION.md) for the latest collection UI, Bakery Power, Recipe Mastery, package shop, Undo, independent saved orders and Safari fixes.
 
 ## Tests

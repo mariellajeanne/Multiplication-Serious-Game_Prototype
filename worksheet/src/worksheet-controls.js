@@ -1,5 +1,6 @@
 'use strict';
 $('tryCustom').onclick=()=>{const a=Number($('customA').value),b=Number($('customB').value);if(!Number.isInteger(a)||a<1||a>99999||!Number.isInteger(b)||b<1||b>99){status('Choose 1–99999 × 1–99.',true);return;}let v=`${a},${b}`;if(!Array.from($('problem').options).some(o=>o.value===v)){let o=new Option(`${a} × ${b}`,v);$('problem').add(o,0)}$('problem').value=v;reset()};
+$('addRows').onclick=()=>playCascadeAddition();
 $('restart').onclick=reset;$('problem').onchange=reset;$('undo').onclick=undo;$('sound').onclick=()=>{sound=!sound;$('sound').textContent=sound?'♫ Sound on':'♫ Sound off'};document.querySelectorAll('[data-mult-mode]').forEach(btn=>btn.addEventListener('click',()=>{
  multMode=btn.dataset.multMode;
  $('arraySpeedWrap').hidden=multMode!=='array';

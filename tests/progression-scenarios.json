@@ -1,0 +1,9 @@
+{
+ "modelVersion":2,"seed":20261104,"trials":60,"orders":80,"secondsPerOrder":[60,90,120],
+ "policies":["growth","mixed","collector"],
+ "scenarios":[
+  {"name":"early","completed":0,"mastery":0,"recipeMastery":0,"tier":1,"kitchen":0,"bakery":1,"slots":1,"foods":["pandesal"]},
+  {"name":"middle","completed":40,"mastery":40,"recipeMastery":4,"tier":2,"kitchen":3,"bakery":21,"slots":5,"foods":["pandesal","pan-de-coco","ensaymada","mamon","buko-pie"]},
+  {"name":"late","completed":160,"mastery":160,"recipeMastery":10,"tier":5,"kitchen":12,"bakery":71,"slots":6,"foods":["mamon","buko-pie","brazo","butter-mamon","celebration-ensaymada","ube-ensaymada"]}
+ ]
+}

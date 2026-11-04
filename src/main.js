@@ -15,7 +15,7 @@ function render(){
  if(typeof syncRewardPresentation==='function')syncRewardPresentation();
  if(g.run&&g.run.phase==='engine'){const fr=$('worksheetFrame');if(fr){fr.onload=()=>sendEngine('hello');fr.src='worksheet/worksheet-engine.html'}if(typeof fitWorksheet==='function')fitWorksheet()}
 }
-if(typeof window!=='undefined')window.addEventListener('resize',()=>{if(g.run?.phase==='engine'&&typeof fitWorksheet==='function')fitWorksheet();if(typeof centerBakeryCard==='function')centerBakeryCard()});
+if(typeof window!=='undefined')window.addEventListener('resize',()=>{if(g.run?.phase==='engine'&&typeof fitWorksheet==='function')fitWorksheet();if(typeof centerBakeryCard==='function')centerBakeryCard();if((!g.run||g.run.paused)&&oddsCollapsed===null){const odds=document.querySelector('.ticket-odds');if(odds)odds.outerHTML=renderTicketOdds()}});
 setInterval(()=>{tickStaff();updateOrderRefresh();validatePurchaseUndo();paintPurchaseUndo()},1000);refillBoard();render();save();
 
 function paintPausedOrder(){

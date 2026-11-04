@@ -109,7 +109,7 @@ test('completed state recovers a lost complete event; saved claims survive reloa
 });
 
 // Run the real worksheet state/placement functions with only rendering and motion
-// stubbed. Async placement still commits on its actual microtask boundary.
+// stubbed. Accepted placements commit before their visual animation finishes.
 function worksheet(){
   const elements=new Map(),messages=[],listeners={};
   const element=id=>{if(!elements.has(id))elements.set(id,{value:'',textContent:'',style:{},
@@ -166,5 +166,5 @@ test('real worksheet accepted placements emit stable actions across undo, carry 
   assert.equal(w.exec('s.row'),1,'duplicate start must not reset state');assert.equal(w.list().length,before);
   w.exec(`externalStart({id:10,a:79,b:18},'attempt-B')`);assert.equal(w.list().length,0);
   w.exec(`operand('top',0);operand('bottom',0);revealProduct();place('ones','slot',0);run++`);
-  await Promise.resolve();assert.equal(w.list().length,2,'cancelled async placement does not emit a reward');
+  await Promise.resolve();assert.equal(w.list().length,3,'an accepted placement records its reward immediately before visual cancellation');
 });

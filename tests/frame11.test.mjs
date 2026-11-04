@@ -43,7 +43,7 @@ test('duplicate discoveries permanently unlock mastery; purchases grow past five
  assert.equal(h.run('before-after'),h.run('cost'));assert.equal(h.run('recipeMastery(g.owned[0])'),11);
  assert.equal(h.run('availableMastery(g.owned[0])'),1);
  assert.ok(Math.abs(h.run('foodValue(g.owned[0])')-1.2*(2.3+7*.4))<1e-10);
- assert.equal(h.run('g.owned.length'),13);
+ assert.equal(h.run('g.owned.length'),1);
  assert.equal(progressionHarness(h.json('g')).run('bakeryValue()'),h.run('bakeryValue()'));
 });
 
@@ -62,7 +62,7 @@ test('bulk mastery quotes the exact eligible total and rejects stale confirmatio
  const h=progressionHarness();h.run(`g.coins=1e8;discoverFood(F('pandesal'));discoverFood(F('monay'));g.recipeCeilings.monay=0;
  selectedFoods=new Set([1,2,3]);requestSelectedMastery();quote=masteryConfirmation.cost;before=g.coins;ok=confirmSelectedMastery();again=confirmSelectedMastery()`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('before-g.coins'),h.run('quote'));
- assert.deepEqual(h.json('g.owned.map(recipeMastery)'),[1,1,0]);
+ assert.deepEqual(h.json('g.owned.map(recipeMastery)'),[1,0]);
  h.run(`g.recipeCeilings.pandesal++;requestSelectedMastery();g.owned[0].mastery++;before=g.coins;stale=confirmSelectedMastery()`);
  assert.equal(h.run('stale'),false);assert.equal(h.run('g.coins'),h.run('before'));
 });
@@ -110,11 +110,11 @@ test('coin package purchases save stock, charge exactly once, reject stale prici
  assert.equal(h.run('ok'),false);assert.equal(h.run('g.coins'),h.run('before'));
 });
 
-test('unboxing keeps every food, expands mastery ceilings, persists results, and never permits negative stock',()=>{
+test('unboxing retains one instance per recipe, expands mastery ceilings, persists results, and never permits negative stock',()=>{
  const h=progressionHarness();h.run(`g.packages[0]=30;Math.random=()=>0;before=g.owned.length;ok=unboxPackages(0,30,true);again=unboxPackages(0,30,true)`);
- assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('g.packages[0]'),0);assert.equal(h.run('g.owned.length'),31);
+ assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('g.packages[0]'),0);assert.equal(h.run('g.owned.length'),1);
  assert.equal(h.run('g.recipeCeilings.pandesal'),30);
- assert.equal(progressionHarness(h.json('g')).run('g.owned.length'),31);
+ assert.equal(progressionHarness(h.json('g')).run('g.owned.length'),1);
 });
 
 test('completed orders pay once across stale attempts, reload, switching and mistakes; visible Luck never decreases',()=>{

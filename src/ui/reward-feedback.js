@@ -1,4 +1,6 @@
 ﻿/* Presentation only. Accounting is committed by rewards.js before any flight. */
+const FEEDBACK_TIMING=Object.freeze({routine:180,gain:280,hold:120,flight:360,reveal:480});
+function feedbackPulse(node){if(!node)return;node.classList.remove('ui-pulse');void node.offsetWidth;node.classList.add('ui-pulse');setTimeout(()=>node.classList.remove('ui-pulse'),FEEDBACK_TIMING.gain)}
 const rewardPresentation={epoch:0,pending:0,timers:new Set(),nodes:new Set()};
 function animateRewardElement(node,frames,options){try{return node.animate?.(frames,options)}catch(error){return null}}
 function rewardFlightsPending(){return rewardPresentation.pending>0}
@@ -43,7 +45,7 @@ function animateRewardGain(data,gain){
  const target=destination.getBoundingClientRect(),point=data.point;
  const valid=point&&Number.isFinite(point.x)&&Number.isFinite(point.y)&&point.x>=0&&point.x<=1&&point.y>=0&&point.y<=1;
  const sourceY=valid&&fr?fr.top+fr.height*point.y:fr?fr.top+fr.height*.5:innerHeight*.4;
- const node=document.createElement('div');node.className='reward-flight reward-'+gain.kind;node.textContent=gain.text;
+ const node=document.createElement('div');node.className='reward-flight reward-'+gain.kind+(gain.kind==='chest'?` package-type p${data.rarity}`:'');node.textContent=gain.text;
  node.style.transformOrigin='0 0';document.body.appendChild(node);
  const size=node.getBoundingClientRect(),w=size.width||80,h=size.height||28;
  const left=area?area.left-w-10:12,right=area?area.right+10:innerWidth-w-12;
@@ -60,7 +62,7 @@ function animateRewardGain(data,gain){
  node.style.left=x+'px';node.style.top=y+'px';
  rewardPresentation.nodes.add(node);rewardPresentation.pending++;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- if(!reduced)animateRewardElement(node,[{opacity:0,transform:'scale(.7)'},{opacity:1,transform:'scale(1.06)'},{opacity:1,transform:'scale(1)'}],{duration:190,easing:'ease-out'});
+ if(!reduced)animateRewardElement(node,[{opacity:0,transform:'scale(.7)'},{opacity:1,transform:'scale(1.06)'},{opacity:1,transform:'scale(1)'}],{duration:FEEDBACK_TIMING.routine,easing:'ease-out'});
  const timer=setTimeout(()=>{
   rewardPresentation.timers.delete(timer);
   const scale=.32,smallWidth=w*scale;
@@ -74,7 +76,7 @@ function animateRewardGain(data,gain){
    {offset:.28,transform:`translate(${edge-x}px,0px) scale(.32)`,opacity:1},
    {offset:.82,transform:`translate(${edge-x}px,${endY-y}px) scale(.32)`,opacity:1},
    {transform:`translate(${endX-x}px,${endY-y}px) scale(.32)`,opacity:0}
-  ],{duration:reduced?140:620,easing:'linear',fill:'forwards'});
+  ],{duration:reduced?100:FEEDBACK_TIMING.flight,easing:'ease-out',fill:'forwards'});
   const arrival=setTimeout(()=>{
    rewardPresentation.timers.delete(arrival);node.remove();rewardPresentation.nodes.delete(node);
    if(epoch!==rewardPresentation.epoch)return;
@@ -83,9 +85,9 @@ function animateRewardGain(data,gain){
    paintRewardDock({...g.run,pool:data.pool,luck:data.totalLuck,chests:data.chests,index:data.index});
    if(gain.kind==='luck'){destination.classList.remove('dock-bump');void destination.offsetWidth;destination.classList.add('dock-bump')}else bumpPrizeDock();
    if(!rewardPresentation.pending)paintRewardDock(g.run);
-  },reduced?150:640);
+  },reduced?110:FEEDBACK_TIMING.flight+20);
   rewardPresentation.timers.add(arrival);
- },500);
+ },FEEDBACK_TIMING.hold);
  rewardPresentation.timers.add(timer);
 }
 function animateChestReward(rarity,point){

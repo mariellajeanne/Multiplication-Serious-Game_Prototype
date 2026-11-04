@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},equipment:{oven:0,mixer:0,fridge:0,display:0},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},equipment:{oven:0,mixer:0,fridge:0,display:0},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
 if(!g.owned||!g.equipment||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
@@ -29,10 +29,12 @@ function migrateFrame11(state){
  const started=state.board.filter(t=>state.orderRuns[t.id]);
  state.board=[...started,...state.board.filter(t=>!state.orderRuns[t.id]).slice(0,Math.max(0,ORDER_LIMIT-started.length))];
  state.ticketSeq=Math.max(state.ticketSeq||0,...state.board.map(t=>Number(t.id)||0));
- // Preserve purchased slots and every owned copy; only remove invalid/duplicate recipe assignments.
+ // Retain unique recipes and consolidate older multiple-copy investments before assignment validation.
+ consolidateOwnedFoods(state);
  const seen=new Set();state.activeMenu=state.activeMenu.filter(uid=>{const o=state.owned.find(x=>x.uid===uid);if(!o||seen.has(o.id))return false;seen.add(o.id);return true}).slice(0,state.menuSlots);
  return state;
 }
+if(previousSave&&g.uniqueFoodsVersion!==1){try{if(!localStorage.getItem('panaderyaQuestV2BeforeUniqueFoods'))localStorage.setItem('panaderyaQuestV2BeforeUniqueFoods',previousSave)}catch(_){} }
 migrateFrame11(g);
 // Old established players keep their saved guide preference.
 if(typeof g.guideGraduated!=='boolean')g.guideGraduated=g.completed>=3;
@@ -72,9 +74,24 @@ function refreshSkipCost(){return Math.max(1,Math.round(economyUnit()*.5))}
 function requestRefreshSkip(){const cost=refreshSkipCost();showModal('Refresh untouched orders?',`<p>Saved orders and their rewards stay exactly where they are.</p><button class="primary" ${g.coins<cost?'disabled':''} onclick="if(refreshOrders(true))closeModal()">Skip · 🪙 ${fmt(cost)}</button>`)}
 function updateOrderRefresh(){const button=$('refreshOrders');if(!button)return;const remaining=refreshRemaining(),seconds=Math.ceil(remaining/1000);button.disabled=remaining>0;button.textContent=remaining?`Refresh in ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`:'Refresh Orders';}
 function save(){reconcileAutoEquip();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
-function toast(text){const el=document.createElement('div');el.className='toast';el.textContent=text;$('toasts').appendChild(el);setTimeout(()=>el.remove(),3200)}
-function showModal(title,html,variant=''){if(!modal)modalReturnFocus=document.activeElement;modal={title,html,variant};paintModal()}
-function closeModal(){modal=null;paintModal();render();if(modalReturnFocus?.isConnected)modalReturnFocus.focus?.({preventScroll:true});modalReturnFocus=null}
+let toastTimer=null;
+function clearNotifications(){clearTimeout(toastTimer);const root=$('toasts');if(root)root.replaceChildren()}
+function toast(text){
+ const root=$('toasts');if(!root)return;
+ clearNotifications();
+ if(modal){let note=document.querySelector?.('.modal .dialog-notice');if(!note){note=document.createElement('p');note.className='dialog-notice';note.setAttribute('role','status');document.querySelector?.('.modalbody')?.appendChild(note)}note.textContent=text;return}
+ const el=document.createElement('div');el.className='toast';el.textContent=text;root.appendChild(el);toastTimer=setTimeout(()=>el.remove(),2800);
+}
+function captureFocus(el){return el?{node:el,id:el.id,key:el.getAttribute?.('data-focus'),action:el.getAttribute?.('onclick'),label:el.getAttribute?.('aria-label')}:null}
+function restoreFocus(target){
+ if(!target)return;let el=target.node?.isConnected?target.node:target.id?$(target.id):null;
+ if(!el)el=[...(document.querySelectorAll?.('button,summary,[role="tab"]')||[])].find(node=>target.key?node.getAttribute('data-focus')===target.key:target.action?node.getAttribute('onclick')===target.action:target.label&&node.getAttribute('aria-label')===target.label);
+ if(!el)el=document.querySelector?.('.iconbtn');el?.focus?.({preventScroll:true});
+}
+let modalTriggerFocus=null;
+document.addEventListener?.('click',event=>{const trigger=event.target.closest?.('button,summary,[role="tab"]');if(trigger){modalTriggerFocus=captureFocus(trigger);setTimeout(()=>modalTriggerFocus=null,0)}},true);
+function showModal(title,html,variant=''){if(!modal)modalReturnFocus=modalTriggerFocus||captureFocus(document.activeElement);clearNotifications();modal={title,html,variant};paintModal()}
+function closeModal(){const focus=modalReturnFocus;modal=null;modalReturnFocus=null;clearNotifications();paintModal();render();restoreFocus(focus)}
 function paintModal(){
  const root=$('modals');if(!modal){root.innerHTML='';return}
  root.innerHTML=`<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal ${modal.variant||''}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modalhead"><h2 id="modalTitle">${modal.title}</h2><span class="dialog-wallet">🪙 ${amountLabel(g.coins)}</span><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`;

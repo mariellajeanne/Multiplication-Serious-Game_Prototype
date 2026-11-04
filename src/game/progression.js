@@ -18,8 +18,32 @@ function amountLabel(value){return Math.abs(value)<1e6?fmt(value):new Intl.Numbe
 function multiplierLabel(value){return Math.abs(value)<1e4?value.toFixed(2):new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(value)}
 function tierBase(o){return (FOOD.find(f=>f.id===o.id)?.base||0)*TIER_FACTORS[foodTier(o)]+Math.max(0,Number(o.baseCarry)||0)}
 function individualValue(o){return tierBase(o)*masteryFactor(recipeMastery(o))}
+// One retained instance per Food Index recipe. Legacy investments consolidate once.
+function consolidateOwnedFoods(state){
+ const groups=new Map();for(const o of state.owned){if(!groups.has(o.id))groups.set(o.id,[]);groups.get(o.id).push(o)}
+ const replacements=new Map();let changed=false;
+ state.owned=[...groups.values()].map(copies=>{
+  const strongest=[...copies].sort((a,b)=>individualValue(b)-individualValue(a)||a.uid-b.uid)[0];
+  const keep=copies.find(o=>state.activeMenu.includes(o.uid))||strongest;
+  for(const o of copies)replacements.set(o.uid,keep.uid);
+  if(copies.length===1)return keep;
+  changed=true;const maximum=Math.max(...copies.map(individualValue)),mastery=Math.max(...copies.map(recipeMastery));
+  const fusion=Math.max(...copies.map(foodTier)),base=FOOD.find(f=>f.id===keep.id)?.base||0;
+  const result={...keep,mastery,level:Math.min(5,mastery+1),fusion,
+   spent:copies.reduce((n,o)=>n+(o.spent||0),0),resaleBase:copies.reduce((n,o)=>n+foodResaleBase(o),0)};
+  result.baseCarry=Math.max(keep.baseCarry||0,maximum/masteryFactor(mastery)-base*TIER_FACTORS[fusion],0);
+  state.recipeCeilings[keep.id]=Math.max(state.recipeCeilings[keep.id]||0,mastery,copies.length-1);
+  return result;
+ });
+ state.menuSlots=clamp(state.menuSlots,1,FOOD.length);
+ state.activeMenu=[...new Set(state.activeMenu.map(uid=>replacements.get(uid)).filter(uid=>uid!==undefined))].slice(0,state.menuSlots);
+ if(changed||state.purchaseUndo?.before?.owned&&new Set(state.purchaseUndo.before.owned.map(o=>o.id)).size!==state.purchaseUndo.before.owned.length)state.purchaseUndo=null;
+ state.uniqueFoodsVersion=1;return state;
+}
 function bakeryFactor(level){return Math.pow(BAKERY_POWER_CONFIG.factor,clamp(level||1,1,BAKERY_POWER_CONFIG.purchases+1)-1)}
-function powerLabel(value){return new Intl.NumberFormat('en-US',{maximumFractionDigits:6}).format(value)}
+function powerLabel(value){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value)}
+// Display rounding is independent of the probability used by the random draw.
+function probabilityLabel(probability){const percent=probability*100;return percent>0&&percent<.01?'<0.01%':percent.toFixed(2)+'%'}
 function bakeryStage(level){return BAKERY_MILESTONES.filter(n=>n<=level).length}
 function binomialRanks(p){
  const coefficients=[1,7,21,35,35,21,7,1];

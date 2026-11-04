@@ -1,5 +1,7 @@
 # Panaderya Quest — agent instructions
 
+**Current owner corrections (2026-11-04):** [Tablet UX implementation](docs/TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
+
 Current behavior and verification: [docs/FRAME_11_IMPLEMENTATION.md](docs/FRAME_11_IMPLEMENTATION.md) (2026-11-04). Frame 11 supersedes older layout/cap references: all owned foods, one starting slot, duplicate-unlocked unbounded Recipe Mastery, Bakery Power with 100 internal purchases, coin packages, safe ten-second Undo and persistent independent order worksheets. Keep both bridges in sync. Run `node --test tests/*.test.mjs` and the focused WebKit/Edge runner when changing these paths.
 
 ## The project and the goal

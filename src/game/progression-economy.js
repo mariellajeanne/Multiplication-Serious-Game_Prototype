@@ -1,6 +1,9 @@
 /* Prices are measured against expected Normal-order earnings, not challenge modes. */
 function economyUnit(){return expectedTicketBase(g.mastery)*pricingMenuBase()*kitchenBonus()*decorBonus()}
 function earningUnit(){return expectedTicketBase(g.mastery)*bakeryValue()}
+function slotCost(){return Math.round(economyUnit()*(2+.6*Math.pow(Math.max(0,g.menuSlots-1),1.15)))}
+function packagePrice(rank){return Math.max(1,Math.round(economyUnit()*PACKAGE_SHOP[rank].priceOrders))}
+function packageUnlocked(rank){return g.bakeryLevel>=PACKAGE_SHOP[rank].unlock}
 function foodEarningShare(o){return expectedTicketBase(g.mastery)*foodValue(o)*kitchenBonus()*decorBonus()}
 function foodLevelCost(o){return Math.max(1,Math.round(foodEarningShare(o)*(.75+.45*Math.pow(recipeMastery(o)+1,1.3))))}
 function foodLevelPrice(o){return foodLevelCost(o)}
@@ -37,7 +40,7 @@ function buyMastery(uids,expected=null){
 function duplicateFusionPlan(o,donorUid){const donor=g.owned.find(x=>x.uid===Number(donorUid));return fusionPlan(o,donor,fusionFee(o,donor))}
 function fusionFingerprint(foods){return JSON.stringify(foods.map(o=>[o.uid,o.id,o.fusion,o.level,o.spent,o.baseCarry||0,o.resaleBase??null]))}
 function applyDuplicateFusion(plan,fingerprint){
- if(g.run||g.completed<5||!plan)return false;
+ if(g.uniqueFoodsVersion>=1||g.run||g.completed<5||!plan)return false;
  const inputs=plan.inputs.map(uid=>g.owned.find(o=>o.uid===uid));
  if(inputs.some(o=>!o)||fusionFingerprint(inputs)!==fingerprint)return false;
  const verified=duplicateFusionPlan(inputs[0],inputs[1].uid);

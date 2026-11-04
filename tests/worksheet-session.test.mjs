@@ -11,7 +11,7 @@ test('dialogs and repeated renders retain the live frame and all child state',()
   nodes.app={dataset:{},set innerHTML(html){writes++;frame=html.includes('worksheetFrame')?
     {src:'',contentWindow:{state:{}}}:null;}};
   const context=vm.createContext({document:{getElementById:id=>id==='worksheetFrame'?frame:nodes[id]},
-    localStorage:{getItem:()=>null,setItem:()=>{}},setInterval:()=>{},setTimeout:()=>{}});
+    localStorage:{getItem:()=>null,setItem:()=>{}},setInterval:()=>{},setTimeout:()=>{},clearTimeout:()=>{}});
   for(const file of ['src/data/catalog.js','src/game/progression.js','src/game/state.js','src/ui/bakery-art.js'])
     vm.runInContext(readFileSync(resolve(root,file),'utf8'),context);
   vm.runInContext(`g.helpSeen=true;function renderLeft(){return ''}function renderRight(){return ''}

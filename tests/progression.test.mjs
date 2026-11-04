@@ -31,15 +31,10 @@ test('all same-food Tier 1–4 combinations conserve tier units, actual values, 
  assert.equal(h.run("fusionPlan({id:'pandesal',uid:1,fusion:1,level:1},{id:'monay',uid:2,fusion:1,level:1},1)"),null);
 });
 
-test('fusion transaction is exact once, keeps overflow in inventory and same-food excess level credits',()=>{
- const h=progressionHarness();h.run(`g.completed=5;g.coins=1e7;g.menuSlots=1;g.owned=[{uid:1,id:'pandesal',fusion:2,level:5,spent:1000},{uid:2,id:'pandesal',fusion:3,level:5,spent:2000}];g.uidNext=3;
-  plan=duplicateFusionPlan(g.owned[0],2);fingerprint=fusionFingerprint(g.owned);before=g.coins;ok=applyDuplicateFusion(plan,fingerprint);again=applyDuplicateFusion(plan,fingerprint);`);
- assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);
- assert.equal(h.run('g.coins'),h.run('before-plan.fee'));assert.equal(h.run('g.foodLevelCredits.pandesal'),4);
- h.run(`g.owned.push({uid:g.uidNext++,id:'pandesal',fusion:1,level:1,spent:0});creditUid=g.uidNext-1;g.recipeCeilings.pandesal=4;price=foodLevelPrice(g.owned.at(-1));upgradeFood(creditUid,true)`);
- assert.equal(h.run('g.foodLevelCredits.pandesal'),4);assert.equal(h.run('g.owned.at(-1).spent'),h.run('price'));
- h.run(`g.owned=[{uid:8,id:'monay',fusion:4,level:3,spent:110},{uid:9,id:'monay',fusion:4,level:4,spent:201}];g.activeMenu=[9];plan=duplicateFusionPlan(g.owned[0],9);applyDuplicateFusion(plan,fusionFingerprint(g.owned));`);
- assert.equal(h.run('g.owned.length'),2);assert.deepEqual(h.json('g.activeMenu'),[8]);assert.equal(h.run('g.owned[1].fusion'),3);
+test('legacy duplicate-fusion transactions cannot recreate multiple instances in a unique-food save',()=>{
+ const h=progressionHarness();h.run(`g.completed=5;g.coins=1e7;g.owned=[{uid:1,id:'pandesal',fusion:2,level:5,spent:1000},{uid:2,id:'pandesal',fusion:3,level:5,spent:2000}];
+ plan=duplicateFusionPlan(g.owned[0],2);fingerprint=fusionFingerprint(g.owned);before=JSON.stringify(g);ok=applyDuplicateFusion(plan,fingerprint);again=applyDuplicateFusion(plan,fingerprint)`);
+ assert.equal(h.run('ok'),false);assert.equal(h.run('again'),false);assert.equal(h.run('JSON.stringify(g)'),h.run('before'));
 });
 
 test('stale fusion previews and repeated confirmations cannot spend, consume or duplicate',()=>{
@@ -129,12 +124,10 @@ test('Base Auto Equip uses improved Mastery to break equal-base ties immediately
  const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.deepEqual(r.json('g.activeMenu'),[2]);assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));
 });
 
-test('both fusion transactions update contribution and total, and retain them in storage',()=>{
- for(const duplicate of [false,true]){
-  const h=progressionHarness();h.run(`g.coins=1e9;g.completed=5;g.owned.push({uid:2,id:'pandesal',level:1,fusion:1,spent:0});g.uidNext=3;before=bakeryValue();${duplicate?'fuseDuplicate(1,2)':'fuseIngredients(1)'}`);
-  assert.ok(h.run('bakeryValue()>before'));
-  const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));
- }
+test('ingredient fusion updates the unique recipe contribution and retains its investment in storage',()=>{
+ const h=progressionHarness();h.run(`g.coins=1e9;g.completed=5;before=bakeryValue();fuseIngredients(1)`);
+ assert.ok(h.run('bakeryValue()>before'));assert.equal(h.run('g.owned.length'),1);
+ const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));assert.equal(r.run('bakeryValue()'),h.run('bakeryValue()'));
 });
 
 test('exit and resume retain ticket identity, board, ledger, rewards and attempt across save',()=>{

@@ -33,3 +33,17 @@ Tip: if you are editing appearance alone, most of the worksheet behavior should 
 - Enable reduced motion and repeat purchase, package and addition feedback.
 
 Windows WebKit and Edge emulation do not replace these device checks.
+
+
+## Unique-food / tablet UX follow-up (2026-11-04)
+
+- Complete 79 ? 18 via swipe and 12 ? 12 via Add Rows. Confirm Guide OFF removes instructions/arrows; the Add Rows control remains available.
+- Make an invalid placement. The digits, Undo and prize dock must not move. Check corrected placement can immediately continue while its short animation finishes.
+- Open recipe details at all five target tablet sizes; scroll the information body while the action footer remains usable. Test Select Foods and long-press, mixed actions and the slot-limit explanation.
+- Open duplicate rewards repeatedly: exactly one owned card per recipe, unchanged purchased Mastery/Tier/investment/assignment, and +1 available paid-Mastery capacity per duplicate.
+- At maximum slots, verify the full Food Index sets the cap even with undiscovered recipes.
+- With an empty previously selected package type, enter Unbox and check that an in-stock type is selected. Check MAX, Open Selected Instantly, Open All scope and next locked type requirements.
+- Close Settings/shop/confirmations/details using touch and keyboard. Focus returns to the initiating control; stale notifications must not cover math or Collect.
+- Reload a legacy multiple-copy fixture and confirm one retained recipe, conserved paid investments, a backup under panaderyaQuestV2BeforeUniqueFoods, unchanged primary save key and retained order sessions/rewards.
+
+Physical iPad and audible checks remain pending; desktop WebKit does not mark these device steps passed. Legacy game modes are outside this phase.

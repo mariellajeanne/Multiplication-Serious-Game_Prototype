@@ -88,13 +88,14 @@ function prizeItems(openNow=true){
 }
 function drawFood(packageType){const rarity=drawRank(packageProbabilities(packageType));return pick(FOOD.filter(f=>f.rarity===rarity))}
 function discoverFood(food){
- const copies=g.owned.filter(o=>o.id===food.id).length,isNew=!g.discovered.includes(food.id);
- // A discovery beyond the first permanently expands this recipe's mastery ceiling.
- g.recipeCeilings[food.id]=Math.max(0,g.recipeCeilings[food.id]||0)+(isNew?0:1);
+ const existing=g.owned.find(o=>o.id===food.id),isNew=!g.discovered.includes(food.id);
+ // A duplicate unlocks capacity on the recipe; it never purchases mastery or creates an instance.
+ if(!isNew)g.recipeCeilings[food.id]=Math.max(0,g.recipeCeilings[food.id]||0)+1;
+ if(existing)return {food,uid:existing.uid,copyNumber:2,isNew:false,masteryUnlocked:1};
  const uid=g.uidNext++;g.owned.push({uid,id:food.id,level:1,mastery:0,fusion:1,spent:0});
  if(isNew)g.discovered.push(food.id);
- if(g.activeMenu.length<g.menuSlots&&!g.activeMenu.some(id=>g.owned.find(o=>o.uid===id)?.id===food.id))g.activeMenu.push(uid);
- return {food,copyNumber:copies+1,isNew};
+ if(g.activeMenu.length<g.menuSlots)g.activeMenu.push(uid);
+ return {food,uid,copyNumber:isNew?1:2,isNew,masteryUnlocked:isNew?0:1};
 }
 function captureActiveWorksheet(){
  const frame=$('worksheetFrame'),r=g.run;if(!r||r.phase!=='engine')return;
