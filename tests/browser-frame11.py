@@ -105,20 +105,19 @@ def check_browser(pw, engine):
         assert page.evaluate('recipeMastery(g.owned[0])') == 0
         page.evaluate('closeFoodPanel()')
         page.evaluate('openPackages("buy",0)')
-        assert page.locator('.package-type-list>button').count() == 4  # 3 unlocked, next only
+        assert page.locator('.package-type-list>button').count() == 8
         page.screenshot(path=str(SHOTS / f'{engine}-packages.png'), full_page=True)
         coins,stock = page.evaluate('[g.coins,g.packages[0]]')
         price = page.evaluate('packagePrice(0)*3')
         page.evaluate('setPackageQuantity(3)')
         page.locator('#packageBuy').tap()
-        if page.get_by_role('button',name='Confirm',exact=False).count():
-            page.get_by_role('button',name='Confirm',exact=False).tap()
         assert page.evaluate('g.coins') == coins-price
         assert page.evaluate('g.packages[0]') == stock+3
         assert page.locator('#unopenedPackages').inner_text() == page.evaluate('amountLabel(g.packages.reduce((a,b)=>a+b,0))')
         page.evaluate('setPackageQuantity(3)')
         count = page.evaluate('g.owned.length')
-        page.get_by_role('button',name='Open Selected Instantly',exact=True).tap()
+        for _ in range(3):
+            page.locator('.package-opening-grid button').first.tap()
         assert page.evaluate('g.owned.length') == count
         assert page.evaluate('new Set(g.owned.map(o=>o.id)).size===g.owned.length')
         assert page.evaluate('g.packages[0]') == stock
@@ -178,13 +177,16 @@ def check_browser(pw, engine):
         page.locator('.package-panel .primary').click();page.keyboard.press('Escape')
         assert page.evaluate('document.activeElement.matches(".package-panel .primary")')
         page.evaluate("g.packages[0]=0;g.packages[1]=3;openPackages('unbox',0)")
-        assert page.evaluate('packageType')==1
-        assert page.locator('#packageOpen').is_enabled()
+        assert page.evaluate('packageType')==0
+        assert page.locator('#packageOpenAll').is_disabled()
+        page.locator('[data-package-type="1"]').tap()
+        assert page.locator('#packageOpenAll').is_enabled()
         page.wait_for_timeout(250)
         page.screenshot(path=str(SHOTS / f'{engine}-available-unbox.png'),full_page=True)
         page.evaluate("openPackages('buy',0)")
-        page.locator('.package-type-list .locked').tap()
-        assert '10 more Bakery Power upgrades' in page.locator('.modalbody').inner_text()
+        page.locator('.package-type-list .locked').first.tap()
+        assert page.locator('#packageBuy').is_disabled()
+        assert 'NEEDS HIGHER' in page.locator('.package-type-list .locked').first.inner_text()
         page.evaluate('closeModal()')
         page.set_viewport_size({'width':1194,'height':834})
         page.evaluate("window.bridgeDebug=[];window.addEventListener('message',e=>bridgeDebug.push({type:e.data?.type,source:e.data?.source,same:e.source===$('worksheetFrame')?.contentWindow}))")

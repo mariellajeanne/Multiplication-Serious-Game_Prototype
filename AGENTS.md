@@ -1,5 +1,7 @@
 # Panaderya Quest — agent instructions
 
+**Packages workspace (2026-11-05):** [Three-column interface and automatic collection](docs/PACKAGES_INTERFACE.md) supersedes separate Buy/Unbox tabs and reward dialogs: all eight types, 50-per-type purchasing capacity (old excess stock retained), immediate food/Mastery credit and selected-type-only Open All. Verify with `python tests/browser-packages.py`.
+
 **Coin-only orders (2026-11-04):** [Order Ticket tiers and rewards](docs/ORDER_COIN_TIERS.md) supersedes package drops, temporary Package Luck and challenge coin modifiers below. New orders pay base coins times saved Baker's Boost; packages come from the Package Counter. Preserve migration of already-earned packages and fixed legacy budgets. Verify with `python tests/browser-order-coins.py` and the full worksheet runner.
 
 **Frame 12 food selection (2026-11-04):** [Floating popup implementation](docs/FOOD_SELECTION_IMPLEMENTATION.md) replaces sheet references: 75%-width single/multi alternatives overlay the grid without resizing it. Verify with `python tests/browser-food-selection.py` and the browser zoom runner.

@@ -101,11 +101,11 @@ test('package types are distinct from food rarities; displayed ticket odds match
  assert.match(h.run('html'),/Coin Reward Tier Odds/);assert.match(h.run('html'),/Divine Treasury/);assert.doesNotMatch(h.run('html'),/Crown Jewel/);
 });
 
-test('coin package purchases save stock, charge exactly once, reject stale pricing and reveal only next locked type',()=>{
- const h=progressionHarness();h.run(`g.coins=1e8;openPackages('buy',0);html=popup.html;packageQuantity=3;before=g.coins;price=packagePrice(0);requestPackagePurchase();
+test('coin package purchases save stock, charge exactly once, reject stale pricing and expose all eight types',()=>{
+ const h=progressionHarness();h.run(`g.coins=1e8;openPackages('buy',0);html=popup.html;setPackageQuantity(3);before=g.coins;price=packagePrice(0);requestPackagePurchase();
  if(packagePurchaseReview)confirmPackagePurchase();again=confirmPackagePurchase()`);
  assert.equal(h.run('g.coins'),h.run('before-price*3'));assert.equal(h.run('g.packages[0]'),3);assert.equal(h.run('again'),false);
- assert.match(h.run('html'),/Standard/);assert.match(h.run('html'),/Lucky/);assert.doesNotMatch(h.run('html'),/Fortunate|Miraculous/);
+ assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,8);assert.match(h.run('html'),/NEEDS HIGHER/);
  h.run(`g.packages[0]=0;packagePurchaseReview={rank:0,count:1,total:packagePrice(0),price:packagePrice(0)};g.bakeryLevel++;before=g.coins;ok=confirmPackagePurchase()`);
  assert.equal(h.run('ok'),false);assert.equal(h.run('g.coins'),h.run('before'));
 });

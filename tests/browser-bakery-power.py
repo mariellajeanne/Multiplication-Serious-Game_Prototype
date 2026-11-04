@@ -99,9 +99,9 @@ def check(pw,engine):
         page.locator('.coins-counter').tap()
         assert page.locator('.coins-help p').all_text_contents()==['Complete orders to earn coins!',"Your Baker's Boost multiplies the coins you earn."]
         page.locator('.modal .close').tap()
-        page.evaluate("packageTab='unbox'")
         page.locator('.package-panel .primary').tap()
-        assert page.locator('.package-shop-tabs [aria-pressed="true"]').inner_text()=='Buy Packages'
+        assert page.locator('.package-type-card[aria-pressed="true"]').count()==1
+        assert page.locator('#packageBuy').is_visible()
         page.locator('.modal .close').tap()
         assert page.locator('.coins-counter').evaluate('e=>parseFloat(getComputedStyle(e).borderTopWidth)>=2&&getComputedStyle(e).boxShadow!=="none"')
         assert errors==[],errors

@@ -64,9 +64,7 @@ function bakeryIcon(name){
 }
 function packageArt(){return '<svg class="package-art" viewBox="0 0 64 64" role="img" aria-label="Bakery package"><path d="M7 23 32 10l25 13v29L32 62 7 50Z" fill="#ca8a4d" stroke="#a56735" stroke-width="2"/><path d="m7 23 25 12 25-12-25-13Z" fill="#f5d091"/><path d="M32 35v27l25-10V23Z" fill="#dca265"/><path d="m24 14 25 13v11l-10 4V31L15 19Z" fill="#fff0c5"/><rect x="13" y="33" width="13" height="11" rx="3" fill="#fff4d8" transform="rotate(20 19 38)"/><path d="m17 38 3 3 4-4" fill="none" stroke="#75906b" stroke-width="2" stroke-linecap="round"/></svg>'}
 function foodCopyLabel(number){if(number===1)return 'Collected again!';const last=number%100;return number+(last>=11&&last<=13?'th':({1:'st',2:'nd',3:'rd'}[number%10]||'th'))+' Copy!'}
-function renderPackageRewards(rewards){
- const groups=new Map();
- for(const reward of rewards){const previous=groups.get(reward.food.id);if(previous){previous.isNew||=reward.isNew;previous.masteryUnlocked+=(reward.masteryUnlocked??(reward.isNew?0:1))}else groups.set(reward.food.id,{...reward,masteryUnlocked:reward.masteryUnlocked??(reward.isNew?0:1)})}
- rewards=[...groups.values()];
- return `<div class="resolved-order"><div class="resolved-packages">${rewards.map((reward,i)=>`<article class="package-reward r${reward.food.rarity} ${reward.isNew?'first-discovery':''}" style="--reward-delay:${Math.min(i,5)*.06}s"><span class="copy-badge ${reward.isNew?'new-discovery':''}">${reward.isNew?'NEW!':'Mastery unlocked!'}</span><span class="package-seal">${packageArt()}</span>${foodArt(reward.food.id)}<h3>${reward.food.name}</h3>${rarityTag(reward.food.rarity)}<p class="discovery-benefit">${reward.isNew?'A new recipe discovered! ':''}${reward.masteryUnlocked?`+${reward.masteryUnlocked} Recipe Mastery upgrade${reward.masteryUnlocked===1?'':'s'} unlocked<small>Buy upgrades with coins in food details.</small>`:''}</p></article>`).join('')}</div><button class="primary back-to-bakery" onclick="closeModal()">Back to Bakery</button></div>`;
+function renderOpenedPackage(reward,token){
+ const food=reward.food;
+ return `<article class="package-open-slot opened-package r${food.rarity}" data-package-token="${token}" tabindex="-1" aria-label="${food.name}, ${RARITIES[food.rarity]}, ${reward.isNew?'new recipe':'Mastery capacity +1'}">${foodArt(food.id)}<strong>${food.name}</strong><span>${food.rarity+1}\u2605 ${RARITIES[food.rarity]}</span><b>${reward.isNew?'NEW!':'+1 MASTERY AVAILABLE'}</b></article>`;
 }

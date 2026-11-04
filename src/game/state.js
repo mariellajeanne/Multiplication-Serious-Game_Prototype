@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),packageRevision:0,rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
 if(!g.owned||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
@@ -14,6 +14,7 @@ function migrateFrame11(state){
  state.orderRuns=state.orderRuns||{};state.claimedOrders=state.claimedOrders||{};
  state.packages=Array.from({length:8},(_,i)=>Math.max(0,Math.floor(state.packages?.[i]||0)));
  state.recipeCeilings=state.recipeCeilings||{};
+ state.packageRevision=Math.max(0,Math.floor(state.packageRevision||0));
  if(!state.frame11Version){
   // Previously earned chests guaranteed a food rarity. Keep that promise for
   // pending legacy rewards instead of reinterpreting them as a Luck-type draw.
@@ -111,8 +112,8 @@ function refreshSkipCost(){return Math.max(1,Math.round(economyUnit()*.5))}
 function requestRefreshSkip(){const cost=refreshSkipCost();showModal('Refresh untouched orders?',`<p>Saved orders and their rewards stay exactly where they are.</p><button class="primary" ${g.coins<cost?'disabled':''} onclick="if(refreshOrders(true))closeModal()">Skip · 🪙 ${fmt(cost)}</button>`)}
 function updateOrderRefresh(){const button=$('refreshOrders');if(!button)return;const remaining=refreshRemaining(),seconds=Math.ceil(remaining/1000);button.disabled=remaining>0;button.textContent=remaining?`Refresh in ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`:'Refresh Orders';}
 function save(){
- // Refuse to overwrite a newer claim receipt from another tab with stale progress.
- try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}}catch(_){}
+ // Refuse to overwrite newer rewards or inventory from another tab.
+ try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}if((stored?.packageRevision||0)>(g.packageRevision||0)){toast('Packages changed in another tab. Reload to continue.');return false}}catch(_){}
  reconcileAutoEquip();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
 let toastTimer=null;
 function clearNotifications(){clearTimeout(toastTimer);const root=$('toasts');if(root)root.replaceChildren()}
@@ -130,8 +131,8 @@ function restoreFocus(target){
 }
 let modalTriggerFocus=null;
 document.addEventListener?.('click',event=>{const trigger=event.target.closest?.('button,summary,[role="tab"]');if(trigger){modalTriggerFocus=captureFocus(trigger);setTimeout(()=>modalTriggerFocus=null,0)}},true);
-function showModal(title,html,variant=''){if(!modal)modalReturnFocus=modalTriggerFocus||captureFocus(document.activeElement);clearNotifications();modal={title,html,variant};paintModal()}
-function closeModal(){const focus=modalReturnFocus;modal=null;modalReturnFocus=null;clearNotifications();paintModal();render();restoreFocus(focus)}
+function showModal(title,html,variant=''){if(modal?.variant?.includes('package-shop-modal')&&!variant.includes('package-shop-modal'))endPackageSession();if(!modal)modalReturnFocus=modalTriggerFocus||captureFocus(document.activeElement);clearNotifications();modal={title,html,variant};paintModal()}
+function closeModal(){if(modal?.variant?.includes('package-shop-modal'))endPackageSession();const focus=modalReturnFocus;modal=null;modalReturnFocus=null;clearNotifications();paintModal();render();restoreFocus(focus)}
 function paintModal(){
  const root=$('modals');if(!modal){root.innerHTML='';return}
  root.innerHTML=`<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal ${modal.variant||''}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modalhead"><h2 id="modalTitle">${modal.title}</h2><span class="dialog-wallet">🪙 ${amountLabel(g.coins)}</span><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`;

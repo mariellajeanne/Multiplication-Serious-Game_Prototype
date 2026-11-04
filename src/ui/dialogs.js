@@ -83,7 +83,6 @@ function openProbabilities(){
  const odds=ticketProbabilities(ticketLuckMastery());
  showModal('Coin Reward Tier Odds',`<p>\u{1f340} Permanent Luck grows as you complete orders. It increases the chance of higher coin tiers on new Order Tickets.</p><div class="package-odds-table">${odds.map((p,i)=>`<div><b>${i+1}\u2605 ${COIN_TIERS[i]}</b><span>${probabilityLabel(p).replace('<','&lt;')}</span></div>`).join('')}</div><p>Base coins \u00d7 Baker's Boost = total coins. A ticket keeps its tier until it is finished or replaced.</p><p>Packages are available from the Package Counter. Permanent Luck does not change package contents.</p>`);
 }
-function showPackageOdds(rank){const node=$('packageOdds');if(node)node.innerHTML=foodOddsMarkup(Number(rank))}
 function sellFoodPrompt(uid){const o=g.owned.find(x=>x.uid===uid);if(!o)return;showModal('Sell this whole food?',`<div class="food-detail">${foodArt(o.id)}<div><h2>${F(o.id).name}</h2><p>Level ${o.level} · Fusion ${o.fusion}</p><div class="tool-preview">🪙 +${fmt(resalePrice(o))}</div></div></div><div class="warning">This removes this copy and its upgrades from your menu. Your discovery stays in Food Index.</div><p class="dialog-note" style="margin-top:12px">${fmt(baseResale(o))} base + ${fmt(Math.floor(o.spent*.5))} upgrade refund</p><div class="btnrow"><button class="primary" onclick="closeModal()">Keep my food</button><button class="secondary" onclick="sellFood(${uid})">Sell for 🪙 ${fmt(resalePrice(o))}</button></div>`)}
 function unlockDemo(){if(g.run){toast('Finish your current order before changing bakery upgrades.');return;}if(!confirm('Demo shortcut: unlock every feature and add test coins? You can reset afterward.'))return;g.completed=Math.max(g.completed,16);g.mastery=Math.max(g.mastery,28);g.permanentLuck=Math.floor(g.mastery/4);g.coins+=100000;for(const id of ['spanish-bread','spanish-bread','ensaymada','ensaymada','ube-pandesal','hopia']){g.owned.push({uid:g.uidNext++,id,level:1,fusion:1,spent:0});if(!g.discovered.includes(id))g.discovered.push(id)}g.activeMenu=[...new Set(g.owned.map(x=>x.id))].slice(0,g.menuSlots).map(id=>g.owned.find(x=>x.id===id).uid);g.board=[];refillBoard();save();closeModal();toast('🧪 All systems unlocked! Sample Filipino foods and coins added.');}
 function resetGame(){if(!confirm('Erase all saved My Panaderya progress?'))return;try{localStorage.removeItem('panaderyaQuestV2');localStorage.removeItem('panaderyaQuestV2BeforeProgression')}catch(_){}g=fresh();refillBoard();save();closeModal();render();showTutorial()}
@@ -91,48 +90,109 @@ function toggleMusic(){g.musicOn=!g.musicOn;save();if(g.musicOn){startMusic()}el
 function startMusic(){if(musicTimer)return;try{music=new(window.AudioContext||window.webkitAudioContext)();let i=0;musicTimer=setInterval(()=>{if(!g.musicOn)return;const extra=g.decor>=2?2:0;const seq=[60,64,67,72,67,64,62,67,65,62,60,67];const midi=seq[i++%seq.length]+(extra&&i%8===0?12:0);const osc=music.createOscillator(),gain=music.createGain();osc.type='sine';osc.frequency.value=440*Math.pow(2,(midi-69)/12);gain.gain.setValueAtTime(.0001,music.currentTime);gain.gain.exponentialRampToValueAtTime(.017,music.currentTime+.04);gain.gain.exponentialRampToValueAtTime(.0001,music.currentTime+.32);osc.connect(gain).connect(music.destination);osc.start();osc.stop(music.currentTime+.34)},400)}catch(e){g.sound=false;toast('Music unavailable in this browser.')}}
 function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}if(music){music.close();music=null}}
 
-/* Coin-only package purchasing and saved unboxing stock. No storage limit. */
-let packageTab='buy',packageType=0,packageQuantity=1,packagePurchaseReview=null;
-function foodOddsMarkup(rank){return `<div class="food-odds">${packageProbabilities(rank).map((p,i)=>`<span>${RARITIES[i]} <b>${probabilityLabel(p).replace('<','&lt;')}</b></span>`).join('')}</div>`}
-function packageQuantityMaximum(){return packageTab==='buy'?Math.min(1000,Math.floor(g.coins/packagePrice(packageType))):g.packages[packageType]}
-function showPackageUnlock(rank){const upgrades=PACKAGE_SHOP[rank].unlock-g.bakeryLevel;showModal(`${PACKAGE_TYPES[rank]} Packages`, `<div class="package-selected package-type p${rank}">${packageArt()}<div><h3>Keep growing your bakery</h3><p>Buy ${upgrades} more Bakery Power upgrade${upgrades===1?'':'s'} to unlock ${PACKAGE_TYPES[rank]} packages.</p><p>Unlocks at Bakery Power ×${powerLabel(bakeryFactor(PACKAGE_SHOP[rank].unlock))}.</p></div></div><button class="secondary" onclick="openPackages('buy',${packageType})">Back to packages</button>`)}
-function openPackages(tab=packageTab,rank=packageType){
- packageTab=tab;packageType=clamp(Number(rank)||0,0,7);packageQuantity=1;packagePurchaseReview=null;
- const unlocked=PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)),locked=PACKAGE_SHOP.find(t=>!packageUnlocked(t.rank)),stock=g.packages.reduce((a,b)=>a+b,0);
- if(tab==='buy'&&!packageUnlocked(packageType))packageType=unlocked.at(-1).rank;
- if(tab==='unbox'&&!g.packages[packageType])packageType=Math.max(0,g.packages.findIndex(n=>n>0));
- const rankNow=packageType,price=packagePrice(rankNow),max=packageQuantityMaximum();if(!max)packageQuantity=0;
- showModal('Bakery Packages',`<div class="package-shop-tabs"><button class="secondary" aria-pressed="${tab==='buy'}" onclick="openPackages('buy')">Buy Packages</button><button class="secondary" aria-pressed="${tab==='unbox'}" onclick="openPackages('unbox')">Unbox Packages · ${stock}</button></div>${tab==='buy'?`<div class="package-type-list">${[...unlocked,...locked?[locked]:[]].map(t=>`<button class="package-type p${t.rank} ${t.rank===rankNow?'chosen':''} ${packageUnlocked(t.rank)?'':'locked'}" aria-pressed="${t.rank===rankNow}" onclick="${packageUnlocked(t.rank)?`openPackages('buy',${t.rank})`:`showPackageUnlock(${t.rank})`}">${packageArt()}<b>${t.name}</b><small>${packageUnlocked(t.rank)?`🪙 ${amountLabel(packagePrice(t.rank))}`:'Locked · Tap to see how'}</small></button>`).join('')}</div>`:`<div class="package-type-list">${PACKAGE_TYPES.map((name,i)=>g.packages[i]?`<button class="package-type p${i} ${i===rankNow?'chosen':''}" aria-pressed="${i===rankNow}" onclick="openPackages('unbox',${i})">${packageArt()}<b>${name}</b><span>${g.packages[i]} saved</span></button>`:'').join('')||'<p>Your shelf is empty. Buy packages at the Package Counter.</p>'}</div>`}<div class="package-selected package-type p${rankNow}">${packageArt()}<div><h3>${PACKAGE_TYPES[rankNow]} · Luck type</h3><p>A surprise food inside. ${PACKAGE_TYPES[rankNow]} does not guarantee ${RARITIES[rankNow]} food.</p>${g.legacyPackageFoods?.[rankNow]?.length?'<p>Includes saved rewards with their original guaranteed food rarity.</p>':''}</div></div><details><summary>Food rarity odds inside ${PACKAGE_TYPES[rankNow]}</summary>${foodOddsMarkup(rankNow)}</details><label class="package-quantity-label" for="packageQuantity">How many? <output id="packageQuantityLabel">${packageQuantity}</output></label><div class="package-quantity"><button id="packageMinus" class="secondary" aria-label="One fewer package" disabled onclick="setPackageQuantity(packageQuantity-1)">−</button><input id="packageQuantity" type="range" min="${max?1:0}" max="${Math.max(1,max)}" value="${packageQuantity}" ${!max?'disabled':''} oninput="setPackageQuantity(this.value)" aria-label="Package quantity"><button id="packagePlus" class="secondary" aria-label="One more package" ${max<=1?'disabled':''} onclick="setPackageQuantity(packageQuantity+1)">+</button><button id="packageMax" class="secondary" ${!max?'disabled':''} onclick="setPackageQuantity(packageQuantityMaximum())">MAX</button></div><small class="quantity-help">${tab==='buy'?'MAX = the most you can afford, up to 1,000 at a time.':`MAX = all saved ${PACKAGE_TYPES[rankNow]} packages.`}</small><p id="packageCost">${tab==='buy'?`Total 🪙 ${fmt(price*packageQuantity)}${max?'':' · Not enough coins'}`:`${g.packages[rankNow]} available to open`}</p>${tab==='buy'?`<button id="packageBuy" class="primary wide" ${!max?'disabled':''} onclick="requestPackagePurchase()">Buy & save ${packageQuantity} package${packageQuantity===1?'':'s'}</button>`:`<div class="btnrow"><button id="packageOpen" class="primary" ${!max?'disabled':''} onclick="unboxPackages(packageType,packageQuantity)">Open Selected</button><button id="packageInstant" class="secondary" ${!max?'disabled':''} onclick="unboxPackages(packageType,packageQuantity,true)">Open Selected Instantly</button><button class="secondary" ${!stock?'disabled':''} onclick="unboxAllPackages()">Open All ${stock} Packages</button></div><small class="quantity-help">Open All includes every saved package type.</small>`}`);
+/* One package workspace. Stock/foods persist; revealed slots live only in this session. */
+const PACKAGE_CAPACITY=50;
+let packageType=0,packageQuantity=1,packagePurchaseReview=null,packageQuote=null;
+let packageSession=null,packageSessionSequence=0;
+function endPackageSession(){packageSession=null;packageQuote=null;packagePurchaseReview=null}
+function ensurePackageSession(){
+ if(!packageSession)packageSession={id:++packageSessionSequence,sequence:0,view:0,busy:false,slots:Array.from({length:8},()=>[])};
+ for(let rank=0;rank<8;rank++){
+  const slots=packageSession.slots[rank],unopened=slots.filter(slot=>!slot.reward);
+  let excess=unopened.length-g.packages[rank];
+  while(excess-->0){const slot=unopened.pop();slots.splice(slots.indexOf(slot),1)}
+  for(let i=unopened.length;i<g.packages[rank];i++)slots.push({id:`${packageSession.id}-${++packageSession.sequence}`,rank,reward:null});
+ }
+ return packageSession;
+}
+function packageRoom(rank=packageType){return Math.max(0,PACKAGE_CAPACITY-g.packages[rank])}
+function packageQuantityMaximum(){return packageUnlocked(packageType)?Math.min(packageRoom(),Math.floor(g.coins/packagePrice(packageType))):0}
+function foodOddsMarkup(rank){return `<div class="package-food-odds">${packageProbabilities(rank).map((p,i)=>`<div class="package-odds-row r${i}"><span>${i+1}\u2605 ${RARITIES[i]}</span><span class="package-food-bar" aria-hidden="true"><i style="width:${p*100}%"></i></span><b>${probabilityLabel(p).replace('<','&lt;')}</b></div>`).join('')}</div>`}
+function packageBuyLabel(){return `BUY ${packageQuantity} ${PACKAGE_TYPES[packageType].toUpperCase()} PACKAGES`}
+function quotePackagePurchase(){
+ const session=ensurePackageSession();
+ packageQuote={id:`${session.id}-buy-${++session.sequence}`,rank:packageType,count:packageQuantity,price:packagePrice(packageType),stock:g.packages[packageType]};
+ packageQuote.total=packageQuote.price*packageQuote.count;
+ return packageQuote;
+}
+function renderPackageTypes(){return PACKAGE_SHOP.map(type=>{
+ const unlocked=packageUnlocked(type.rank);
+ return `<button class="package-type package-type-card p${type.rank} ${type.rank===packageType?'chosen':''} ${unlocked?'':'locked'}" data-package-type="${type.rank}" aria-pressed="${type.rank===packageType}" aria-label="${type.rank+1} star ${type.name} package${unlocked?'':', needs higher Bakery Power'}" onclick="openPackages('buy',${type.rank})"><span class="package-card-art">${packageArt()}${unlocked?`<b class="package-card-price">${amountLabel(packagePrice(type.rank))} \u{1fa99}</b>`:'<span class="package-locked-label">NEEDS HIGHER<br><strong>BAKERY POWER \u{1f451}</strong></span>'}<span class="package-card-stars" aria-hidden="true">${'\u2605'.repeat(type.rank+1)}</span></span><strong class="package-card-name">${type.rank+1}\u2605 ${type.name.toUpperCase()}</strong></button>`;
+ }).join('')}
+function renderPackageSlots(){return packageSession.slots[packageType].map(slot=>slot.reward?renderOpenedPackage(slot.reward,slot.id):`<button class="package-open-slot package-type p${packageType}" data-package-token="${slot.id}" aria-label="Open one ${PACKAGE_TYPES[packageType]} package" onclick="openPackageSlot(${packageType},'${slot.id}')">${packageArt()}<span aria-hidden="true">${'\u2605'.repeat(packageType+1)}</span></button>`).join('')}
+function renderPackageWorkspace(){
+ const session=ensurePackageSession(),max=packageQuantityMaximum();packageQuantity=max?clamp(packageQuantity||1,1,max):0;
+ const quote=quotePackagePurchase(),rank=packageType;
+ session.view++;session.viewId=`${session.id}-view-${session.view}`;
+ return `<div class="package-workspace"><section class="package-types-column" aria-label="Package types"><h2>PACKAGES</h2><nav class="package-type-list" aria-label="Choose a package type" tabindex="0">${renderPackageTypes()}</nav></section><section class="package-purchase-column" aria-label="Package purchasing"><h2 id="packageSelectedHeading">${rank+1}\u2605 ${PACKAGE_TYPES[rank].toUpperCase()} PACKAGE</h2><section class="package-odds-section" aria-label="Food item odds"><h3>FOOD ITEM ODDS</h3><div id="packageOdds">${foodOddsMarkup(rank)}</div></section><section class="package-order-section" aria-label="Order packages"><h3>ORDER PACKAGES</h3><div class="package-order-controls"><div class="package-purchase-form"><div class="package-quantity-summary"><div class="package-quantity-card"><label for="packageQuantity">NO. OF ${rank+1}\u2605 PACKAGES</label><output id="packageQuantityLabel">${packageQuantity}</output><span id="packageCapacity" aria-label="Selected quantity / available package spaces">${packageQuantity}/${packageRoom()}</span></div><b id="packageCost" class="package-cost-badge">${fmt(quote.total)} \u{1fa99}</b></div><div class="package-quantity-controls"><button id="packageMinus" class="secondary" ${packageQuantity<=1?'disabled':''} onclick="setPackageQuantity(packageQuantity-1)" aria-label="One fewer package">\u22121</button><button id="packageMinusFive" class="secondary" ${packageQuantity<=1?'disabled':''} onclick="setPackageQuantity(packageQuantity-5)" aria-label="Five fewer packages">\u22125</button><input id="packageQuantity" type="range" min="${max?1:0}" max="${Math.max(1,max)}" value="${packageQuantity}" ${!max?'disabled':''} oninput="setPackageQuantity(this.value)" aria-label="Purchase quantity"><button id="packagePlus" class="secondary" ${packageQuantity>=max?'disabled':''} onclick="setPackageQuantity(packageQuantity+1)" aria-label="One more package">+1</button><button id="packagePlusFive" class="secondary" ${packageQuantity>=max?'disabled':''} onclick="setPackageQuantity(packageQuantity+5)" aria-label="Five more packages">+5</button></div><button id="packageMax" class="secondary package-max" ${!max?'disabled':''} onclick="setPackageQuantity(packageQuantityMaximum())">MAX AFFORDABLE</button></div><button id="packageBuy" class="primary package-buy" ${!max?'disabled':''} onclick="requestPackagePurchase('${quote.id}')"><span id="packageBuyLabel">${packageBuyLabel()}</span><strong id="packageBuyTotal">${fmt(quote.total)} \u{1fa99}</strong></button></div></section></section><section class="package-opening-column" aria-label="Opening packages"><h2 id="packageOpeningHeading">OPEN ${rank+1}\u2605 PACKAGES</h2><div class="package-opening-grid" id="packageOpeningGrid" tabindex="0" aria-label="${PACKAGE_TYPES[rank]} packages and opened foods">${renderPackageSlots()}</div><div class="package-opening-footer"><button id="packageOpenAll" class="package-open-all" ${!g.packages[rank]?'disabled':''} onclick="unboxAllPackages('${session.viewId}')">OPEN ALL PACKAGES</button></div></section></div>`;
+}
+function paintPackageWorkspace(focus=null){
+ const list=document.querySelector?.('.package-type-list'),grid=$('packageOpeningGrid'),scroll=[list?.scrollTop||0,grid?.scrollTop||0];
+ const html=renderPackageWorkspace(),body=document.querySelector?.('.package-shop-modal .modalbody');
+ if(body&&modal?.variant==='package-shop-modal'){modal.html=html;body.innerHTML=html;clearNotifications()}
+ else showModal('Packages',html,'package-shop-modal');
+ const nextList=document.querySelector?.('.package-type-list'),nextGrid=$('packageOpeningGrid');
+ if(nextList)nextList.scrollTop=scroll[0];if(nextGrid)nextGrid.scrollTop=scroll[1];
+ // Repainting keeps pointer/keyboard focus on the action or its revealed result.
+ if(focus&&typeof requestAnimationFrame==='function')requestAnimationFrame(()=>{
+  const target=document.querySelector(`[data-package-token="${focus}"]`)||$(focus);target?.focus?.({preventScroll:true});
+ });
+}
+// Keep the established entry signature for Package Counter links; buying and opening are simultaneous now.
+function openPackages(tab='buy',rank=packageType){
+ if(!Number.isInteger(Number(rank))||Number(rank)<0||Number(rank)>7)return false;
+ if(!packageSession||packageType!==Number(rank))packageQuantity=1;
+ packageType=Number(rank);packagePurchaseReview=null;paintPackageWorkspace();return true;
 }
 function setPackageQuantity(value){
  const max=packageQuantityMaximum();packageQuantity=max?clamp(Math.floor(Number(value)||1),1,max):0;
- const input=$('packageQuantity');if(input){input.min=max?1:0;input.max=Math.max(1,max);input.value=packageQuantity;input.disabled=!max}const output=$('packageQuantityLabel');if(output)output.textContent=packageQuantity;
- for(const [id,disabled] of [['packageMinus',packageQuantity<=1],['packagePlus',packageQuantity>=max],['packageMax',!max]]){const button=$(id);if(button)button.disabled=disabled}
- const cost=$('packageCost');if(cost)cost.textContent=packageTab==='buy'?`Total 🪙 ${fmt(packagePrice(packageType)*packageQuantity)}${max?'':' · Not enough coins'}`:`Opening ${packageQuantity} of ${g.packages[packageType]} saved ${PACKAGE_TYPES[packageType]} packages`;
- const buy=$('packageBuy');if(buy)buy.textContent=`Buy & save ${packageQuantity} package${packageQuantity===1?'':'s'}`;
+ const quote=quotePackagePurchase(),input=$('packageQuantity');
+ if(input){input.min=max?1:0;input.max=Math.max(1,max);input.value=packageQuantity;input.disabled=!max}
+ const texts={packageQuantityLabel:packageQuantity,packageCapacity:`${packageQuantity}/${packageRoom()}`,packageCost:`${fmt(quote.total)} \u{1fa99}`,packageBuyLabel:packageBuyLabel(),packageBuyTotal:`${fmt(quote.total)} \u{1fa99}`};
+ for(const [id,value] of Object.entries(texts)){const el=$(id);if(el)el.textContent=value}
+ for(const [id,disabled] of [['packageMinus',packageQuantity<=1],['packageMinusFive',packageQuantity<=1],['packagePlus',packageQuantity>=max],['packagePlusFive',packageQuantity>=max],['packageMax',!max],['packageBuy',!max]]){const button=$(id);if(button)button.disabled=disabled}
+ const buy=$('packageBuy');if(buy)buy.setAttribute('onclick',`requestPackagePurchase('${quote.id}')`);
 }
-function requestPackagePurchase(){
- const rank=packageType,count=packageQuantity,total=packagePrice(rank)*count;
- if(!packageUnlocked(rank)||g.coins<total)return false;
- packagePurchaseReview={rank,count,total,price:packagePrice(rank)};
- if(total>=Math.max(1,economyUnit()*3)||total>=g.coins*.25)showModal('Buy these packages?',`<p>${count} ${PACKAGE_TYPES[rank]} packages · <b>🪙 ${fmt(total)}</b></p><p>Saved for later opening. Randomized purchases cannot be undone.</p><button class="secondary" onclick="openPackages('buy',${rank})">Cancel</button><button class="primary" onclick="confirmPackagePurchase()">Confirm · 🪙 ${fmt(total)}</button>`);
- else return confirmPackagePurchase();
+function packageStockIsCurrent(){
+ try{const latest=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if((latest?.packageRevision||0)!==(g.packageRevision||0)){toast('Packages changed in another tab. Reload to continue.');return false}}catch(_){}
+ return true;
+}
+function requestPackagePurchase(id=packageQuote?.id){
+ if(!packageQuote||packageQuote.id!==id)return false;
+ packagePurchaseReview=packageQuote;packageQuote=null;return confirmPackagePurchase();
 }
 function confirmPackagePurchase(){
- const tx=packagePurchaseReview;packagePurchaseReview=null;if(!tx||!Number.isInteger(tx.count)||tx.count<1||tx.count>1000||!packageUnlocked(tx.rank)||tx.price!==packagePrice(tx.rank)||tx.total!==tx.price*tx.count||g.coins<tx.total)return false;
- const backup=JSON.stringify(g);commitPurchaseUndo('Packages purchased');g.coins-=tx.total;g.packages[tx.rank]+=tx.count;
- if(!save()){g=JSON.parse(backup);migrateFrame11(g);return false}
- render();openPackages('unbox',tx.rank);toast(`${tx.count} ${PACKAGE_TYPES[tx.rank]} packages saved!`);return true;
+ const tx=packagePurchaseReview;packagePurchaseReview=null;
+ if(!tx||packageSession?.busy||tx.rank!==packageType||tx.count!==packageQuantity||!Number.isInteger(tx.count)||tx.count<1||tx.count>packageRoom(tx.rank)||!packageUnlocked(tx.rank)||tx.price!==packagePrice(tx.rank)||tx.total!==tx.price*tx.count||tx.stock!==g.packages[tx.rank]||g.coins<tx.total||!packageStockIsCurrent())return false;
+ const backup=JSON.stringify(g);commitPurchaseUndo('Packages purchased');g.coins-=tx.total;g.packages[tx.rank]+=tx.count;g.packageRevision=(g.packageRevision||0)+1;
+ if(!save()){g=JSON.parse(backup);migrateFrame11(g);paintPackageWorkspace('packageBuy');return false}
+ render();paintPackageWorkspace('packageBuy');return true;
 }
-function unboxPackages(rank,count,skip=false){
+function openPackageSlot(rank,id){
+ if(rank!==packageType||!packageSession)return false;
+ const slot=packageSession.slots[rank].find(item=>item.id===id);
+ return slot&&!slot.reward?commitPackageOpening(rank,[slot],id):false;
+}
+function unboxPackages(rank,count){
  if(!Number.isInteger(rank)||rank<0||rank>7||!Number.isInteger(count)||count<1||g.packages[rank]<count)return false;
- const quantities=Array(8).fill(0);quantities[rank]=count;return openPackageBatch(quantities,skip);
+ packageType=rank;const session=ensurePackageSession();
+ return commitPackageOpening(rank,session.slots[rank].filter(slot=>!slot.reward).slice(0,count));
 }
-function unboxAllPackages(){return openPackageBatch([...g.packages],true)}
-function openPackageBatch(quantities,skip=false){
- if(!Array.isArray(quantities)||quantities.length!==8||quantities.some((n,i)=>!Number.isInteger(n)||n<0||n>g.packages[i])||!quantities.some(n=>n))return false;
- const backup=JSON.stringify(g);commitPurchaseUndo('Packages opened');const rewards=[];
- quantities.forEach((count,rank)=>{g.packages[rank]-=count;for(let i=0;i<count;i++){const legacy=g.legacyPackageFoods?.[rank]?.shift();rewards.push(discoverFood(Number.isInteger(legacy)?pick(FOOD.filter(f=>f.rarity===legacy)):drawFood(rank)))}});
- if(!save()){g=JSON.parse(backup);migrateFrame11(g);return false}
- render();showModal('Fresh from your packages!',renderPackageRewards(rewards),'order-reward-modal');if(skip||typeof matchMedia==='function'&&matchMedia('(prefers-reduced-motion:reduce)').matches)document.querySelector?.('.order-reward-modal')?.classList.add('skip-unbox');return true;
+function unboxAllPackages(viewId=null){
+ if(!packageSession||viewId!==null&&viewId!==packageSession.viewId)return false;
+ return unboxPackages(packageType,g.packages[packageType]);
+}
+function commitPackageOpening(rank,slots,focus='packageOpenAll'){
+ const session=packageSession;
+ if(!session||session.busy||!slots.length||slots.length>g.packages[rank]||slots.some(slot=>slot.reward||!session.slots[rank].includes(slot))||!packageStockIsCurrent())return false;
+ const backup=JSON.stringify(g),rewards=[];session.busy=true;
+ try{
+  commitPurchaseUndo('Packages opened');g.packages[rank]-=slots.length;g.packageRevision=(g.packageRevision||0)+1;
+  for(const slot of slots){const legacy=g.legacyPackageFoods?.[rank]?.shift();rewards.push(discoverFood(Number.isInteger(legacy)?pick(FOOD.filter(food=>food.rarity===legacy)):drawFood(rank)))}
+  if(!save()){g=JSON.parse(backup);migrateFrame11(g);return false}
+  // Only successful durable transactions reveal foods. Replayed slot IDs are spent.
+  slots.forEach((slot,i)=>slot.reward=rewards[i]);
+ }catch(error){g=JSON.parse(backup);migrateFrame11(g);throw error}
+ finally{session.busy=false}
+ render();paintPackageWorkspace(focus);return true;
 }

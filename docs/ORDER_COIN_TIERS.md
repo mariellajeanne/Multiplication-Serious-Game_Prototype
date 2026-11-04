@@ -1,5 +1,7 @@
 # Coin-only Order Tickets — 2026-11-04
 
+**Packages update (2026-11-05):** [Current workspace](PACKAGES_INTERFACE.md) replaces separate opening dialogs and Open Selected with immediate in-place collection. Open All now consumes only the selected package type; old guaranteed-food queues remain supported.
+
 Implemented owner direction. This supersedes earlier ticket-package rewards, temporary Package Luck, ticket/package odds labels, and challenge coin modifiers. The worksheet's input, carry, undo, tutorial, sound, retry/lives and independent-session behavior is retained.
 
 ## Current reward contract

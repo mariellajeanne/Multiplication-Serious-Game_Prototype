@@ -34,11 +34,11 @@ test('slot purchases cap at the complete Food Index even with just one discovere
  assert.equal(h.run('extra'),false);assert.equal(h.run('g.coins'),h.run('before'));
 });
 
-test('an empty Unbox selection chooses available stock, and zero stock has no purchasable quantity',()=>{
+test('package selection stays on the chosen type even when empty; locked types cannot be purchased',()=>{
  const h=progressionHarness();h.run(`g.packages[4]=7;openPackages('unbox',0);selection=packageType;html=popup.html;
  g.packages[4]=0;openPackages('unbox',4);setPackageQuantity(999)`);
- assert.equal(h.run('selection'),4);assert.match(h.run('html'),/MAX = all saved Blessed packages/);
- assert.equal(h.run('packageQuantity'),0);assert.match(h.run('popup.html'),/Your shelf is empty/);
+ assert.equal(h.run('selection'),0);assert.match(h.run('html'),/OPEN 1\u2605 PACKAGES/);
+ assert.equal(h.run('packageQuantity'),0);assert.match(h.run('popup.html'),/OPEN 5\u2605 PACKAGES/);
 });
 
 test('rounded display never rounds a nonzero chance to zero or mutates model precision',()=>{
@@ -46,8 +46,8 @@ test('rounded display never rounds a nonzero chance to zero or mutates model pre
  assert.equal(h.run('probabilityLabel(0)'),'0.00%');assert.equal(h.run('powerLabel(5.112046)'), '5.11');
  assert.equal(h.run('BAKERY_POWER_CONFIG.factor'),1.085);
  h.run(`Math.random=()=>0;g.packages[0]=5;unboxPackages(0,5,true);html=popup.html`);
- assert.equal((h.run('html').match(/<article class="package-reward/g)||[]).length,1);
- assert.match(h.run('html'),/\+5 Recipe Mastery upgrades unlocked/);assert.doesNotMatch(h.run('html'),/resolved-coins|resolved-luck|resolved-practice/);
+ assert.equal((h.run('html').match(/<article class="package-open-slot opened-package/g)||[]).length,5);
+ assert.match(h.run('html'),/\+1 MASTERY AVAILABLE/);assert.equal(h.run('g.recipeCeilings.pandesal'),5);assert.doesNotMatch(h.run('html'),/resolved-coins|resolved-luck|resolved-practice/);
 });
 
 test('ingredient previews use actual unbounded Mastery rather than the legacy Level 5 mirror',()=>{
