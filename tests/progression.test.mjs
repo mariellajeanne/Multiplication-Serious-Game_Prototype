@@ -81,15 +81,15 @@ test('refresh persists five tickets and deadline, blocks repeat, reload and roll
  const ids=r.json('g.board.map(t=>t.id)');assert.equal(new Set(ids).size,5);
 });
 
-test('bakery supports 100 purchases and active income remains stronger than staff',()=>{
+test('bakery supports the extended runway and active income remains stronger than staff',()=>{
  const h=progressionHarness();h.run('g.completed=100;g.coins=1e30');
  for(let level=1;level<=101;level++){
   assert.equal(h.run('g.bakeryLevel'),level);const before=h.run('bakeryValue()'),stage=h.run('bakeryStage(g.bakeryLevel)');
   if(level<101){assert.equal(h.run('upgradeDecor()'),true);assert.ok(Math.abs(h.run('bakeryValue()')/before-1.085)<1e-12);
    assert.equal(h.run('bakeryStage(g.bakeryLevel)')-stage,[2,3,5,7,10,13,17,21,25,30].includes(level+1)?1:0);}
  }
- assert.equal(h.run('upgradeDecor()'),false);
- assert.ok(Math.abs(h.run('economyUnit()/90/staffRate()')-4)<1e-12);
+ h.run('g.bakeryLevel=BAKERY_POWER_CONFIG.purchases;g.coins=bakeryUpgradeCost()*2');assert.equal(h.run('upgradeDecor()'),true);assert.equal(h.run('upgradeDecor()'),false);
+ assert.ok(Math.abs(h.run('ticketBase(0)*bakeryValue()/90/staffRate()')-4)<1e-12);
 });
 
 test('unequipping or selling cannot lower global upgrade prices or create a high-rate staff contract',()=>{

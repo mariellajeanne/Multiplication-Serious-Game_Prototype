@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),packageRevision:0,rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({progressionVersion:PROGRESSION_VERSION,economyVersion:ECONOMY_BALANCE.version,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),packageRevision:0,rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
 if(!g.owned||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
@@ -14,6 +14,14 @@ function migrateFrame11(state){
  state.orderRuns=state.orderRuns||{};state.claimedOrders=state.claimedOrders||{};
  state.packages=Array.from({length:8},(_,i)=>Math.max(0,Math.floor(state.packages?.[i]||0)));
  state.recipeCeilings=state.recipeCeilings||{};
+ // Repricing keeps every asset and pending reward; old price-based Undo quotes expire.
+ if(state.economyVersion!==ECONOMY_BALANCE.version){
+  // Existing players retain package types unlocked under the previous 10-level gates.
+  state.packageTierUnlocks=[...new Set([...(state.packageTierUnlocks||[]),...PACKAGE_SHOP.filter(t=>state.bakeryLevel>=1+t.rank*10).map(t=>t.rank)])];
+  const menu={};for(const food of state.owned.filter(o=>state.activeMenu.includes(o.uid)))menu[food.id]=Math.max(menu[food.id]||0,individualValue(food));
+  state.economyPeakBase=Math.max(1,Object.values(menu).reduce((a,b)=>a+b,0));
+  state.purchaseUndo=null;state.economyVersion=ECONOMY_BALANCE.version;
+ }
  state.packageRevision=Math.max(0,Math.floor(state.packageRevision||0));
  if(!state.frame11Version){
   // Previously earned chests guaranteed a food rarity. Keep that promise for

@@ -6,16 +6,16 @@ const BAKERY_STAGES=['Freshly opened','Warm welcome','Cozy counter','Neighborhoo
 const TICKET_DIMS=[[2,1],[2,2],[2,2],[3,2],[3,2],[4,2],[4,2],[4,2]];
 const ORDER_LIMIT=5, ORDER_REFRESH_MS=180000;
 // Frame 11: tune progression and shop economy here, independently of presentation.
-const BAKERY_POWER_CONFIG={purchases:100,factor:1.085,priceOrders:2.5,priceGrowth:.2};
+const BAKERY_POWER_CONFIG={purchases:ECONOMY_BALANCE.bakeryCap,factor:ECONOMY_BALANCE.bakeryGain};
 const PACKAGE_TYPES=['Standard','Lucky','Fortunate','Charmed','Blessed','Miraculous','Divine','Fate'];
-const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:1+rank*10,priceOrders:.6*Math.pow(2,rank)}));
+const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:ECONOMY_BALANCE.unlocks[rank],priceOrders:ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank)}));
 const MASTERY_STEP=.4, PURCHASE_UNDO_MS=10000;
 function recipeMastery(o){return Math.max(0,Math.floor(o.mastery??((o.level||1)-1)))}
 function masteryFactor(n){return n<5?LEVEL_FACTORS[n+1]:2.3+(n-4)*MASTERY_STEP}
 function availableMastery(o){return Math.max(0,(g.recipeCeilings?.[o.id]||0)-recipeMastery(o))}
 function foodTier(o){return clamp(Math.floor(Number(o.fusion)||1),1,MAX_FOOD_TIER)}
-function amountLabel(value){return Math.abs(value)<1e6?fmt(value):new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:1}).format(value)}
-function multiplierLabel(value){return Math.abs(value)<1e4?value.toFixed(2):new Intl.NumberFormat('en-US',{notation:'compact',maximumFractionDigits:2}).format(value)}
+function amountLabel(value){return Math.abs(value)<1e6?fmt(value):largeNumberLabel(value,1)}
+function multiplierLabel(value){return Math.abs(value)<1e4?value.toFixed(2):largeNumberLabel(value,2)}
 function tierBase(o){return (FOOD.find(f=>f.id===o.id)?.base||0)*TIER_FACTORS[foodTier(o)]+Math.max(0,Number(o.baseCarry)||0)}
 function individualValue(o){return tierBase(o)*masteryFactor(recipeMastery(o))}
 // One retained instance per Food Index recipe. Legacy investments consolidate once.
@@ -41,7 +41,7 @@ function consolidateOwnedFoods(state){
  state.uniqueFoodsVersion=1;return state;
 }
 function bakeryFactor(level){return Math.pow(BAKERY_POWER_CONFIG.factor,clamp(level||1,1,BAKERY_POWER_CONFIG.purchases+1)-1)}
-function powerLabel(value){return new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value)}
+function powerLabel(value){return Math.abs(value)>=1e6?largeNumberLabel(value,2):new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value)}
 // Display rounding is independent of the probability used by the random draw.
 function probabilityLabel(probability){const percent=probability*100;return percent>0&&percent<.01?'<0.01%':percent.toFixed(2)+'%'}
 function bakeryStage(level){return BAKERY_MILESTONES.filter(n=>n<=level).length}
@@ -61,7 +61,7 @@ const COIN_ORDER_LABELS=[['Snack Order','Breakfast Order'],['Family Order','Picn
 const COIN_ORDER_ICONS=['🏠','🧺','🏫','☕','🏨','🏘️','🏰','🌟'];
 function ticketCoinTier(ticket){return clamp(Number.isInteger(ticket.coinTier)?ticket.coinTier:ticket.rarity||0,0,7)}
 function ticketOrderLabel(ticket){return ticket.orderLabel||COIN_ORDER_LABELS[ticketCoinTier(ticket)][Math.abs(Number(ticket.id)||0)%2]}
-function ticketBase(rank){return 130*2**clamp(rank,0,7)}
+function ticketBase(rank){return Math.round(ECONOMY_BALANCE.coinBase*ECONOMY_BALANCE.coinGrowth**clamp(rank,0,7))}
 function expectedTicketBase(mastery){return ticketProbabilities(mastery).reduce((sum,p,i)=>sum+p*ticketBase(i),0)}
 function tierRecipe(a,b){
  if(!Number.isInteger(a)||!Number.isInteger(b)||a<1||b<1||a>=5||b>=5)return null;
@@ -93,9 +93,9 @@ function bestMenu(owned,capacity,mode){
  const seen=new Set();return sorted.filter(o=>{if(seen.has(o.id))return false;seen.add(o.id);return true}).slice(0,capacity).map(o=>o.uid);
 }
 function pricingMenuBase(){
- const ids=new Set(bestMenu(g.owned,g.menuSlots,'final'));
- return Math.max(1,g.economyPeakBase||0,g.owned.filter(o=>ids.has(o.uid)).reduce((sum,o)=>sum+individualValue(o),0));
+ return Math.max(1,g.economyPeakBase||0,foodSum());
 }
+
 function migrateProgression(state){
  if(state.progressionVersion>=PROGRESSION_VERSION)return state;
  const ranks=[...(state.board||[]).map(t=>t.rarity),state.run?.ticket?.rarity,...(state.run?.chests||[]).map(c=>typeof c==='number'?c:c.rarity)];

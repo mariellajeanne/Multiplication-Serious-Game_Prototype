@@ -42,10 +42,10 @@ test('Boost and proportional prices have no Kitchen dependency across early, lat
   assert.ok(Math.abs(h.run('bakeryValue()')/(Math.max(1,food)*power)-1)<1e-12);
   const income=expected*Math.max(1,food)*power;
   assert.ok(Math.abs(h.run('earningUnit()')/income-1)<1e-12);
-  for(const [expr,orders] of [['slotCost()',2],['packagePrice(0)',.6],['bakeryUpgradeCost()',2.5+.2*(bakery-1)**1.15],['foodLevelPrice(g.owned[0])',1.2]])
-   assert.ok(Math.abs(h.run(expr)-income*orders)<=.500001,expr);
-  // At a comfortable 60/90/120 seconds per order, active earnings remain 6x/4x/3x staff.
-  for(const seconds of [60,90,120])assert.ok(Math.abs(income/seconds/h.run('staffRate()')-360/seconds)<1e-10);
+  const quotes=h.json('[slotCost(),packagePrice(0),bakeryUpgradeCost(),foodLevelPrice(g.owned[0])]');
+  h.run('g.equipment={oven:99999,mixer:99999}');
+  assert.deepEqual(h.json('[slotCost(),packagePrice(0),bakeryUpgradeCost(),foodLevelPrice(g.owned[0])]'),quotes);
+  for(const seconds of [60,90,120])assert.ok(Math.abs(h.run('ticketBase(0)*bakeryValue()')/seconds/h.run('staffRate()')-360/seconds)<1e-10);
   h.run('showBoostInfo()');assert.doesNotMatch(h.run('popup.html'),/Kitchen|kitchen/);
  }
 });

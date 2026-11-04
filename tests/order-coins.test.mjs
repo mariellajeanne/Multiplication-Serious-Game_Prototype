@@ -2,10 +2,10 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {progressionHarness} from './progression-harness.mjs';
 
-test('eight coin tiers double in value; saved tiers and labels do not consume RNG on render, resume or migration',()=>{
+test('eight coin tiers grow exponentially; saved tiers and labels do not consume RNG on render, resume or migration',()=>{
  const h=progressionHarness();
  assert.deepEqual(h.json('COIN_TIERS'),['Coin Stack','Coin Jar','Coin Bag','Coin Bucket','Coin Cart','Treasure Chest','Golden Vault','Divine Treasury']);
- assert.deepEqual(h.json('COIN_TIERS.map((_,i)=>ticketBase(i))'),[130,260,520,1040,2080,4160,8320,16640]);
+ assert.deepEqual(h.json('COIN_TIERS.map((_,i)=>ticketBase(i))'),[130,176,237,320,432,583,787,1062]);
  h.run(`g.mastery=80;refillBoard();saved=JSON.stringify(g.board);save();
   Math.random=()=>{throw Error('Must not reroll saved rewards')};renderTickets();migrateFrame11(g)`);
  assert.equal(h.run('JSON.stringify(g.board)'),h.run('saved'));

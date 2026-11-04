@@ -1,16 +1,16 @@
-/* Prices are measured against expected Normal-order earnings, not challenge modes. */
-function economyUnit(){return expectedTicketBase(ticketLuckMastery())*pricingMenuBase()*decorBonus()}
+/* Prices grow below income and become more efficient with completed math practice. */
+function economyUnit(){return balancedPriceUnit(pricingMenuBase(),g.bakeryLevel,g.completed)}
 function earningUnit(){return expectedTicketBase(ticketLuckMastery())*bakeryValue()}
-function slotCost(){return Math.round(economyUnit()*(2+.6*Math.pow(Math.max(0,g.menuSlots-1),1.15)))}
-function packagePrice(rank){return Math.max(1,Math.round(economyUnit()*PACKAGE_SHOP[rank].priceOrders))}
-function packageUnlocked(rank){return g.bakeryLevel>=PACKAGE_SHOP[rank].unlock}
+function slotCost(){return balancedSlotCost(pricingMenuBase(),g.bakeryLevel,g.menuSlots,g.completed)}
+function packagePrice(rank){return balancedPackagePrice(rank,pricingMenuBase(),g.bakeryLevel,g.completed)}
+function packageUnlocked(rank){return g.bakeryLevel>=PACKAGE_SHOP[rank].unlock||g.packageTierUnlocks?.includes(rank)===true}
 function foodEarningShare(o){return expectedTicketBase(ticketLuckMastery())*foodValue(o)*decorBonus()}
-function foodLevelCost(o){return Math.max(1,Math.round(foodEarningShare(o)*(.75+.45*Math.pow(recipeMastery(o)+1,1.3))))}
+function foodLevelCost(o){return balancedMasteryCost(tierBase(o),recipeMastery(o),g.bakeryLevel,g.completed)}
 function foodLevelPrice(o){return foodLevelCost(o)}
-function fusionFee(o,other=null){const tier=other?Math.max(foodTier(o),foodTier(other)):foodTier(o);return Math.max(1,Math.round(expectedTicketBase(ticketLuckMastery())*F(o.id).base*decorBonus()*(1.5+.65*Math.pow(tier,1.25))))}
+function fusionFee(o,other=null){return balancedFusionFee(F(o.id).base,g.bakeryLevel,other?Math.max(foodTier(o),foodTier(other)):foodTier(o),g.completed)}
 function ingredientNeeds(o){const f=F(o.id),qty=[0,3,7,15,30][foodTier(o)]*(1+Math.floor(f.rarity/2));return f.ingredients.map((name,i)=>({name,need:Math.round(qty*(i===1?.7:1)),have:g.ingredients[name]||0,price:INGREDIENTS.find(x=>x[0]===name)[2]}))}
 function fusionIngredientCost(o){return ingredientNeeds(o).reduce((s,x)=>s+Math.max(0,x.need-x.have)*x.price,0)}
-function bakeryUpgradeCost(){return Math.max(1,Math.round(economyUnit()*(BAKERY_POWER_CONFIG.priceOrders+BAKERY_POWER_CONFIG.priceGrowth*Math.pow(g.bakeryLevel-1,1.15))))}
+function bakeryUpgradeCost(){return balancedBakeryCost(pricingMenuBase(),g.bakeryLevel,g.completed)}
 function refreshFoodProgress(){
  reconcileAutoEquip();
  // Values are derived from owned foods, never a stored multiplier snapshot.
@@ -80,7 +80,7 @@ function upgradeDecor(){
  toast(`Bakery Power ×${multiplierLabel(old)} → ×${multiplierLabel(decorBonus())} · +${multiplierLabel(decorBonus()-old)} 👑 · Baker's Boost +${((decorBonus()/old-1)*100).toFixed(1)}%`);
  const panel=document.querySelector?.('.bakery-power');panel?.classList.add('power-purchased');return true;
 }
-function staffRate(){return earningUnit()/360}
+function staffRate(){return ticketBase(0)*bakeryValue()/360}
 function equipBest(mode){if(g.run&&!g.run.paused||!['final','base'].includes(mode))return false;if(g.autoEquip!=='off')g.autoEquip=mode;g.activeMenu=bestMenu(g.owned,g.menuSlots,mode);save();render();return true}
 function setAutoEquip(mode,enabled){if(g.run||!['final','base'].includes(mode))return false;g.autoEquip=enabled?mode:g.autoEquip===mode?'off':g.autoEquip;save();render();return true}
 function manualMenuAllowed(){if(g.run)return false;if(g.autoEquip!=='off'){toast('Turn Auto Equip off to choose your own menu.');return false}return true}

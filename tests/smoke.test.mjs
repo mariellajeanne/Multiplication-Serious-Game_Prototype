@@ -6,7 +6,7 @@ import { spawnSync } from 'node:child_process';
 const root=resolve(import.meta.dirname,'..');
 const html=readFileSync(resolve(root,'index.html'),'utf8');
 const scripts=[
- 'src/data/catalog.js','src/game/progression.js','src/game/state.js','src/game/rewards.js',
+ 'src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js',
  'src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/ui/dialogs.js','src/ui/scene.js',
  'src/ui/menu.js','src/ui/reward-feedback.js','src/game/worksheet-bridge.js','src/main.js'
 ];

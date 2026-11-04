@@ -1,5 +1,7 @@
 # My Panaderya — Unity migration reference
 
+**Accelerating economy (2026-11-05):** [Current formulas, migration and simulation evidence](docs/ECONOMY_REBALANCE.md) supersedes earlier prices, doubling coin-tier bases, package gates and the 100-purchase Bakery cap. Power keeps its existing 8.5% gain with 5,000 purchases; prices grow below income, and old assets, unlocked package types and frozen rewards are preserved. Run `node tests/simulate-progression.mjs docs/progression-simulation.json`.
+
 **Kitchen removal (2026-11-04):** [Implementation and save migration](docs/KITCHEN_REMOVAL.md). Kitchen tools and bonuses are retired; do not port them.
 
 Updated 2026-11-04. **The web app remains a functional gameplay and visual prototype. No Unity project or migration has been started.** This file and [tablet implementation notes](docs/TABLET_UX_IMPLEMENTATION.md) supersede Frame 11 wherever they disagree about duplicate ownership, tablet usability or the scope of modes.

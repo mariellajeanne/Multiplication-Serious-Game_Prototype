@@ -34,8 +34,8 @@ def check(pw,engine):
         page.evaluate('g.packages=[1,2,3,4,5,6,7,8]')
         for width,height in [(2000,1200),(1194,834),(1024,768)]:
             page.set_viewport_size({'width':width,'height':height})
-            for level in [1,21,100,101]:
-                page.evaluate(f'g.bakeryLevel={level};g.coins=1e12;render()')
+            for level in [1,21,page.evaluate('BAKERY_POWER_CONFIG.purchases'),page.evaluate('BAKERY_POWER_CONFIG.purchases+1')]:
+                page.evaluate(f'g.bakeryLevel={level};g.coins=1e250;render()')
                 panel=page.locator('.bakery-power')
                 assert page.locator('.leftcol').evaluate('''e=>{const r=e.getBoundingClientRect(),a=e.children[0].getBoundingClientRect(),b=e.children[1].getBoundingClientRect(),gap=parseFloat(getComputedStyle(e).rowGap),usable=r.height-gap;return Math.abs(a.height/usable-.6)<.002&&Math.abs(b.height/usable-.4)<.002&&Math.abs(b.bottom-r.bottom)<1&&Math.abs(r.bottom-(innerHeight-10))<1}'''), (engine,width,level)
                 assert page.locator('.bakery-carousel,.carousel-controls,.bakery-upgrade-card,.power-change').count()==0
@@ -61,8 +61,8 @@ def check(pw,engine):
                     const r=e.getBoundingClientRect(),p=e.closest('.bakery-power').getBoundingClientRect();
                     return r.top>=p.top&&r.bottom<=p.bottom&&r.height>=44&&e.contains(document.elementFromPoint(r.x+r.width/2,r.y+r.height/2));
                 }''')
-                assert button.is_disabled()==(level==101)
-                assert page.locator('.bakery-row.next').count()==(0 if level==101 else 1)
+                assert button.is_disabled()==(level==page.evaluate('BAKERY_POWER_CONFIG.purchases+1'))
+                assert page.locator('.bakery-row.next').count()==(0 if level==page.evaluate('BAKERY_POWER_CONFIG.purchases+1') else 1)
                 assert page.locator('.bakery-row.locked').count()==(1 if level<100 else 0)
                 if level<100:
                     assert page.locator('.bakery-row.locked .bakery-row-copy>strong').inner_text()=='???'

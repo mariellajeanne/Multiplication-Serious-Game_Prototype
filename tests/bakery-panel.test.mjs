@@ -4,10 +4,10 @@ import {progressionHarness} from './progression-harness.mjs';
 
 test('bakery list uses actual neighboring progression states and additive gains at every stage',()=>{
  const h=progressionHarness();
- for(let level=1;level<=101;level++){
+ for(const level of [...Array.from({length:101},(_,i)=>i+1),h.run('BAKERY_POWER_CONFIG.purchases'),h.run('BAKERY_POWER_CONFIG.purchases+1')]){
   h.run(`g.bakeryLevel=${level}`);
   const rows=h.json('bakeryProgressRows()');
-  assert.deepEqual(rows.map(r=>r.index),[level-1,level,level+1,level+2].filter(n=>n>=1&&n<=101));
+  assert.deepEqual(rows.map(r=>r.index),[level-1,level,level+1,level+2].filter(n=>n>=1&&n<=h.run('BAKERY_POWER_CONFIG.purchases+1')));
   assert.equal(rows.filter(r=>r.status==='current').length,1);
   for(const row of rows){
    if(row.status==='locked'){assert.equal(row.name,'???');assert.equal(row.gain,null);continue}
@@ -20,7 +20,7 @@ test('bakery list uses actual neighboring progression states and additive gains 
   assert.doesNotMatch(html,/carousel|browseBakery|Our bakery journey|Multiplies your|power-change|flourishing/);
   assert.equal((html.match(/onclick="showBakeryPowerInfo\(\)"/g)||[]).length,2);
   assert.equal((html.match(/onclick="upgradeDecor\(\)"/g)||[]).length,1);
-  if(level===101)assert.doesNotMatch(html,/NEXT|UNLOCK PREVIOUS/);
+  if(level===h.run('BAKERY_POWER_CONFIG.purchases+1'))assert.doesNotMatch(html,/NEXT|UNLOCK PREVIOUS/);
  }
 });
 

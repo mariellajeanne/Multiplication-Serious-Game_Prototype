@@ -1,5 +1,7 @@
 # Packages workspace — 2026-11-05
 
+**Accelerating economy (2026-11-05):** [Current formulas, migration and simulation evidence](ECONOMY_REBALANCE.md) supersedes earlier prices, doubling coin-tier bases, package gates and the 100-purchase Bakery cap. Power keeps its existing 8.5% gain with 5,000 purchases; prices grow below income, and old assets, unlocked package types and frozen rewards are preserved. Run `node tests/simulate-progression.mjs docs/progression-simulation.json`.
+
 Implemented owner direction. This supersedes the separate Buy/Unbox tabs, next-locked-type-only list, 1,000-per-purchase limit, all-types Open All, and separate package reward dialog. The attached wireframe determines the structure; the written request explicitly removes its Collect Items button.
 
 ## Layout

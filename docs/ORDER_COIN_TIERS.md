@@ -1,5 +1,7 @@
 # Coin-only Order Tickets — 2026-11-04
 
+**Accelerating economy (2026-11-05):** [Current formulas, migration and simulation evidence](ECONOMY_REBALANCE.md) supersedes earlier prices, doubling coin-tier bases, package gates and the 100-purchase Bakery cap. Power keeps its existing 8.5% gain with 5,000 purchases; prices grow below income, and old assets, unlocked package types and frozen rewards are preserved. Run `node tests/simulate-progression.mjs docs/progression-simulation.json`.
+
 **Packages update (2026-11-05):** [Current workspace](PACKAGES_INTERFACE.md) replaces separate opening dialogs and Open Selected with immediate in-place collection. Open All now consumes only the selected package type; old guaranteed-food queues remain supported.
 
 Implemented owner direction. This supersedes earlier ticket-package rewards, temporary Package Luck, ticket/package odds labels, and challenge coin modifiers. The worksheet's input, carry, undo, tutorial, sound, retry/lives and independent-session behavior is retained.
@@ -11,17 +13,17 @@ Order Tickets and their worksheet actions award coins only. The Package Counter'
 | Stars | Coin tier | Base coins |
 | --- | --- | ---: |
 | 1 | Coin Stack | 130 |
-| 2 | Coin Jar | 260 |
-| 3 | Coin Bag | 520 |
-| 4 | Coin Bucket | 1,040 |
-| 5 | Coin Cart | 2,080 |
-| 6 | Treasure Chest | 4,160 |
-| 7 | Golden Vault | 8,320 |
-| 8 | Divine Treasury | 16,640 |
+| 2 | Coin Jar | 176 |
+| 3 | Coin Bag | 237 |
+| 4 | Coin Bucket | 320 |
+| 5 | Coin Cart | 432 |
+| 6 | Treasure Chest | 583 |
+| 7 | Golden Vault | 787 |
+| 8 | Divine Treasury | 1,062 |
 
 New orders use `round(baseCoins × bakersBoost)`. Starting an order snapshots both factors. Necessary math actions accumulate part of that fixed coin budget; finishing releases the remainder. Actions, errors, repeated messages, retries and switching cannot add packages or reroll a tier. New orders use the same two-factor payout in every mode; former challenge payout bonuses/penalties and misleading descriptions are removed to honor this contract. Challenge input/lives/retries and Mastery credit are preserved.
 
-The saved claim and finished-order popup show the earned coin tier, Base coins, saved Baker's Boost and Total coins earned. Boost has up to 12 significant digits here to avoid misleading arithmetic from the compact HUD's two-decimal formatting; final coins round to whole coins.
+The saved claim and finished-order popup show the earned coin tier, Base coins, saved Baker's Boost and Total coins earned. Boost has up to 12 significant digits below 1e12; larger values use compact magnitude/scientific labels to avoid overflowing the popup. Display labels are approximate; the saved numeric budget determines the whole-coin payout.
 
 ## Generation and luck
 
@@ -52,15 +54,13 @@ No package opening, food discovery or reward RNG occurs during a coin claim. Pac
 
 ## Balance evidence
 
-`tests/simulate-progression.mjs` now models purchased packages only (model 4), using production formulas and fixed seed 20261104: 60 trials × 80 orders × three progression snapshots × three spending policies. Accepted output: [progression-simulation.json](progression-simulation.json).
+The [2026-11-05 rebalance](ECONOMY_REBALANCE.md) replaces the original doubled bases and proportional price curves. `tests/simulate-progression.mjs` now compares complete fresh-save journeys at 25/50/100/200 orders: 24 seeds × three spending policies × four Luck conditions × baseline and selected models, totaling 115,200 orders. Current output: [progression-simulation.json](progression-simulation.json).
 
-The doubled tier rewards use the original 130-coin low-tier anchor. Existing proportional cost formulas remain unchanged: Standard Packages cost approximately 0.6 expected orders, first Bakery Power approximately 2.5, and the next slot approximately 2.0 early orders. Active solving remains 3× helper income at a 120-second pace. No additional price tuning is necessary to keep progression accessible.
-
-Removing free food draws intentionally slows collection: early mixed-policy median discoveries after 80 orders change from 17 to 8 and power growth from about 296× to 42×. The collector policy reaches a median 10 discoveries. A policy that never buys packages retains its starting recipe while still progressing through Bakery Power; collection now requires the requested package system. These are model predictions, not child playtest results.
+Median one-order upgrade affordability rises from 2 early to 5 middle and 9 late in the balanced, ordinary-Luck policy. Forced Coin Stack tickets still support a late median of 3. Coin Luck affects generation only; package food odds remain separate. Active solving remains at least 3× helper gross income at a 120-second pace. Collection requires buying/opening packages; no free food draw or package reward was restored to orders. These are model predictions, not child playtest results.
 
 ## Verification
 
-- `node --test tests/*.test.mjs`: 97 passing, including ledger replay protection, all eight payout tiers, frozen rewards, migration idempotency, legacy guaranteed foods, purchase/opening rollback, stale receipts, switching and refresh.
+- `node --test tests/*.test.mjs`: 117 passing after the economy rebalance, including ledger replay protection, all eight payout tiers, frozen rewards, migration idempotency, legacy guaranteed foods, purchase/opening rollback, stale receipts, switching and refresh.
 - `python tests/browser-order-coins.py`: real WebKit/Edge, all eight static treatments at 2000×1200, 1194×834, 1024×768, 834×1194, 390×844 and 597×417; no clipped content, tier persistence, switching, saved claim, coins only, exact payout and one claim.
 - `python tests/browser-frame11.py`: full WebKit/Edge workflow including package buying/opening, 79×18 carrying by taps and drags, guide/sound toggles, undo, swipe/add rows, lost-completion recovery, reload and claiming once.
 - `python tests/browser-responsive.py`: WebKit/Edge responsive layouts and actual Edge browser zoom at 80%, 100%, 125%, 150% and 200%.

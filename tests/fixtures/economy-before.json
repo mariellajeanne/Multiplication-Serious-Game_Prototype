@@ -1,0 +1,72 @@
+{
+  "bakery": {
+    "purchases": 100,
+    "factor": 1.085,
+    "priceOrders": 2.5,
+    "priceGrowth": 0.2
+  },
+  "shop": [
+    {
+      "name": "Standard",
+      "rank": 0,
+      "unlock": 1,
+      "priceOrders": 0.6
+    },
+    {
+      "name": "Lucky",
+      "rank": 1,
+      "unlock": 11,
+      "priceOrders": 1.2
+    },
+    {
+      "name": "Fortunate",
+      "rank": 2,
+      "unlock": 21,
+      "priceOrders": 2.4
+    },
+    {
+      "name": "Charmed",
+      "rank": 3,
+      "unlock": 31,
+      "priceOrders": 4.8
+    },
+    {
+      "name": "Blessed",
+      "rank": 4,
+      "unlock": 41,
+      "priceOrders": 9.6
+    },
+    {
+      "name": "Miraculous",
+      "rank": 5,
+      "unlock": 51,
+      "priceOrders": 19.2
+    },
+    {
+      "name": "Divine",
+      "rank": 6,
+      "unlock": 61,
+      "priceOrders": 38.4
+    },
+    {
+      "name": "Fate",
+      "rank": 7,
+      "unlock": 71,
+      "priceOrders": 76.8
+    }
+  ],
+  "functions": {
+    "bakeryFactor": "function bakeryFactor(level){return Math.pow(BAKERY_POWER_CONFIG.factor,clamp(level||1,1,BAKERY_POWER_CONFIG.purchases+1)-1)}",
+    "ticketBase": "function ticketBase(rank){return 130*2**clamp(rank,0,7)}",
+    "economyUnit": "function economyUnit(){return expectedTicketBase(ticketLuckMastery())*pricingMenuBase()*decorBonus()}",
+    "earningUnit": "function earningUnit(){return expectedTicketBase(ticketLuckMastery())*bakeryValue()}",
+    "slotCost": "function slotCost(){return Math.round(economyUnit()*(2+.6*Math.pow(Math.max(0,g.menuSlots-1),1.15)))}",
+    "packagePrice": "function packagePrice(rank){return Math.max(1,Math.round(economyUnit()*PACKAGE_SHOP[rank].priceOrders))}",
+    "foodLevelCost": "function foodLevelCost(o){return Math.max(1,Math.round(foodEarningShare(o)*(.75+.45*Math.pow(recipeMastery(o)+1,1.3))))}",
+    "fusionFee": "function fusionFee(o,other=null){const tier=other?Math.max(foodTier(o),foodTier(other)):foodTier(o);return Math.max(1,Math.round(expectedTicketBase(ticketLuckMastery())*F(o.id).base*decorBonus()*(1.5+.65*Math.pow(tier,1.25))))}",
+    "bakeryUpgradeCost": "function bakeryUpgradeCost(){return Math.max(1,Math.round(economyUnit()*(BAKERY_POWER_CONFIG.priceOrders+BAKERY_POWER_CONFIG.priceGrowth*Math.pow(g.bakeryLevel-1,1.15))))}",
+    "pricingMenuBase": "function pricingMenuBase(){\n const ids=new Set(bestMenu(g.owned,g.menuSlots,'final'));\n return Math.max(1,g.economyPeakBase||0,g.owned.filter(o=>ids.has(o.uid)).reduce((sum,o)=>sum+individualValue(o),0));\n}",
+    "staffRate": "function staffRate(){return earningUnit()/360}"
+  },
+  "revision": "70369cb0b9bd726d2b829f5b34aa3c3b6957c4b1"
+}

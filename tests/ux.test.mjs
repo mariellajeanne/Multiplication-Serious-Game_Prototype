@@ -7,7 +7,7 @@ const root=resolve(import.meta.dirname,'..');
 function ui(){
  const c=vm.createContext({Math:Object.create(Math),localStorage:{getItem:()=>null,setItem:()=>{}},
    document:{getElementById:()=>null},setTimeout:()=>{}});
- for(const file of ['src/data/catalog.js','src/game/progression.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js',
+ for(const file of ['src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js',
    'src/ui/bakery-art.js','src/ui/dialogs.js','src/ui/scene.js','src/ui/menu.js'])
    vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
  vm.runInContext(`showModal=(title,html)=>{result={title,html}};toast=()=>{};render=()=>{};
@@ -21,7 +21,7 @@ test('ticket preview uses saved math and coin tiers without consuming RNG',()=>{
 
 test('floating food preview shows actual contribution, mastery availability and price without ownership changes',()=>{
  const c=ui();vm.runInContext(`g.recipeCeilings.pandesal=2;openFoodItem(1);before=JSON.stringify(g.owned);result=renderFoodPanel();cost=foodLevelPrice(g.owned[0]);assignFood(1);after=JSON.stringify(g.owned);active=g.activeMenu.length`,c);
- assert.match(c.result,/1\.20/);assert.match(c.result,/0\.30/);assert.match(c.result,/Available \+2/);assert.equal(c.cost,246);assert.equal(c.before,c.after);assert.equal(c.active,1);
+ assert.match(c.result,/1\.20/);assert.match(c.result,/0\.30/);assert.match(c.result,/Available \+2/);assert.equal(c.cost,29);assert.equal(c.before,c.after);assert.equal(c.active,1);
 });
 
 test('main navigation keeps menu, Food Index and packages accessible without exposing future features',()=>{
@@ -200,7 +200,7 @@ test('guide graduates once at the third claimed order and respects later opt-in'
 test('older established saves retain their explicit guide preference and original storage key',()=>{
  const original=ui();const saved=vm.runInContext(`(()=>{const old=fresh();old.completed=8;old.tutorialArrows=true;delete old.guideGraduated;return JSON.stringify(old)})()`,original);
  const c=vm.createContext({localStorage:{getItem:key=>{assert.equal(key,'panaderyaQuestV2');return saved}},document:{getElementById:()=>null}});
- for(const file of ['src/data/catalog.js','src/game/progression.js','src/game/state.js'])vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
+ for(const file of ['src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js'])vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
  assert.equal(vm.runInContext('g.guideGraduated&&g.tutorialArrows',c),true);
 });
 

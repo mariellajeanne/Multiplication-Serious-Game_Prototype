@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const $=id=>document.getElementById(id);const fmt=n=>Math.floor(n).toLocaleString('en-US');const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));const pick=a=>a[Math.floor(Math.random()*a.length)];const RARITIES=['Classic','Favorite','Special','Premium','Deluxe','Signature','Masterpiece','Crown Jewel'];
+const $=id=>document.getElementById(id);const fmt=n=>Math.abs(n)>=1e15?largeNumberLabel(Math.floor(n),2):Math.floor(n).toLocaleString('en-US');const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));const pick=a=>a[Math.floor(Math.random()*a.length)];const RARITIES=['Classic','Favorite','Special','Premium','Deluxe','Signature','Masterpiece','Crown Jewel'];
 const FOOD=[
 {id:'pandesal',name:'Pandesal',icon:'🥖',rarity:0,base:1.2,ingredients:['Flour','Yeast']},
 {id:'monay',name:'Monay',icon:'🍞',rarity:0,base:1.45,ingredients:['Flour','Butter']},

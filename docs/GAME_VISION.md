@@ -1,5 +1,7 @@
 # Panaderya Quest — game vision and interaction goals
 
+**Accelerating economy (2026-11-05):** [Current formulas, migration and simulation evidence](ECONOMY_REBALANCE.md) supersedes earlier prices, doubling coin-tier bases, package gates and the 100-purchase Bakery cap. Power keeps its existing 8.5% gain with 5,000 purchases; prices grow below income, and old assets, unlocked package types and frozen rewards are preserved. Run `node tests/simulate-progression.mjs docs/progression-simulation.json`.
+
 **Coin-only orders (2026-11-04):** [Order Ticket tiers and rewards](ORDER_COIN_TIERS.md) supersedes package drops, temporary Package Luck and challenge coin modifiers below. New orders pay base coins times saved Baker's Boost; packages come from the Package Counter. Preserve migration of already-earned packages and fixed legacy budgets. Verify with `python tests/browser-order-coins.py` and the full worksheet runner.
 
 **Kitchen removal (2026-11-04):** [Current removal and save compatibility](KITCHEN_REMOVAL.md) supersedes all Kitchen descriptions below. Baker's Boost and proportional prices now use recipes and Bakery Power only.

@@ -84,10 +84,10 @@ test('Undo cannot reverse mastery used by opened packages, sales or changed assi
  }
 });
 
-test('Bakery Power supports 100 configurable purchases, shows a bounded vertical progression list',()=>{
+test('Bakery Power supports the extended configurable purchase runway, shows a bounded vertical progression list',()=>{
  const h=progressionHarness();h.run('g.coins=1e100');
  for(let i=0;i<100;i++)assert.equal(h.run('upgradeDecor()'),true);
- assert.equal(h.run('upgradeDecor()'),false);assert.equal(h.run('g.bakeryLevel'),101);
+ h.run('g.bakeryLevel=BAKERY_POWER_CONFIG.purchases;g.coins=bakeryUpgradeCost()*2');assert.equal(h.run('upgradeDecor()'),true);assert.equal(h.run('upgradeDecor()'),false);assert.equal(h.run('g.bakeryLevel'),h.run('BAKERY_POWER_CONFIG.purchases+1'));
  h.run('g.bakeryLevel=20;html=renderBakery()');
  assert.doesNotMatch(h.run('html'),/\/100|\/101|Level|progressbar/);
  assert.equal((h.run('html').match(/🪙/g)||[]).length,2);

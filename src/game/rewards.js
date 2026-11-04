@@ -70,7 +70,7 @@ function finishCombo(){const r=g.run;r.streak++;r.bestStreak=Math.max(r.bestStre
 function finishSum(){const r=g.run;if(!r||r.phase==='claim')return;r.phase='claim';r.pool=r.budget;save();render();coinFly(7);toast('Order complete! Your coins are ready to collect. \u{1f389}')}
 function coinRewardMarkup(r){
  const rank=ticketCoinTier(r.ticket),base=r.baseCoins??r.ticket.base??r.pool,boost=r.bakersBoost??r.pool/base;
- return `<section class="coin-order-reward coin-tier-${rank}" aria-label="Coin reward"><div class="coin-reward-tier">${coinTierArt(rank)}<h3>${rank+1}\u2605 ${COIN_TIERS[rank]}</h3></div><dl><div><dt>Base coins</dt><dd>${fmt(base)} \u{1fa99}</dd></div><div><dt>Baker's Boost${r.savedReward?' (saved)':''}</dt><dd>\u00d7${new Intl.NumberFormat('en-US',{maximumSignificantDigits:12}).format(boost)} \u{1f48e}</dd></div><div class="coin-reward-total"><dt>Total coins earned</dt><dd>${fmt(r.pool)} \u{1fa99}</dd></div></dl></section>`;
+ return `<section class="coin-order-reward coin-tier-${rank}" aria-label="Coin reward"><div class="coin-reward-tier">${coinTierArt(rank)}<h3>${rank+1}\u2605 ${COIN_TIERS[rank]}</h3></div><dl><div><dt>Base coins</dt><dd>${fmt(base)} \u{1fa99}</dd></div><div><dt>Baker's Boost${r.savedReward?' (saved)':''}</dt><dd>\u00d7${Math.abs(boost)>=1e12?largeNumberLabel(boost,2):new Intl.NumberFormat('en-US',{maximumSignificantDigits:12}).format(boost)} \u{1f48e}</dd></div><div class="coin-reward-total"><dt>Total coins earned</dt><dd>${fmt(r.pool)} \u{1fa99}</dd></div></dl></section>`;
 }
 function prizeItems(){
  const r=g.run;if(!r||r.phase!=='claim'||g.claimedOrders[r.ticket.id])return false;

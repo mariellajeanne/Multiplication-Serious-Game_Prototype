@@ -1,9 +1,81 @@
 {
- "modelVersion":4,"seed":20261104,"trials":60,"orders":80,"secondsPerOrder":[60,90,120],
- "policies":["growth","mixed","collector"],
- "scenarios":[
-  {"name":"early","completed":0,"mastery":0,"recipeMastery":0,"tier":1,"bakery":1,"slots":1,"foods":["pandesal"]},
-  {"name":"middle","completed":40,"mastery":40,"recipeMastery":4,"tier":2,"bakery":21,"slots":5,"foods":["pandesal","pan-de-coco","ensaymada","mamon","buko-pie"]},
-  {"name":"late","completed":160,"mastery":160,"recipeMastery":10,"tier":5,"bakery":71,"slots":6,"foods":["mamon","buko-pie","brazo","butter-mamon","celebration-ensaymada","ube-ensaymada"]}
- ]
+  "modelVersion": 5,
+  "seed": 20261105,
+  "trials": 24,
+  "checkpoints": [
+    25,
+    50,
+    100,
+    200
+  ],
+  "policies": {
+    "balanced": 0.3,
+    "bakery": 0.18,
+    "collector": 0.45
+  },
+  "luck": [
+    "normal",
+    "unfavorable",
+    "favorable",
+    "coin_stack_only"
+  ],
+  "meaningfulGain": 0.001,
+  "secondsPerOrder": 90,
+  "candidates": [
+    {
+      "name": "before",
+      "kind": "baseline"
+    },
+    {
+      "name": "bakery_milestones",
+      "kind": "balanced",
+      "parameters": {
+        "coinGrowth": 1.35,
+        "bakeryGain": 1.085,
+        "priceGrowth": 1.085,
+        "menuElasticity": 0.9,
+        "bakeryOrders": 0.85,
+        "bakeryCurve": 0.016,
+        "efficiency": 0.7,
+        "efficiencyOrders": 75,
+        "bakeryCap": 5000,
+        "packagePower": 0.97
+      }
+    }
+  ],
+  "defaults": {
+    "version": 1,
+    "coinBase": 130,
+    "coinGrowth": 1.45,
+    "bakeryCap": 2000,
+    "bakeryGain": 1.075,
+    "priceGrowth": 1.074,
+    "menuElasticity": 0.9,
+    "bakeryOrders": 0.58,
+    "bakeryCurve": 0.015,
+    "efficiency": 0,
+    "efficiencyOrders": 75,
+    "masteryOrders": 0.16,
+    "masteryCurve": 0.03,
+    "masteryExponent": 0.7,
+    "slotOrders": 0.4,
+    "slotCurve": 0.08,
+    "slotExponent": 1.3,
+    "packageOrders": 0.16,
+    "packageGrowth": 2.35,
+    "resaleMargin": 1.2,
+    "fusionOrders": 2,
+    "fusionCurve": 1.2,
+    "unlocks": [
+      1,
+      12,
+      30,
+      60,
+      110,
+      190,
+      300,
+      450
+    ],
+    "packagePower": 1
+  }
 }
