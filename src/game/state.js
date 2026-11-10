@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,economyVersion:ECONOMY_BALANCE.version,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),packageRevision:0,rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({progressionVersion:PROGRESSION_VERSION,economyVersion:ECONOMY_BALANCE.version,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:9},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(9).fill(0),packageRevision:0,rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
 if(!g.owned||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
@@ -12,7 +12,7 @@ if(g.progressionVersion!==PROGRESSION_VERSION){
 if(!Number.isInteger(g.menuSlots))g.menuSlots=1;if(!Array.isArray(g.activeMenu))g.activeMenu=g.owned.slice(0,g.menuSlots).map(x=>x.uid);if(typeof g.tutorialArrows!=='boolean')g.tutorialArrows=true;if(typeof g.musicOn!=='boolean')g.musicOn=false;
 function migrateFrame11(state){
  state.orderRuns=state.orderRuns||{};state.claimedOrders=state.claimedOrders||{};
- state.packages=Array.from({length:8},(_,i)=>Math.max(0,Math.floor(state.packages?.[i]||0)));
+ state.packages=Array.from({length:9},(_,i)=>Math.max(0,Math.floor(state.packages?.[i]||0)));
  state.recipeCeilings=state.recipeCeilings||{};
  // Repricing keeps every asset and pending reward; old price-based Undo quotes expire.
  if(state.economyVersion!==ECONOMY_BALANCE.version){
@@ -45,12 +45,13 @@ function migrateFrame11(state){
  consolidateOwnedFoods(state);
  const seen=new Set();state.activeMenu=state.activeMenu.filter(uid=>{const o=state.owned.find(x=>x.uid===uid);if(!o||seen.has(o.id))return false;seen.add(o.id);return true}).slice(0,state.menuSlots);
  migrateCoinRewards(state);
+ reconcileOrderFoods(state);
  return state;
 }
 // Convert already-earned package promises to counter stock once. No reward RNG
 // runs during migration; guaranteed legacy food ranks stay attached to that stock.
 function migrateCoinRewards(state){
- state.legacyPackageFoods=Array.from({length:8},(_,i)=>state.legacyPackageFoods?.[i]||[]);
+ state.legacyPackageFoods=Array.from({length:9},(_,i)=>state.legacyPackageFoods?.[i]||[]);
  const runs=Object.values(state.orderRuns);
  for(const ticket of [...state.board,...runs.map(r=>r.ticket)]){
   ticket.coinTier=ticketCoinTier(ticket);ticket.orderLabel=ticketOrderLabel(ticket);
@@ -77,6 +78,18 @@ function migrateCoinRewards(state){
 }
 if(previousSave&&g.uniqueFoodsVersion!==1){try{if(!localStorage.getItem('panaderyaQuestV2BeforeUniqueFoods'))localStorage.setItem('panaderyaQuestV2BeforeUniqueFoods',previousSave)}catch(_){} }
 migrateFrame11(g);
+migrateBakeryHub(g);
+// One-time removal preserves assets and frozen order budgets, never recalculates rewards.
+function migrateBakeryHub(state){
+ if(state.bakeryHubVersion===1)return state;
+ const level=Math.max(1,Number(state.bakeryLevel)||1);
+ state.retiredBakeryPower={level,spent:state.bakerySpent||0};
+ state.packageTierUnlocks=[...new Set([...(state.packageTierUnlocks||[]),...PACKAGE_SHOP.filter(t=>t.rank<8&&level>=t.unlock).map(t=>t.rank)])];
+ // Helpers are supplemental: remove the retired factor from their future ticks only.
+ if(state.staff?.until>Date.now())state.staff.rate/=Math.pow(1.085,Math.min(5000,level-1));
+ state.bakeryLevel=1;state.bakerySpent=0;state.purchaseUndo=null;state.bakeryHubVersion=1;
+ return state;
+}
 // Retired Kitchen fields never participate in values, prices or save validation.
 // Commit old Undo records: their signatures include the removed equipment field.
 if(Object.prototype.hasOwnProperty.call(g,'equipment')||Object.prototype.hasOwnProperty.call(g,'kitchenSpent'))g.purchaseUndo=null;
@@ -91,14 +104,27 @@ const rarityLabel=r=>`★${r+1} · ${RARITIES[r]}`;
 const rarityTag=r=>`<span class="tag rarity-r${r} ${RARITIES[r].toLowerCase().replaceAll(' ','-')}">${rarityLabel(r)}</span>`;
 const foodValue=individualValue;
 const foodSum=()=>{const best={};for(const o of g.owned.filter(x=>g.activeMenu.includes(x.uid)))best[o.id]=Math.max(best[o.id]||0,foodValue(o));return Object.values(best).reduce((a,b)=>a+b,0)};
-const decorBonus=()=>bakeryFactor(g.bakeryLevel);
-const bakeryValue=()=>Math.max(1,foodSum())*decorBonus();
+const decorBonus=()=>1; // compatibility alias, no hidden bakery-wide multiplier
+const bakeryValue=()=>Math.max(1,foodSum());
 const tierLevel=()=>g.completed<2?0:g.completed<4?1:g.completed<7?2:g.completed<11?3:g.completed<16?4:5;
 const masterStage=()=>Math.min(5,Math.floor(g.mastery/4));
 const highestRarity=()=>7;
 function ticketLuckMastery(){return Math.max(g.mastery||0,(g.permanentLuck||0)*4)}
 function ticketRarity(){return drawRank(ticketProbabilities(ticketLuckMastery()))}
-function makeTicket(){const rarity=ticketRarity(),dims=TICKET_DIMS[rarity];const aMin=10**(dims[0]-1),aMax=10**dims[0]-1,bMin=10**(dims[1]-1),bMax=10**dims[1]-1;const a=aMin+Math.floor(Math.random()*(aMax-aMin+1)),b=bMin+Math.floor(Math.random()*(bMax-bMin+1));const id=++g.ticketSeq;return {id,rarity,coinTier:rarity,orderLabel:pick(COIN_ORDER_LABELS[rarity]),orderIcon:COIN_ORDER_ICONS[rarity],a,b,base:ticketBase(rarity)}}
+function menuRecipes(state=g){return [...new Set((state.activeMenu||[]).map(uid=>state.owned.find(o=>o.uid===uid)?.id).filter(id=>FOOD.some(f=>f.id===id)))]}
+function assignedOrderFood(ticket,state=g,locked=false){
+ const equipped=menuRecipes(state),valid=FOOD.some(f=>f.id===ticket.foodId);
+ if(valid&&(locked||equipped.includes(ticket.foodId)||!equipped.length))return ticket.foodId;
+ // Use ticket identity, never reward RNG, to distribute orders across real menu recipes.
+ const candidates=equipped.length?equipped:state.owned.filter(o=>FOOD.some(f=>f.id===o.id)).map(o=>o.id);
+ return candidates[Math.abs(Number(ticket.id)||0)%candidates.length]||FOOD[0].id;
+}
+function reconcileOrderFoods(state=g){
+ for(const run of Object.values(state.orderRuns||{}))if(run?.ticket)run.ticket.foodId=assignedOrderFood(run.ticket,state,true);
+ for(const ticket of state.board||[]){const run=state.orderRuns?.[ticket.id];ticket.foodId=run?.ticket?.foodId||assignedOrderFood(ticket,state,false)}
+ return state;
+}
+function makeTicket(){const rarity=ticketRarity(),dims=TICKET_DIMS[rarity];const aMin=10**(dims[0]-1),aMax=10**dims[0]-1,bMin=10**(dims[1]-1),bMax=10**dims[1]-1;const a=aMin+Math.floor(Math.random()*(aMax-aMin+1)),b=bMin+Math.floor(Math.random()*(bMax-bMin+1));const id=++g.ticketSeq;const ticket={id,rarity,coinTier:rarity,orderLabel:pick(COIN_ORDER_LABELS[rarity]),orderIcon:COIN_ORDER_ICONS[rarity],a,b,base:ticketBase(rarity)};ticket.foodId=assignedOrderFood(ticket);return ticket}
 function refillBoard(){while(g.board.length<ORDER_LIMIT)g.board.push(makeTicket())}
 function reconcileAutoEquip(){if((!g.run||g.run.paused)&&['final','base'].includes(g.autoEquip)){const next=bestMenu(g.owned,g.menuSlots,g.autoEquip);if(JSON.stringify(next)!==JSON.stringify(g.activeMenu))g.activeMenu=next}}
 function orderNow(){g.orderClock=Math.max(g.orderClock||0,Date.now());return g.orderClock}
@@ -122,7 +148,7 @@ function updateOrderRefresh(){const button=$('refreshOrders');if(!button)return;
 function save(){
  // Refuse to overwrite newer rewards or inventory from another tab.
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}if((stored?.packageRevision||0)>(g.packageRevision||0)){toast('Packages changed in another tab. Reload to continue.');return false}}catch(_){}
- reconcileAutoEquip();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
+ reconcileAutoEquip();reconcileOrderFoods();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
 let toastTimer=null;
 function positionNotifications(){
  const dock=$('notificationDock');if(!dock||(!g.purchaseUndo&&!$('toasts')?.childElementCount))return;
@@ -158,7 +184,7 @@ function showModal(title,html,variant=''){if(modal?.variant?.includes('package-s
 function closeModal(){if(modal?.variant?.includes('package-shop-modal'))endPackageSession();const focus=modalReturnFocus;modal=null;modalReturnFocus=null;clearNotifications();paintModal();render();restoreFocus(focus)}
 function paintModal(){
  const root=$('modals');if(!modal){root.innerHTML='';return}
- root.innerHTML=`<div class="backdrop" onclick="if(event.target===this)closeModal()"><div class="modal ${modal.variant||''}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modalhead"><h2 id="modalTitle">${modal.title}</h2><span class="dialog-wallet">🪙 ${amountLabel(g.coins)}</span><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`;
+ root.innerHTML=`<div class="backdrop ${modal.variant?.includes('package-shop-modal')?'':'bakery-overlay'}" onclick="if(event.target===this)closeModal()"><div class="modal ${modal.variant||''}" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1"><div class="modalhead"><h2 id="modalTitle">${modal.title}</h2><span class="dialog-wallet">🪙 ${amountLabel(g.coins)}</span><button aria-label="Close" class="close" onclick="closeModal()">×</button></div><div class="modalbody">${modal.html}</div></div></div>`;
  if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>root.querySelector?.('.modal')?.focus());
 }
 document.addEventListener?.('keydown',event=>{

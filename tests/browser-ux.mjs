@@ -61,7 +61,7 @@ try{
   await cdp('Runtime.enable');await cdp('Page.enable');await cdp('Network.enable');
   await cdp('Page.bringToFront');
   await cdp('Emulation.setDeviceMetricsOverride',{width:1600,height:1200,deviceScaleFactor:1,mobile:false});
-  await cdp('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/index.html`});
+  await cdp('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/index.html?view=legacy`});
   await waitFor(`typeof startTicket==='function'`);
   await evaluate('document.fonts.ready');
   assert.equal(await evaluate(`Array.from(document.fonts).some(f=>f.family==='Panaderya Rounded'&&f.status==='loaded')`),true,'bundled rounded font actually loads');

@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "viewports": [
+    [
+      2000,
+      1200
+    ],
+    [
+      1280,
+      800
+    ],
+    [
+      1024,
+      768
+    ]
+  ],
+  "all_existing_tiers": 8,
+  "die_cut_mask_matches_artwork": true,
+  "mouse_touch_scrollbar_keyboard": true,
+  "stationary_heading_controls": true,
+  "centered_title_and_utility_labels": true,
+  "three_complete_contained_slips": true,
+  "board_aligned_and_clear_of_window": true,
+  "spark_and_multiplier_only": true,
+  "css_button_corners": true,
+  "refresh_and_paid_skip_cancel": true,
+  "register_grounded_and_clear_of_tickets": true,
+  "reduced_motion": true,
+  "original_worksheet_resume_reload": true,
+  "errors": []
+}

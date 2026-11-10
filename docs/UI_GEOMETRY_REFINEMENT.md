@@ -1,0 +1,27 @@
+# Precise UI geometry and composition — 2026-11-10
+
+This owner-requested pass supersedes the smaller register, fixed-width Boost and separate list-column scrollbar in [UI layout polish](UI_LAYOUT_POLISH.md). It changes the actual root game, preserving the room, cabinet, title, ticket artwork, production data/actions and original worksheet/Packages interfaces.
+
+## Current structure
+
+- The cabinet header uses a shared 48px left/right inset, an automatically sized right column and one vertical centerline. Menu Collection keeps its original aspect ratio; Boost hugs its diamond, live value, 10px gap and 24px horizontal padding. Its cream pill is drawn in CSS with concentric outlines. Only the home button uses the simple rainbow SVG diamond; existing popup artwork remains unchanged. Shimmer and reduced-motion support remain.
+- Both Orders utility controls share a 46px illustrated pill and a transparent target at least 44 rendered pixels high. The target does not stretch the visual pill. Labels, green Skip state and original refresh/confirmation controllers remain intact.
+- `.board-front` owns the title and utilities. Its native CSS wood extension connects the original plaque area to the new recessed opening without scaling the original clip/plaque. The board retains its 410×727 logical bounds at x1430/y149, cabinet-body alignment and window clearance. The opening begins after the title, 12px gap, responsive utility target and 18px lower margin.
+- `.board-list` defines the architectural opening, inset 38px on both sides, with 26px upper and 18px lower corner radii. Both it and its scroll viewport clip moving tickets. An inset lining follows that same seam above the paper. Three complete slips and part of a fourth fit at rest at the supported landscape sizes. Die-cut paper, matched masks, all eight tiers, labels, equations and progress are preserved.
+- The Orders rail is a sibling of the opening, mounted on the right stile (11px from the board's right edge). The track and visible thumb share the same horizontal center. Independent rail and thumb border-image slices preserve the decorative caps; only their center fills extend. The 15px thumb artwork has a separate 44px touch target. The track remains above the arrows' expanded targets so clicks at its limits reach the track.
+- `src/ui/illustrated-controls.js` now uses fractional computed track/thumb heights to calculate travel. The native scroll ratio maps to exactly `0 … trackHeight − thumbHeight`, avoiding gaps caused by rounded `clientHeight`. At maximum scroll the thumb anchors directly to `bottom:0`, eliminating the last subpixel rounding remainder. Native swipe, pointer capture, wheel, track clicks, arrows, Home/End and keyboard scrolling remain.
+- The register is 280px wide, a 16.7% increase from 240px, with its original aspect ratio, orientation, bell and cutout. A shared counter baseline (`bottom:226px`) keeps its doily grounded. It overlaps the lower list naturally. The list's lower content padding lets every ticket, including the last one, scroll fully above it.
+
+## Verification and artifacts
+
+- All 127 Node tests passed; separate smoke rerun: 5 passed.
+- Orders, UI refinement, production UI replacement and hub runners passed Edge and WebKit. Orders checks cover 2000×1200, 1280×800 and 1024×768, shared header anchors, content-sized Boost, compact pill geometry, rounded opening clipping, all eight tiers, accessible ticket contents, stationary controls, real refresh/cancelled Skip, mouse/touch/keyboard scrolling, reduced motion and worksheet resume/reload.
+- Scrollbar geometry is checked at the top, middle and bottom, including the visible thumb's center and both travel limits, within 0.1 rendered pixel. Real drags beyond both endpoints clamp to the native scroll range. Close-up and full screenshots plus measurements are in [Orders artifacts](../output/playwright/geometry/orders/).
+- `PANADERYA_TEST_VIEW=hub node tests/browser-worksheet.mjs` passed 79×18=1422 and 19×9=171, click/drag, carries, Undo, swipe addition, tutorial/SFX toggles, reload, unique claims and degraded-API/dropped-delivery cases. The sandboxed Edge/CDP attempt stalled and was interrupted; the unchanged runner completed outside the sandbox with its isolated temporary profile.
+- Responsive runner passed Edge/WebKit legacy layouts and actual Edge zoom checks. The current hub is covered directly by the Orders and integration runners.
+- The installed web-game client ran home and Boost interactions; screenshots, `render_game_to_text` and browser error output were inspected. Before/after screenshots were compared at both requested sizes. No application errors were reported by the completed suites.
+- [Focused backup](../output/playwright/geometry/focused-before.zip), [preservation audit](../output/playwright/geometry/preservation-audit.json) and [test logs](../output/playwright/geometry/) retain the evidence. Production state/economy/catalog, worksheet engine/bridges, preserved interface CSS and all raster assets remain unchanged.
+
+Physical-tablet inspection and owner aesthetic acceptance remain external checks. No push or deployment.
+
+Files changed in this pass: `src/ui/bakery-hub.js`, `styles/bakery-hub.css`, `src/ui/illustrated-controls.js`, `tests/browser-order-presentation.py`, `tests/browser-ui-replacement.py`, `AGENTS.md`, `docs/UI_LAYOUT_POLISH.md`, this document and `progress.md`. Task artifacts stay under `output/playwright/geometry/`.

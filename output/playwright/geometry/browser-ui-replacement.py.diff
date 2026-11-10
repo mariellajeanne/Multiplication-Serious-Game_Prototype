@@ -1,0 +1,11 @@
+--- before/tests/browser-ui-replacement.py
++++ after/tests/browser-ui-replacement.py
+@@ -94,7 +94,7 @@
+     assert page.locator('#cabinet-scroll').evaluate('e=>e.scrollHeight>e.clientHeight+2')==(count>9)
+     page.wait_for_timeout(80)
+     assert page.locator('#cabinet-scrollbar').get_attribute('aria-hidden')==('false' if count>9 else 'true')
+-    assert page.evaluate('''()=>{const board=document.querySelector('#orders-board').getBoundingClientRect(),reg=document.querySelector('.register-art').getBoundingClientRect(),list=document.querySelector('#order-scroller').getBoundingClientRect(),controls=document.querySelector('.board-utilities').getBoundingClientRect(),heading=document.querySelector('.board-title').getBoundingClientRect(),hud=document.querySelector('.top-hud').getBoundingClientRect(),stage=document.querySelector('#stage').getBoundingClientRect();return heading.bottom<=controls.top&&controls.bottom<list.top&&list.bottom<=reg.top&&reg.top<board.bottom&&reg.bottom<stage.top+stage.height*.825&&stage.right-hud.right>=15}''')
++    assert page.evaluate('''()=>{const board=document.querySelector('#orders-board').getBoundingClientRect(),reg=document.querySelector('.register-art').getBoundingClientRect(),list=document.querySelector('#order-scroller').getBoundingClientRect(),controls=document.querySelector('.board-utilities').getBoundingClientRect(),heading=document.querySelector('.board-title').getBoundingClientRect(),hud=document.querySelector('.top-hud').getBoundingClientRect(),stage=document.querySelector('#stage').getBoundingClientRect();return heading.bottom<=controls.top&&controls.bottom<list.top&&controls.bottom<reg.top&&reg.top<list.bottom&&reg.top<board.bottom&&reg.bottom<stage.top+stage.height*.825&&stage.right-hud.right>=15}''')
+     screenshot(page,f'{engine}-{width}-foods-{count}')
+    test_scroll(page,engine,'#cabinet-scroll','#cabinet-track','#cabinet-thumb','[data-hub-action="food-down"]')
+    screenshot(page,f'{engine}-{width}-foods-last-row')

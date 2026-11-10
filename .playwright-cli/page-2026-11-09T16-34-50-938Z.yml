@@ -1,0 +1,137 @@
+- main "My Panaderya bakery" [ref=f1e4]:
+  - img "My Panaderya"
+  - region "Boutique package display" [ref=f1e5]:
+    - button "Open the packages boutique" [ref=f1e6] [cursor=pointer]
+    - button "Open packages" [ref=f1e7] [cursor=pointer]:
+      - img "Packages"
+  - region "Equipped Filipino bakery food showcase" [ref=f1e8]:
+    - generic [ref=f1e9]:
+      - img "Menu Collection"
+      - button "Baker's Boost ×1.20" [ref=f1e10] [cursor=pointer]:
+        - generic [ref=f1e11]:
+          - generic [ref=f1e12]: Baker's Boost
+          - strong [ref=f1e13]: ×1.20
+    - generic "Equipped food showcase, scroll to browse" [ref=f1e15]:
+      - button "Manage Pandesal, Baker's Boost ×1.20" [ref=f1e17] [cursor=pointer]:
+        - img "Pandesal"
+        - generic [ref=f1e18]: ×1.20
+  - region "Orders" [ref=f1e19]:
+    - heading "Orders" [level=2]
+    - generic [ref=f1e20]:
+      - button "New Orders" [ref=f1e21] [cursor=pointer]
+      - button "Reward Odds" [ref=f1e22] [cursor=pointer]
+    - generic "Available orders, scroll for more" [ref=f1e23]:
+      - generic [ref=f1e24]:
+        - button "Start Party Order, Pandesal, 38 × 34, 0% complete, 3 star reward" [ref=f1e25] [cursor=pointer]:
+          - generic:
+            - generic:
+              - generic:
+                - img "Coin Bag"
+                - generic [aria-hidden]: ★ 3
+              - generic:
+                - generic:
+                  - generic [aria-hidden]: 🏫
+                  - text: Party Order
+                - generic:
+                  - img "Pandesal"
+                  - generic: "38"
+                  - generic: ×
+                  - img "tray"
+                  - generic: "34"
+                - progressbar "Order progress":
+                  - generic: Progress
+                  - strong: 0%
+        - button "Start Breakfast Order, Pandesal, 34 × 1, 0% complete, 1 star reward" [ref=f1e26] [cursor=pointer]:
+          - generic:
+            - generic:
+              - generic:
+                - img "Coin Stack"
+                - generic [aria-hidden]: ★ 1
+              - generic:
+                - generic:
+                  - generic [aria-hidden]: 🏠
+                  - text: Breakfast Order
+                - generic:
+                  - img "Pandesal"
+                  - generic: "34"
+                  - generic: ×
+                  - img "tray"
+                  - generic: "1"
+                - progressbar "Order progress":
+                  - generic: Progress
+                  - strong: 0%
+        - button "Start Picnic Order, Pandesal, 84 × 10, 0% complete, 2 star reward" [ref=f1e27] [cursor=pointer]:
+          - generic:
+            - generic:
+              - generic:
+                - img "Coin Jar"
+                - generic [aria-hidden]: ★ 2
+              - generic:
+                - generic:
+                  - generic [aria-hidden]: 🧺
+                  - text: Picnic Order
+                - generic:
+                  - img "Pandesal"
+                  - generic: "84"
+                  - generic: ×
+                  - img "tray"
+                  - generic: "10"
+                - progressbar "Order progress":
+                  - generic: Progress
+                  - strong: 0%
+        - button "Start Breakfast Order, Pandesal, 71 × 3, 0% complete, 1 star reward" [ref=f1e28] [cursor=pointer]:
+          - generic:
+            - generic:
+              - generic:
+                - img "Coin Stack"
+                - generic [aria-hidden]: ★ 1
+              - generic:
+                - generic:
+                  - generic [aria-hidden]: 🏠
+                  - text: Breakfast Order
+                - generic:
+                  - img "Pandesal"
+                  - generic: "71"
+                  - generic: ×
+                  - img "tray"
+                  - generic: "3"
+                - progressbar "Order progress":
+                  - generic: Progress
+                  - strong: 0%
+        - button "Start Breakfast Order, Pandesal, 80 × 4, 0% complete, 1 star reward" [ref=f1e29] [cursor=pointer]:
+          - generic:
+            - generic:
+              - generic:
+                - img "Coin Stack"
+                - generic [aria-hidden]: ★ 1
+              - generic:
+                - generic:
+                  - generic [aria-hidden]: 🏠
+                  - text: Breakfast Order
+                - generic:
+                  - img "Pandesal"
+                  - generic: "80"
+                  - generic: ×
+                  - img "tray"
+                  - generic: "4"
+                - progressbar "Order progress":
+                  - generic: Progress
+                  - strong: 0%
+    - generic [ref=f1e30]:
+      - button "Scroll orders up" [ref=f1e31] [cursor=pointer]
+      - scrollbar "Order scroll position" [ref=f1e33]
+      - button "Scroll orders down" [ref=f1e34] [cursor=pointer]
+  - generic [ref=f1e35]:
+    - button "View 250 coins" [ref=f1e36] [cursor=pointer]:
+      - generic [ref=f1e37]: "250"
+    - button "Help" [ref=f1e38] [cursor=pointer]:
+      - img "Help"
+    - button "Settings" [ref=f1e39] [cursor=pointer]:
+      - img "Settings"
+  - navigation "Bakery navigation" [ref=f1e40]:
+    - button "Packages" [ref=f1e41] [cursor=pointer]:
+      - img "Packages"
+    - button "Play Orders" [ref=f1e42] [cursor=pointer]:
+      - img "Play Orders"
+    - button "Menu Collection" [ref=f1e43] [cursor=pointer]:
+      - img "Menu Collection"

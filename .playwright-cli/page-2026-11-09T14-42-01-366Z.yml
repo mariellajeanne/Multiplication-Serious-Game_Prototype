@@ -1,0 +1,112 @@
+- main "My Panaderya bakery" [ref=e4]:
+  - img "My Panaderya"
+  - region "Boutique package display" [ref=e5]:
+    - button "Open the packages boutique" [ref=e6] [cursor=pointer]
+    - button "Open packages" [ref=e7] [cursor=pointer]:
+      - img "Packages"
+  - region "Equipped Filipino bakery food showcase" [ref=e8]:
+    - generic [ref=e9]:
+      - img "Menu Collection"
+      - button "Baker's Boost ×1.20" [ref=e10] [cursor=pointer]:
+        - generic [ref=e11]:
+          - generic [ref=e12]: BAKER'S BOOST
+          - strong [ref=e13]: ×1.20
+    - generic "Equipped food showcase, scroll to browse" [ref=e15]:
+      - button "Manage Pandesal, Baker's Boost ×1.20" [ref=e17] [cursor=pointer]:
+        - img "Pandesal"
+        - generic [ref=e18]: ×1.20
+  - region "Orders" [ref=e19]:
+    - heading "Orders" [level=2]
+    - generic "Available orders, scroll for more" [ref=e20]:
+      - generic [ref=e21]:
+        - button "Start Pandesal, 37 × 3, Coin Stack, 156 coins" [ref=e22] [cursor=pointer]:
+          - generic [ref=e23]:
+            - img "Coin Stack"
+            - generic [ref=e24]: Coin Stack
+          - generic [ref=e25]:
+            - generic [ref=e26]: Pandesal
+            - generic [ref=e27]: 156 coins
+            - generic [ref=e28]:
+              - img "Pandesal"
+              - generic [ref=e29]: "37"
+              - generic [ref=e30]: ×
+              - img "tray"
+              - generic [ref=e31]: "3"
+          - img "Play"
+        - button "Start Pandesal, 77 × 1, Coin Stack, 156 coins" [ref=e32] [cursor=pointer]:
+          - generic [ref=e33]:
+            - img "Coin Stack"
+            - generic [ref=e34]: Coin Stack
+          - generic [ref=e35]:
+            - generic [ref=e36]: Pandesal
+            - generic [ref=e37]: 156 coins
+            - generic [ref=e38]:
+              - img "Pandesal"
+              - generic [ref=e39]: "77"
+              - generic [ref=e40]: ×
+              - img "tray"
+              - generic [ref=e41]: "1"
+          - img "Play"
+        - button "Start Pandesal, 76 × 4, Coin Stack, 156 coins" [ref=e42] [cursor=pointer]:
+          - generic [ref=e43]:
+            - img "Coin Stack"
+            - generic [ref=e44]: Coin Stack
+          - generic [ref=e45]:
+            - generic [ref=e46]: Pandesal
+            - generic [ref=e47]: 156 coins
+            - generic [ref=e48]:
+              - img "Pandesal"
+              - generic [ref=e49]: "76"
+              - generic [ref=e50]: ×
+              - img "tray"
+              - generic [ref=e51]: "4"
+          - img "Play"
+        - button "Start Pandesal, 92 × 49, Coin Jar, 211 coins" [ref=e52] [cursor=pointer]:
+          - generic [ref=e53]:
+            - img "Coin Jar"
+            - generic [ref=e54]: Coin Jar
+          - generic [ref=e55]:
+            - generic [ref=e56]: Pandesal
+            - generic [ref=e57]: 211 coins
+            - generic [ref=e58]:
+              - img "Pandesal"
+              - generic [ref=e59]: "92"
+              - generic [ref=e60]: ×
+              - img "tray"
+              - generic [ref=e61]: "49"
+          - img "Play"
+        - button "Start Pandesal, 59 × 9, Coin Stack, 156 coins" [ref=e62] [cursor=pointer]:
+          - generic [ref=e63]:
+            - img "Coin Stack"
+            - generic [ref=e64]: Coin Stack
+          - generic [ref=e65]:
+            - generic [ref=e66]: Pandesal
+            - generic [ref=e67]: 156 coins
+            - generic [ref=e68]:
+              - img "Pandesal"
+              - generic [ref=e69]: "59"
+              - generic [ref=e70]: ×
+              - img "tray"
+              - generic [ref=e71]: "9"
+          - img "Play"
+    - generic [ref=e72]:
+      - button "Scroll orders up" [ref=e73] [cursor=pointer]
+      - scrollbar "Order scroll position" [ref=e75]
+      - button "Scroll orders down" [ref=e76] [cursor=pointer]
+    - generic [ref=e77]:
+      - button "New Orders" [ref=e78] [cursor=pointer]: ↻ New Orders
+      - button "Reward Odds" [ref=e79] [cursor=pointer]
+  - generic [ref=e80]:
+    - button "View 250 coins" [ref=e81] [cursor=pointer]:
+      - generic [ref=e82]: "250"
+    - button "Help" [ref=e83] [cursor=pointer]:
+      - img "Help"
+    - button "Settings" [ref=e84] [cursor=pointer]:
+      - img "Settings"
+  - navigation "Bakery navigation" [ref=e85]:
+    - button "Packages" [ref=e86] [cursor=pointer]:
+      - img "Packages"
+    - button "Play Orders" [ref=e87] [cursor=pointer]:
+      - img "Play Orders"
+    - button "Menu Collection" [ref=e88] [cursor=pointer]:
+      - img "Menu Collection"

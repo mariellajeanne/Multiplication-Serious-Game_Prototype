@@ -1,14 +1,12 @@
 /* Shared, deterministic progression rules. No DOM, random draws or transactions. */
 const PROGRESSION_VERSION=3, MAX_FOOD_LEVEL=5, MAX_FOOD_TIER=5;
 const TIER_FACTORS=[0,1,2,3.5,5.5,8], LEVEL_FACTORS=[0,1,1.25,1.55,1.9,2.3];
-const BAKERY_MILESTONES=[2,3,5,7,10,13,17,21,25,30];
-const BAKERY_STAGES=['Freshly opened','Warm welcome','Cozy counter','Neighborhood bakery','Blooming bakery','Golden counter','Artisan bakery','Celebration bakery','Grand panaderya','Master bakery','Crown panaderya'];
 const TICKET_DIMS=[[2,1],[2,2],[2,2],[3,2],[3,2],[4,2],[4,2],[4,2]];
 const ORDER_LIMIT=5, ORDER_REFRESH_MS=180000;
 // Frame 11: tune progression and shop economy here, independently of presentation.
-const BAKERY_POWER_CONFIG={purchases:ECONOMY_BALANCE.bakeryCap,factor:ECONOMY_BALANCE.bakeryGain};
-const PACKAGE_TYPES=['Standard','Lucky','Fortunate','Charmed','Blessed','Miraculous','Divine','Fate'];
-const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:ECONOMY_BALANCE.unlocks[rank],priceOrders:ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank)}));
+// Saved Bakery Power is archived during hub migration; it no longer progresses.
+const PACKAGE_TYPES=['Standard','Lucky','Fortunate','Charmed','Blessed','Miraculous','Divine','Fate','Sovereign'];
+const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:ECONOMY_BALANCE.unlocks[rank],orders:[0,4,12,24,45,75,120,180,260][rank],priceOrders:ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank)}));
 const MASTERY_STEP=.4, PURCHASE_UNDO_MS=10000;
 function recipeMastery(o){return Math.max(0,Math.floor(o.mastery??((o.level||1)-1)))}
 function masteryFactor(n){return n<5?LEVEL_FACTORS[n+1]:2.3+(n-4)*MASTERY_STEP}
@@ -40,11 +38,10 @@ function consolidateOwnedFoods(state){
  if(changed||state.purchaseUndo?.before?.owned&&new Set(state.purchaseUndo.before.owned.map(o=>o.id)).size!==state.purchaseUndo.before.owned.length)state.purchaseUndo=null;
  state.uniqueFoodsVersion=1;return state;
 }
-function bakeryFactor(level){return Math.pow(BAKERY_POWER_CONFIG.factor,clamp(level||1,1,BAKERY_POWER_CONFIG.purchases+1)-1)}
+function bakeryFactor(){return 1} // compatibility for archived saves/tools; never grants Power
 function powerLabel(value){return Math.abs(value)>=1e6?largeNumberLabel(value,2):new Intl.NumberFormat('en-US',{maximumFractionDigits:2}).format(value)}
 // Display rounding is independent of the probability used by the random draw.
 function probabilityLabel(probability){const percent=probability*100;return percent>0&&percent<.01?'<0.01%':percent.toFixed(2)+'%'}
-function bakeryStage(level){return BAKERY_MILESTONES.filter(n=>n<=level).length}
 function binomialRanks(p){
  const coefficients=[1,7,21,35,35,21,7,1];
  const weights=coefficients.map((c,i)=>c*Math.pow(p,i)*Math.pow(1-p,7-i));
@@ -52,7 +49,7 @@ function binomialRanks(p){
 }
 // Increasing p couples seven Bernoulli draws: every upper tail is nondecreasing.
 function ticketProbabilities(mastery){return binomialRanks(.04+.68*(1-Math.exp(-Math.max(0,mastery||0)/80)))}
-function packageProbabilities(packageRank){return binomialRanks(.08+.84*clamp(packageRank,0,7)/7)}
+function packageProbabilities(packageRank){return binomialRanks(packageRank>=8?.97:.08+.84*clamp(packageRank,0,7)/7)}
 function drawRank(probabilities,random=Math.random()){
  let cumulative=0;for(let i=0;i<probabilities.length;i++){cumulative+=probabilities[i];if(random<cumulative)return i}return probabilities.length-1;
 }
@@ -118,4 +115,4 @@ function migrateProgression(state){
  state.rarityCount=8;state.progressionVersion=PROGRESSION_VERSION;return state;
 }
 
-function themeLevel(){return Math.min(4,Math.floor(bakeryStage(g.bakeryLevel)/2))}
+function themeLevel(){return Math.min(4,Math.floor(g.completed/30))}

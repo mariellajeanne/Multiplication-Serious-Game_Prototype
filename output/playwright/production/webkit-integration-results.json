@@ -1,0 +1,30 @@
+{
+  "passed": true,
+  "actual_project": "C:\\GitProjects\\THS HO Game\\Multiplication-Serious-Game_Prototype",
+  "viewports": [
+    [
+      2000,
+      1200
+    ],
+    [
+      1280,
+      800
+    ],
+    [
+      1440,
+      900
+    ]
+  ],
+  "counts": [
+    1,
+    3,
+    5,
+    9,
+    10,
+    16,
+    17
+  ],
+  "native_touch_gestures": false,
+  "exceptions_preserved": true,
+  "errors": []
+}

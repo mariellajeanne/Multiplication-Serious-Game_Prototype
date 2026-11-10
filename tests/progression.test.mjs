@@ -56,7 +56,7 @@ test('legacy six and identifiable seven-rank saves migrate once, preserving owne
  base.run={phase:'claim',ticket:{id:20,rarity:5,a:79,b:18,base:304},budget:500,pool:500,chests:[{rarity:5}],worksheetRewards:{attemptId:'keep',actions:{x:true}}};
  const {json,run,store}=progressionHarness(base);
  assert.equal(json('g.owned[0]').fusion,4);assert.equal(run('g.owned[0].spent'),12345);assert.ok(run('foodValue(g.owned[0])')>=27*4*1.4);
- assert.ok(run('decorBonus()')>=1.55);assert.equal(run('g.bakerySpent'),46550);assert.equal(run('g.board[0].rarity'),7);
+ assert.equal(run('decorBonus()'),1);assert.equal(run('g.retiredBakeryPower.spent'),46550);assert.equal(run('g.board[0].rarity'),7);
  assert.deepEqual(json('g.run.worksheetRewards'),base.run.worksheetRewards);assert.equal(run('g.run.budget'),500);assert.equal(run('g.run.ticket.id'),20);
  assert.equal(store.get('panaderyaQuestV2BeforeProgression'),JSON.stringify(base));
  run('before=JSON.stringify(g);migrateProgression(g)');assert.equal(run('JSON.stringify(g)'),run('before'));
@@ -81,23 +81,20 @@ test('refresh persists five tickets and deadline, blocks repeat, reload and roll
  const ids=r.json('g.board.map(t=>t.id)');assert.equal(new Set(ids).size,5);
 });
 
-test('bakery supports the extended runway and active income remains stronger than staff',()=>{
- const h=progressionHarness();h.run('g.completed=100;g.coins=1e30');
- for(let level=1;level<=101;level++){
-  assert.equal(h.run('g.bakeryLevel'),level);const before=h.run('bakeryValue()'),stage=h.run('bakeryStage(g.bakeryLevel)');
-  if(level<101){assert.equal(h.run('upgradeDecor()'),true);assert.ok(Math.abs(h.run('bakeryValue()')/before-1.085)<1e-12);
-   assert.equal(h.run('bakeryStage(g.bakeryLevel)')-stage,[2,3,5,7,10,13,17,21,25,30].includes(level+1)?1:0);}
+test('active food-only income remains stronger than staff at a comfortable solving pace',()=>{
+ const h=progressionHarness();
+ for(const level of [1,21,101,5001]){
+  h.run(`g.bakeryLevel=${level}`);assert.equal(h.run('bakeryValue()'),1.2);
+  assert.ok(Math.abs(h.run('ticketBase(0)*bakeryValue()/90/staffRate()')-4)<1e-12);
  }
- h.run('g.bakeryLevel=BAKERY_POWER_CONFIG.purchases;g.coins=bakeryUpgradeCost()*2');assert.equal(h.run('upgradeDecor()'),true);assert.equal(h.run('upgradeDecor()'),false);
- assert.ok(Math.abs(h.run('ticketBase(0)*bakeryValue()/90/staffRate()')-4)<1e-12);
 });
 
 test('unequipping or selling cannot lower global upgrade prices or create a high-rate staff contract',()=>{
- const h=progressionHarness();h.run(`g.completed=20;g.owned.push({uid:2,id:'ube-ensaymada',fusion:4,level:4,spent:5000});g.activeMenu=[1,2];save();bakeryPrice=bakeryUpgradeCost();slotPrice=slotCost();income=staffRate();g.activeMenu=[];save();`);
- assert.equal(h.run('bakeryUpgradeCost()'),h.run('bakeryPrice'));assert.equal(h.run('slotCost()'),h.run('slotPrice'));
+ const h=progressionHarness();h.run(`g.completed=20;g.owned.push({uid:2,id:'ube-ensaymada',fusion:4,level:4,spent:5000});g.activeMenu=[1,2];save();slotPrice=slotCost();income=staffRate();g.activeMenu=[];save();`);
+ assert.equal(h.run('slotCost()'),h.run('slotPrice'));
  assert.ok(h.run('staffRate()')<h.run('income'));
  h.run('g.owned=g.owned.filter(o=>o.uid!==2);save()');
- const reloaded=progressionHarness(h.json('g'));assert.equal(reloaded.run('bakeryUpgradeCost()'),h.run('bakeryPrice'));
+ const reloaded=progressionHarness(h.json('g'));assert.equal(reloaded.run('slotCost()'),h.run('slotPrice'));
 });
 
 test('a stale tab save retains the latest refresh deadline',()=>{

@@ -35,10 +35,10 @@ test('compact header counters open minimal Boost and Coins dialogs without chang
  vm.runInContext(`g.bakeryLevel=14;g.owned[0].mastery=3;before=JSON.stringify(g);
   menu=renderMenu();showBoostInfo();boost=result;showCoinsInfo();coins=result;after=JSON.stringify(g)`,c);
  assert.equal(c.before,c.after);
- assert.equal(c.boost.title,"Baker's Boost 💎");
- assert.match(c.boost.html,/Total Menu 💎/);assert.match(c.boost.html,/Bakery Power 👑/);
- assert.match(c.boost.html,/id="menuBoostComponent">2\.28<\/strong>/);assert.match(c.boost.html,/id="bakeryPowerComponent">2\.89<\/strong>/);
- assert.doesNotMatch(c.boost.html,/Kitchen|<button|recipes|Equipped/);
+ assert.equal(c.boost.title,"Baker's Boost");
+ assert.match(c.boost.html,/Equipped-food Menu Boost/);assert.doesNotMatch(c.boost.html,/Bakery Power/);
+ assert.match(c.boost.html,/id="menuBoostComponent">\u00d72\.28<\/strong>/);
+ assert.doesNotMatch(c.boost.html,/Kitchen|<button|bakeryPowerComponent/);
  assert.equal(c.coins.title,'Coins 🪙');
  assert.equal(c.coins.html,'<div class="coins-help"><p>Complete orders to earn coins!</p><p>Your Baker\'s Boost multiplies the coins you earn.</p></div>');
  assert.match(c.menu,/<div class="menu-brand">.*My Panaderya.*menu-settings.*<div class="menu-counters">/);

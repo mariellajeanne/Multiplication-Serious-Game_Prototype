@@ -2,6 +2,7 @@
 <html lang="en"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="theme-color" content="#f5ead5"/><title>My Panaderya</title>
 
 <link rel="preload" href="assets/fonts/Nunito-Bold.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="icon" href="assets/bakery-ui/bakers-sparkle.png">
 <link rel="stylesheet" href="styles/base.css">
 <link rel="stylesheet" href="styles/menu.css">
 <link rel="stylesheet" href="styles/tickets.css">
@@ -10,19 +11,36 @@
 <link rel="stylesheet" href="styles/typography.css">
 <link rel="stylesheet" href="styles/feedback-layout.css">
 <link rel="stylesheet" href="styles/progression.css">
-</head><body><div id="app"></div><div id="modals"></div><div id="notificationDock" class="notification-dock"><div id="purchaseUndo" class="purchase-undo" role="status" hidden></div><div id="toasts" class="toaststack" aria-live="polite"></div></div>
-<script src="src/data/catalog.js" defer></script>
-<script src="src/game/economy-balance.js" defer></script>
-<script src="src/game/progression.js" defer></script>
-<script src="src/game/state.js" defer></script>
-<script src="src/game/rewards.js" defer></script>
-<script src="src/game/progression-economy.js" defer></script>
-<script src="src/game/economy.js" defer></script>
-<script src="src/ui/bakery-art.js" defer></script>
-<script src="src/ui/dialogs.js" defer></script>
-<script src="src/ui/scene.js" defer></script>
-<script src="src/ui/menu.js" defer></script>
-<script src="src/ui/reward-feedback.js" defer></script>
-<script src="src/game/worksheet-bridge.js" defer></script>
-<script src="src/main.js" defer></script>
+<link rel="stylesheet" href="styles/bakery-environment.css">
+<link rel="stylesheet" href="styles/bakery-hub.css">
+<link rel="stylesheet" href="styles/bakery-interface.css">
+<link rel="stylesheet" href="styles/bakery-preserved-interfaces.css">
+</head><body data-view="loading">
+<main id="bakeryEnvironment" class="bakery-environment" aria-label="My Panaderya bakery interior" hidden></main>
+<template id="environmentSceneTemplate">
+ <div class="environment-architecture" aria-hidden="true"><picture><source media="(max-aspect-ratio: 3/2)" srcset="assets/environment/bakery-wall-tablet.webp"><img src="assets/environment/bakery-wall.webp" alt="" fetchpriority="high" decoding="async" draggable="false"></picture></div>
+ <div class="environment-counter" aria-hidden="true"><picture><source media="(max-aspect-ratio: 3/2)" srcset="assets/environment/bakery-counter-tablet.webp"><img src="assets/environment/bakery-counter.webp" alt="" fetchpriority="high" decoding="async" draggable="false"></picture></div>
+ <img class="environment-register" src="assets/environment/cash-register.webp" alt="" aria-hidden="true" decoding="async" draggable="false">
+</template>
+<div id="app" hidden inert></div><div id="modals" hidden inert></div><div id="notificationDock" class="notification-dock" hidden inert><div id="purchaseUndo" class="purchase-undo" role="status" hidden></div><div id="toasts" class="toaststack" aria-live="polite"></div></div>
+<!-- Preserve classic-script dependency order in both playable views.
+     ?view=environment keeps these inert and never touches game state. -->
+<script src="src/data/catalog.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/game/economy-balance.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/game/progression.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/game/state.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/game/rewards.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/game/progression-economy.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/game/economy.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/bakery-art.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/illustrated-art.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/illustrated-controls.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/dialogs.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/scene.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/menu.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/reward-feedback.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/game/worksheet-bridge.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/ui/bakery-hub.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/main.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/environment-entry.js" defer></script>
 </body></html>

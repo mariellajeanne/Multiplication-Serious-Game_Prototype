@@ -23,7 +23,9 @@ function foodArt(id,extraClass=''){
  };
  return `<svg class="food-art ${extraClass}" viewBox="0 0 160 120" role="img" aria-label="${food.name}"><ellipse cx="80" cy="104" rx="58" ry="9" fill="#8e613422"/><ellipse cx="80" cy="97" rx="65" ry="8" fill="#fff5df"/>${drawings[food.artId||food.id]||bun}</svg>`;
 }
-function orderFood(ticket){return FOOD.filter(f=>f.rarity===ticket.rarity)[ticket.id%FOOD.filter(f=>f.rarity===ticket.rarity).length]||FOOD[0]}
+function orderFood(ticket){return FOOD.find(f=>f.id===(ticket.foodId||assignedOrderFood(ticket)))||FOOD[0]}
+function presentedFoodArt(id,extraClass=''){return typeof bakeryFoodArt==='function'?bakeryFoodArt(id,extraClass):foodArt(id,extraClass)}
+function boostSymbol(){return typeof isIllustratedBakery==='function'&&isIllustratedBakery()&&typeof boostSparkle==='function'?boostSparkle():'💎'}
 function orderStory(ticket){return `${ticket.b} trays · ${ticket.a} ${orderFood(ticket).name} each`}
 function luckProgress(){return `<div class="luck-track permanent-luck"><div class="luck-stars" aria-label="${g.mastery%4} of 4 practice stars">${Array.from({length:4},(_,i)=>`<span class="${i<g.mastery%4?'filled':''}" aria-hidden="true">★</span>`).join('')}</div><small>More mastery → Higher Luck</small><div class="luck-caption"><b>★ Ticket luck +${g.permanentLuck}<small>PERMANENT</small></b><button class="text-button" onclick="openProbabilities()" aria-label="Detailed ticket probabilities">ⓘ</button></div></div>`}
 
@@ -31,6 +33,7 @@ function trayArt(){return '<svg class="tray-icon" viewBox="0 0 64 44" role="img"
 // Shared, code-native illustrations: soft fills, the same warm outline and light edge.
 // Shared illustrated coins, with a different container/silhouette for every tier.
 function coinTierArt(rank){
+ if(typeof isIllustratedBakery==='function'&&isIllustratedBakery()&&typeof illustratedCoinArt==='function')return illustratedCoinArt(rank);
  const coin=(x,y,r=9)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="#f4c44e" stroke="#bd8435" stroke-width="2"/><circle cx="${x}" cy="${y}" r="${r*.68}" fill="none" stroke="#ffe6a0" stroke-width="2"/><path d="M${x-2} ${y-4}v8m4-8v8" stroke="#bd8435" stroke-width="1.5"/>`;
  const pile=`${coin(42,74)}${coin(60,78)}${coin(77,73)}${coin(52,60)}${coin(69,58)}`;
  const drawings=[

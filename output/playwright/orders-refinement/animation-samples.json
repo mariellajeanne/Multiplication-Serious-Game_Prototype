@@ -1,0 +1,82 @@
+[
+  {
+    "state": "quiet",
+    "effects": [
+      {
+        "element": "",
+        "transform": "matrix(0.7, 0, 0, 0.7, 0, 0)",
+        "opacity": "0.12"
+      },
+      {
+        "element": "",
+        "transform": "matrix(0.7, 0, 0, 0.7, 0, 0)",
+        "opacity": "0.12"
+      },
+      {
+        "element": "ticket-light-sweep",
+        "transform": "matrix(1, 0, 0, 1, -558.6, 0)",
+        "opacity": "1"
+      },
+      {
+        "element": "",
+        "transform": "matrix(0.7, 0, 0, 0.7, 0, 0)",
+        "opacity": "0.12"
+      },
+      {
+        "element": "",
+        "transform": "matrix(0.7, 0, 0, 0.7, 0, 0)",
+        "opacity": "0.12"
+      },
+      {
+        "element": "ticket-light-sweep",
+        "transform": "matrix(1, 0, 0, 1, -558.6, 0)",
+        "opacity": "1"
+      },
+      {
+        "element": "ticket-iridescence",
+        "transform": "none",
+        "opacity": "0.35"
+      }
+    ]
+  },
+  {
+    "state": "shimmer",
+    "effects": [
+      {
+        "element": "",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "0.8"
+      },
+      {
+        "element": "",
+        "transform": "matrix(0.7, 0, 0, 0.7, 0, 0)",
+        "opacity": "0.12"
+      },
+      {
+        "element": "ticket-light-sweep",
+        "transform": "matrix(1, 0, 0, 1, -19.4516, 0)",
+        "opacity": "1"
+      },
+      {
+        "element": "",
+        "transform": "matrix(1, 0, 0, 1, 0, 0)",
+        "opacity": "0.8"
+      },
+      {
+        "element": "",
+        "transform": "matrix(0.7, 0, 0, 0.7, 0, 0)",
+        "opacity": "0.12"
+      },
+      {
+        "element": "ticket-light-sweep",
+        "transform": "matrix(1, 0, 0, 1, -19.4516, 0)",
+        "opacity": "1"
+      },
+      {
+        "element": "ticket-iridescence",
+        "transform": "none",
+        "opacity": "0.75"
+      }
+    ]
+  }
+]

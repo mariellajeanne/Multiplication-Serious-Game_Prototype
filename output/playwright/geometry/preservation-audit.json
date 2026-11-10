@@ -1,0 +1,35 @@
+{
+  "unchanged_count": 26,
+  "authorized_changed_file": [
+    "src/ui/illustrated-controls.js"
+  ],
+  "reason": "Shared scrollbar geometry retains fractional track/thumb heights for exact endpoint mapping.",
+  "unchanged": [
+    "src/game/economy-balance.js",
+    "src/game/economy.js",
+    "src/game/progression-economy.js",
+    "src/game/progression.js",
+    "src/game/rewards.js",
+    "src/game/state.js",
+    "src/game/worksheet-bridge.js",
+    "worksheet/src/embedded-controls.js",
+    "worksheet/src/parent-bridge.js",
+    "worksheet/src/partial-product-addition.js",
+    "worksheet/src/product-placement.js",
+    "worksheet/src/sound-and-multiplication-fx.js",
+    "worksheet/src/state.js",
+    "worksheet/src/tap-and-drag.js",
+    "worksheet/src/worksheet-controls.js",
+    "worksheet/src/worksheet-render-and-tutorial.js",
+    "worksheet/styles/custom-theme.css",
+    "worksheet/styles/effects-and-guides.css",
+    "worksheet/styles/embedded-layout.css",
+    "worksheet/styles/foundation.css",
+    "worksheet/styles/illustrated-bakery.css",
+    "worksheet/styles/receipt-theme.css",
+    "worksheet/styles/responsive-workspace.css",
+    "worksheet/worksheet-engine.html",
+    "src/data/catalog.js",
+    "styles/bakery-preserved-interfaces.css"
+  ]
+}

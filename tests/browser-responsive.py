@@ -32,7 +32,7 @@ def check(pw, engine):
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     try:
-        page.goto(f'http://127.0.0.1:{server.server_port}/index.html')
+        page.goto(f'http://127.0.0.1:{server.server_port}/index.html?view=legacy')
         page.wait_for_function("typeof render==='function'")
         page.evaluate("""g.coins=999999;g.completed=40;g.bakeryLevel=14;g.menuSlots=6;
             for(const food of FOOD)if(!g.owned.some(o=>o.id===food.id))discoverFood(food);render()""")
@@ -126,7 +126,7 @@ def check_browser_zoom(pw):
             worker=context.service_workers[0] if context.service_workers else context.wait_for_event('serviceworker')
             page=context.new_page()
             cdp=context.new_cdp_session(page)
-            page.goto(f'http://127.0.0.1:{server.server_port}/index.html')
+            page.goto(f'http://127.0.0.1:{server.server_port}/index.html?view=legacy')
             page.wait_for_selector('.menu-header')
             for factor in [1,.8,1.25,1.5,2]:
                 actual=worker.evaluate('''async factor=>{

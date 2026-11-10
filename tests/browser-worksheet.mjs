@@ -8,6 +8,7 @@ import {resolve,extname,join,sep} from 'node:path';
 import {spawn} from 'node:child_process';
 
 const root=resolve(import.meta.dirname,'..');
+const hubMode=process.env.PANADERYA_TEST_VIEW==='hub';
 const server=createServer(async(req,res)=>{
   try{
     const file=resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
@@ -54,7 +55,7 @@ try{
     const detail=await evaluate(`({phase:g.run?.phase,errors:g.run?.mistakes,
       bridgeDone:g.run?.bridgeDone,actions:g.run&&Object.keys(g.run.worksheetRewards?.actions||{}),
       child:window.auditChild&&auditChild.eval('({phase:s.phase,done:s.done,busy,additionStart,complete:s.complete,events:window.auditEvents})')})`);
-    const shots=resolve(root,'docs/previews/progression');await mkdir(shots,{recursive:true});
+    const shots=resolve(root,'.test-tools/worksheet-shots');await mkdir(shots,{recursive:true});
     const failed=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     await writeFile(join(shots,'browser-failure.png'),Buffer.from(failed.data,'base64'));
     throw Error('Timed out: '+expression+' '+JSON.stringify({detail,errors}));
@@ -62,7 +63,7 @@ try{
   await cdp('Runtime.enable');await cdp('Page.enable');
   await cdp('Page.bringToFront');
   await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
-  await cdp('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/index.html`});
+  await cdp('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/index.html${hubMode?'':'?view=legacy'}`});
   await waitFor(`typeof startTicket==='function'`);
   await evaluate('document.fonts.ready');
   await evaluate(`g.helpSeen=true;closeModal();g.board=[{id:9001,a:79,b:18,rarity:1,base:304}];render();document.querySelector('.ticket').click();`);
@@ -73,9 +74,9 @@ try{
     const before=await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound})'))`);
     const board=await evaluate('JSON.stringify(g.board)');
     await evaluate('abandonTicket()');
-    assert.ok(await evaluate("g.run.paused&&$('liveOrder').hidden&&!$('pausedMenu').hidden"));
+    assert.ok(await evaluate(hubMode?"g.run.paused&&!$('hubHome').hidden&&$('hubOrder').hidden":"g.run.paused&&$('liveOrder').hidden&&!$('pausedMenu').hidden"));
     await evaluate('startTicket(g.run.ticket.id)');
-    assert.ok(await evaluate("!g.run.paused&&$('worksheetFrame')===auditFrame&&!$('liveOrder').hidden"));
+    assert.ok(await evaluate(hubMode?"!g.run.paused&&$('worksheetFrame')===auditFrame&&!$('hubOrder').hidden":"!g.run.paused&&$('worksheetFrame')===auditFrame&&!$('liveOrder').hidden"));
     assert.equal(await evaluate('JSON.stringify(g.board)'),board);
     assert.equal(await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound})'))`),before);
     for(const dialog of ['openSettings()','showTutorial(2)','openProbabilities()','openMenu()']){
@@ -190,7 +191,7 @@ try{
   await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,x:swipe.x,y:swipe.y+70});
   await waitFor(`g.run?.phase==='claim'`);
   assert.equal(await evaluate('g.run.pool'),budget);
-  assert.equal(await evaluate('g.run.chests.length'),1);
+  assert.equal(await evaluate('g.run.chests'),undefined);
   assert.equal(await evaluate('g.run.correct'),9);
   assert.equal(await evaluate('Object.keys(g.run.worksheetRewards.actions).length'),20);
   assert.equal(await evaluate(`(()=>{const run=g.run,before=JSON.stringify(run);return refreshOrders()&&g.run===run&&JSON.stringify(g.run)===before&&g.board.length===5})()`),true,'refresh keeps unclaimed rewards and the completed ticket untouched');
@@ -199,7 +200,7 @@ try{
   await waitFor(`typeof startTicket==='function'&&g.run?.phase==='claim'&&document.querySelector('.claim-screen .primary')!==null`);
   assert.equal(await evaluate('g.run.pool'),budget);
   assert.equal(await evaluate(`getComputedStyle(document.querySelector('.claim-screen')).display!=='none'`),true);
-  const shots=resolve(root,'docs/previews/progression');await mkdir(shots,{recursive:true});
+  const shots=resolve(root,'.test-tools/worksheet-shots');await mkdir(shots,{recursive:true});
   await cdp('Emulation.setDeviceMetricsOverride',{width:1194,height:834,deviceScaleFactor:1,mobile:false});
   await pause(250);
   const completedShot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
@@ -208,17 +209,17 @@ try{
   assert.equal(await evaluate('g.coins'),initialWallet+budget);
   assert.equal(await evaluate('g.completed'),1);
   console.log('PASS browser: reload restores the in-page completed-order claim; repeated collection pays once');
-  console.log(`PASS browser: 79 × 18 = 1422, click/drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins and one chest claimed exactly once`);
+  console.log(`PASS browser: 79 × 18 = 1422, click/drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins claimed exactly once; no package drop`);
   const levelCost=await evaluate('foodLevelCost(g.owned[0])');
-  await evaluate('openFoodItem(1)');await pause(280);
-  const upgrade=await evaluate(`(()=>{const r=document.querySelector('.modal .primary').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
+  await evaluate("closeModal();discoverFood(F('pandesal'));if(typeof isBakeryHub==='function'&&isBakeryHub())openHubFood(1);else openFoodItem(1)");await pause(280);
+  const upgrade=await evaluate(`(()=>{const r=document.querySelector('.action-mastery').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
   await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...upgrade});
   await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...upgrade});
   await waitFor('g.owned[0].level===2');
   assert.equal(await evaluate('g.coins'),initialWallet+budget-levelCost);
   assert.equal(await evaluate('JSON.parse(localStorage.getItem("panaderyaQuestV2")).owned[0].level'),2);
   assert.ok(await evaluate('bakeryValue()>1.2'));
-  console.log('PASS browser: ticket selection → real math → chest claim → food upgrade, saved under the existing key');
+  console.log('PASS browser: ticket selection → real math → coin claim → food upgrade, saved under the existing key');
 
   // Separate one-row carrying case: incoming carry creates a new leading digit.
   await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});
@@ -239,7 +240,7 @@ try{
   await click('[data-part="ones"]');await click('[data-slot="0:1"]');
   await waitFor(`g.run?.phase==='claim'`);
   assert.equal(await evaluate('g.run.pool'),await evaluate('g.run.budget'));
-  assert.equal(await evaluate('g.run.chests.length'),1);
+  assert.equal(await evaluate('g.run.chests'),undefined);
   console.log('PASS browser: 19 × 9 = 171 at 390px with emulated touch taps/drags, outgoing/incoming carry before placement; tutorial/SFX enabled');
 
   // Tablet touch completion with both deliveries lost once and broken motion.
@@ -275,7 +276,7 @@ try{
   await waitFor(`g.run?.phase==='claim'`);
   assert.equal(await evaluate('droppedCompletionMessages'),2);
   assert.equal(await evaluate('g.run.pool'),tabletBudget);
-  assert.equal(await evaluate('g.run.chests.length'),1);
+  assert.equal(await evaluate('g.run.chests'),undefined);
   await evaluate('prizeItems();prizeItems()');assert.equal(await evaluate('g.coins'),tabletWallet+tabletBudget);
   console.log('PASS browser: 79 × 18 tablet touch/swipe completes with findLastIndex absent, animation APIs throwing, and first two completion deliveries dropped; claim pays once');
   assert.deepEqual(errors,[],'browser runtime exceptions');

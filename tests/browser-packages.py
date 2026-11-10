@@ -29,7 +29,7 @@ def check(pw, engine):
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     try:
-        page.goto(f'http://127.0.0.1:{server.server_port}/index.html')
+        page.goto(f'http://127.0.0.1:{server.server_port}/index.html?view=legacy')
         page.wait_for_selector('.package-panel')
         page.evaluate("g.coins=1e9;g.bakeryLevel=21;g.packages=[15,4,0,0,0,0,0,2];save();openPackages('buy',0);setPackageQuantity(10)")
         page.evaluate('document.fonts.ready')
@@ -37,7 +37,7 @@ def check(pw, engine):
         for width,height in [(2000,1200),(1194,834),(1024,768)]:
             page.set_viewport_size({'width':width,'height':height})
             page.wait_for_timeout(120)
-            assert page.locator('.package-type-card').count()==8
+            assert page.locator('.package-type-card').count()==9
             metrics=page.locator('.package-workspace').evaluate('''e=>{
                 const r=e.getBoundingClientRect(),cols=[...e.children].map(c=>c.getBoundingClientRect());
                 const buttons=[...e.querySelectorAll('button')].filter(b=>b.getClientRects().length);
@@ -125,7 +125,7 @@ def check(pw, engine):
             assert page.locator('.modal').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
             assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1')
         assert errors==[],errors
-        print(f'PASS {engine}: wireframe proportions at all tablet sizes; eight types; gates; quantities/capacity; buy once; single and selected-type Open All; immediate Mastery; session/reload integrity',flush=True)
+        print(f'PASS {engine}: wireframe proportions at all tablet sizes; nine types; gates; quantities/capacity; buy once; single and selected-type Open All; immediate Mastery; session/reload integrity',flush=True)
     except Exception:
         page.screenshot(path=str(shots/f'{engine}-failure.png'))
         print('ERRORS',errors,flush=True)

@@ -1,0 +1,175 @@
+@font-face{font-family:"Bakery UI";src:url("../assets/fonts/Nunito-Bold.ttf") format("truetype");font-weight:400 1000;font-display:swap}
+/* Home UI transferred from the approved repaired ZIP; gameplay remains in production. */
+body[data-view="hub"]{margin:0;overflow:hidden;background:#2e1a12;color:#633b29;font-family:Nunito,system-ui,sans-serif;--hub-unit:min(1vw,1.666667dvh);--bakery-scale:1}
+body[data-view="hub"] #app{position:fixed;inset:0;width:100%;height:100%;margin:0;padding:0;max-width:none;isolation:isolate}
+.hub-home{position:fixed;inset:0;overflow:hidden;background:#2e1a12;font-size:16px}
+.hub-home[hidden],.hub-collection[hidden],.hub-order-workspace[hidden]{display:none!important}
+body[data-view="hub"] .hub-home *{box-sizing:border-box}
+body[data-view="hub"] .hub-home button,body[data-view="hub"] .hub-home input{font:inherit}
+body[data-view="hub"] .hub-home button{color:inherit;cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none}
+body[data-view="hub"] .hub-home button:disabled{cursor:default;filter:grayscale(.65);opacity:.55}
+body[data-view="hub"] .hub-home button:focus-visible,body[data-view="hub"] .hub-home [tabindex]:focus-visible{outline:4px solid #fff9c5;outline-offset:3px}
+body[data-view="hub"] .hub-home img{user-select:none;-webkit-user-drag:none}
+body[data-view="hub"] .hub-home button img{pointer-events:none}
+body[data-view="hub"] .hub-home #stage{position:absolute;left:50%;top:50%;width:2000px;height:1200px;margin-left:-1000px;margin-top:-600px;transform-origin:center;overflow:hidden;isolation:isolate;background:#f2c49b}
+body[data-view="hub"] .hub-home .stage-background{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+body[data-view="hub"] .hub-home .register-art{position:absolute;right:170px;bottom:226px;width:280px;height:auto;object-fit:contain;pointer-events:none;z-index:6;-webkit-mask:url('../assets/bakery-ui/register-cutout.svg') center/100% 100% no-repeat;mask:url('../assets/bakery-ui/register-cutout.svg') center/100% 100% no-repeat}
+body[data-view="hub"] .hub-home #title-sign{position:absolute;left:510px;top:-6px;width:920px;height:240px;object-fit:contain;pointer-events:none;z-index:5}
+body[data-view="hub"] .hub-home .picture-button{display:block;border:0;background:none;padding:0;transition:filter .12s;position:relative;isolation:isolate}
+body[data-view="hub"] .hub-home .picture-button>img{display:block;width:100%;height:100%;object-fit:contain;transition:filter .12s,transform .12s}
+body[data-view="hub"] .hub-home .picture-button.is-pressed>img{transform:scale(.975);filter:brightness(.94)}
+body[data-view="hub"] .hub-home .picture-button[aria-pressed=true]>img{filter:brightness(1.06) drop-shadow(0 0 6px #ffe5a8)}
+body[data-view="hub"] .hub-home .is-pressed:not(.picture-button){filter:brightness(.92)}
+@media(hover:hover) and (pointer:fine){body[data-view="hub"] .hub-home button:not(:disabled):hover{filter:brightness(1.07)}
+body[data-view="hub"] .hub-home .picture-button:not(:disabled):hover>img{filter:brightness(1.07)}}
+body[data-view="hub"] .hub-home #package-station{position:absolute;left:6px;top:110px;width:510px;height:780px;z-index:3}
+body[data-view="hub"] .hub-home .alcove-hit{position:absolute;inset:40px 8px 18px 28px;border:0;border-radius:190px 190px 40px 40px;background:none}
+body[data-view="hub"] .hub-home .alcove-hit:focus-visible{outline-offset:-12px}
+body[data-view="hub"] .hub-home #packages-plaque{position:absolute;left:81px;top:507px;width:416px;height:190px}
+body[data-view="hub"] .hub-home #menu-cabinet{position:absolute;left:520px;top:207px;width:900px;height:700px;z-index:4}
+body[data-view="hub"] .hub-home .cabinet-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;object-fit:fill}
+/* One shared inset and center line anchor both header elements to the frame. */
+body[data-view="hub"] .hub-home .cabinet-header{--header-inset:48px;position:absolute;top:25px;left:var(--header-inset);right:var(--header-inset);height:86px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;z-index:4}
+body[data-view="hub"] .hub-home #menu-heading-global{display:block;width:100%;max-width:445px;height:auto;justify-self:start;pointer-events:none}
+body[data-view="hub"] .hub-home .boost-status{position:relative;width:max-content;height:max(70px,calc(44px / var(--bakery-scale)));display:flex;align-items:center;justify-content:center;gap:10px;padding:0 24px;isolation:isolate;--utility-height:70px}
+body[data-view="hub"] .hub-home .boost-star{position:static;width:34px;height:44px;flex:none;animation:sparkle 4s ease-in-out infinite;filter:drop-shadow(0 0 4px #fffae8);pointer-events:none}
+body[data-view="hub"] .hub-home .boost-number{font-size:36px;line-height:1.1;white-space:nowrap;color:#873e78;text-shadow:0 1px #fff7e2}
+@keyframes sparkle{0%,100%{transform:scale(.95) rotate(-4deg);filter:drop-shadow(0 0 4px #fffae8) hue-rotate(0deg)}50%{transform:scale(1.06) rotate(4deg);filter:drop-shadow(0 0 8px #fff) hue-rotate(70deg)}}
+body[data-view="hub"] .hub-home #cabinet-inner{position:absolute;left:55px;right:45px;top:166px;bottom:72px;display:flex;gap:8px;min-height:0;z-index:2}
+body[data-view="hub"] .hub-home #cabinet-scroll{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y;scroll-behavior:auto}
+body[data-view="hub"] .hub-home #cabinet-scroll::-webkit-scrollbar,body[data-view="hub"] .hub-home .board-paper-scroller::-webkit-scrollbar,body[data-view="hub"] .hub-home .modal-content::-webkit-scrollbar{display:none}
+body[data-view="hub"] .hub-home #cabinet-grid{display:flex;flex-wrap:wrap;justify-content:center;align-content:center;gap:10px;min-height:100%;padding:4px 4px 8px}
+body[data-view="hub"] .hub-home #cabinet-grid.is-overflowing{align-content:flex-start}
+body[data-view="hub"] .hub-home .food-cell{position:relative;flex:none;min-width:0;overflow:hidden;border:0;border-radius:13px;background:none;padding:0;isolation:isolate}
+body[data-view="hub"] .hub-home .glass-cell-art{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
+body[data-view="hub"] .hub-home .food-aura{position:absolute;inset:12% 3% 15%;background:radial-gradient(ellipse,var(--glow) 0%,transparent 68%);opacity:.6;z-index:2;pointer-events:none;animation:food-glow 3.8s ease-in-out infinite alternate}
+@keyframes food-glow{from{opacity:.4}to{opacity:.72}}
+body[data-view="hub"] .hub-home .food-image{position:absolute;left:7%;top:5%;width:86%;height:76%;object-fit:contain;z-index:3;pointer-events:none;filter:drop-shadow(0 3px 3px #34190c66)}
+body[data-view="hub"] .hub-home .cell-glare{position:absolute;inset:3px 3px 32px;z-index:4;pointer-events:none;border-radius:12px;background:linear-gradient(128deg,#fff7df1a 0 8%,transparent 8% 16%,#fff7df12 16% 20%,transparent 20%)}
+body[data-view="hub"] .hub-home .food-multiplier{position:absolute;z-index:5;left:50%;bottom:5px;transform:translateX(-50%);height:33px;min-width:119px;max-width:90%;display:flex;align-items:center;justify-content:center;gap:3px;padding:2px 12px 3px 8px;background:url('../assets/bakery-ui/multiplier-chip.png') center/100% 100% no-repeat;color:#fff8de;font-size:21px;line-height:1;font-weight:900;text-shadow:0 2px 1px #482414;white-space:nowrap}
+body[data-view="hub"] .hub-home .food-multiplier img{width:25px;height:27px;object-fit:contain}
+body[data-view="hub"] .hub-home .art-scroll,body[data-view="hub"] .hub-home .board-scroll-rail{position:relative;flex:none;width:39px;height:100%;touch-action:none;z-index:4}
+body[data-view="hub"] .hub-home .rail-image{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+body[data-view="hub"] .hub-home .scroll-end,body[data-view="hub"] .hub-home .board-scroll-end{position:absolute;left:-6px;width:51px;height:42px;min-height:0;min-width:0;padding:0;border:0;background:none;z-index:3}
+body[data-view="hub"] .hub-home .scroll-top,body[data-view="hub"] .hub-home .order-top{top:0}
+body[data-view="hub"] .hub-home .scroll-bottom,body[data-view="hub"] .hub-home .order-bottom{bottom:0}
+body[data-view="hub"] .hub-home .scroll-track,body[data-view="hub"] .hub-home .board-scroll-track{position:absolute;top:42px;bottom:42px;left:9px;width:21px;touch-action:none;cursor:pointer}
+body[data-view="hub"] .hub-home .scroll-thumb,body[data-view="hub"] .hub-home .board-scroll-thumb{position:absolute;left:-2px;top:0;width:25px;min-height:44px;object-fit:fill;touch-action:none;cursor:grab;filter:drop-shadow(0 2px 1px #633318)}
+body[data-view="hub"] .hub-home .scroll-thumb:active,body[data-view="hub"] .hub-home .board-scroll-thumb:active{cursor:grabbing}
+body[data-view="hub"] .hub-home .art-scroll.is-idle,body[data-view="hub"] .hub-home .board-scroll-rail.is-idle{visibility:hidden;pointer-events:none}
+/* The original cap/plaque and nine-slice sides stay fixed. Extend only the
+   front wood below the plaque; the rounded opening is the actual scroll clip. */
+body[data-view="hub"] .hub-home #orders-board{--ticket-height:108px;--ticket-gap:10px;--board-cap-height:58px;--utility-target:max(54px,calc(44px / var(--bakery-scale)));--opening-top:calc(182px + var(--utility-target));--opening-side:38px;position:absolute;left:1430px;top:149px;width:410px;height:727px;z-index:4}
+body[data-view="hub"] .hub-home .board-frame{position:absolute;inset:0;pointer-events:none;border-style:solid;border-width:165px 38px 52px;border-image:url('../assets/bakery-ui/clipboard-wood.png') 370 85 115 fill stretch;z-index:0}
+body[data-view="hub"] .hub-home .board-front{position:absolute;inset:0 0 auto;display:grid;grid-template-rows:72px var(--utility-target);gap:12px;padding:80px 26px 18px}
+body[data-view="hub"] .hub-home .board-front::before{content:"";position:absolute;left:32px;right:32px;top:148px;bottom:-26px;background:repeating-linear-gradient(177deg,transparent 0 14px,#f5b86b0c 15px 16px,transparent 17px 27px),linear-gradient(90deg,#8b3f16,#b65b22 7%,#bd6429 45%,#b75b22 92%,#8b3f16);box-shadow:inset 0 2px 3px #54270c55;pointer-events:none;z-index:1}
+body[data-view="hub"] .hub-home .board-title{position:relative;margin:0;display:flex;align-items:center;justify-content:center;gap:12px;font-size:40px;line-height:1;color:#63331d;text-shadow:0 2px #fff5db;pointer-events:none;z-index:5}
+body[data-view="hub"] .hub-home .board-title svg{display:block;width:32px;height:38px;flex:none}
+body[data-view="hub"] .hub-home .board-list{position:absolute;left:var(--opening-side);right:var(--opening-side);top:var(--opening-top);bottom:38px;min-height:0;border-radius:26px 26px 18px 18px;background:#713814;box-shadow:0 -4px 0 #ce8039,0 -8px 0 #8b401a;isolation:isolate;overflow:hidden;z-index:2}
+/* This lining follows the same architectural seam and sits above moving paper. */
+body[data-view="hub"] .hub-home .board-list::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 5px 9px #381805b3,inset 2px 0 4px #4c220b80,inset -2px 0 4px #4c220b80;pointer-events:none;z-index:3}
+body[data-view="hub"] .hub-home .board-paper-scroller{position:relative;width:100%;height:100%;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;border-radius:inherit;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y;scroll-snap-type:y proximity;scroll-padding:12px 0;z-index:2}
+/* The extra lower scroll space brings the final slip above the foreground register. */
+body[data-view="hub"] .hub-home #order-items{display:flex;flex-direction:column;gap:var(--ticket-gap);padding:12px 28px 130px 6px}
+/* Die-cut paper, matching mask and artwork; dynamic content has a separate safe area. */
+body[data-view="hub"] .hub-home .order-ticket{--tier-ink:#80512e;--tier-edge:#c89554;--tier-paper:#fff1ce;--tier-paper-bottom:#f6dfad;--tier-metal:#bd8c48;--tier-aura:transparent;position:relative;display:block;flex:none;width:100%;height:var(--ticket-height);min-height:var(--ticket-height);padding:0;border:0;border-radius:0;background:none;box-shadow:none;transform:none;text-align:left;isolation:isolate;overflow:visible;scroll-snap-align:start}
+body[data-view="hub"] .hub-home .order-ticket::before,body[data-view="hub"] .hub-home .order-ticket::after{display:none}
+body[data-view="hub"] .hub-home :is(.ticket-cutout,.ticket-shadow){position:absolute;inset:0;display:block;-webkit-mask:url('../assets/bakery-ui/order-ticket-mask.svg') center/100% 100% no-repeat;mask:url('../assets/bakery-ui/order-ticket-mask.svg') center/100% 100% no-repeat;pointer-events:none}
+body[data-view="hub"] .hub-home .ticket-shadow{background:#5e301a7a;transform:translateY(3px);filter:blur(.8px)}
+body[data-view="hub"] .hub-home .ticket-cutout{overflow:hidden;contain:paint}
+body[data-view="hub"] .hub-home .ticket-frame-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+body[data-view="hub"] .hub-home .ticket-outer-edge{stroke:var(--tier-edge);stroke-width:4}
+body[data-view="hub"] .hub-home .ticket-inner-edge{stroke:#fff9e3;stroke-width:2}
+body[data-view="hub"] .hub-home .ticket-perforation{stroke:var(--tier-edge);stroke-width:1;stroke-dasharray:2 5;opacity:.45}
+body[data-view="hub"] .hub-home .ticket-safe-content{position:absolute;inset:8px 16px 10px;display:grid;grid-template-columns:58px minmax(0,1fr);align-items:stretch;gap:10px;z-index:3}
+body[data-view="hub"] .hub-home .coin-hero{display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:0;gap:0;background:none;border:0;padding:0}
+body[data-view="hub"] .hub-home .coin-hero img{height:63px;width:58px;object-fit:contain}
+body[data-view="hub"] .hub-home .order-tier{font-size:18px;line-height:1.1;color:var(--tier-ink);white-space:nowrap;text-shadow:0 1px #fff9e2}
+body[data-view="hub"] .hub-home .order-main{display:grid;grid-template-rows:26px 32px 22px;align-content:center;gap:3px;min-width:0;height:100%}
+body[data-view="hub"] .hub-home .order-name{display:flex;align-items:center;gap:5px;min-width:0;font-size:19px;line-height:1.2;color:var(--tier-ink);white-space:nowrap}
+body[data-view="hub"] .hub-home .order-type-icon{font-size:19px;line-height:1;flex:none}
+body[data-view="hub"] .hub-home .order-math{display:flex;align-items:center;justify-content:center;gap:3px;white-space:nowrap;font-size:23px;line-height:1;letter-spacing:-.5px;min-width:0;font-weight:900;color:#6c391f}
+body[data-view="hub"] .hub-home .food-symbol{width:28px;height:28px;object-fit:contain;flex:none}
+body[data-view="hub"] .hub-home .tray-symbol{width:23px;height:21px;object-fit:contain;flex:none}
+body[data-view="hub"] .hub-home .order-quantity{font-size:23px}
+body[data-view="hub"] .hub-home .times{font-size:19px}
+body[data-view="hub"] .hub-home .hub-ticket-progress{position:relative;display:flex;align-items:center;justify-content:space-between;padding:2px 6px;border:1px solid var(--tier-edge);border-radius:5px;background:linear-gradient(to right,#e5c998 var(--progress),#fff9e7 var(--progress));font-size:16px;line-height:1;color:var(--tier-ink);white-space:nowrap}
+/* Eight production coin tiers; increasing material/effects, never different layout. */
+body[data-view="hub"] .hub-home .order-ticket.coin-tier-1{--tier-paper:#f7edce;--tier-paper-bottom:#eedaa7;--tier-edge:#b6995a;--tier-ink:#806037;--tier-metal:#b8985b}
+body[data-view="hub"] .hub-home .order-ticket.coin-tier-2{--tier-paper:#ffe8bd;--tier-paper-bottom:#efcd93;--tier-edge:#c58b3f;--tier-ink:#94572e;--tier-metal:#ce9952}
+body[data-view="hub"] .hub-home .order-ticket.coin-tier-3{--tier-paper:#f5ded8;--tier-paper-bottom:#edc7b9;--tier-edge:#b87c6c;--tier-ink:#8d5149;--tier-metal:#c68c7a}
+body[data-view="hub"] .hub-home .order-ticket.coin-tier-4{--tier-paper:#f7d9ce;--tier-paper-bottom:#e9bfa9;--tier-edge:#b16f53;--tier-ink:#945033;--tier-metal:#d69e6b}
+body[data-view="hub"] .hub-home .order-ticket.coin-tier-5{--tier-paper:#f8e7b8;--tier-paper-bottom:#e8c87e;--tier-edge:#a77d32;--tier-ink:#805124;--tier-metal:#e3bc62}
+body[data-view="hub"] .hub-home .order-ticket.coin-tier-6{--tier-paper:#f6dfc8;--tier-paper-bottom:#e6c099;--tier-edge:#a96f37;--tier-ink:#8b4b29;--tier-metal:#f7cf7b;--tier-aura:#f3bc6444;filter:drop-shadow(0 0 4px var(--tier-aura))}
+body[data-view="hub"] .hub-home .order-ticket.coin-tier-7{--tier-paper:#fff0c7;--tier-paper-bottom:#efcf81;--tier-edge:#aa7729;--tier-ink:#87501f;--tier-metal:#ffe49b;--tier-aura:#e6b4d14d;filter:drop-shadow(0 0 5px var(--tier-aura))}
+body[data-view="hub"] .hub-home .coin-tier-1 .ticket-perforation{stroke-dasharray:1 3}
+body[data-view="hub"] .hub-home .coin-tier-5 .ticket-outer-edge{stroke-width:5}
+body[data-view="hub"] .hub-home :is(.coin-tier-6,.coin-tier-7) .ticket-inner-edge{stroke:var(--tier-metal);stroke-width:3}
+body[data-view="hub"] .hub-home .ticket-corner-accents{position:absolute;inset:9px 16px;z-index:1;border:0;background:linear-gradient(var(--tier-metal),var(--tier-metal)) left top/17px 2px no-repeat,linear-gradient(var(--tier-metal),var(--tier-metal)) right top/17px 2px no-repeat,linear-gradient(var(--tier-metal),var(--tier-metal)) left bottom/17px 2px no-repeat,linear-gradient(var(--tier-metal),var(--tier-metal)) right bottom/17px 2px no-repeat;opacity:.8;pointer-events:none}
+body[data-view="hub"] .hub-home .ticket-rays{position:absolute;inset:8px auto 9px 17px;width:108px;background:repeating-conic-gradient(from 15deg at 50% 56%,#fff9e955 0deg 17deg,transparent 17deg 38deg);opacity:.5;pointer-events:none}
+body[data-view="hub"] .hub-home .ticket-sparkles{position:absolute;inset:0;pointer-events:none;z-index:4}
+body[data-view="hub"] .hub-home .ticket-sparkles i{position:absolute;left:22px;top:13px;width:12px;height:12px;background:#fff6d0;clip-path:polygon(50% 0,63% 37%,100% 50%,63% 63%,50% 100%,37% 63%,0 50%,37% 37%);opacity:.3;animation:order-sparkle 6s ease-in-out infinite}
+body[data-view="hub"] .hub-home .ticket-sparkles i+ i{left:auto;right:19px;top:auto;bottom:14px;animation-delay:-3s;width:10px;height:10px}
+body[data-view="hub"] .hub-home .coin-tier-4 .ticket-sparkles{opacity:.55}
+body[data-view="hub"] .hub-home .coin-tier-5 .ticket-sparkles i{animation-delay:-1.2s}
+body[data-view="hub"] .hub-home .ticket-light-sweep{position:absolute;inset:0;z-index:2;pointer-events:none;background:linear-gradient(110deg,transparent 36%,#fff9dd66 48%,transparent 60%);transform:translateX(-140%);animation:order-sweep 11s ease-in-out infinite}
+body[data-view="hub"] .hub-home .ticket-iridescence{position:absolute;inset:3px 7px 5px;z-index:2;pointer-events:none;border-radius:14px;box-shadow:inset 0 2px 0 #f5c4ce,inset 2px 0 0 #d6e7c1,inset 0 -2px 0 #e0cfef,inset -2px 0 0 #f5dda1;opacity:.55;animation:order-iridescence 8s ease-in-out infinite}
+@keyframes order-sparkle{0%,62%,100%{opacity:.12;transform:scale(.7)}72%,84%{opacity:.8;transform:scale(1)}}
+@keyframes order-sweep{0%,73%{transform:translateX(-140%)}91%,100%{transform:translateX(140%)}}
+@keyframes order-iridescence{0%,100%{opacity:.35}50%{opacity:.75}}
+
+/* The rail is centered on the right wooden stile, outside the paper opening.
+   Fixed end slices and the thumb's independent art avoid image distortion. */
+body[data-view="hub"] .hub-home .board-scroll-rail{position:absolute;right:11px;top:var(--opening-top);bottom:48px;height:auto;width:27px;z-index:6}
+body[data-view="hub"] .hub-home .board-scroll-rail .rail-image{border-style:solid;border-width:28px 0;border-image:url('../assets/bakery-ui/scroll-rail-clean.png') 32 0 fill stretch}
+body[data-view="hub"] .hub-home .board-scroll-track{left:50%;transform:translateX(-50%);width:15px;top:28px;bottom:28px;z-index:4}
+body[data-view="hub"] .hub-home .board-scroll-thumb{position:absolute;left:0;transform:none;width:100%;min-height:calc(44px / var(--bakery-scale));padding:0;filter:drop-shadow(0 2px 1px #633318)}
+/* Match the visible thumb to the track's width directly. Its independent
+   transparent hit area expands outward without fractional centering transforms. */
+body[data-view="hub"] .hub-home .board-scroll-thumb::before{content:"";position:absolute;inset:0;left:50%;transform:translateX(-50%);width:max(27px,calc(44px / var(--bakery-scale)))}
+body[data-view="hub"] .hub-home .thumb-art{position:absolute;inset:0;width:100%;border-style:solid;border-width:12px 0;border-image:url('../assets/bakery-ui/scroll-thumb-clean.png') 13 0 fill stretch;pointer-events:none}
+body[data-view="hub"] .hub-home .board-scroll-end{left:50%;transform:translateX(-50%);width:max(51px,calc(44px / var(--bakery-scale)));height:max(28px,calc(44px / var(--bakery-scale)));min-height:0;top:auto;bottom:auto}
+body[data-view="hub"] .hub-home .board-scroll-end.order-top{top:calc(14px - max(28px,calc(44px / var(--bakery-scale))) / 2)}
+body[data-view="hub"] .hub-home .board-scroll-end.order-bottom{bottom:calc(14px - max(28px,calc(44px / var(--bakery-scale))) / 2)}
+body[data-view="hub"] .hub-home .board-utilities{position:relative;display:grid;grid-template-columns:1fr 1.08fr;gap:12px;z-index:5}
+body[data-view="hub"] .hub-home .board-footer{--utility-height:46px;min-width:0;height:100%;display:flex;align-items:center;justify-content:center;font-size:21px;line-height:1;text-shadow:0 1px #fff7df;white-space:nowrap;font-weight:900}
+/* Compact visible pills keep independent, generous transparent touch targets. */
+body[data-view="hub"] .hub-home .bakery-utility{position:relative;border:0;background:none;box-shadow:none;border-radius:999px;color:#633b29}
+body[data-view="hub"] .hub-home .bakery-utility::before{content:"";position:absolute;left:0;right:0;top:50%;height:var(--utility-height);transform:translateY(-50%);border:3px solid #8a4b28;border-radius:999px;background:linear-gradient(#fffce7 0%,#fff0c9 60%,#e9c48c 100%);box-shadow:0 3px 0 #66351f,0 5px 6px #47241140,inset 0 0 0 2px #e4b175,inset 0 0 0 4px #fff9dd;pointer-events:none}
+body[data-view="hub"] .hub-home .bakery-utility>*{position:relative;z-index:1}
+body[data-view="hub"] .hub-home .bakery-utility[aria-pressed=true]::before{box-shadow:0 3px 0 #66351f,0 0 0 3px #fff1b9,inset 0 0 0 2px #e4b175,inset 0 0 0 4px #fff9dd}
+body[data-view="hub"] .hub-home .top-hud{position:absolute;right:34px;top:18px;width:458px;height:87px;display:grid;grid-template-columns:288px 73px 73px;gap:12px;align-items:center;z-index:8}
+body[data-view="hub"] .hub-home .top-hud .picture-button{width:100%;height:82px}
+body[data-view="hub"] .hub-home .wallet-count{position:absolute;left:83px;right:67px;top:26px;text-align:center;font-size:28px;line-height:1;white-space:nowrap;color:#fff1d4;text-shadow:0 2px 1px #3d1d10}
+body[data-view="hub"] .hub-home .bottom-nav{position:absolute;left:340px;right:340px;top:1014px;height:142px;display:grid;grid-template-columns:350px 500px 350px;gap:60px;align-items:center;z-index:9}
+body[data-view="hub"] .hub-home .bottom-nav .picture-button{height:142px;width:100%}
+body[data-view="hub"] .hub-home .bottom-nav .picture-button.nav-play{height:150px}
+body[data-view="hub"] .hub-home .toast{position:absolute;left:50%;bottom:182px;transform:translate(-50%,10px);padding:14px 28px;border-radius:19px;border:3px solid #d3a061;background:#fff0cb;box-shadow:0 5px 0 #743c24,0 10px 20px #3d210f44;font-size:23px;max-width:1100px;text-align:center;opacity:0;pointer-events:none;z-index:45;transition:opacity .15s,transform .15s}
+body[data-view="hub"] .hub-home .toast.show{opacity:1;transform:translate(-50%,0)}
+body[data-view="hub"] .hub-home .food-art{margin:0;aspect-ratio:auto}
+body[data-view="hub"] .hub-home .order-math{font-weight:900}
+body[data-view="hub"] .hub-home .resume-indicator{position:absolute;right:22px;bottom:10px;font-size:20px;color:#65331d;background:#fff2c7;padding:2px 12px;border-radius:20px;box-shadow:0 2px #cf8e30}
+body[data-view="hub"] .hub-home .showcase-empty{flex:none;width:370px;height:110px;min-height:0;padding:10px 20px 15px;border:0;background:url('../assets/bakery-ui/action-cream.png') center/100% 100% no-repeat;color:#63351f;font-size:27px;line-height:1.1;box-shadow:none}.hub-home .showcase-empty small{font-size:20px}
+body[data-view="hub"] .hub-home .board-footer{font-weight:900}
+@media(prefers-reduced-motion:reduce){body[data-view="hub"] .hub-home *,body[data-view="hub"] .hub-home *::before,body[data-view="hub"] .hub-home *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+body[data-view="hub"] .bakery-ui{--game-font:"Bakery UI",sans-serif;color:#63351f}
+body[data-view="hub"] .hub-home .food-art{max-width:none;max-height:none;min-height:0;flex:none}
+body[data-view="hub"] .hub-home .boost-status::after{display:none}
+body[data-view="hub"] .hub-home .coin-hero .coin-tier-art{flex:0 1 auto;min-height:0;max-height:none;max-width:none;margin:0}
+
+body[data-view="loading"]{background:#2e1a12}
+body[data-view="hub"] .hub-home .board-footer.is-skip{color:#fff9dc;text-shadow:0 1px #42602a}
+body[data-view="hub"] .hub-home .board-footer.is-skip::before{background:linear-gradient(#bcd885,#87b55a 60%,#63933d);color:#fff9dc;text-shadow:0 1px #42602a}
+body[data-view="hub"] .hub-home .top-hud #help-button,body[data-view="hub"] .hub-home .top-hud #settings-button{border:0;background:none;padding:0;box-shadow:none;transform:none}
+body[data-view="hub"] .hub-home .top-hud .picture-button.is-pressed>img{transform:none;filter:brightness(.85)}
+body[data-view="hub"] .hub-home #title-sign{object-fit:contain;filter:drop-shadow(0 4px 2px #753a2526)}
+/* Keep real touch targets large when the illustrated stage scales down. */
+body[data-view="hub"] .hub-home .top-hud :is(#help-button,#settings-button){min-width:calc(44px / var(--bakery-scale));min-height:calc(44px / var(--bakery-scale))}
+body[data-view="hub"] .hub-home .board-footer{min-height:calc(44px / var(--bakery-scale))}
+body[data-view="hub"] .hub-home .scroll-end{width:max(51px,calc(44px / var(--bakery-scale)));height:max(42px,calc(44px / var(--bakery-scale)));min-width:calc(44px / var(--bakery-scale));min-height:calc(44px / var(--bakery-scale));left:50%;transform:translateX(-50%)}
+body[data-view="hub"] .hub-home .scroll-track{top:max(42px,calc(44px / var(--bakery-scale)));bottom:max(42px,calc(44px / var(--bakery-scale)))}
+body[data-view="hub"] .hub-home .scroll-thumb{box-sizing:border-box;width:max(25px,calc(44px / var(--bakery-scale)));left:50%;transform:translateX(-50%);min-height:calc(44px / var(--bakery-scale));padding-inline:max(0px,calc((44px / var(--bakery-scale) - 25px)/2))}
+body[data-view="hub"] .hub-home :is(.scroll-thumb,.board-scroll-thumb):focus-visible{outline:0;outline-offset:0;filter:drop-shadow(0 0 3px #fff5bf) drop-shadow(0 0 1px #714127)}
+body[data-view="hub"] .hub-home .coin-tier-7 .ticket-light-sweep{animation-delay:-3s}
+body[data-view="hub"] .hub-home .order-ticket:focus-visible{outline:0;outline-offset:0;filter:drop-shadow(0 0 2px #fff8be) drop-shadow(0 0 4px #9e63a9)}

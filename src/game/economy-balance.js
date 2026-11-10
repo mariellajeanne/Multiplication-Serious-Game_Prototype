@@ -3,12 +3,7 @@ const ECONOMY_BALANCE={
  "version": 1,
  "coinBase": 130,
  "coinGrowth": 1.35,
- "bakeryCap": 5000,
- "bakeryGain": 1.085,
- "priceGrowth": 1.085,
  "menuElasticity": 0.9,
- "bakeryOrders": 0.85,
- "bakeryCurve": 0.016,
  "efficiency": 0.7,
  "efficiencyOrders": 75,
  "masteryOrders": 0.16,
@@ -18,7 +13,6 @@ const ECONOMY_BALANCE={
  "slotCurve": 0.08,
  "slotExponent": 1.3,
  "packageOrders": 0.16,
- "packagePower": 0.97,
  "packageGrowth": 2.35,
  "resaleMargin": 1.2,
  "fusionOrders": 2,
@@ -35,12 +29,9 @@ const ECONOMY_BALANCE={
  ]
 };
 function balancedPriceUnit(menuPeak,bakeryLevel,completed=0){
- // Income uses the full Menu and Power. Prices use sublinear Menu growth and
+ // Income uses equipped foods. Prices use sublinear Menu growth and
  // practice efficiency, so progress buys more upgrades instead of repricing it away.
- return ECONOMY_BALANCE.coinBase*Math.pow(Math.max(1,menuPeak),ECONOMY_BALANCE.menuElasticity)*Math.pow(ECONOMY_BALANCE.priceGrowth,Math.min(ECONOMY_BALANCE.bakeryCap,Math.max(0,bakeryLevel-1)))/Math.pow(1+Math.max(0,completed)/ECONOMY_BALANCE.efficiencyOrders,ECONOMY_BALANCE.efficiency);
-}
-function balancedBakeryCost(menuPeak,bakeryLevel,completed=0){
- return Math.max(1,Math.round(balancedPriceUnit(menuPeak,bakeryLevel,completed)*(ECONOMY_BALANCE.bakeryOrders+ECONOMY_BALANCE.bakeryCurve*Math.sqrt(Math.max(0,bakeryLevel-1)))));
+ return ECONOMY_BALANCE.coinBase*Math.pow(Math.max(1,menuPeak),ECONOMY_BALANCE.menuElasticity)/Math.pow(1+Math.max(0,completed)/ECONOMY_BALANCE.efficiencyOrders,ECONOMY_BALANCE.efficiency);
 }
 function balancedMasteryCost(recipeBase,mastery,bakeryLevel,completed=0){
  // Charge against the recipe's base, not its already purchased Mastery bonus.
@@ -58,9 +49,7 @@ function expectedPackageResale(rank){
  },0);
 }
 function balancedPackagePrice(rank,menuPeak,bakeryLevel,completed=0){
- const purchases=Math.min(ECONOMY_BALANCE.bakeryCap,Math.max(0,bakeryLevel-1));
- const indexedPower=Math.pow(ECONOMY_BALANCE.priceGrowth,purchases)*Math.pow(ECONOMY_BALANCE.bakeryGain,purchases*(ECONOMY_BALANCE.packagePower-1));
- const cost=balancedPriceUnit(menuPeak,1,completed)*indexedPower*ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank);
+ const cost=balancedPriceUnit(menuPeak,1,completed)*ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank);
  // Protect resale economics while letting milestone packages become affordable during continued growth.
  return Math.max(1,Math.ceil(expectedPackageResale(rank)*ECONOMY_BALANCE.resaleMargin),Math.round(cost));
 }

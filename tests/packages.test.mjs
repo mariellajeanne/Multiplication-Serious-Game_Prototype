@@ -2,20 +2,20 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {progressionHarness} from './progression-harness.mjs';
 
-test('all eight types select both panels; Bakery Power gates buying, without hiding types or old stock',()=>{
+test('all nine types select both panels; completed orders gate buying, without hiding types or old stock',()=>{
  const h=progressionHarness();
- for(let rank=0;rank<8;rank++){
+ for(let rank=0;rank<9;rank++){
   h.run(`g.packages[${rank}]=2;openPackages('buy',${rank});html=popup.html`);
   assert.equal(h.run('packageType'),rank);
   assert.match(h.run('html'),new RegExp(`id="packageSelectedHeading">${rank+1}★ ${h.run(`PACKAGE_TYPES[${rank}].toUpperCase()`)} PACKAGE`));
   assert.match(h.run('html'),new RegExp(`id="packageOpeningHeading">OPEN ${rank+1}★ PACKAGES`));
-  assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,8);
+  assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,9);
   assert.equal(h.run('packageQuantityMaximum()>0'),rank===0);
-  h.run(`g.bakeryLevel=PACKAGE_SHOP[${rank}].unlock-1`);
+  h.run(`g.completed=PACKAGE_SHOP[${rank}].orders-1`);
   if(rank)assert.equal(h.run('packageUnlocked(packageType)'),false);
-  h.run(`g.bakeryLevel=PACKAGE_SHOP[${rank}].unlock;g.coins=packagePrice(packageType)*50;openPackages('buy',${rank})`);
+  h.run(`g.completed=PACKAGE_SHOP[${rank}].orders;g.coins=packagePrice(packageType)*50;openPackages('buy',${rank})`);
   assert.equal(h.run('packageQuantityMaximum()'),48);
-  h.run('g.bakeryLevel=1;g.coins=250');
+  h.run('g.completed=0;g.coins=250');
  }
 });
 
@@ -45,7 +45,7 @@ test('purchase quotes spend exactly once and reject stale quantities, prices, st
   quote=packageQuote.id;price=packagePrice(0);before=g.coins;ok=requestPackagePurchase(quote);again=requestPackagePurchase(quote)`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);
  assert.equal(h.run('g.packages[0]'),5);assert.equal(h.run('before-g.coins'),h.run('price*5'));
- for(const mutation of ['g.bakeryLevel+=20','g.packages[0]++','packageQuantity++',"openPackages('buy',1)"]){
+ for(const mutation of ['g.economyPeakBase=1000','g.packages[0]++','packageQuantity++',"openPackages('buy',1)"]){
   const h=progressionHarness();h.run(`g.coins=1e9;openPackages('buy',0);setPackageQuantity(2);id=packageQuote.id;${mutation};before=JSON.stringify([g.coins,g.packages]);ok=requestPackagePurchase(id)`);
   assert.equal(h.run('ok'),false,mutation);assert.equal(h.run('JSON.stringify([g.coins,g.packages])'),h.run('before'));
  }

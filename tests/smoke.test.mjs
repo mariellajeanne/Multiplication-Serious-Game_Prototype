@@ -7,8 +7,8 @@ const root=resolve(import.meta.dirname,'..');
 const html=readFileSync(resolve(root,'index.html'),'utf8');
 const scripts=[
  'src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js',
- 'src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/ui/dialogs.js','src/ui/scene.js',
- 'src/ui/menu.js','src/ui/reward-feedback.js','src/game/worksheet-bridge.js','src/main.js'
+ 'src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/ui/illustrated-art.js','src/ui/illustrated-controls.js','src/ui/dialogs.js','src/ui/scene.js',
+ 'src/ui/menu.js','src/ui/reward-feedback.js','src/game/worksheet-bridge.js','src/ui/bakery-hub.js','src/main.js','src/environment-entry.js'
 ];
 test('all classic scripts are included in dependency order',()=>{
   let prev=-1;
@@ -39,7 +39,7 @@ test('worksheet uses modular worksheet engine, bridge and tutorial/sound control
   assert.match(bridge,/function handleWorksheetMessage/);
 });
 test('CSS and menu/ticket renderer are present',()=>{
-  for(const s of ['styles/base.css','styles/menu.css','styles/tickets.css','styles/worksheet.css','styles/bakery-theme.css','styles/feedback-layout.css','styles/progression.css']) {
+  for(const s of ['styles/base.css','styles/menu.css','styles/tickets.css','styles/worksheet.css','styles/bakery-theme.css','styles/feedback-layout.css','styles/progression.css','styles/bakery-environment.css','styles/bakery-hub.css','styles/bakery-interface.css','styles/bakery-preserved-interfaces.css']) {
     assert.ok(existsSync(resolve(root,s)));
     assert.ok(html.includes(`href="${s}"`));
   }

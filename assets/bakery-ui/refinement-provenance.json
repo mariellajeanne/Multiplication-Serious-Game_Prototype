@@ -1,0 +1,20 @@
+{
+  "date": "2026-11-09",
+  "tool": "built-in image_gen; no API/CLI fallback",
+  "assets": [
+    {
+      "path": "assets/bakery-ui/title-sign-refined.png",
+      "intent": "Repair the original sign with genuine transparent boundaries",
+      "transparent_background": true,
+      "prompt": "Edit target: the supplied My Panaderya bakery sign raster asset. Reconstruct this ONE standalone game logo faithfully, preserving the exact words 'My Panaderya', playful plump cream lettering with dark cocoa outlines and warm caramel extruded shadows, pink oval enamel plaque, wooden outline, chef hat centered on top, symmetrical golden wheat on both ends and a golden bread loaf below the letters. Repair the actual asset: remove all baked peach room/background rectangles, bottom horizontal shelf lines, cut-off lower border, strange edge fragments and malformed details. Complete the entire wooden sign perimeter on all sides with clean coherent outlines; no clipping. Make left/right ornamental flourishes balanced without changing the established art direction. The lettering must be exact and beautifully legible. Warm illustrated casual bakery game style, softly shaded, matching the source. Transparent background only outside the complete sign silhouette; genuine clean alpha, no rectangular background, no ground plane or external shadow or extra objects. Wide horizontal asset with a little transparent margin around the full perimeter. This is a production logo repair, no new decorative elements or scene."
+    },
+    {
+      "path": "assets/bakery-ui/bakery-room.png",
+      "intent": "Repair the upper-left wooden arch in the underlying room image",
+      "transparent_background": false,
+      "prompt": "Edit target: this existing illustrated bakery room background. Make ONE precise architectural repair in the UPPER-LEFT CORNER ONLY, behind the hanging green leaves and above the pink-and-cream striped awning. The current thick wooden arc has an awkward projecting double beam/triangular wooden extension above the awning near x=100..410, y=65..210. Remove that malformed protrusion. Reconstruct a single coherent rounded wooden arch closely following the awning's curved roof, with a consistent narrow wooden rim, physically logical joins to the vertical supporting posts and peach plaster wall. The awning must follow a smooth coherent perspective. Keep all existing green hanging foliage and the pink-and-cream striped canopy, its scalloped hem, its width, curvature and screen location. Preserve the warm polished diorama illustration, consistent cocoa outlines, caramel shading and original light direction. Do not hide the mistake behind added leaves or objects. Invariants: all other room pixels/composition must stay as close as possible to the target: identical canvas proportions and crop, pendant lamps, empty peach center wall, gift packages, flower vase, curved package-display shelves, lace trim, foreground counter surface and wood panels, right window and flowers, lower-left bread basket and lower-right leaves. Do not add text, signage, UI, controls, logos, bakery cabinets or new decorations. Maintain the original landscape canvas aspect ratio 1619:971 and all object positions. Only repair the corner's wooden architecture and tiny adjoining wall/awning seams. Opaque complete background asset."
+    }
+  ],
+  "code_native_assets": ["control-help.svg", "control-settings.svg", "control-close.svg", "popup-frame.svg"],
+  "notes": "Vector controls extend the existing repo-native UI icon system. Popup frame uses 9-slice border-image; raster borders are not stretched. No decorative cover image is placed over the repaired room corner."
+}

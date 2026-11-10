@@ -73,9 +73,9 @@ test('ten second Undo reverses only the latest transaction once, survives reload
  const h=progressionHarness();h.run(`Date.now=()=>100000;g.coins=1e9;before=JSON.stringify([g.coins,g.menuSlots]);buyMenuSlot();id=g.purchaseUndo.id;save()`);
  const reload=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));reload.run('Date.now=()=>100001;ok=undoPurchase(g.purchaseUndo.id);again=undoPurchase("old")');
  assert.equal(reload.run('ok'),true);assert.equal(reload.run('again'),false);assert.equal(reload.run('JSON.stringify([g.coins,g.menuSlots])'),h.run('before'));
- h.run('buyMenuSlot();old=g.purchaseUndo.id;upgradeDecor();latest=g.purchaseUndo.id;denied=undoPurchase(old);ok=undoPurchase(latest)');
+ h.run(`buyMenuSlot();old=g.purchaseUndo.id;discoverFood(F('pandesal'));buyMastery([1]);latest=g.purchaseUndo.id;denied=undoPurchase(old);ok=undoPurchase(latest)`);
  assert.equal(h.run('denied'),false);assert.equal(h.run('ok'),true);assert.equal(h.run('g.menuSlots'),3);assert.equal(h.run('g.bakeryLevel'),1);
- h.run('upgradeDecor();refillBoard();startTicket(g.board[0].id);denied=undoPurchase(latest)');assert.equal(h.run('g.purchaseUndo'),null);assert.equal(h.run('denied'),false);
+ h.run('buyMenuSlot();refillBoard();startTicket(g.board[0].id);denied=undoPurchase(latest)');assert.equal(h.run('g.purchaseUndo'),null);assert.equal(h.run('denied'),false);
  const expired=progressionHarness();expired.run('g.coins=1e9;Date.now=()=>1000;buyMenuSlot();id=g.purchaseUndo.id;Date.now=()=>11001;ok=undoPurchase(id)');assert.equal(expired.run('ok'),false);
 });
 
@@ -86,13 +86,10 @@ test('Undo cannot reverse mastery used by opened packages, sales or changed assi
  }
 });
 
-test('Bakery Power supports the extended configurable purchase runway, shows a bounded vertical progression list',()=>{
- const h=progressionHarness();h.run('g.coins=1e100');
- for(let i=0;i<100;i++)assert.equal(h.run('upgradeDecor()'),true);
- h.run('g.bakeryLevel=BAKERY_POWER_CONFIG.purchases;g.coins=bakeryUpgradeCost()*2');assert.equal(h.run('upgradeDecor()'),true);assert.equal(h.run('upgradeDecor()'),false);assert.equal(h.run('g.bakeryLevel'),h.run('BAKERY_POWER_CONFIG.purchases+1'));
- h.run('g.bakeryLevel=20;html=renderBakery()');
- assert.doesNotMatch(h.run('html'),/\/100|\/101|Level|progressbar/);
- assert.equal((h.run('html').match(/🪙/g)||[]).length,2);
+test('retired Power has no transaction or configurable purchase runway',()=>{
+ const h=progressionHarness();assert.equal(h.run('typeof upgradeDecor'),'undefined');
+ assert.equal(h.run('typeof BAKERY_POWER_CONFIG'),'undefined');
+ h.run('g.bakeryLevel=5001');assert.equal(h.run('bakeryValue()'),1.2);
 });
 
 test('package types are distinct from food rarities; displayed ticket odds match generation; Fate is not guaranteed Crown Jewel',()=>{
@@ -107,7 +104,7 @@ test('coin package purchases save stock, charge exactly once, reject stale prici
  const h=progressionHarness();h.run(`g.coins=1e8;openPackages('buy',0);html=popup.html;setPackageQuantity(3);before=g.coins;price=packagePrice(0);requestPackagePurchase();
  if(packagePurchaseReview)confirmPackagePurchase();again=confirmPackagePurchase()`);
  assert.equal(h.run('g.coins'),h.run('before-price*3'));assert.equal(h.run('g.packages[0]'),3);assert.equal(h.run('again'),false);
- assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,8);assert.match(h.run('html'),/NEEDS HIGHER/);
+ assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,9);assert.match(h.run('html'),/UNLOCK AT/);
  h.run(`g.packages[0]=0;packagePurchaseReview={rank:0,count:1,total:packagePrice(0),price:packagePrice(0)};g.bakeryLevel++;before=g.coins;ok=confirmPackagePurchase()`);
  assert.equal(h.run('ok'),false);assert.equal(h.run('g.coins'),h.run('before'));
 });
@@ -153,6 +150,6 @@ test('legacy pending packages retain their earned food rarity rather than being 
 
 test('paused orders keep fixed budgets while bakery purchases update totals; Resume commits Undo',()=>{
  const h=progressionHarness();h.run(`g.coins=1e9;g.completed=6;refillBoard();startTicket(g.board[0].id);budget=g.run.budget;id=g.run.ticket.id;abandonTicket();
- buyMenuSlot();slotTx=g.purchaseUndo.id;startTicket(id);denied=undoPurchase(slotTx);abandonTicket();before=bakeryValue();upgraded=upgradeDecor()`);
+ buyMenuSlot();slotTx=g.purchaseUndo.id;startTicket(id);denied=undoPurchase(slotTx);abandonTicket();before=bakeryValue();discoverFood(F('pandesal'));upgraded=buyMastery([1])`);
  assert.equal(h.run('denied'),false);assert.equal(h.run('g.run.budget'),h.run('budget'));assert.equal(h.run('upgraded'),true);assert.ok(h.run('bakeryValue()>before'));
 });

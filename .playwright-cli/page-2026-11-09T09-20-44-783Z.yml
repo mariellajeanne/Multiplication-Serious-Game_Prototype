@@ -1,0 +1,187 @@
+- main "My Panaderya interactive illustrated bakery prototype" [ref=f1e3]:
+  - region:
+    - button
+    - button
+  - region:
+    - generic:
+      - button:
+        - generic:
+          - generic: BAKER'S BOOST
+          - generic: ×57.00
+    - generic:
+      - generic:
+        - generic:
+          - button:
+            - generic: ×1.20
+          - button:
+            - generic: ×3.10
+          - button:
+            - generic: ×1.75
+          - button:
+            - generic: ×2.40
+          - button:
+            - generic: ×4.90
+          - button:
+            - generic: ×7.40
+          - button:
+            - generic: ×8.65
+          - button:
+            - generic: ×9.80
+          - button:
+            - generic: ×17.80
+  - region:
+    - heading [level=2]:
+      - generic: Orders
+    - generic:
+      - generic:
+        - button:
+          - generic: Coin Bag
+          - generic:
+            - generic: Ensaymada
+            - generic: 9,120 coins
+            - generic:
+              - generic: "23"
+              - generic: ×
+              - generic: "14"
+        - button:
+          - generic: Coin Bucket
+          - generic:
+            - generic: Mamon
+            - generic: 21,660 coins
+            - generic:
+              - generic: "36"
+              - generic: ×
+              - generic: "27"
+        - button:
+          - generic: Treasure Chest
+          - generic:
+            - generic: Spanish Bread
+            - generic: 199,500 coins
+            - generic:
+              - generic: "58"
+              - generic: ×
+              - generic: "32"
+        - button:
+          - generic: Coin Stack
+          - generic:
+            - generic: Hopia
+            - generic: 1,140 coins
+            - generic:
+              - generic: "72"
+              - generic: ×
+              - generic: "19"
+        - button:
+          - generic: Coin Cart
+          - generic:
+            - generic: Ube Bun
+            - generic: 57,000 coins
+            - generic:
+              - generic: "41"
+              - generic: ×
+              - generic: "26"
+        - button:
+          - generic: Divine Treasury
+          - generic:
+            - generic: Buko Pie
+            - generic: 2,280,000 coins
+            - generic:
+              - generic: "27"
+              - generic: ×
+              - generic: "35"
+        - button:
+          - generic: Coin Jar
+          - generic:
+            - generic: Yema Roll
+            - generic: 3,135 coins
+            - generic:
+              - generic: "64"
+              - generic: ×
+              - generic: "12"
+    - generic:
+      - button
+      - generic:
+        - scrollbar
+      - button
+    - generic:
+      - button: ↻ New Orders
+      - button: Reward Odds
+  - generic:
+    - button:
+      - generic: 12,750
+    - button
+    - button
+  - navigation:
+    - button [pressed]
+    - button
+    - button
+  - status
+  - dialog "Choose a Package" [ref=f1e125]:
+    - img "Choose a Package"
+    - button "Close popup" [active] [ref=f1e126] [cursor=pointer]:
+      - img "Close"
+    - generic [ref=f1e127]:
+      - generic [ref=f1e128]:
+        - generic [ref=f1e129]:
+          - img "Starter Bag" [ref=f1e130]
+          - generic [ref=f1e131]:
+            - strong [ref=f1e132]: Starter Bag
+            - generic [ref=f1e133]: ● 300
+            - button "Buy Starter Bag for 300 coins" [ref=f1e134] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e135]:
+          - img "Bakery Box" [ref=f1e136]
+          - generic [ref=f1e137]:
+            - strong [ref=f1e138]: Bakery Box
+            - generic [ref=f1e139]: ● 750
+            - button "Buy Bakery Box for 750 coins" [ref=f1e140] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e141]:
+          - img "Sweet Box" [ref=f1e142]
+          - generic [ref=f1e143]:
+            - strong [ref=f1e144]: Sweet Box
+            - generic [ref=f1e145]: ● 1,200
+            - button "Buy Sweet Box for 1200 coins" [ref=f1e146] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e147]:
+          - img "Deluxe Box" [ref=f1e148]
+          - generic [ref=f1e149]:
+            - strong [ref=f1e150]: Deluxe Box
+            - generic [ref=f1e151]: ● 1,800
+            - button "Buy Deluxe Box for 1800 coins" [ref=f1e152] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e153]:
+          - img "Treat Package" [ref=f1e154]
+          - generic [ref=f1e155]:
+            - strong [ref=f1e156]: Treat Package
+            - generic [ref=f1e157]: ● 2,650
+            - button "Buy Treat Package for 2650 coins" [ref=f1e158] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e159]:
+          - img "Pastry Bundle" [ref=f1e160]
+          - generic [ref=f1e161]:
+            - strong [ref=f1e162]: Pastry Bundle
+            - generic [ref=f1e163]: ● 3,800
+            - button "Buy Pastry Bundle for 3800 coins" [ref=f1e164] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e165]:
+          - img "Premium Crate" [ref=f1e166]
+          - generic [ref=f1e167]:
+            - strong [ref=f1e168]: Premium Crate
+            - generic [ref=f1e169]: ● 5,200
+            - button "Buy Premium Crate for 5200 coins" [ref=f1e170] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e171]:
+          - img "Baker's Chest" [ref=f1e172]
+          - generic [ref=f1e173]:
+            - strong [ref=f1e174]: Baker's Chest
+            - generic [ref=f1e175]: ● 7,800
+            - button "Buy Baker's Chest for 7800 coins" [ref=f1e176] [cursor=pointer]:
+              - img "Buy"
+        - generic [ref=f1e177]:
+          - img "Grand Bakery Pack" [ref=f1e178]
+          - generic [ref=f1e179]:
+            - strong [ref=f1e180]: Grand Bakery Pack
+            - generic [ref=f1e181]: ● 12,000
+            - button "Buy Grand Bakery Pack for 12000 coins" [ref=f1e182] [cursor=pointer]:
+              - img "Buy"
+      - paragraph [ref=f1e183]: Nine package tiers · food collectibles come only from opening packages

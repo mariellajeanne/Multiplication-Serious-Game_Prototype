@@ -20,13 +20,13 @@ test('each tier pays base times the boost snapshot with rounding, regardless of 
   const h=progressionHarness();h.run(`g.coins=1e9;g.bakeryLevel=21;g.mode='streak';
    g.board=[{id:100,rarity:${rank},coinTier:${rank},a:79,b:18,base:ticketBase(${rank})}];startTicket(100);
    base=g.run.baseCoins;boost=g.run.bakersBoost;oldPackages=JSON.stringify(g.packages);oldFoods=JSON.stringify(g.owned);
-   abandonTicket();upgradeDecor();startTicket(100);g.run.mistakes=50;g.run.bestStreak=99;finishSum();
+   abandonTicket();discoverFood(F('pandesal'));buyMastery([1]);startTicket(100);g.run.mistakes=50;g.run.bestStreak=99;finishSum();
    payout=g.run.pool;before=g.coins;ok=prizeItems();again=prizeItems()`);
   assert.equal(h.run('payout'),Math.round(h.run('base*boost')));
   assert.equal(h.run('g.coins-before'),h.run('payout'));
   assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);
   assert.equal(h.run('JSON.stringify(g.packages)'),h.run('oldPackages'));
-  assert.equal(h.run('JSON.stringify(g.owned)'),h.run('oldFoods'));
+  assert.ok(h.run('bakeryValue()>boost'));
   assert.match(h.run('popup.html'),/Base coins/);assert.match(h.run('popup.html'),/Baker's Boost/);
   assert.match(h.run('popup.html'),/Total coins earned/);
  }

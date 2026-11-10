@@ -1,0 +1,33 @@
+/* Presentation only: preserve every cell size, row position and interaction hook. */
+:root{--ink:#593d2c;--gold:#d4a04a}
+html,body{background:#fff4df!important;color:#593d2c;font-family:Nunito,system-ui,sans-serif}
+.sheet{background:#fff4df!important;border-radius:14px!important;box-shadow:none!important}
+.head h2{font-family:Nunito,system-ui,sans-serif!important;font-weight:900!important;color:#805632!important}
+.roundtag{background:#f3dfbd!important;border-color:#d8b98d!important;color:#845d3a!important;font-weight:900}
+.sheethead #operationCue{background:#f0d9b0!important;color:#805731!important;letter-spacing:.6px}
+.sheethead #pairs{color:#937451!important}
+.line.bottomline{border-bottom-color:#a8855d!important}
+.symbol{color:#8d6841!important}
+.cell,.ftile,.equation-reveal{font-family:Nunito,system-ui,sans-serif!important;font-weight:1000!important;font-variant-numeric:tabular-nums}
+.cell.number{background:#ffe4ae!important;border-color:#d0a86e!important;box-shadow:0 3px 0 #bd925b!important;color:#654021!important}
+.cell.number.first{background:#ffd986!important;border-color:#bd8a36!important}
+.cell.number.connecting{box-shadow:0 0 0 3px #e7b45455,0 3px 0 #bd925b!important}
+.cell.rowcell{background:#fffaf0!important;border-color:#dac6a6!important;color:#5b4937!important}
+.cell.rowcell.filled{background:#efdfbf!important;border-color:#c4ad84!important;color:#513e2a!important;box-shadow:0 2px 0 #d1bd98!important}
+.cell.rowcell.zero{color:#a39378!important;background:#f5ecda!important}
+.cell.rowcell.provisional{background:#ffe5aa!important;border-color:#d5ad5b!important;color:#6f4d25!important}
+.cell.rowcell.liftable,.cell.hold.waiting{background:#ecdaee!important;border-color:#ba91c2!important;color:#795483!important;box-shadow:0 2px 0 #c8a5ca!important}
+.cell.hold{background:#f9edd6!important;border-color:#d7bf96!important;color:#9b7a4b!important}
+.floating{background:#f9d790!important;border-color:#c79c4d!important;box-shadow:0 4px 0 #ad8240,0 8px 18px #64402b20!important}
+.ftile{background:#ffebbe!important;border-color:#d1a45a!important;color:#654421!important;box-shadow:0 2px 0 #bd9451!important}
+.floating.equation-pending .equation-reveal{background:#ffe5a4!important;color:#795227!important}
+.pair-svg .pair-shell{fill:#edba5230;stroke:#bf8d37}.pair-svg .pair-glow{stroke:#f4cc78}.pair-svg .pair-rib{stroke:#fff0c6}
+.guide-prompt{color:#83603a!important;font-weight:900}
+.guide-target{outline-color:#d2a14c!important}
+.guide-dim{opacity:.42!important}
+.actions .tool{background:#f0dbb6!important;color:#754e2c!important;border:1px solid #c7a777!important;border-bottom:3px solid #b88e55!important;border-radius:10px!important;font-family:Nunito,system-ui,sans-serif!important;font-weight:900}
+.actions .tool:hover{background:#ffe9bf!important}
+.actions .tool{background:transparent url('../../assets/illustrated/action-control.svg') center/100% 100% no-repeat!important;border:0!important;box-shadow:none!important;padding-bottom:6px}
+.status.error{background:#fbe3d8!important;border-color:#dfa58c!important;color:#894b35!important}
+.line.final-merged .final-merged-digit{background:#dfebce!important;color:#48633b!important;border-color:#9eb585!important}
+body[data-decor] .sheet{background:#fff4df!important}

@@ -43,6 +43,8 @@ function ensureWorksheetRewards(r,reset=false){
  }
  r.worksheetRewards=ledger;return ledger;
 }
+// Shared by the real run and its UI quote; started runs retain their saved budget.
+function orderCoinQuote(ticket,boost=bakeryValue()){return Math.round(ticket.base*boost)}
 function startTicket(id){
  if(g.claimedOrders[id])return false;
  if(g.run?.ticket.id===id){commitPurchaseUndo('An order is being resumed');g.run.paused=false;save();render();return true}
@@ -51,7 +53,7 @@ function startTicket(id){
  if(g.orderRuns[id]){g.run=g.orderRuns[id];g.run.paused=false;save();render();return true}
  const t=g.board.find(x=>x.id===id);if(!t)return;
  const steps=generateSteps(t.a,t.b);
- g.run={ticket:t,steps,index:0,phase:'engine',paused:false,partial:{},pool:0,earnedActive:0,coinRewardsVersion:1,baseCoins:t.base,bakersBoost:bakeryValue(),mistakes:0,correct:0,streak:0,bestStreak:0,livesLeft:g.lives,retriesLeft:retryLimit(),budget:Math.round(t.base*bakeryValue()),mode:g.mode,bridgeDone:0,bridgeSig:'',bridgeErrors:0};
+ g.run={ticket:t,steps,index:0,phase:'engine',paused:false,partial:{},pool:0,earnedActive:0,coinRewardsVersion:1,baseCoins:t.base,bakersBoost:bakeryValue(),mistakes:0,correct:0,streak:0,bestStreak:0,livesLeft:g.lives,retriesLeft:retryLimit(),budget:orderCoinQuote(t),mode:g.mode,bridgeDone:0,bridgeSig:'',bridgeErrors:0};
  ensureWorksheetRewards(g.run,true);
  g.orderRuns[t.id]=g.run;
  refillBoard();save();render();toast('New order, baker!');
@@ -70,7 +72,8 @@ function finishCombo(){const r=g.run;r.streak++;r.bestStreak=Math.max(r.bestStre
 function finishSum(){const r=g.run;if(!r||r.phase==='claim')return;r.phase='claim';r.pool=r.budget;save();render();coinFly(7);toast('Order complete! Your coins are ready to collect. \u{1f389}')}
 function coinRewardMarkup(r){
  const rank=ticketCoinTier(r.ticket),base=r.baseCoins??r.ticket.base??r.pool,boost=r.bakersBoost??r.pool/base;
- return `<section class="coin-order-reward coin-tier-${rank}" aria-label="Coin reward"><div class="coin-reward-tier">${coinTierArt(rank)}<h3>${rank+1}\u2605 ${COIN_TIERS[rank]}</h3></div><dl><div><dt>Base coins</dt><dd>${fmt(base)} \u{1fa99}</dd></div><div><dt>Baker's Boost${r.savedReward?' (saved)':''}</dt><dd>\u00d7${Math.abs(boost)>=1e12?largeNumberLabel(boost,2):new Intl.NumberFormat('en-US',{maximumSignificantDigits:12}).format(boost)} \u{1f48e}</dd></div><div class="coin-reward-total"><dt>Total coins earned</dt><dd>${fmt(r.pool)} \u{1fa99}</dd></div></dl></section>`;
+ const boostLabel=Math.abs(boost)>=1e12?largeNumberLabel(boost,2):new Intl.NumberFormat('en-US',{maximumSignificantDigits:12}).format(boost);
+ return `<section class="coin-order-reward coin-tier-${rank}" aria-label="Coin reward"><div class="coin-reward-tier">${coinTierArt(rank)}<h3>${rank+1}\u2605 ${COIN_TIERS[rank]}</h3></div><p class="reward-equation" aria-label="Base coins times Baker's Boost equals total coins">${amountLabel(base)} <span>×</span> ${boostLabel} <span>=</span> <strong>${amountLabel(r.pool)}</strong></p><dl><div><dt>Base coins</dt><dd>${fmt(base)} \u{1fa99}</dd></div><div><dt>Baker's Boost${r.savedReward?' (saved)':''}</dt><dd>\u00d7${boostLabel} ${typeof boostSymbol==='function'?boostSymbol():''}</dd></div><div class="coin-reward-total"><dt>Total coins earned</dt><dd>${fmt(r.pool)} \u{1fa99}</dd></div></dl></section>`;
 }
 function prizeItems(){
  const r=g.run;if(!r||r.phase!=='claim'||g.claimedOrders[r.ticket.id])return false;
@@ -107,4 +110,4 @@ function captureActiveWorksheet(){
    ticket:r.ticket,top:state.a,bottom:state.b,complete:state.complete}});
  }}catch(_){}
 }
-function checkUnlocks(){const unlocks=[['decor',4,'🌷 Decorations unlocked — your worksheet can evolve!'],['fusion',5,'✨ Food fusion and ingredients unlocked!'],['staff',6,'🧑‍🍳 Temporary staff can now help your bakery!'],['challenges',3,'🎮 New challenge modes are appearing!']];for(const [key,at,msg] of unlocks){if(g.completed>=at&&!g.seenUnlocks.includes(key)){g.seenUnlocks.push(key);toast(msg)}}save()}
+function checkUnlocks(){const unlocks=[['fusion',5,'✨ Food fusion and ingredients unlocked!'],['staff',6,'🧑‍🍳 Temporary staff can now help your bakery!'],['challenges',3,'🎮 New challenge modes are appearing!']];for(const [key,at,msg] of unlocks){if(g.completed>=at&&!g.seenUnlocks.includes(key)){g.seenUnlocks.push(key);toast(msg)}}save()}

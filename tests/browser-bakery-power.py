@@ -28,7 +28,7 @@ def check(pw,engine):
     errors=[]
     page.on('pageerror',lambda error:errors.append(str(error)))
     try:
-        page.goto(f'http://127.0.0.1:{server.server_port}/index.html')
+        page.goto(f'http://127.0.0.1:{server.server_port}/index.html?view=legacy')
         page.wait_for_function("typeof renderBakery==='function'")
         page.evaluate('document.fonts.ready')
         page.evaluate('g.packages=[1,2,3,4,5,6,7,8]')

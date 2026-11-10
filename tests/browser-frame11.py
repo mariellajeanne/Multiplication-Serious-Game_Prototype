@@ -33,7 +33,7 @@ def check_browser(pw, engine):
     errors = []
     page.on('pageerror', lambda error: errors.append(str(error)))
     try:
-        page.goto(f'http://127.0.0.1:{server.server_port}/index.html')
+        page.goto(f'http://127.0.0.1:{server.server_port}/index.html?view=legacy')
         page.wait_for_function("typeof startTicket==='function'")
         page.evaluate('document.fonts.ready')
         assert page.evaluate('g.menuSlots') == 1

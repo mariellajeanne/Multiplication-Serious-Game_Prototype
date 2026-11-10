@@ -3,14 +3,13 @@ function economyUnit(){return balancedPriceUnit(pricingMenuBase(),g.bakeryLevel,
 function earningUnit(){return expectedTicketBase(ticketLuckMastery())*bakeryValue()}
 function slotCost(){return balancedSlotCost(pricingMenuBase(),g.bakeryLevel,g.menuSlots,g.completed)}
 function packagePrice(rank){return balancedPackagePrice(rank,pricingMenuBase(),g.bakeryLevel,g.completed)}
-function packageUnlocked(rank){return g.bakeryLevel>=PACKAGE_SHOP[rank].unlock||g.packageTierUnlocks?.includes(rank)===true}
+function packageUnlocked(rank){return !!PACKAGE_SHOP[rank]&&(g.completed>=PACKAGE_SHOP[rank].orders||g.packageTierUnlocks?.includes(rank)===true)}
 function foodEarningShare(o){return expectedTicketBase(ticketLuckMastery())*foodValue(o)*decorBonus()}
 function foodLevelCost(o){return balancedMasteryCost(tierBase(o),recipeMastery(o),g.bakeryLevel,g.completed)}
 function foodLevelPrice(o){return foodLevelCost(o)}
 function fusionFee(o,other=null){return balancedFusionFee(F(o.id).base,g.bakeryLevel,other?Math.max(foodTier(o),foodTier(other)):foodTier(o),g.completed)}
 function ingredientNeeds(o){const f=F(o.id),qty=[0,3,7,15,30][foodTier(o)]*(1+Math.floor(f.rarity/2));return f.ingredients.map((name,i)=>({name,need:Math.round(qty*(i===1?.7:1)),have:g.ingredients[name]||0,price:INGREDIENTS.find(x=>x[0]===name)[2]}))}
 function fusionIngredientCost(o){return ingredientNeeds(o).reduce((s,x)=>s+Math.max(0,x.need-x.have)*x.price,0)}
-function bakeryUpgradeCost(){return balancedBakeryCost(pricingMenuBase(),g.bakeryLevel,g.completed)}
 function refreshFoodProgress(){
  reconcileAutoEquip();
  // Values are derived from owned foods, never a stored multiplier snapshot.
@@ -71,18 +70,9 @@ function buyIngredient(name,count){
 function baseResale(o){return foodResaleBase(o)}
 function resalePrice(o){return baseResale(o)+Math.floor((o.spent||0)*.5)}
 function sellFood(uid){if(g.run)return false;const o=g.owned.find(x=>x.uid===uid);if(!o)return false;g.coins+=resalePrice(o);g.owned=g.owned.filter(x=>x.uid!==uid);g.activeMenu=g.activeMenu.filter(x=>x!==uid);save();render();openMenu();toast('Food sold. Its discovery is safe in your Index!');return true}
-function upgradeDecor(){
- if(g.run&&!g.run.paused||g.bakeryLevel>BAKERY_POWER_CONFIG.purchases)return false;
- const price=bakeryUpgradeCost();if(g.coins<price){toast('Not enough coins for this Bakery Power upgrade yet.');return false}
- const before={coins:g.coins,bakeryLevel:g.bakeryLevel,bakerySpent:g.bakerySpent,economyPeakBase:g.economyPeakBase};
- const old=decorBonus();commitPurchaseUndo();g.coins-=price;g.bakerySpent+=price;g.bakeryLevel++;
- registerPurchaseUndo('Bakery Power',price,before);save();render();
- toast(`Bakery Power ×${multiplierLabel(old)} → ×${multiplierLabel(decorBonus())} · +${multiplierLabel(decorBonus()-old)} 👑 · Baker's Boost +${((decorBonus()/old-1)*100).toFixed(1)}%`);
- const panel=document.querySelector?.('.bakery-power');panel?.classList.add('power-purchased');return true;
-}
 function staffRate(){return ticketBase(0)*bakeryValue()/360}
 function equipBest(mode){if(g.run&&!g.run.paused||!['final','base'].includes(mode))return false;if(g.autoEquip!=='off')g.autoEquip=mode;g.activeMenu=bestMenu(g.owned,g.menuSlots,mode);save();render();return true}
-function setAutoEquip(mode,enabled){if(g.run||!['final','base'].includes(mode))return false;g.autoEquip=enabled?mode:g.autoEquip===mode?'off':g.autoEquip;save();render();return true}
+function setAutoEquip(mode,enabled){if(g.run&&!g.run.paused||!['final','base'].includes(mode))return false;g.autoEquip=enabled?mode:g.autoEquip===mode?'off':g.autoEquip;save();render();return true}
 function manualMenuAllowed(){if(g.run)return false;if(g.autoEquip!=='off'){toast('Turn Auto Equip off to choose your own menu.');return false}return true}
 
 // The latest reversible purchase is persisted. Every dependent economy mutation invalidates it.

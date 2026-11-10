@@ -1,0 +1,150 @@
+/* Scalable illustrated overlays; worksheet and package shop remain isolated. */
+body[data-view="hub"] .bakery-popup-backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:#29150ca6;backdrop-filter:blur(3px);z-index:100;overflow:hidden}
+body[data-view="hub"] .bakery-popup{position:relative;display:flex;flex-direction:column;gap:0;width:min(680px,100%);height:auto;min-height:0;max-width:100%;max-height:calc(100dvh - 48px);margin:0;padding:10px 12px 16px;transform:none;isolation:isolate;overflow:visible;background:#ffedc5;border:24px solid transparent;border-image:url('../assets/bakery-ui/popup-frame.svg') 48 fill stretch;border-radius:36px;box-shadow:0 12px 30px #30170b66;color:#63351f;--game-font:"Bakery UI",sans-serif;font-size:clamp(16px,1.15vw,22px);line-height:1.35;animation:hub-popup-in .15s ease-out}
+body[data-view="hub"] .bakery-popup.popup-small{width:560px}
+body[data-view="hub"] .bakery-popup.popup-large{width:min(1180px,94vw)}
+body[data-view="hub"] .bakery-popup.small-collection{width:min(900px,94vw)}
+body[data-view="hub"] .bakery-popup *{box-sizing:border-box}
+body[data-view="hub"] .bakery-popup::before,body[data-view="hub"] .bakery-popup::after,body[data-view="hub"] .bakery-popup .popup-head::before,body[data-view="hub"] .bakery-popup .popup-head::after{display:none}
+@keyframes hub-popup-in{from{opacity:0;translate:0 8px}to{opacity:1;translate:0 0}}
+body[data-view="hub"] .bakery-popup .popup-head{position:relative;inset:auto;flex:none;display:flex;align-items:center;justify-content:space-between;gap:16px;min-height:58px;padding:0 46px 14px 4px;margin:0 0 12px;background:none;border:0;border-bottom:2px solid #d8ae77;box-shadow:none}
+body[data-view="hub"] .bakery-popup .popup-head h2{position:static;width:auto;height:auto;transform:none;margin:0;color:#69361f;font-size:clamp(24px,1.9vw,34px);font-weight:900;line-height:1.15;text-align:left;letter-spacing:0;text-shadow:0 1px #fff9de}
+body[data-view="hub"] .bakery-popup .popup-head .close{position:absolute;top:-24px;right:-28px;width:56px;height:56px;min-width:56px;min-height:56px;background:none;border:0;border-radius:50%;padding:0;box-shadow:none;z-index:5}
+body[data-view="hub"] .bakery-popup .close img{width:100%;height:100%;object-fit:contain;pointer-events:none}
+body[data-view="hub"] .bakery-popup .popup-body{position:relative;inset:auto;min-height:0;max-height:100%;padding:0 4px 3px;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:#bd8549 #f8dfac;background:none;font-size:inherit;line-height:inherit}
+body[data-view="hub"] .bakery-popup :is(h3,h4){font-size:1.1em;line-height:1.2;margin:4px 0 12px;color:#69381f}
+body[data-view="hub"] .bakery-popup p{font-size:inherit;line-height:1.4;margin:8px 0 14px}
+body[data-view="hub"] .bakery-popup :is(button,input,select,summary){font-family:inherit;font-size:inherit}
+body[data-view="hub"] .bakery-popup button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-width:44px;min-height:46px;padding:9px 18px 11px;border:2px solid #b77b41;border-radius:18px;box-shadow:0 3px #91532c,inset 0 2px #fff8de;background:linear-gradient(#fff8de,#f5d394);color:#63351f;line-height:1.15;font-weight:900;text-align:center;white-space:normal;touch-action:manipulation;-webkit-tap-highlight-color:transparent;cursor:pointer;transform:none;transition:filter .1s,box-shadow .1s}
+body[data-view="hub"] .bakery-popup button img{pointer-events:none}
+body[data-view="hub"] .bakery-popup .primary{background:linear-gradient(#9bc555,#558c30);border-color:#528332;color:#fffbe5;text-shadow:0 1px #3f6429;box-shadow:0 3px #3c6426,inset 0 2px #d2e99b}
+body[data-view="hub"] .bakery-popup button[aria-pressed="true"],body[data-view="hub"] .bakery-popup .collection-equip.equipped{background:linear-gradient(#a4c966,#6d9f40);border-color:#638e3d;color:#fffbe5;box-shadow:0 3px #507333,inset 0 2px #e4f3bd}
+body[data-view="hub"] .bakery-popup button:disabled{opacity:.48;filter:grayscale(.55);cursor:default}
+body[data-view="hub"] .bakery-popup :is(button,select,input,summary,[tabindex]):focus-visible{outline:3px solid #9560a0;outline-offset:3px}
+body[data-view="hub"] .bakery-popup button.is-pressed,body[data-view="hub"] .bakery-popup button:not(:disabled):active{filter:brightness(.9);box-shadow:0 1px #91532c,inset 0 2px 4px #6e3c2922;transform:none}
+@media(hover:hover) and (pointer:fine){body[data-view="hub"] .bakery-popup button:not(:disabled):hover{filter:brightness(1.05);transform:none}}
+body[data-view="hub"] .bakery-popup :is(.btnrow,.fusion-actions){display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin:16px 0 4px}
+body[data-view="hub"] .bakery-popup :is(select,input){min-height:46px;padding:8px 10px;border:2px solid #c3945a;border-radius:12px;background:#fff8e6;color:#63351f}
+body[data-view="hub"] .bakery-popup details{margin:12px 0 4px;border-top:1px solid #ddb986;padding-top:8px}
+body[data-view="hub"] .bakery-popup summary{display:list-item;min-height:44px;padding:12px 4px;cursor:pointer;font-weight:900}
+body[data-view="hub"] .bakery-popup :is(.minitext,.dialog-note,.explainline,.index-card small,.costrow small){font-size:.9em;line-height:1.35;color:#865937}
+body[data-view="hub"] .bakery-popup :is(.itemcard,.index-card,.costrow,.warning,.successbox,.coin-reward-total){background:#fff4d8;border:1px solid #d7ad72;border-radius:16px;box-shadow:none;padding:14px;color:#63351f}
+body[data-view="hub"] .bakery-popup .modalgrid{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+body[data-view="hub"] .bakery-popup .itemcard{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center}
+body[data-view="hub"] .bakery-popup .itemcard .food-art{width:150px;height:120px;max-height:none;max-width:100%;margin:0;object-fit:contain}
+body[data-view="hub"] .bakery-popup .itemcard h3{font-size:1em;margin:0}
+body[data-view="hub"] .bakery-popup .itemcard button{margin-top:auto}
+body[data-view="hub"] .bakery-popup .tag{font-size:.8em;padding:5px 9px}
+body[data-view="hub"] .bakery-popup .selection-review{max-height:32vh;overflow:auto}
+body[data-view="hub"] .bakery-popup .selection-review>div{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:10px 4px;border-bottom:1px solid #dfbf91}
+body[data-view="hub"] .bakery-popup .selection-review .food-art{width:70px;height:60px;object-fit:contain}
+/* Illustrated tutorial and settings. */
+body[data-view="hub"] .bakery-popup .help-steps{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+body[data-view="hub"] .bakery-popup .help-steps li{display:flex;align-items:center;gap:16px;padding:8px 0}
+body[data-view="hub"] .bakery-popup .help-steps :is(svg,img){flex:none;width:62px;height:58px;object-fit:contain;max-width:none;max-height:none}
+body[data-view="hub"] .bakery-popup .help-steps b{display:block;font-size:1.05em}
+body[data-view="hub"] .bakery-popup .help-steps small{display:block;font-size:.85em;color:#885d3b;margin-top:3px}
+body[data-view="hub"] .bakery-popup .worksheet-tips ul{padding-left:22px;margin:0 0 12px}
+body[data-view="hub"] .bakery-popup .worksheet-tips li{margin:6px 0}
+body[data-view="hub"] .bakery-popup .settings-row{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:12px 0;border:0;border-bottom:1px solid #dbb884}
+body[data-view="hub"] .bakery-popup .settings-row>b{display:flex;align-items:center;gap:12px;font-size:1.1em}
+body[data-view="hub"] .bakery-popup .bakery-icon{width:34px;height:34px;flex:none}
+body[data-view="hub"] .bakery-popup .setting-toggle{min-width:112px;justify-content:space-between;padding:9px 14px}
+body[data-view="hub"] .bakery-popup .toggle-dot{width:22px;height:22px;border-radius:50%;background:#fff9de;box-shadow:0 1px 3px #65462366;border:1px solid #d3b27c}
+body[data-view="hub"] .bakery-popup .settings-extras{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin-top:16px}
+body[data-view="hub"] .bakery-popup .adult-tools{margin-top:18px;border-top:1px dashed #c69d68}
+body[data-view="hub"] .bakery-popup .adult-tools p{font-size:.9em}
+body[data-view="hub"] .bakery-popup .adult-tools summary::before{display:none}
+body[data-view="hub"] .bakery-popup select{appearance:none;padding-right:34px;background:#fff8e6 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 12'%3E%3Cpath d='m3 4 5 5 5-5' fill='none' stroke='%23875834' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") right 10px center/14px 12px no-repeat}
+/* Live rewards, Boost and food contributions. */
+body[data-view="hub"] .bakery-popup :is(.hub-wallet-detail,.hub-boost-detail){display:flex;align-items:center;justify-content:center;gap:24px;padding:10px 0 20px}
+body[data-view="hub"] .bakery-popup :is(.hub-wallet-detail,.hub-boost-detail)>div{display:flex;flex-direction:column;gap:5px}
+body[data-view="hub"] .bakery-popup .hub-wallet-detail>.coin-tier-art{width:130px;height:140px;max-height:none;flex:none;object-fit:contain}
+body[data-view="hub"] .bakery-popup .hub-wallet-detail strong{font-size:2.4em;line-height:1.1}
+body[data-view="hub"] .bakery-popup .hub-boost-detail>.boost-star{position:static;width:95px;height:125px;object-fit:contain;animation:sparkle 4s ease-in-out infinite}
+body[data-view="hub"] .bakery-popup #menuBoostComponent{font-size:2.7em;line-height:1.1;color:#854574}
+body[data-view="hub"] .bakery-popup .contributions-heading{font-size:1em;color:#855736}
+body[data-view="hub"] .bakery-popup .boost-food-list{max-height:250px;overflow:auto;overscroll-behavior:contain;border-block:1px solid #dbb884}
+body[data-view="hub"] .bakery-popup .boost-food-list>div{display:flex;align-items:center;gap:12px;min-height:70px;padding:5px 0;border-bottom:1px solid #e2c391}
+body[data-view="hub"] .bakery-popup .boost-food-list .food-art{width:66px;height:58px;max-width:none;max-height:none;object-fit:contain;margin:0}
+body[data-view="hub"] .bakery-popup .boost-food-list span{flex:1;min-width:0;display:flex;flex-direction:column}
+body[data-view="hub"] .bakery-popup .boost-food-list small{font-size:.85em;color:#865937}
+body[data-view="hub"] .bakery-popup .boost-food-list strong{color:#854574;white-space:nowrap}
+body[data-view="hub"] .bakery-popup .mastery-growth{display:flex;align-items:center;justify-content:center;gap:12px;padding-top:16px}
+body[data-view="hub"] .bakery-popup .mastery-growth img{width:38px;height:50px;object-fit:contain}
+body[data-view="hub"] .bakery-popup .mastery-growth small{display:block;font-size:.85em;color:#865937}
+body[data-view="hub"] .bakery-popup .reward-formula{display:flex;justify-content:center;align-items:center;gap:12px;flex-wrap:wrap;text-align:center}
+body[data-view="hub"] .bakery-popup .reward-formula>span{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:.9em}
+body[data-view="hub"] .bakery-popup .reward-formula :is(svg,img){width:48px;height:48px;object-fit:contain;max-height:none}
+body[data-view="hub"] .bakery-popup .odds-luck{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+body[data-view="hub"] .bakery-popup .odds-luck small{font-size:.85em;color:#865937}
+body[data-view="hub"] .bakery-popup .hub-odds-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+body[data-view="hub"] .bakery-popup .hub-odds-grid article{display:flex;flex-direction:column;align-items:center;gap:6px;padding:14px 10px;background:#fff5db;border:1px solid #d9b178;border-radius:20px;text-align:center}
+body[data-view="hub"] .bakery-popup .hub-odds-grid .coin-tier-art{flex:none;width:112px;height:94px;max-height:none;max-width:100%;object-fit:contain}
+body[data-view="hub"] .bakery-popup .hub-odds-grid strong{font-size:.9em;line-height:1.2}
+body[data-view="hub"] .bakery-popup .hub-odds-grid b{font-size:1.3em;color:#98572b}
+body[data-view="hub"] .bakery-popup .odds-meter{width:85%;height:7px;border-radius:9px;background:linear-gradient(to right,#dca745 var(--chance),#ead3a8 var(--chance))}
+body[data-view="hub"] .bakery-popup .base-coin-list{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:12px;font-size:.85em}
+body[data-view="hub"] .bakery-popup .coin-order-reward{background:none;border:0;padding:0;box-shadow:none}
+body[data-view="hub"] .bakery-popup .coin-reward-tier{background:none}
+body[data-view="hub"] .bakery-popup .coin-reward-tier .coin-tier-art{width:150px;height:140px;object-fit:contain}
+body[data-view="hub"] .bakery-popup .coin-order-reward dl{font-size:inherit}
+body[data-view="hub"] .bakery-popup .reward-equation{font-size:1.15em;padding:12px;border-radius:14px;background:#fff5d8}
+/* Collection and production food-selection actions. */
+body[data-view="hub"] .hub-collection{position:fixed;inset:0;z-index:30;pointer-events:none}
+body[data-view="hub"] .hub-collection .hub-collection-overlay{pointer-events:auto;z-index:30}
+body[data-view="hub"] .hub-collection .collection-body{overflow:visible;display:flex;flex-direction:column}
+body[data-view="hub"] .hub-collection .illustrated-collection-content{position:relative;display:flex;flex-direction:column;height:auto;min-height:0;max-height:calc(100dvh - 190px);padding:0;background:none;border:0;box-shadow:none;overflow:visible;gap:14px}
+body[data-view="hub"] .hub-collection .collection-toolbar{position:static;display:grid;grid-template-columns:1fr auto;gap:12px;flex:none;padding:0 0 12px;background:none;border:0;border-bottom:1px solid #d5ae76}
+body[data-view="hub"] .hub-collection :is(.collection-slot-controls,.collection-equip-controls,.collection-filter-controls){display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+body[data-view="hub"] .hub-collection .collection-slot-controls>b{margin-right:6px;white-space:nowrap}
+body[data-view="hub"] .hub-collection .collection-equip-controls{justify-content:flex-end}
+body[data-view="hub"] .hub-collection .collection-filter-controls{grid-column:1/-1}
+body[data-view="hub"] .hub-collection .collection-sort-note{margin-left:auto;color:#8e603d;font-size:.85em}
+body[data-view="hub"] .hub-collection .auto-equip-control{display:flex;align-items:center;gap:8px;font-size:.9em}
+body[data-view="hub"] .hub-collection .auto-equip-control select{max-width:160px}
+body[data-view="hub"] .hub-collection .menu-grid{position:static;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:250px;align-content:start;gap:12px;min-height:0;max-height:calc(100dvh - 350px);height:calc(var(--owned-rows)*262px);flex:1 1 auto;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;background:none;padding:4px 4px 8px;scrollbar-width:thin;scrollbar-color:#c18f55 #f8dfac}
+body[data-view="hub"] .hub-collection .collection-card{display:flex;flex-direction:column;justify-content:space-between;align-items:stretch;gap:4px;width:100%;height:250px;padding:10px;overflow:hidden;background:linear-gradient(#fff8e4,#f8dfae);border:2px solid #d4a56d;border-radius:20px;box-shadow:0 3px #c08d50;transform:none}
+body[data-view="hub"] .hub-collection .collection-card::before{display:none}
+body[data-view="hub"] .hub-collection .food-card-target{position:static;display:flex;flex-direction:column;justify-content:start;align-items:center;gap:4px;min-width:0;min-height:0;width:100%;height:auto;flex:1;padding:0;background:none;border:0;box-shadow:none;color:#63351f;overflow:hidden}
+body[data-view="hub"] .hub-collection .food-card-target>.food-art{width:100%;height:100px;min-height:0;max-height:none;max-width:none;aspect-ratio:auto;object-fit:contain;margin:0;filter:none}
+body[data-view="hub"] .hub-collection .food-card-target>strong{width:100%;font-size:1em;line-height:1.1;text-align:center;white-space:normal}
+body[data-view="hub"] .hub-collection .food-card-rarity{font-size:.85em;line-height:1.15;color:#865937}
+body[data-view="hub"] .hub-collection .food-card-bottom{position:static;display:block;font-size:.8em;line-height:1.2;color:#865937;white-space:normal;background:none;border:0;padding:0;min-height:0}
+body[data-view="hub"] .hub-collection .menu-grid[data-food-count="1"]{grid-template-columns:minmax(220px,280px);justify-content:center}
+body[data-view="hub"] .hub-collection .menu-grid[data-food-count="2"]{grid-template-columns:repeat(2,minmax(220px,280px));justify-content:center}
+body[data-view="hub"] .hub-collection .collection-equip{align-self:center;flex:none;min-height:44px;width:85%;max-width:180px;padding:8px 12px;font-size:.95em}
+body[data-view="hub"] .hub-collection .is-selected{outline:3px solid #a366aa;outline-offset:-5px}
+body[data-view="hub"] .hub-collection .food-card-target[aria-pressed="true"]{color:#63351f;background:none;border:0;box-shadow:none}
+body[data-view="hub"] .hub-collection #foodPanel{position:static;display:contents}
+body[data-view="hub"] .hub-collection .food-selection-popup{position:absolute;left:12.5%;right:auto;top:0;bottom:0;width:75%;height:auto;max-height:none;display:flex;flex-direction:column;gap:12px;z-index:12;padding:22px;background:#ffedc5;border:20px solid transparent;border-image:url('../assets/bakery-ui/popup-frame.svg') 48 fill stretch;border-radius:30px;box-shadow:0 12px 35px #40241166;overflow:visible;transform:none;animation:hub-popup-in .14s ease-out}
+body[data-view="hub"] .hub-collection .food-panel-close{position:absolute;right:-24px;top:-24px;min-width:52px;min-height:52px;width:52px;height:52px;padding:0;border:0;background:transparent url('../assets/bakery-ui/control-close.svg') center/contain no-repeat;color:transparent;box-shadow:none;z-index:4}
+body[data-view="hub"] .hub-collection .food-panel-scroll{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;padding:4px 0;background:none;scrollbar-width:thin}
+body[data-view="hub"] .hub-collection .recipe-detail{display:grid;grid-template-columns:40% minmax(0,1fr);align-items:center;gap:22px;min-height:0;height:auto;padding:0;background:none;border:0}
+body[data-view="hub"] .hub-collection .selection-food-visual{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;padding:0}
+body[data-view="hub"] .hub-collection .selection-food-visual .food-art{width:100%;height:170px;max-width:none;max-height:none;object-fit:contain;margin:0;filter:none}
+body[data-view="hub"] .hub-collection :is(.selection-rarity-stars,.selection-rarity-name){font-size:.95em;line-height:1.2;text-align:center;color:#996c35}
+body[data-view="hub"] .hub-collection .selection-food-stats{display:grid;grid-template-rows:none;gap:12px;min-width:0;align-content:start;padding:0;background:none}
+body[data-view="hub"] .hub-collection .selection-food-stats h2{font-size:1.25em;margin:0;line-height:1.15}
+body[data-view="hub"] .hub-collection .selection-boost{display:flex;flex-direction:column;gap:4px}
+body[data-view="hub"] .hub-collection .detail-contribution{color:#854574;font-size:1.2em}
+body[data-view="hub"] .hub-collection :is(.selection-mastery,.mastery-availability){display:flex;flex-direction:column;gap:4px;padding:10px 12px;border:1px solid #dfb87e;border-radius:14px;background:#fff4d6;font-size:1em}
+body[data-view="hub"] .hub-collection .selection-boost small{font-size:.85em}
+body[data-view="hub"] .hub-collection .boost-sparkle{display:inline-flex;width:20px;height:22px;vertical-align:middle;color:#c19ad4;position:relative}
+body[data-view="hub"] .hub-collection .boost-sparkle svg{width:100%;height:100%}
+body[data-view="hub"] .hub-collection .boost-sparkle i{display:none}
+body[data-view="hub"] .hub-collection .selection-hint{font-size:.8em;color:#8c613e;text-align:center;margin:0}
+body[data-view="hub"] .hub-collection .food-action-area{flex:none;min-height:0}
+body[data-view="hub"] .hub-collection .food-panel-actions{position:static;display:flex;align-items:stretch;gap:10px;padding:0;border:0;background:none;box-shadow:none}
+body[data-view="hub"] .hub-collection .food-panel-actions button{flex:1;min-width:0;min-height:46px;padding:10px 12px;font-size:.95em;white-space:normal}
+body[data-view="hub"] .hub-collection .food-equip-actions{flex:1;display:flex;flex-direction:column;gap:6px}
+body[data-view="hub"] .hub-collection .action-mastery{flex:1.4!important;display:flex;flex-direction:column;gap:3px}
+body[data-view="hub"] .hub-collection .action-mastery small{font-size:.85em}
+body[data-view="hub"] .hub-collection .food-selection-multi{top:auto;bottom:0;min-height:200px}
+body[data-view="hub"] .hub-collection .selection-tools{display:flex;gap:12px;padding-right:20px;background:none}
+body[data-view="hub"] .hub-collection .selection-tools button{flex:1}
+body[data-view="hub"] .bakery-popup .dialog-notice{padding:10px 14px;margin:8px 0;background:#fff5d6;border:1px solid #d8ad70;border-radius:12px;font-size:.95em}
+body[data-view="hub"] #notificationDock .toast{background:#fff0cb;color:#63351f;border:2px solid #d3a061;box-shadow:0 4px 0 #743c24;border-radius:16px}
+@media(max-width:1100px){body[data-view="hub"] .hub-collection .collection-toolbar{grid-template-columns:1fr}body[data-view="hub"] .hub-collection .collection-equip-controls{justify-content:flex-start}body[data-view="hub"] .hub-collection .menu-grid{grid-template-columns:repeat(3,minmax(0,1fr));max-height:calc(100dvh - 410px)}body[data-view="hub"] .hub-collection .collection-sort-note{display:none}}
+@media(max-width:600px){body[data-view="hub"] .bakery-popup-backdrop{padding:14px}body[data-view="hub"] .bakery-popup{border-width:16px;padding:6px;max-height:calc(100dvh - 28px)}body[data-view="hub"] .bakery-popup .hub-odds-grid{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-view="hub"] .hub-collection .menu-grid{grid-template-columns:repeat(2,minmax(0,1fr))}body[data-view="hub"] .hub-collection .food-selection-popup{left:0;width:100%;padding:10px;border-width:14px}}
+@media(prefers-reduced-motion:reduce){body[data-view="hub"] .bakery-popup,body[data-view="hub"] .bakery-popup *{animation:none!important;transition:none!important}}

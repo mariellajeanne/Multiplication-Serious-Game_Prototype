@@ -44,7 +44,7 @@ test('package selection stays on the chosen type even when empty; locked types c
 test('rounded display never rounds a nonzero chance to zero or mutates model precision',()=>{
  const h=progressionHarness();assert.equal(h.run('probabilityLabel(1e-12)'),'<0.01%');
  assert.equal(h.run('probabilityLabel(0)'),'0.00%');assert.equal(h.run('powerLabel(5.112046)'), '5.11');
- assert.equal(h.run('BAKERY_POWER_CONFIG.factor'),1.085);
+ assert.equal(h.run('bakeryFactor(5001)'),1);
  h.run(`Math.random=()=>0;g.packages[0]=5;unboxPackages(0,5,true);html=popup.html`);
  assert.equal((h.run('html').match(/<article class="package-open-slot opened-package/g)||[]).length,5);
  assert.match(h.run('html'),/\+1 MASTERY AVAILABLE/);assert.equal(h.run('g.recipeCeilings.pandesal'),5);assert.doesNotMatch(h.run('html'),/resolved-coins|resolved-luck|resolved-practice/);

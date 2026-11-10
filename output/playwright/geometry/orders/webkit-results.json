@@ -1,0 +1,143 @@
+{
+  "passed": true,
+  "viewports": [
+    [
+      2000,
+      1200
+    ],
+    [
+      1280,
+      800
+    ],
+    [
+      1024,
+      768
+    ]
+  ],
+  "all_existing_tiers": 8,
+  "die_cut_mask_matches_artwork": true,
+  "mouse_touch_scrollbar_keyboard": true,
+  "stationary_heading_controls": true,
+  "centered_title_and_utility_labels": true,
+  "three_complete_contained_slips": true,
+  "board_aligned_and_clear_of_window": true,
+  "spark_and_multiplier_only": true,
+  "css_button_corners": true,
+  "refresh_and_paid_skip_cancel": true,
+  "register_grounded_lower_board_overlap": true,
+  "header_symmetric_and_content_sized": true,
+  "thumb_centered_exact_endpoints": true,
+  "reduced_motion": true,
+  "original_worksheet_resume_reload": true,
+  "scroll_metrics": [
+    {
+      "viewport": [
+        2000,
+        1200
+      ],
+      "fraction": 0,
+      "center": 0,
+      "artCenter": 0,
+      "error": 0,
+      "top": 0,
+      "bottom": 224.078125
+    },
+    {
+      "viewport": [
+        2000,
+        1200
+      ],
+      "fraction": 0.5,
+      "center": 0,
+      "artCenter": 0,
+      "error": -0.012790930979136306,
+      "top": 127.3125,
+      "bottom": 96.765625
+    },
+    {
+      "viewport": [
+        2000,
+        1200
+      ],
+      "fraction": 1,
+      "center": 0,
+      "artCenter": 0,
+      "error": 0,
+      "top": 224.078125,
+      "bottom": 0
+    },
+    {
+      "viewport": [
+        1280,
+        800
+      ],
+      "fraction": 0,
+      "center": 0,
+      "artCenter": 0,
+      "error": 0,
+      "top": 0,
+      "bottom": 141.26998901367188
+    },
+    {
+      "viewport": [
+        1280,
+        800
+      ],
+      "fraction": 0.5,
+      "center": 0,
+      "artCenter": 0,
+      "error": -0.004927584370108207,
+      "top": 78.3800048828125,
+      "bottom": 62.8900146484375
+    },
+    {
+      "viewport": [
+        1280,
+        800
+      ],
+      "fraction": 1,
+      "center": 0,
+      "artCenter": 0,
+      "error": 0,
+      "top": 141.26998901367188,
+      "bottom": 0
+    },
+    {
+      "viewport": [
+        1024,
+        768
+      ],
+      "fraction": 0,
+      "center": 0,
+      "artCenter": 0,
+      "error": 0,
+      "top": 0,
+      "bottom": 110.66400146484375
+    },
+    {
+      "viewport": [
+        1024,
+        768
+      ],
+      "fraction": 0.5,
+      "center": 0,
+      "artCenter": 0,
+      "error": -0.0012467013060515342,
+      "top": 59.8079833984375,
+      "bottom": 50.855987548828125
+    },
+    {
+      "viewport": [
+        1024,
+        768
+      ],
+      "fraction": 1,
+      "center": 0,
+      "artCenter": 0,
+      "error": 0,
+      "top": 110.66400146484375,
+      "bottom": 0
+    }
+  ],
+  "errors": []
+}

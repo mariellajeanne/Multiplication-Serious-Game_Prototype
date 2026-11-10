@@ -1,0 +1,111 @@
+- generic [ref=e2]:
+  - generic:
+    - main:
+      - region:
+        - button
+        - button
+      - region:
+        - generic:
+          - button:
+            - generic:
+              - generic: BAKER'S BOOST
+              - strong: ×1.20
+        - generic:
+          - generic:
+            - generic:
+              - button:
+                - generic: ×1.20
+      - region:
+        - heading [level=2]:
+          - generic: Orders
+        - generic:
+          - generic:
+            - button:
+              - generic: Coin Stack
+              - generic:
+                - generic: Pandesal
+                - generic: 156 coins
+                - generic:
+                  - generic: "37"
+                  - generic: ×
+                  - generic: "3"
+            - button:
+              - generic: Coin Stack
+              - generic:
+                - generic: Pandesal
+                - generic: 156 coins
+                - generic:
+                  - generic: "77"
+                  - generic: ×
+                  - generic: "1"
+            - button:
+              - generic: Coin Stack
+              - generic:
+                - generic: Pandesal
+                - generic: 156 coins
+                - generic:
+                  - generic: "76"
+                  - generic: ×
+                  - generic: "4"
+            - button:
+              - generic: Coin Jar
+              - generic:
+                - generic: Pandesal
+                - generic: 211 coins
+                - generic:
+                  - generic: "92"
+                  - generic: ×
+                  - generic: "49"
+            - button:
+              - generic: Coin Stack
+              - generic:
+                - generic: Pandesal
+                - generic: 156 coins
+                - generic:
+                  - generic: "59"
+                  - generic: ×
+                  - generic: "9"
+        - generic:
+          - button
+          - generic:
+            - scrollbar
+          - button
+        - generic:
+          - button: ↻ New Orders
+          - button: Reward Odds
+      - generic:
+        - button:
+          - generic: "250"
+        - button
+        - button
+      - navigation:
+        - button
+        - button
+        - button [pressed]
+  - dialog "Menu Collection" [ref=e90]:
+    - banner [ref=e91]:
+      - heading "Menu Collection" [level=2]
+      - generic [ref=e92]: 🪙 250
+      - button "Back to bakery" [active] [ref=e93] [cursor=pointer]
+    - main [ref=e95]:
+      - generic [ref=e96]:
+        - generic [ref=e97]: 1/1 Slots Used
+        - button "+1 Slot · 61 coins" [ref=e98] [cursor=pointer]
+        - button "Hide Unequipped" [ref=e99] [cursor=pointer]
+        - button "Select Foods" [ref=e100] [cursor=pointer]
+        - button "Equip Best" [ref=e101] [cursor=pointer]
+        - generic [ref=e102]:
+          - text: Auto Equip
+          - combobox "Auto Equip" [ref=e103]:
+            - option "Off" [selected]
+            - option "Best Boost"
+            - option "Best Base"
+        - button "Food Index" [ref=e104] [cursor=pointer]
+      - generic "Owned foods, scroll to browse" [ref=e105]:
+        - article [ref=e106]:
+          - button "Manage Pandesal, ★1 · Classic, Mastery 0" [ref=e107] [cursor=pointer]:
+            - img "Pandesal"
+            - strong [ref=e108]: Pandesal
+            - generic [ref=e109]: Classic · ×1.20
+            - generic [ref=e110]: Mastery 0
+          - button "Equipped ✓" [ref=e111] [cursor=pointer]

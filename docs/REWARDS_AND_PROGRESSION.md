@@ -1,5 +1,9 @@
 # Reward economy and progression — design reference
 
+**Current illustrated integration (2026-11-09):** [Visual and saved-order handoff](ILLUSTRATED_BAKERY.md) preserves the food-only economy below. All 17 foods have new miniature-style sprites; catalog IDs, rarity, Mastery, equipment and formulas remain unchanged. Tickets now retain an actual equipped recipe, locking it once started. Claims award coins only. The grown-up demo shortcut no longer grants foods directly; food acquisition remains in package opening. Starter and existing saved foods are preserved.
+
+**Food-only economy (2026-11-09):** [Current hub migration and numerical evidence](THREEJS_BAKERY_HUB.md) supersedes all Bakery Power formulas, purchases and package gates below. Boost is the equipped-food sum with the existing minimum ×1. Started orders keep their saved payout promise. Nine package types use completed-order gates; old unlocked types and excess stock survive migration. Tiers 1–8 retain exact odds; new Sovereign uses seven-trial binomial rank with p=.97. The 24-seed food-only report documents slower late upgrades; it is not an accepted pacing guarantee.
+
 **Accelerating economy (2026-11-05):** [Current formulas, migration and simulation evidence](ECONOMY_REBALANCE.md) supersedes earlier prices, doubling coin-tier bases, package gates and the 100-purchase Bakery cap. Power keeps its existing 8.5% gain with 5,000 purchases; prices grow below income, and old assets, unlocked package types and frozen rewards are preserved. Run `node tests/simulate-progression.mjs docs/progression-simulation.json`.
 
 **Packages workspace (2026-11-05):** [Three-column interface and automatic collection](PACKAGES_INTERFACE.md) supersedes separate Buy/Unbox tabs and reward dialogs: all eight types, 50-per-type purchasing capacity (old excess stock retained), immediate food/Mastery credit and selected-type-only Open All. Verify with `python tests/browser-packages.py`.

@@ -38,13 +38,13 @@ test('Boost and proportional prices have no Kitchen dependency across early, lat
  const h=progressionHarness();
  for(const [mastery,bakery,toolLevel] of [[0,1,0],[40,21,3],[160,71,12],[1000,101,20]]){
   h.run(`g.mastery=${mastery};g.bakeryLevel=${bakery};g.equipment={oven:${toolLevel}}`);
-  const food=h.run('foodSum()'),power=1.085**(bakery-1),expected=h.run('expectedTicketBase(g.mastery)');
+  const food=h.run('foodSum()'),power=1,expected=h.run('expectedTicketBase(g.mastery)');
   assert.ok(Math.abs(h.run('bakeryValue()')/(Math.max(1,food)*power)-1)<1e-12);
   const income=expected*Math.max(1,food)*power;
   assert.ok(Math.abs(h.run('earningUnit()')/income-1)<1e-12);
-  const quotes=h.json('[slotCost(),packagePrice(0),bakeryUpgradeCost(),foodLevelPrice(g.owned[0])]');
+  const quotes=h.json('[slotCost(),packagePrice(0),foodLevelPrice(g.owned[0])]');
   h.run('g.equipment={oven:99999,mixer:99999}');
-  assert.deepEqual(h.json('[slotCost(),packagePrice(0),bakeryUpgradeCost(),foodLevelPrice(g.owned[0])]'),quotes);
+  assert.deepEqual(h.json('[slotCost(),packagePrice(0),foodLevelPrice(g.owned[0])]'),quotes);
   for(const seconds of [60,90,120])assert.ok(Math.abs(h.run('ticketBase(0)*bakeryValue()')/seconds/h.run('staffRate()')-360/seconds)<1e-10);
   h.run('showBoostInfo()');assert.doesNotMatch(h.run('popup.html'),/Kitchen|kitchen/);
  }
