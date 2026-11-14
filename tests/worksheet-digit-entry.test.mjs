@@ -35,19 +35,19 @@ test('submitted wrong digits/columns/carry positions progress through actual-act
  assert.equal(w.exec('worksheetDigitEntry.feedback'),'Try again!','The next placement starts at feedback level one');
  w.select('carry',1);w.enter(2);assert.equal(w.exec('s.done'),1);
 });
-test('selection, editing, switching, Undo and session restoration retain unresolved mistake counts',()=>{
+test('legacy draft migration and Undo retain unresolved mistake counts without writing an old draft',()=>{
  const w=worksheet();w.connect();w.select('slot',1);w.enter(8);
  w.select('slot',0);w.exec(`worksheetDigitKey('7');worksheetDigitKey('Backspace');worksheetDigitKey('8');saved=window.getWorksheetSession();s=history.pop().s;render();revealProduct()`);
  assert.equal(w.exec('worksheetDigitEntry.guidance["0:0/ones"].mistakes'),1);
  w.exec(`externalStart({id:77,a:84,b:17},'A',true,saved)`);
- assert.equal(w.exec('worksheetDigitEntry.value'),'8');assert.deepEqual(w.json('worksheetDigitEntry.selected'),{kind:'slot',r:0,c:0});
+ assert.equal(w.exec('worksheetDigitEntry.value'),'');assert.equal(w.exec('worksheetDigitEntry.selected'),null);
  w.select('slot',2);w.enter(8);assert.match(w.exec('worksheetDigitEntry.feedback'),/ones column/);
  assert.equal(w.exec('worksheetDigitEntry.guidance["0:0/ones"].mistakes'),2);
 });
-test('carry additions reopen changed provisional digits and require typed replacements',()=>{
+test('new placement waits for carry resolution and uses the adjusted digits',()=>{
  const w=worksheet(19,9);w.connect();w.select('carry',1);w.enter(8);w.select('slot',0);w.enter(1);
- w.connect();w.select('slot',1);w.enter(9);assert.equal(w.exec('s.rows[0][1]'),9);
- w.exec(`addCarry('placed')`);assert.equal(w.exec('value()'),17);assert.equal(w.exec('s.rows[0][1]'),undefined);assert.equal(w.exec('s.onesPlaced'),false);
+ w.connect();assert.equal(w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:1},9)`),false);assert.equal(w.exec('s.rows[0][1]'),undefined);
+ w.exec(`addCarry('floating')`);assert.equal(w.exec('value()'),17);assert.equal(w.exec('s.rows[0][1]'),undefined);assert.equal(w.exec('s.onesPlaced'),false);
  w.select('slot',1);w.enter(7);assert.equal(w.exec('s.complete'),false);w.select('slot',2);w.enter(1);
  assert.equal(w.exec('s.complete'),true);assert.deepEqual(w.json('s.rows[0]'),{0:1,1:7,2:1});
 });
@@ -60,4 +60,21 @@ test('Golden placement feedback and authenticated digit messages cannot spend fa
  w.listeners.message({...message,data:{...message.data,attemptId:'stale'}});assert.equal(w.exec('worksheetDigitEntry.value'),'');
  w.listeners.message(message);w.enter(8);w.select('carry',1);w.enter(2);w.exec(`worksheetDigitKey('Enter');bridgePoll()`);
  assert.equal(w.exec('s.done'),1);assert.equal(w.messages.filter(m=>m.type==='state').at(-1).actions.filter(a=>a.kind==='combo').length,1);
+});
+test('dragged equal digits are separate instances and Undo restores only the reverted instance',()=>{
+ const w=worksheet(64,7);w.connect();w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:0},8);worksheetDropDigit('tens',{kind:'carry',c:1},2)`);w.connect();w.exec("addCarry('floating')");
+ // 6 × 7 + 2 = 44: identical tiles may occupy either valid position.
+ assert.equal(w.exec(`worksheetDropDigit('tens',{kind:'slot',r:0,c:1},4)`),true);
+ assert.equal(w.exec(`worksheetDropDigit('tens',{kind:'slot',r:0,c:2},4)`),false,'Consumed source cannot be reused');
+ assert.equal(w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:2},4)`),true);
+ w.exec('s=history.pop().s;render()');
+ assert.deepEqual(w.json('s.digitSources["0:1"]'),{ones:'tens'});
+ assert.equal(w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:2},4)`),true);
+});
+test('temporary written tens remain movable to carry without duplicating their source',()=>{
+ const w=worksheet(84,47);w.connect();
+ assert.equal(w.exec(`worksheetDropDigit('tens',{kind:'slot',r:0,c:1},2)`),true);
+ assert.equal(w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:0},8)`),true);assert.equal(w.exec('s.done'),0);
+ assert.equal(w.exec(`worksheetDropDigit('tens',{kind:'carry',c:1},2)`),true);assert.equal(w.exec('s.done'),1);
+ assert.equal(w.exec('s.rows[0][1]'),undefined);assert.equal(w.exec('s.carrySlots[1].value'),2);
 });

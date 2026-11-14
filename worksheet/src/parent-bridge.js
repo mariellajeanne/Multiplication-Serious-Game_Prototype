@@ -108,7 +108,7 @@ function externalStart(ticket,attemptId,forceRestart=false,session=null){
  $('customA').value=a;$('customB').value=b;$('tryCustom').click();
  if(session?.attemptId===attemptId&&session.state?.a===a&&session.state?.b===b){
   s=cloneWorksheetState(session.state);history=cloneWorksheetState(session.history||[]);money=session.money||0;
-  if(session.entry?.version===1&&typeof worksheetDigitEntry!=='undefined')worksheetDigitEntry=cloneWorksheetState(session.entry);
+  if(session.entry?.version===1&&typeof worksheetDigitEntry!=='undefined'){worksheetDigitEntry=cloneWorksheetState(session.entry);if(worksheetExternalCalculator){worksheetDigitEntry.selected=null;worksheetDigitEntry.value=''}}
   worksheetActions=new Map((session.actions||[]).map(action=>[action.id,action]));
   Object.assign(bridgeMetrics,session.metrics||{},{sent:false,completionAck:false});
   additionCollapsed=s.complete===true;busy=false;selection=s.chosen;render();
@@ -128,6 +128,10 @@ window.addEventListener('message',event=>{
  }
  if(m.type==='challenge-input'&&m.attemptId===worksheetAttemptId){const changed=worksheetChallengeInput!==!!m.enabled;worksheetChallengeInput=!!m.enabled;if(productActive()&&s.revealed&&typeof setWorksheetPlacementPath==='function')setWorksheetPlacementPath(m.progressive);if(changed)updateTutorial()}
  if(m.type==='digit-key'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k)worksheetDigitKey(m.key);
+ if(m.type==='digit-drop'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k&&m.target&&Number.isInteger(m.target.c)&&['slot','carry'].includes(m.target.kind)){const accepted=worksheetDropDigit(m.part,m.target,m.value);report('digit-drop-result',{dropId:m.dropId,accepted,row:m.row,col:m.col})}
+ if(m.type==='arm-carry'&&m.attemptId===worksheetAttemptId){armCarry();bridgePoll()}
+ if(m.type==='resolve-carry'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k){addCarry(s.onesPlaced?'placed':'floating');bridgePoll()}
+ if(m.type==='focus-phase'&&m.attemptId===worksheetAttemptId){document.body.dataset.focusPhase=m.phase;document.body.dataset.guideLevel=String(m.guideLevel);updateTutorial()}
  if(m.type==='summary-celebrate'&&m.attemptId===worksheetAttemptId&&s.complete)play('finish');
  if(m.type==='undo'&&m.attemptId===worksheetAttemptId){undo();bridgePoll()}
  if(m.type==='completion-ack'&&m.attemptId===worksheetAttemptId)bridgeMetrics.completionAck=true;
@@ -144,8 +148,7 @@ window.addEventListener('keydown',event=>{
   const button=event.target.closest?.('button');
   if(button&&(!button.matches('[data-slot],[data-carry]')||button!==Q(digitTargetSelector(worksheetDigitEntry.selected)||'.no-entry-target')))return;
  }
- if(s.revealed){event.preventDefault();worksheetDigitKey(event.key)}
- else if(worksheetChallengeInput){event.preventDefault();report('fact-key',{key:event.key,row:s.row,col:s.k})}
+ if(!s.revealed&&worksheetChallengeInput){event.preventDefault();report('fact-key',{key:event.key,row:s.row,col:s.k})}
 });
 
 reset();

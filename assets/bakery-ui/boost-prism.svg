@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="96" height="80" viewBox="0 0 96 80" preserveAspectRatio="xMidYMid meet">
+ <title>Rainbow Baker's Boost diamond</title>
+ <defs>
+  <clipPath id="gem"><path d="M21 7H75L92 29 48 74 4 29Z"/></clipPath>
+  <linearGradient id="reflection"><stop stop-color="white" stop-opacity="0"/><stop offset=".5" stop-color="white" stop-opacity=".55"/><stop offset="1" stop-color="white" stop-opacity="0"/></linearGradient>
+ </defs>
+ <style>
+  .reflection{transform:translateX(-110px);animation:prism-shimmer 3.6s ease-in-out infinite}
+  @keyframes prism-shimmer{0%,60%{transform:translateX(-110px)}90%,100%{transform:translateX(110px)}}
+  @media(prefers-reduced-motion:reduce){.reflection{animation:none;opacity:0}}
+ </style>
+ <g clip-path="url(#gem)" stroke="#6d443b" stroke-width=".9" stroke-linejoin="round">
+  <path d="M4 29 21 7 33 7 26 29Z" fill="#ff718e"/>
+  <path d="M21 7H48L26 29Z" fill="#ffab55"/>
+  <path d="M48 7H75L70 29Z" fill="#ffe369"/>
+  <path d="m75 7 17 22H70Z" fill="#9bdb62"/>
+  <path d="m26 29 22-22 22 22Z" fill="#ffce60"/>
+  <path d="M4 29H26L48 74Z" fill="#f47fb7"/>
+  <path d="M26 29H48V74Z" fill="#56cfe5"/>
+  <path d="M48 29H70L48 74Z" fill="#8e8bed"/>
+  <path d="M70 29H92L48 74Z" fill="#63cd9f"/>
+  <path d="m26 29 22 23v22Z" fill="#549de9" stroke="none"/>
+  <path d="M48 52 70 29 48 74Z" fill="#b781e6" stroke="none"/>
+  <path d="M8 29H88M26 29 48 74 70 29" fill="none" stroke="#fff4df" stroke-opacity=".55" stroke-width="1.5"/>
+  <g class="reflection" stroke="none"><path d="m-20 0 28 0 40 80H20Z" fill="url(#reflection)"/></g>
+ </g>
+ <path d="M21 7H75L92 29 48 74 4 29Z" fill="none" stroke="#71472f" stroke-width="3.5" stroke-linejoin="round"/>
+ <path d="M22 10H73M9 28l11-14" fill="none" stroke="#fff6d9" stroke-width="2.5" stroke-linecap="round" opacity=".8"/>
+</svg>

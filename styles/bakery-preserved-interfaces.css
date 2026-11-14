@@ -1,20 +1,9 @@
 /* Preserved production worksheet and Packages exceptions. */
 .package-opening-grid .food-art{object-fit:contain}
 .package-buy>strong{color:#725030}
-.boost-sparkle{display:inline-block;position:relative;width:1.15em;height:1.7em;flex:none;vertical-align:middle;filter:drop-shadow(0 0 3px #b4dbff);color:transparent}
-.boost-sparkle::before,.boost-sparkle i{content:"";position:absolute;inset:0;-webkit-mask:url('../assets/illustrated/boost-silhouette.svg') center/contain no-repeat;mask:url('../assets/illustrated/boost-silhouette.svg') center/contain no-repeat}
-.boost-sparkle::before{background:conic-gradient(from 30deg,#fdadbd,#e9a8ee,#a1b6ff,#83e1ec,#d1ec95,#ffe689,#fdadbd)}
-.boost-sparkle svg{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 1px 0 #8b7098)}
-.boost-sparkle::after{content:"✦";position:absolute;right:-.2em;top:-.15em;color:#fff9e6;font-size:.5em;animation:boost-twinkle 4s ease-in-out infinite}
-.boost-sparkle i{background:linear-gradient(110deg,transparent 35%,#fff 49%,transparent 63%);animation:boost-gleam 6s ease-in-out infinite;opacity:0}
-.hub-total-boost>.boost-sparkle{font-size:1.7em}
-.food-boost-tag .boost-sparkle{width:.85em;height:1.1em}
 .hub-order-workspace{position:fixed;inset:0;z-index:10;background:#f4e4cb;padding:12px;overflow:auto}
 .hub-order-workspace .worksheet-stage{height:100%;max-width:1200px;margin:auto}
 .package-type.p8{--package-color:#deb347;--package-ribbon:#9b67c7;background:#fff1c7}
-@keyframes boost-gleam{0%,75%,100%{opacity:0;transform:translateX(-.25em)}80%{opacity:.9}88%{opacity:0;transform:translateX(.25em)}}
-@keyframes boost-twinkle{0%,75%,100%{opacity:.3;transform:scale(.6)}85%{opacity:1;transform:scale(1.15)}}
-@media(prefers-reduced-motion:reduce){.boost-sparkle::after,.boost-sparkle i{animation:none}}
 body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) :is(.primary,.secondary,.close),
 body[data-view="hub"] .hub-order-workspace :is(.primary,.secondary,.close,.worksheet-exit){background:#f8dfb5;color:#653f29;border:1.5px solid #bc9865;border-bottom:3px solid #ad7e4c;box-shadow:none;border-radius:12px;min-height:44px;font-weight:900;transition:background .15s}
 body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) .primary,

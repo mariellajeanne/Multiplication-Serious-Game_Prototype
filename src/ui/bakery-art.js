@@ -25,7 +25,7 @@ function foodArt(id,extraClass=''){
 }
 function orderFood(ticket){return FOOD.find(f=>f.id===(ticket.foodId||assignedOrderFood(ticket)))||FOOD[0]}
 function presentedFoodArt(id,extraClass=''){return typeof bakeryFoodArt==='function'?bakeryFoodArt(id,extraClass):foodArt(id,extraClass)}
-function boostSymbol(){return typeof isIllustratedBakery==='function'&&isIllustratedBakery()&&typeof boostSparkle==='function'?boostSparkle():'💎'}
+function boostSymbol(extraClass=''){return `<img class="boost-gem ${extraClass}" src="assets/bakery-ui/boost-prism.svg" width="96" height="80" alt="" aria-hidden="true" draggable="false">`}
 function orderStory(ticket){return `${ticket.b} trays · ${ticket.a} ${orderFood(ticket).name} each`}
 function luckProgress(){return `<div class="luck-track permanent-luck"><div class="luck-stars" aria-label="${g.mastery%4} of 4 practice stars">${Array.from({length:4},(_,i)=>`<span class="${i<g.mastery%4?'filled':''}" aria-hidden="true">★</span>`).join('')}</div><small>More mastery → Higher Luck</small><div class="luck-caption"><b>★ Ticket luck +${g.permanentLuck}<small>PERMANENT</small></b><button class="text-button" onclick="openProbabilities()" aria-label="Detailed ticket probabilities">ⓘ</button></div></div>`}
 

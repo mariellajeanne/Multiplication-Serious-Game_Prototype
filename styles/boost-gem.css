@@ -1,0 +1,8 @@
+/* Shared art, intrinsic 6:5 proportions, and no flex compression. Size contexts
+   change the width only; the SVG owns its clipped, reduced-motion-safe shimmer. */
+img.boost-gem{display:inline-block;position:static;width:1.35em;height:auto;aspect-ratio:6/5;object-fit:contain;flex:0 0 auto;align-self:center;vertical-align:middle;max-width:none;max-height:none;animation:none;filter:none;pointer-events:none}
+body[data-view="hub"] .hub-home img.boost-gem.boost-star{width:34px;height:auto;animation:none;filter:none}
+body[data-view="hub"] .hub-home .food-boost-tag img.boost-gem{width:1.3em;height:auto;object-fit:contain;flex:none}
+body[data-view="hub"] .bakery-popup .hub-boost-detail>img.boost-gem{width:95px;height:auto;animation:none}
+body[data-view="hub"] .bakery-popup .mastery-growth img.boost-gem{width:38px;height:auto}
+.summary-boost img.boost-gem{width:36px;height:auto}

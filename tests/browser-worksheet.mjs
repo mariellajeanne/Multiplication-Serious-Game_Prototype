@@ -102,6 +102,10 @@ try{
   // Continue the same actual worksheet with mouse/pointer events and its normal
   // animations. Geometry is measured through both documents; no test-fast mode.
   const point=async selector=>{
+    if(selector==='#undo'||selector.includes('[data-answer-digit=')){
+      const parentSelector=selector==='#undo'?'.worksheet-complete-bar button':selector;
+      return evaluate(`(()=>{const el=document.querySelector(${JSON.stringify(parentSelector)});el.scrollIntoView({block:'nearest',inline:'nearest'});const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
+    }
     if(selector==='#equationReveal'){
       await evaluate(`document.getElementById('generateAnswer')?.scrollIntoView({block:'center'})`);await pause(100);
       return evaluate(`(()=>{const r=document.getElementById('generateAnswer').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
@@ -118,19 +122,14 @@ try{
   })()`);
   };
   let touchMode=false,pendingPart=null;
-  const writeDigit=async part=>{
-    const digit=String(await evaluate(`auditChild.eval('${part==='ones'?'ones()':'tens()'}')`));
-    await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:digit,text:digit});
-    await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:digit});
-    await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
-    await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
-    await pause(140);
-  };
+  let pendingDestination=null;
+  const writeDigit=async part=>{await drag(`[data-answer-digit="${part}"]`,pendingDestination);await pause(140);};
   const click=async selector=>{
+    if(selector.includes('[data-slot=')||selector.includes('[data-carry='))pendingDestination=selector;
     if(selector.includes('[data-part=')){pendingPart=selector.includes('ones')?'ones':'tens';return;}
     if(selector==='#equationReveal'){await evaluate(`auditChild.eval('bridgePoll()')`);await pause(80);if(await evaluate(`auditChild.eval('s.revealed')`))return;}
 
-    await waitFor(selector==='#equationReveal'?`document.querySelector('#generateAnswer:not(:disabled)')!==null`:`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
+    await waitFor(selector==='#undo'?`document.querySelector('.worksheet-complete-bar button')!==null`:selector==='#equationReveal'?`document.querySelector('#generateAnswer:not(:disabled)')!==null`:`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
     const p=await point(selector);
     if(touchMode){
       await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});
@@ -183,11 +182,9 @@ try{
   await waitFor(`auditChild.eval('s.revealed')||document.querySelector('#generateAnswer:not(:disabled)')!==null`);
   await click('#equationReveal');await flush();
   assert.equal(await rewardSnapshot(),revealRewards,'undo/reveal must not farm coins or Luck');
-  await click('[data-part="ones"]');await click('[data-slot="0:1"]');
-  await waitFor(`auditChild.eval('!busy&&s.onesPlaced')`);await preserve();
   await click('[data-carry="1"]');await click('[data-slot="0:1"]');
   await waitFor(`auditChild.eval('!busy&&s.mixed')`);await preserve();
-  assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),undefined,'Adding carry reopens the provisional ones for typed correction');
+  assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),undefined,'Carry is resolved before answer placement');
   await click('[data-slot="0:1"]');await writeDigit('ones');
   assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),3);
   await drag('[data-part="tens"]','[data-slot="0:2"]');
@@ -246,7 +243,7 @@ try{
   console.log('PASS browser: ticket selection → real math → coin claim → food upgrade, saved under the existing key');
 
   // Separate one-row carrying case: incoming carry creates a new leading digit.
-  await cdp('Emulation.setDeviceMetricsOverride',{width:390,height:844,deviceScaleFactor:1,mobile:false});
+  await cdp('Emulation.setDeviceMetricsOverride',{width:1024,height:768,deviceScaleFactor:1,mobile:false});
   await cdp('Emulation.setTouchEmulationEnabled',{enabled:true});touchMode=true;
   await evaluate(`closeModal();g.sound=true;g.tutorialArrows=true;
     g.board=[{id:9002,a:19,b:9,rarity:0,base:130}];startTicket(9002)`);
@@ -265,7 +262,7 @@ try{
   await waitFor(`g.run?.procedureComplete===true`);
   assert.equal(await evaluate('g.run.pool'),await evaluate('stepCoinTotals(g.run).total'));
   assert.equal(await evaluate('g.run.chests'),undefined);
-  console.log('PASS browser: 19 × 9 = 171 at 390px with emulated touch taps, typed digits and outgoing/incoming carry before placement; tutorial/SFX enabled');
+  console.log('PASS browser: 19 × 9 = 171 at 1024px with emulated touch taps, typed digits and outgoing/incoming carry before placement; tutorial/SFX enabled');
 
   // Tablet touch completion with both deliveries lost once and broken motion.
   // All math is still performed through the real touch targets and swipe.

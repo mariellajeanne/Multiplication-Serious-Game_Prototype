@@ -12,7 +12,7 @@ function worksheetRewardDisplays(r){
 renderWorksheet=function(){
  const r=g.run;if(!r||r.phase==='failed'||!usesStepCoins(r)&&r.phase==='claim')return previousWorksheetRenderer();
  const food=orderFood(r.ticket);
- return `<main class="worksheet-stage worksheet-modern"><section class="worksheet-left"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div><div class="worksheet-header-actions"><button class="worksheet-settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">${hubImage('control-settings.svg')}</button><button class="worksheet-exit illustrated-worksheet-button" onclick="abandonTicket()">Save &amp; Exit</button></div></header>${worksheetRewardDisplays(r)}<div class="worksheet-engine-wrap"><iframe id="worksheetFrame" class="worksheet-frame" title="Work out your customer's order" sandbox="allow-scripts allow-same-origin"></iframe></div><footer class="worksheet-complete-bar"><span id="worksheetStepProgress">${r.bridgeDone||0} / ${r.steps.length} pairs placed</span><button id="collectRewards" class="illustrated-worksheet-button worksheet-primary" ${r.procedureComplete?'':'disabled'} onclick="beginWorksheetSettlement()">Complete Order</button><span id="pendingCoins" hidden>${fmt(r.pool)}</span></footer><span id="bridgeStatus" hidden></span></section><aside class="worksheet-calculator" aria-label="Bakery calculation panel"><div id="calculationPanel"></div></aside></main>`;
+ return `<main class="worksheet-stage worksheet-modern"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div><div class="worksheet-header-actions"><button class="worksheet-settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">${hubImage('control-settings.svg')}</button><button class="worksheet-exit illustrated-worksheet-button" onclick="abandonTicket()">Save &amp; Exit</button></div></header>${worksheetRewardDisplays(r)}<section class="worksheet-left"><div class="worksheet-engine-wrap"><iframe id="worksheetFrame" class="worksheet-frame" title="Work out your customer's order" sandbox="allow-scripts allow-same-origin"></iframe></div></section><aside class="worksheet-calculator" aria-label="Bakery calculation panel"><div id="calculationPanel"></div></aside><footer class="worksheet-complete-bar"><button class="illustrated-worksheet-button" onclick="sendEngine('undo',{attemptId:g.run.worksheetRewards.attemptId})">Undo</button><span id="worksheetStepProgress">${r.bridgeDone||0} / ${r.steps.length} pairs placed</span><button id="collectRewards" class="illustrated-worksheet-button worksheet-primary" ${r.procedureComplete?'':'disabled'} onclick="beginWorksheetSettlement()">Complete Order</button><span id="pendingCoins" hidden>${fmt(r.pool)}</span></footer><span id="bridgeStatus" hidden></span></main>`;
 };
 function currentWorksheetCalculation(){
  const r=g.run,state=r?.worksheetSession?.state;
@@ -37,9 +37,9 @@ function calculationPanelMarkup(context){
  const resolved=answer&&answer.status!=='waiting',manual=answer?.accepted&&!resolved,entry=r?.worksheetSession?.entry;
  const carryAdded=resolved&&context.state.mixed&&context.state.incoming>0;
  const display=resolved?String(step.p+(carryAdded?context.state.incoming:0)):manual?(answer.entry||'—'):'?';
- const status=resolved?(entry?.feedback||(context.state.carryArmed?'Carry selected. Tap its product ones tile.':!context.state.mixed&&context.state.incoming?'Tap the waiting carry, then its product ones tile.':answer.status==='success'?`×${answer.multiplier} bonus ready. Write each digit to earn it.`:'Select a tile. Write one digit, then press Enter.')):
+ const status=resolved?(entry?.feedback||(context.state.carryArmed?'Carry selected. Tap its product ones tile.':!context.state.mixed&&context.state.incoming?'Tap the waiting carry, then its product ones tile.':answer.status==='success'?`×${answer.multiplier} bonus ready. Place each digit to earn it.`:'Drag a digit, or tap it and then its destination.')):
   calculationNotice||(manual?`${3-answer.attempts.length} ${3-answer.attempts.length===1?'try':'tries'} left`:active?'Get an answer, then write its digits.':'Connect the two digits first.');
- return `<header class="calculator-heading"><span>BAKER’S CALCULATOR</span><h2 id="calculationExpression">${step?`${step.a} × ${step.b}`:'Ready?'}</h2></header>${carryAdded?`<div class="calculator-carry-equation">${step.p} + ${context.state.incoming} carry =</div>`:''}<output class="calculator-answer ${answer?.status==='success'?'is-golden':''}" id="calculationAnswer" ${manual?'tabindex="0" aria-label="Golden Challenge answer"':''}>${display}</output>${answer?.offered&&!answer.accepted&&!resolved?`<button class="golden-challenge-button illustrated-worksheet-button" id="goldenChallenge" onclick="chooseWorksheetChallenge()"><span aria-hidden="true">✦</span><span>Golden Challenge!<small>Solve it yourself for bonus coins!</small></span><b>×${answer.multiplier}</b></button>`:''}${manual?`<div class="golden-active-label">Golden Challenge <b>×${answer.multiplier}</b></div>`:''}${resolved?`<div class="worksheet-digit-input ${entry?.selected?'has-target':''}"><span>WRITE ON THE WORKSHEET</span><strong id="worksheetEntryTarget">${worksheetSelectedTargetLabel(context)}</strong><output id="worksheetDigitInput" aria-label="Digit to write">${entry?.value||'—'}</output></div>`:''}${manual||resolved?calculationKeypadMarkup(manual?'Golden Challenge keypad':'Worksheet digit keypad'):''}<p class="calculator-note ${entry?.level?'is-placement-error':answer?.status==='success'?'is-success':''}" role="status">${status}</p>${!resolved?`<button class="illustrated-worksheet-button ${!answer?.offered&&!manual?'worksheet-primary':''} ${active&&g.tutorialArrows&&!answer?.offered&&!manual?'calculator-guide':''}" id="generateAnswer" ${active?'':'disabled'} onclick="generateWorksheetAnswer()">Generate Answer</button>`:''}`;
+ return `<header class="calculator-heading"><span>BAKER’S CALCULATOR</span><h2 id="calculationExpression">${step?`${step.a} × ${step.b}`:'Ready?'}</h2></header>${carryAdded?`<div class="calculator-carry-equation">${step.p} + ${context.state.incoming} carry =</div>`:''}<output class="calculator-answer ${answer?.status==='success'?'is-golden':''}" id="calculationAnswer" ${manual?'tabindex="0" aria-label="Golden Challenge answer"':''}>${display}</output>${answer?.offered&&!answer.accepted&&!resolved?`<button class="golden-challenge-button illustrated-worksheet-button" id="goldenChallenge" onclick="chooseWorksheetChallenge()"><span aria-hidden="true">✦</span><span>Golden Challenge!<small>Solve it yourself for bonus coins!</small></span><b>×${answer.multiplier}</b></button>`:''}${manual?`<div class="golden-active-label">Golden Challenge <b>×${answer.multiplier}</b></div>`:''}${resolved?worksheetDigitTrayMarkup(context):''}${manual?calculationKeypadMarkup('Golden Challenge keypad'):''}<p class="calculator-note ${entry?.level?'is-placement-error':answer?.status==='success'?'is-success':''}" role="status">${status}</p>${!resolved?`<button class="illustrated-worksheet-button ${!answer?.offered&&!manual?'worksheet-primary':''} ${active&&g.tutorialArrows&&!answer?.offered&&!manual?'calculator-guide':''}" id="generateAnswer" ${active?'':'disabled'} onclick="generateWorksheetAnswer()">Generate Answer</button>`:''}`;
 }
 function paintWorksheetExperience(){
  const r=g.run,panel=$('calculationPanel');if(!r||!panel)return;
@@ -51,6 +51,9 @@ function paintWorksheetExperience(){
   sendEngine('challenge-input',{attemptId:r.worksheetRewards.attemptId,enabled:answer.accepted&&answer.status==='waiting',progressive:['generated','forfeited'].includes(answer.status)});
   if(!context.state.revealed&&answer.status!=='waiting')sendEngine('fact-answer',{attemptId:r.worksheetRewards.attemptId,row:context.step.row,col:context.step.col,restore:true,progressive:['generated','forfeited'].includes(answer.status)});
  }
+ const phase=r.procedureComplete?'complete':r.worksheetSession?.state.phase==='sum'?'add':context?.state.phase==='select'?'connect':context?.state.phase==='product'?(context.state.revealed?context.state.mixed?'place':'carry':'calculate'):'connect';
+ const stage=document.querySelector('.worksheet-modern');if(stage)stage.dataset.worksheetPhase=phase;
+ sendEngine('focus-phase',{attemptId:r.worksheetRewards.attemptId,phase,guideLevel:g.tutorialArrows?(g.completed===0?2:g.completed<3?1:0):0});
  const html=calculationPanelMarkup(context);
  if(panel.dataset.markup!==html){
   const active=document.activeElement,focus=panel.contains(active)?active?.dataset.calcKey||active?.id:null;
@@ -78,7 +81,7 @@ function chooseWorksheetChallenge(){return changeWorksheetCalculation((r,step)=>
 function generateWorksheetAnswer(){return changeWorksheetCalculation((r,step)=>{calculationNotice='';return generateFactAnswer(r,step)})}
 function worksheetCalcKey(key){
  const context=currentWorksheetCalculation(),answer=context&&g.run.factAnswers?.[context.key];
- if(context&&answer&&answer.status!=='waiting'&&!modal&&!g.run.paused){sendEngine('digit-key',{attemptId:g.run.worksheetRewards.attemptId,row:context.step.row,col:context.step.col,key});return true}
+ if(answer&&answer.status!=='waiting')return false;
  return changeWorksheetCalculation((r,step,answer)=>{
   if(!answer.accepted)return false;calculationNotice='';
   if(key==='Backspace'){answer.entry=answer.entry.slice(0,-1);return true}
@@ -105,11 +108,12 @@ fitWorksheet=function(){
  if(!stage||!frame)return previousWorksheetFit();
  if(!g.run||g.run.paused)return;
  syncRewardPresentation();
+ if(typeof cancelWorksheetDrag==='function')cancelWorksheetDrag();
  const left=stage.querySelector('.worksheet-left'),width=left.getBoundingClientRect().width-48,rows=String(g.run.ticket.b).length,cols=String(g.run.ticket.a*g.run.ticket.b).length;
  const chrome=left.getBoundingClientRect().height-frame.getBoundingClientRect().height;
- const available=Math.max(320,innerHeight-stage.getBoundingClientRect().top-chrome-12),gap=innerWidth<1000?5:8;
+ const available=Math.max(260,innerHeight-frame.getBoundingClientRect().top-chrome-100),gap=innerWidth<1000?5:8;
  let cell=Math.max(44,Math.min(120,Math.floor((width-66-gap*(cols-1))/cols)));
- const estimatedHeight=size=>Math.max(44,Math.round(size*.65))+(2+rows)*size+Math.max(56,Math.round(size*.95))+146;
+ const estimatedHeight=size=>Math.max(44,Math.round(size*.65))+(2+rows)*size+Math.max(56,Math.round(size*.95))+80;
  while(cell>44&&estimatedHeight(cell)>available)cell--;
  sendEngine('layout',{cell,gap,rows});paintWorksheetExperience();
 };
@@ -154,6 +158,9 @@ if(typeof worksheetExperienceText==='function')window.render_game_to_text=()=>{
   const answer=context&&g.run.factAnswers?.[context.key];
   state.worksheet={expression:$('calculationExpression')?.textContent||null,answer:$('calculationAnswer')?.textContent||null,keypad:!!document.querySelector('.calculation-keypad'),challenge:answer?.offered?{multiplier:answer.multiplier,accepted:answer.accepted,attempts:answer.attempts.length,status:answer.status}:null,entry:g.run.worksheetSession?.entry?{selected:g.run.worksheetSession.entry.selected,value:g.run.worksheetSession.entry.value,feedback:g.run.worksheetSession.entry.feedback}:null,placed:g.run.bridgeDone||0,pairs:g.run.steps.length,complete:!!g.run.procedureComplete,summary:document.querySelector('.worksheet-summary')?.dataset.summaryStage||null};
   if(usesStepCoins(g.run))state.worksheet.rewards=g.run.stepCoins.options.map(option=>({name:worksheetCoinName(option.rank),chance:option.chance,base:option.base,lifetime:g.mathPractice.lifetimeCoins[option.rank],thisOrder:g.run.stepCoins.counts[option.rank]}));
+  state.worksheet.phase=document.querySelector('.worksheet-modern')?.dataset.worksheetPhase;
+  state.worksheet.digits=context&&typeof worksheetAvailableDigits==='function'?worksheetAvailableDigits(context).map(d=>({part:d.part,digit:d.value})):[];
+  state.worksheet.carryToAdd=context?.state.revealed&&!context.state.mixed?context.state.incoming:0;
  }
  return JSON.stringify(state);
 };

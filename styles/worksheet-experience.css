@@ -92,7 +92,7 @@ body[data-view='hub'] .bakery-popup.worksheet-summary-modal{width:min(960px,94vw
 .summary-base>span,.summary-total>span{font-size:15px;font-weight:900;letter-spacing:.6px;color:#88613c}
 .summary-base>strong{font-size:32px;line-height:1.1}.summary-base>small{font-size:13px;color:#926f4d}
 .summary-boost{display:flex;align-items:center;justify-content:center;gap:8px;font-size:20px;font-weight:900}
-.summary-boost img{width:36px;height:44px;object-fit:contain}.summary-boost b{color:#9652a4}
+.summary-boost img{width:36px;height:auto;object-fit:contain}.summary-boost b{color:#9652a4}
 .summary-equation{font-size:clamp(17px,1.7vw,24px);font-weight:900;overflow-wrap:anywhere}
 .summary-equation::after{content:'Rounded once to whole coins';display:block;margin-top:3px;font-size:12px;font-weight:800;color:#987651}
 .summary-total{position:relative;isolation:isolate;overflow:hidden;display:grid;gap:6px;padding:10px;border-radius:18px;background:#e4efce;color:#507841}
@@ -110,3 +110,35 @@ body[data-view='hub'] .bakery-popup.worksheet-summary-modal #acknowledgeWorkshee
 @media(max-width:1150px){.worksheet-stage.worksheet-modern,.hub-order-workspace .worksheet-stage.worksheet-modern{grid-template-columns:minmax(0,1fr) 280px;gap:12px}.worksheet-left,.worksheet-calculator{border-width:16px}.worksheet-left{padding:5px}.worksheet-calculator{padding:8px}.worksheet-coin-display{grid-template-columns:1fr;justify-items:center;gap:0;padding:7px 5px 10px}.worksheet-coin-art{height:50px;width:62px}.worksheet-coin-copy{text-align:center}.worksheet-coin-copy>strong{font-size:12px}.worksheet-coin-copy>b{font-size:22px}.worksheet-order-expression{font-size:23px}.worksheet-header-actions .worksheet-exit{font-size:14px;padding-inline:14px}.worksheet-order-expression>.food-art{width:42px;height:42px}.worksheet-tray{width:32px}.worksheet-header-actions .worksheet-settings{width:44px;height:44px}.worksheet-coin-display{min-height:133px}}
 @media(max-width:760px){.worksheet-stage.worksheet-modern,.hub-order-workspace .worksheet-stage.worksheet-modern{grid-template-columns:minmax(0,1fr)}.worksheet-calculator{width:100%;max-width:480px;justify-self:center}.worksheet-order-header{flex-wrap:wrap;justify-content:center}.worksheet-order-expression{font-size:23px}.worksheet-header-actions{margin-left:auto}.worksheet-complete-bar{justify-content:center}.worksheet-complete-bar>#collectRewards{width:100%}.worksheet-coin-copy>b>small{display:block}.summary-type{padding:8px 3px}.summary-type strong{font-size:13px}.summary-type b{font-size:14px}.summary-type .coin-tier-art{width:70px;height:64px}}
 @media(prefers-reduced-motion:reduce){.worksheet-modern *,.worksheet-summary *,.worksheet-summary *::before,.worksheet-summary *::after,.worksheet-step-flight,.worksheet-coin-display{animation:none!important;transition:none!important}.summary-reveal{translate:none}}
+/* One compact workbench. Header/rewards/footer share the frame; the digit tray
+   sits beside the right-aligned active columns rather than at the screen edge. */
+.hub-order-workspace .worksheet-stage.worksheet-modern,.worksheet-stage.worksheet-modern{width:min(1500px,100%);grid-template-columns:minmax(0,1fr) 300px;gap:10px 14px;border:18px solid transparent;border-image:url('../assets/bakery-ui/popup-frame.svg') 48 fill stretch;background:#fff1d6;padding:5px 8px}
+.worksheet-modern>.worksheet-order-header,.worksheet-modern>.worksheet-reward-row,.worksheet-modern>.worksheet-complete-bar{grid-column:1/-1}
+.worksheet-modern>.worksheet-left{padding:0;border:0;box-shadow:none;background:none;gap:0}
+.worksheet-modern>.worksheet-calculator{border-width:14px;padding:10px;background:#ffe8bd;box-shadow:0 3px 0 #a4764c33;min-height:0}
+.worksheet-modern .worksheet-coin-display{min-height:90px;grid-template-columns:58px minmax(0,1fr);padding:8px 12px;gap:10px}
+.worksheet-modern .worksheet-coin-art{height:64px;width:58px}
+.worksheet-modern .worksheet-coin-copy{text-align:left}.worksheet-modern .worksheet-coin-copy>b{font-size:23px}
+.worksheet-modern .worksheet-order-header{padding-bottom:6px}
+.worksheet-modern .worksheet-complete-bar{padding-top:5px;flex-wrap:nowrap}
+.worksheet-modern .worksheet-complete-bar>#collectRewards{width:300px;min-height:50px;font-size:20px}
+.worksheet-digit-tray{display:grid;gap:10px;justify-items:center;padding:12px 0}
+.worksheet-digit-tray>span{font-size:17px;font-weight:900;color:#80522e}
+.worksheet-digit-tray>div{display:flex;gap:12px;justify-content:center}
+.worksheet-digit-tray .answer-digit{width:86px;height:90px;min-height:72px;font-size:46px;padding:8px;touch-action:none;user-select:none;cursor:grab}
+.answer-digit.is-selected{outline:3px solid #3d8190;outline-offset:3px}
+.worksheet-digit-ghost{position:fixed;z-index:110;width:80px;height:84px;font-size:44px;translate:-50% -50%;scale:1.06;pointer-events:none;filter:drop-shadow(0 7px 4px #68452e44)}
+.calculator-carry-task{display:grid;gap:10px;text-align:center}.calculator-carry-task small{font-size:12px;line-height:1.35}
+.calculator-carry-task .is-selected{outline:3px solid #9d75b2;outline-offset:2px}
+.worksheet-modern[data-worksheet-phase='calculate'] .worksheet-calculator,.worksheet-modern[data-worksheet-phase='carry'] .worksheet-calculator{outline:2px solid #e0af50;outline-offset:2px}
+.worksheet-modern[data-worksheet-phase='calculate'] .worksheet-left{opacity:.75}
+.worksheet-modern .worksheet-left,.worksheet-modern .worksheet-calculator{transition:opacity 140ms ease-out,outline-color 140ms ease-out}
+.worksheet-modern .calculator-heading h2{font-size:34px}.worksheet-modern .calculator-answer{min-height:78px;font-size:52px}
+.worksheet-modern .calculation-keypad .illustrated-worksheet-button{min-height:46px;font-size:24px}
+.worksheet-modern .calculation-keypad [data-calc-key='Enter']{font-size:16px}
+.digit-drag-demo{font-size:12px;color:#90623a;animation:drag-demonstration 2s ease-in-out 2}
+.digit-drag-demo::before{content:attr(data-demo-digit);display:inline-grid;place-items:center;width:24px;height:28px;margin-right:6px;border:2px solid #b88444;border-radius:7px;background:#ffe3a5;color:#684329;font-size:18px;font-weight:900;animation:digit-example 2s ease-in-out 2}
+@keyframes digit-example{0%,100%{translate:0 0;opacity:.4}45%{translate:-26px -4px;opacity:1}75%{translate:-50px -2px;opacity:0}}
+@keyframes drag-demonstration{50%{translate:-15px 0}}
+@media(max-width:1150px){.hub-order-workspace .worksheet-stage.worksheet-modern,.worksheet-stage.worksheet-modern{grid-template-columns:minmax(0,1fr) 270px;border-width:12px;padding:4px;gap:8px}.worksheet-modern .worksheet-coin-display{gap:5px;padding:7px;grid-template-columns:48px minmax(0,1fr)}.worksheet-modern .worksheet-coin-art{width:48px;height:52px}.worksheet-modern .worksheet-coin-copy>span{font-size:10px}.worksheet-modern .worksheet-complete-bar>#collectRewards{width:260px}}
+@media(max-width:760px){.hub-order-workspace .worksheet-stage.worksheet-modern,.worksheet-stage.worksheet-modern{grid-template-columns:minmax(0,1fr) 230px;min-width:620px}.worksheet-modern .worksheet-calculator{width:auto}.worksheet-modern .worksheet-order-header{flex-wrap:nowrap}.worksheet-modern .worksheet-reward-row{grid-template-columns:repeat(3,minmax(0,1fr))}}

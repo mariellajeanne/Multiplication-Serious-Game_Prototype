@@ -17,3 +17,12 @@
 .external-calculator .cell.entry-selected.entry-hint{border-color:#376f82!important;outline-color:#da9d24}
 .external-calculator .cell.filled{color:#604123;background:#efdcaf;border-color:#b18a51}
 .external-calculator .product-focus .cell.number.connecting{opacity:1!important;filter:none!important}
+.external-calculator #undo{display:none!important}
+.external-calculator .actions:has(#addRows[hidden]){display:none!important}
+.external-calculator .math{margin-left:auto!important;margin-right:10px!important}
+.external-calculator .cell.drop-hover{outline:3px solid #578b97;outline-offset:2px}
+.external-calculator[data-focus-phase='carry'] .cell.hold.waiting{outline:3px solid #a77dc0;outline-offset:2px}
+.external-calculator[data-focus-phase='calculate'] .cell.rowcell{opacity:.72}
+.external-calculator[data-focus-phase='place'] .cell.number:not(.connecting){opacity:.7}
+.external-calculator[data-guide-level='1'] .tutorial-stream{opacity:.55;scale:.85}
+.external-calculator[data-guide-level='1'] .tutorial-stream .stream-chevron:nth-of-type(n+2){display:none}

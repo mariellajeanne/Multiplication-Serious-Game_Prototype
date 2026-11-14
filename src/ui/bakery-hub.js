@@ -3,13 +3,14 @@ let hubCollection=false,hubMountedRun=null,hubMountedPhase=null,hubRenderingWork
 function isBakeryHub(){return typeof document!=='undefined'&&document.body?.dataset.view==='hub'}
 function hubEscape(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function hubAsset(name){
+ if(name==='bakers-sparkle.png')return 'assets/bakery-ui/boost-prism.svg';
  const art={'bakery-room.png':'room','cash-register-facing.png':'register','cabinet-wood.png':'cabinet','title-sign-refined.png':'title','nav-packages.png':'nav-packages','nav-play.png':'nav-play','nav-collection.png':'nav-collection','packages-entry-button.png':'packages-entry','menu-heading.png':'menu-heading','hud-coin-shell.png':'wallet','bakers-sparkle.png':'boost','tray-icon.png':'cloche','control-help.svg':'help','control-settings.svg':'settings','control-close.svg':'close','scroll-thumb-clean.png':'thumb'};
  const sprite=/^(food|coin)-\d\d\.png$/.test(name)?name.replace('.png',''):art[name];
  return 'assets/bakery-ui/'+(sprite?'illustrated/'+sprite+'.png':name);
 }
-function hubImage(name,classes='',alt=''){return `<img class="${classes}" src="${hubAsset(name)}" alt="${hubEscape(alt)}" draggable="false">`}
-function hubBoostDiamond(){return hubImage('bakers-sparkle.png','boost-star')}
-function boostSparkle(){return `<span class="boost-sparkle" aria-hidden="true"><svg viewBox="0 0 64 80"><path d="M32 2C35 27 39 33 57 39C39 43 36 51 31 78C28 53 25 46 7 41C24 36 29 29 32 2Z" fill="currentColor"/><path d="M32 10C32 30 33 35 48 39C34 40 33 49 31 68C31 49 29 43 17 41C29 39 31 32 32 10Z" fill="#fff" opacity=".65"/></svg><i></i></span>`}
+function hubImage(name,classes='',alt=''){return name==='bakers-sparkle.png'?boostSymbol(classes):`<img class="${classes}" src="${hubAsset(name)}" alt="${hubEscape(alt)}" draggable="false">`}
+function hubBoostDiamond(){return boostSymbol('boost-star')}
+function boostSparkle(){return boostSymbol()}
 // The ZIP's temporary labels are not catalog mappings. Its sprites follow these identities.
 const HUB_FOOD_SPRITES=Object.freeze(Object.fromEntries(ILLUSTRATED_FOODS.map((id,i)=>[id,i+1])));
 function hubFoodArt(id,extra=''){
@@ -34,7 +35,7 @@ function hubFoodGeometry(n){return {columns:n===1?1:3,width:n===1?400:241,height
 const HUB_AURAS=['#ffd083','#ffd891','#ffc45d','#cda4fa','#e69bf9','#ffe270','#c78bff','#ff96e5'];
 function renderHubFoods(foods){
  const geometry=hubFoodGeometry(foods.length);
- return foods.map(o=>{const food=F(o.id),label=multiplierLabel(foodValue(o));return `<button type="button" class="food-cell hub-food r${food.rarity}" data-food="${food.id}" data-uid="${o.uid}" data-rarity="${food.rarity}" style="width:${geometry.width}px;height:${geometry.height}px;--glow:${HUB_AURAS[food.rarity]}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(food.name)}, Baker's Boost ×${label}"><span class="food-aura" aria-hidden="true"></span>${hubFoodArt(food.id,'food-image')}${hubImage('glass-compartment.svg','glass-cell-art')}<span class="cell-glare" aria-hidden="true"></span><span class="food-multiplier food-boost-tag" style="font-size:${label.length>10?16:21}px">${hubImage('bakers-sparkle.png')}×${label}</span></button>`}).join('');
+ return foods.map(o=>{const food=F(o.id),label=multiplierLabel(foodValue(o));return `<button type="button" class="food-cell hub-food r${food.rarity}" data-food="${food.id}" data-uid="${o.uid}" data-rarity="${food.rarity}" style="width:${geometry.width}px;height:${geometry.height}px;--glow:${HUB_AURAS[food.rarity]}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(food.name)}, Baker's Boost ×${label}"><span class="food-aura" aria-hidden="true"></span>${hubFoodArt(food.id,'food-image')}${hubImage('glass-compartment.svg','glass-cell-art')}<span class="cell-glare" aria-hidden="true"></span><span class="food-multiplier food-boost-tag" style="font-size:${label.length>10?16:21}px">${boostSymbol()}×${label}</span></button>`}).join('');
 }
 function hubTicketReward(ticket){return g.orderRuns[ticket.id]?.budget??orderCoinQuote(ticket)}
 function hubTicketPaper(ticket,rank){
@@ -146,7 +147,7 @@ showCoinsInfo=function(){
 showBoostInfo=function(){
  if(!isBakeryHub())return preservedShowBoostInfo();
  const foods=g.activeMenu.map(uid=>g.owned.find(o=>o.uid===uid)).filter(Boolean);
- showModal("Baker's Boost",`<div class="hub-boost-detail">${hubImage('bakers-sparkle.png','boost-star')}<div><span>Your order multiplier</span><strong id="menuBoostComponent">×${boostComponentLabel(bakeryValue())}</strong></div></div><h3 class="contributions-heading">Equipped foods add up</h3><div class="boost-food-list">${foods.map(o=>`<div>${hubFoodArt(o.id)}<span><b>${hubEscape(F(o.id).name)}</b><small>Mastery ${recipeMastery(o)}</small></span><strong>+${multiplierLabel(foodValue(o))}</strong></div>`).join('')||'<p>No foods equipped.</p>'}</div><div class="mastery-growth">${hubImage('bakers-sparkle.png')}<span>Recipe Mastery ↑ <b>Boost ↑</b><small>Duplicates unlock more Mastery.</small></span></div><div class="btnrow hub-info-actions"><button class="primary" onclick="closeModal();openHubCollection()">Manage Foods</button></div>`,'hud-info-modal');
+ showModal("Baker's Boost",`<div class="hub-boost-detail">${hubBoostDiamond()}<div><span>Your order multiplier</span><strong id="menuBoostComponent">×${boostComponentLabel(bakeryValue())}</strong></div></div><h3 class="contributions-heading">Equipped foods add up</h3><div class="boost-food-list">${foods.map(o=>`<div>${hubFoodArt(o.id)}<span><b>${hubEscape(F(o.id).name)}</b><small>Mastery ${recipeMastery(o)}</small></span><strong>+${multiplierLabel(foodValue(o))}</strong></div>`).join('')||'<p>No foods equipped.</p>'}</div><div class="mastery-growth">${boostSymbol()}<span>Recipe Mastery ↑ <b>Boost ↑</b><small>Duplicates unlock more Mastery.</small></span></div><div class="btnrow hub-info-actions"><button class="primary" onclick="closeModal();openHubCollection()">Manage Foods</button></div>`,'hud-info-modal');
 };
 const preservedOpenSettings=openSettings;
 openSettings=function(){

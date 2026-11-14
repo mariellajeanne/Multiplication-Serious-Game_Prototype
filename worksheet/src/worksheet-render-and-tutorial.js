@@ -72,6 +72,7 @@ function updateTutorial(){
  document.querySelectorAll('.guide-target,.guide-dim').forEach(el=>el.classList.remove('guide-target','guide-dim'));
  if(prompt){prompt.hidden=!tutorial;prompt.textContent=''}
  if(!tutorial||!s||s.phase==='complete')return;
+ if(worksheetExternalCalculator&&document.body.dataset.guideLevel==='0'){layer.hidden=true;if(prompt)prompt.hidden=true;return}
  let from=null,to=null,text='';
  const top=Q(`[data-top="${s.k}"]`),bottom=Q(`[data-bottom="${s.row}"]`);
  if(s.phase==='select'){
@@ -82,7 +83,8 @@ function updateTutorial(){
   to=$('equationReveal');text=worksheetExternalCalculator?(worksheetChallengeInput?'Try the keypad on the right.':'Get an answer on the right, then place it.'):'Tap to see the product.';
   const p=pointOf(to);if(p){const cue=document.createElement('span');cue.className='tap-cue';cue.style.left=p.x+'px';cue.style.top=p.y+'px';layer.append(cue)}
  }else if(worksheetExternalCalculator){
-  text=worksheetDigitEntry.feedback||(s.carryArmed?'Carry selected. Tap its product ones tile.':s.incoming&&!s.mixed?'Select the waiting carry, then its product ones tile.':'Select a worksheet tile, then write a digit with the keypad.');
+  text=worksheetDigitEntry.feedback||(s.carryArmed?'Carry selected. Add it to the product.':s.incoming&&!s.mixed?'Add the waiting carry first.':'Drag each digit, or tap a digit then its tile.');
+  if(document.body.dataset.guideLevel==='2'&&s.mixed){const expected=worksheetPlacementExpected();to=Q(digitTargetSelector(expected?.target)||'.no-entry-target')}
  }else{
   const onesSource=s.onesPlaced?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
   if(s.incoming&&!s.mixed){from=Q(`[data-carry="${s.k}"]`);to=onesSource;text='Bring the carry into the ones.';}

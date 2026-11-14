@@ -32,9 +32,8 @@ body[data-view="hub"] .hub-home .cabinet-art{position:absolute;inset:0;width:100
 body[data-view="hub"] .hub-home .cabinet-header{--header-inset:48px;position:absolute;top:25px;left:var(--header-inset);right:var(--header-inset);height:86px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:24px;z-index:4}
 body[data-view="hub"] .hub-home #menu-heading-global{display:block;width:100%;max-width:370px;height:auto;justify-self:start;pointer-events:none}
 body[data-view="hub"] .hub-home .boost-status{position:relative;width:max-content;height:70px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 24px;isolation:isolate;--utility-height:70px}
-body[data-view="hub"] .hub-home .boost-star{position:static;width:34px;height:44px;flex:none;animation:sparkle 4s ease-in-out infinite;filter:drop-shadow(0 0 4px #fffae8);pointer-events:none}
+body[data-view="hub"] .hub-home .boost-star{position:static;width:34px;height:auto;flex:none;object-fit:contain;pointer-events:none}
 body[data-view="hub"] .hub-home .boost-number{font-size:36px;line-height:1.1;white-space:nowrap;color:#873e78;text-shadow:0 1px #fff7e2}
-@keyframes sparkle{0%,100%{transform:scale(.95) rotate(-4deg);filter:drop-shadow(0 0 4px #fffae8) hue-rotate(0deg)}50%{transform:scale(1.06) rotate(4deg);filter:drop-shadow(0 0 8px #fff) hue-rotate(70deg)}}
 body[data-view="hub"] .hub-home #cabinet-inner{position:absolute;left:55px;right:45px;top:166px;bottom:72px;display:flex;gap:8px;min-height:0;z-index:2}
 body[data-view="hub"] .hub-home #cabinet-scroll{flex:1;min-width:0;min-height:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y;scroll-behavior:auto}
 body[data-view="hub"] .hub-home #cabinet-scroll::-webkit-scrollbar,body[data-view="hub"] .hub-home .board-paper-scroller::-webkit-scrollbar,body[data-view="hub"] .hub-home .modal-content::-webkit-scrollbar{display:none}
@@ -47,7 +46,7 @@ body[data-view="hub"] .hub-home .food-aura{position:absolute;inset:12% 3% 15%;ba
 body[data-view="hub"] .hub-home .food-image{position:absolute;left:7%;top:5%;width:86%;height:76%;object-fit:contain;z-index:3;pointer-events:none;filter:drop-shadow(0 3px 3px #34190c66)}
 body[data-view="hub"] .hub-home .cell-glare{position:absolute;inset:3px 3px 32px;z-index:4;pointer-events:none;border-radius:12px;background:linear-gradient(128deg,#fff7df1a 0 8%,transparent 8% 16%,#fff7df12 16% 20%,transparent 20%)}
 body[data-view="hub"] .hub-home .food-multiplier{position:absolute;z-index:5;left:50%;bottom:5px;transform:translateX(-50%);height:33px;min-width:119px;max-width:90%;display:flex;align-items:center;justify-content:center;gap:3px;padding:2px 12px 3px 8px;background:url('../assets/bakery-ui/multiplier-chip.png') center/100% 100% no-repeat;color:#fff8de;font-size:21px;line-height:1;font-weight:900;text-shadow:0 2px 1px #482414;white-space:nowrap}
-body[data-view="hub"] .hub-home .food-multiplier img{width:25px;height:27px;object-fit:contain}
+body[data-view="hub"] .hub-home .food-multiplier img{width:25px;height:auto;object-fit:contain}
 body[data-view="hub"] .hub-home .art-scroll,body[data-view="hub"] .hub-home .board-scroll-rail{position:relative;flex:none;width:39px;height:100%;touch-action:none;z-index:4}
 body[data-view="hub"] .hub-home .rail-image{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 body[data-view="hub"] .hub-home .scroll-end,body[data-view="hub"] .hub-home .board-scroll-end{position:absolute;left:-6px;width:51px;height:42px;min-height:0;min-width:0;padding:0;border:0;background:none;z-index:3}

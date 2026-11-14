@@ -21,6 +21,7 @@ function spark(el,txt='✦'){if(!el||window.__BATCH_TEST_FAST||matchMedia('(pref
 function place(part,kind,c){
  if(!productActive()||busy||!s.revealed)return;
  if(worksheetExternalCalculator&&!worksheetDigitAuthorized)return;
+ if(worksheetExternalCalculator&&!s.mixed)return;
  const cc=currentCol(),isLast=lastDigit();
  let valid=part==='ones'?(kind==='slot'&&c===cc):((kind==='slot'&&c===cc+1)||(kind==='carry'&&!isLast&&c===s.k+1));
  if(!valid){invalid();status('Try another place for this digit.',true);return}
@@ -67,7 +68,7 @@ function addCarry(target){
   else if(s.tensLocation==='row')s.rows[s.row][currentCol()+1]=tens();
   else s.carrySlots[s.k+1]={value:tens(),provisional:false};
  }
- if(worksheetExternalCalculator){worksheetDigitEntry.guidance[digitStepKey()+'/carry-down']={mistakes:0};worksheetDigitEntry.feedback='Carry added. Write the updated digits.';worksheetDigitEntry.level=0}
+ if(worksheetExternalCalculator){worksheetDigitEntry.guidance[digitStepKey()+'/carry-down']={mistakes:0};worksheetDigitEntry.feedback='Carry added. Place the updated digits.';worksheetDigitEntry.level=0}
  s.chosen=null;selection=null;play('mix');render();pulseWorksheet(target==='placed'||worksheetExternalCalculator?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]'));status('Combined.');maybeAdvance();
 }
 function maybeAdvance(){if(busy||!productActive()||!s.revealed||!s.mixed||!s.onesPlaced||(tens()>0&&(!s.tensPlaced||(!lastDigit()&&s.tensLocation!=='carry'))))return;s.done++;s.boxes++;money+=5;play('done');s.k++;s.raw=0;s.mixed=false;s.incoming=0;s.onesPlaced=false;s.tensPlaced=false;s.tensLocation=null;s.chosen=null;s.carryArmed=false;s.first=null;selection=null;if(s.k<s.A.length){s.phase='select';render();status('');return}if(s.row<s.B.length-1){s.row++;s.k=0;s.phase='select';s.carrySlots={};render();status('New row.');return}if(s.B.length>1){s.phase='sum';s.sumCol=0;s.sumCarry=0;render();status('Partial products ready.');return}finish();}
