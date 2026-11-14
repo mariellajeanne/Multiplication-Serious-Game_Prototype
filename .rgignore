@@ -1,0 +1,8 @@
+# Keep normal source searches focused. Explicit paths remain available when needed.
+.agents/
+.test-tools/
+.playwright-cli/
+output/
+docs/history/
+docs/previews/
+__pycache__/

@@ -182,13 +182,17 @@ function unboxAllPackages(viewId=null){
  if(!packageSession||viewId!==null&&viewId!==packageSession.viewId)return false;
  return unboxPackages(packageType,g.packages[packageType]);
 }
+function discoverPackageFood(rank,fromStock=true){
+ const legacy=fromStock?g.legacyPackageFoods?.[rank]?.shift():null;
+ return discoverFood(Number.isInteger(legacy)?pick(FOOD.filter(food=>food.rarity===legacy)):drawFood(rank));
+}
 function commitPackageOpening(rank,slots,focus='packageOpenAll'){
  const session=packageSession;
  if(!session||session.busy||!slots.length||slots.length>g.packages[rank]||slots.some(slot=>slot.reward||!session.slots[rank].includes(slot))||!packageStockIsCurrent())return false;
  const backup=JSON.stringify(g),rewards=[];session.busy=true;
  try{
   commitPurchaseUndo('Packages opened');g.packages[rank]-=slots.length;g.packageRevision=(g.packageRevision||0)+1;
-  for(const slot of slots){const legacy=g.legacyPackageFoods?.[rank]?.shift();rewards.push(discoverFood(Number.isInteger(legacy)?pick(FOOD.filter(food=>food.rarity===legacy)):drawFood(rank)))}
+  for(const slot of slots)rewards.push(discoverPackageFood(rank));
   if(!save()){g=JSON.parse(backup);migrateFrame11(g);return false}
   // Only successful durable transactions reveal foods. Replayed slot IDs are spent.
   slots.forEach((slot,i)=>slot.reward=rewards[i]);

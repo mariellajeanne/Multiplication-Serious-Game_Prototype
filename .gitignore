@@ -4,3 +4,10 @@ node_modules/
 *.log
 
 .test-tools/
+
+# Reproducible browser/debug output; never commit generated screenshots or backups.
+/output/
+/.playwright-cli/
+/docs/previews/
+__pycache__/
+*.py[cod]

@@ -1,105 +1,43 @@
-# Latest focused update
+# Production architecture
 
-**Full production UI replacement (2026-11-09, latest):** [Integration and preservation record](PRODUCTION_UI_REPLACEMENT.md) supersedes the previous illustrated home implementation below. `src/ui/bakery-hub.js` renders the transferred 2000×1200 composition and shared popup components from `assets/bakery-ui/`, directly reading `g` and invoking the existing production actions. `src/ui/illustrated-controls.js` binds native scroll viewports to the illustrated rails. Home/popup styles are isolated from the original worksheet and package shop; `styles/bakery-preserved-interfaces.css` retains their original rules. `orderCoinQuote` is shared between ticket display and actual order creation; frozen saved budgets remain authoritative. No demo catalog, state, answer field, package distribution or persistence code was copied. The iframe engine/bridge and package controllers are unchanged. Archived environment art is mounted only for its explicit query route.
+My Panaderya is a static site. Root `index.html` declares the stylesheet and classic-script order; `src/environment-entry.js` loads those scripts sequentially. Default is the illustrated hub. `?view=legacy` uses the preserved interface with the same game/save; `?view=environment` mounts only scenery and never loads game state, migrations or timers.
 
-**Illustrated bakery (2026-11-09, current):** [Current architecture, art mapping and checks](ILLUSTRATED_BAKERY.md) supersedes the Three.js renderer and environment-only entry below. Default loads the existing classic game, `src/ui/illustrated-art.js` and `src/ui/bakery-hub.js`. Separate WebP environment layers and clipped food/package/coin atlases replace procedural models; the same game state, transaction paths and persistent worksheet mount remain. Shared presentation adapters keep the package popup's original vector art and skin. Tickets add a saved recipe `foodId`, with migration and started-order locking; equations, payouts, worksheet protocol and the save key remain unchanged. Earlier food-only economy evidence remains in [the previous hub handoff](THREEJS_BAKERY_HUB.md).
+## Source and data flow
 
-**Accelerating economy (2026-11-05):** [Current formulas, migration and simulation evidence](ECONOMY_REBALANCE.md) supersedes earlier prices, doubling coin-tier bases, package gates and the 100-purchase Bakery cap. Power keeps its existing 8.5% gain with 5,000 purchases; prices grow below income, and old assets, unlocked package types and frozen rewards are preserved. Run `node tests/simulate-progression.mjs docs/progression-simulation.json`.
+| Responsibility | Source |
+| --- | --- |
+| Food catalog, modes and content IDs | `src/data/catalog.js` |
+| Pure progression/migrations and pricing formulas | `src/game/progression.js`, `economy-balance.js` |
+| Persistent state, equipment, ticket generation/refresh | `src/game/state.js` |
+| Transactions, Mastery, packages, slots, Undo | `src/game/progression-economy.js`, `economy.js` |
+| Order runs, quotes, budgets and one-time claims | `src/game/rewards.js` |
+| Production illustrated home, collection and shared popups | `src/ui/bakery-hub.js` |
+| Native scrolling with illustrated rails | `src/ui/illustrated-controls.js` |
+| Shared/preserved menus, package shop, dialogs and art | Other files in `src/ui/` |
+| Main render, lifecycle and timers | `src/main.js` |
+| Parent worksheet mount and protocol | `src/game/worksheet-bridge.js` |
+| Child math engine | `worksheet/worksheet-engine.html`, `worksheet/src/` |
 
-**Packages workspace (2026-11-05):** [Three-column interface and automatic collection](PACKAGES_INTERFACE.md) supersedes separate Buy/Unbox tabs and reward dialogs: all eight types, 50-per-type purchasing capacity (old excess stock retained), immediate food/Mastery credit and selected-type-only Open All. Verify with `python tests/browser-packages.py`.
+The hub reads `g.activeMenu` and `g.owned`, derives food contributions/Boost, and renders `g.board` with `g.orderRuns` progress. It invokes existing production controllers rather than maintaining another catalog/economy. Main Packages props are decorative; the station, plaque and navigation button open the original nine-tier shop.
 
-**Coin-only orders (2026-11-04):** [Order Ticket tiers and rewards](ORDER_COIN_TIERS.md) supersedes package drops, temporary Package Luck and challenge coin modifiers below. New orders pay base coins times saved Baker's Boost; packages come from the Package Counter. Preserve migration of already-earned packages and fixed legacy budgets. Verify with `python tests/browser-order-coins.py` and the full worksheet runner.
+The hub adapter routes the original Packages shop and worksheet shell through preserved renderers/art. Their styles live in `styles/bakery-preserved-interfaces.css`; current home/popups use `bakery-hub.css` and `bakery-interface.css`. All stylesheets referenced by the root and worksheet entries are active, including shared/legacy layers. Current visuals and structural anchors are in [UI geometry](UI_GEOMETRY_REFINEMENT.md).
 
-**Frame 12 selection (2026-11-04):** [Current floating controls](FOOD_SELECTION_IMPLEMENTATION.md) replace the food-details sheet without resizing the grid; single and multi-selection use exclusive compact popup states.
+Food and coin sprite filenames are constructed dynamically; the absence of a literal filename in source does not make an asset unused. Worksheet/package SVGs also reference image atlases. The explicit environment route has separate WebP layers. The retired Three.js renderer and standalone demo are absent from production.
 
-**Bakery Power panel (2026-11-04):** [Current wireframe implementation](BAKERY_POWER_PANEL.md) uses a full-height 60/40 Bakery Power/Packages sidebar, a current bakery image, and a vertical progression list; this replaces the earlier 40vh cap.
+## Persistence and worksheet contract
 
-**Viewport responsiveness (2026-11-04):** [Current viewport layout](VIEWPORT_RESPONSIVENESS.md) supersedes earlier fixed panel heights, layout caps and header/toolbar breakpoints.
+`panaderyaQuestV2` is a compatibility contract. `state.js` and `progression.js` migrate old records, preserving ownership/investment, unlocked package types, excess stock, legacy reward promises, order identities, claim records and saved worksheet state. Retired Power fields are neutral compatibility data, not active bonuses.
 
-**Compact Menu header (2026-11-04):** [Current header and counter popups](MENU_HEADER_IMPLEMENTATION.md) supersedes earlier topbar, Boost-banner and Menu-heading descriptions.
+Classic scripts share top-level lexical bindings. Their order in both HTML entries is significant; they are not independent ES modules. Avoid introducing colliding globals or casually changing load order.
 
-**Kitchen removal (2026-11-04):** [Current removal and save compatibility](KITCHEN_REMOVAL.md) supersedes all Kitchen descriptions below. Baker's Boost and proportional prices now use recipes and Bakery Power only.
+The parent bridge and `worksheet/src/parent-bridge.js` exchange `postMessage` commands and state. Source markers are `bc-shell` toward the child and `pq-worksheet` toward the parent. Preserve origin/frame/attempt checks, ready/start/state/complete acknowledgements, sound/tutorial/layout controls and retry delivery.
 
-**Current owner corrections (2026-11-04):** [Tablet UX implementation](TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](../UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
+A run owns its worksheet snapshot and an append-only action ledger. Accepted mathematical actions use stable attempt/row/column/kind identities; duplicate messages and Undo/replay cannot grant rewards twice. Started orders keep frozen budgets. Completion/claim are independently guarded. The iframe is retained across dialogs and pause/resume; saved worksheets restore after reload. Geometry/animation feedback must never determine reward eligibility.
 
-**Current owner-directed implementation (2026-11-04):** [Frame 11](FRAME_11_IMPLEMENTATION.md) supersedes the older inventory/layout and progression notes below. The app now has one starting menu slot, all owned foods in the center grid, unlimited duplicate-unlocked Recipe Mastery, 100 configurable Bakery Power purchases, coin package buying/saved unboxing, safe purchase Undo, persistent per-ticket worksheets and a retrying WebKit handshake. Preserve the original math interactions and existing save key.
+The worksheet owns math input, placement, carries, partial-row addition, guides and SFX. The parent owns game rewards. See [worksheet source guide](../worksheet/README.md) for module responsibilities.
 
-See [Mastery cards and ticket exit](MASTERY_AND_TICKET_FIX.md) for the current card presentation, equal-base Auto Equip fix and retained live worksheet on Exit/Resume.
+## Validation and history
 
-# Architecture, code map, and constraints
+Use [AGENTS.md](../AGENTS.md) for exact Node and Edge/WebKit commands. Browser integration covers package purchases/opening, duplicate Mastery capacity, upgrades, equipment/Boost, saves, retained worksheet mounts and claims. Worksheet regression covers carrying, tap/drag/swipe, settings and degraded APIs/delivery. Fixtures under `tests/fixtures/` are test inputs/baselines, not disposable output.
 
-**Phase 1 environment (2026-11-08):** [Current environment and entry-point isolation](BAKERY_ENVIRONMENT.md) supersedes older main-screen appearance notes. `index.html` defaults to scenery only. `src/environment-entry.js` activates the original classic scripts, in their original order, only at `?view=legacy`. The default environment never executes state migrations, timers or lifecycle saves. Existing gameplay sources and both worksheet bridges are unchanged. New scenery styles are scoped in `styles/bakery-environment.css`.
-
-**Current implementation (2026-10-31):** The owner explicitly authorized Stages C/D. See [STAGE_C_D_IMPLEMENTATION.md](STAGE_C_D_IMPLEMENTATION.md) for current eight rarities, Level/Tier 5 and value-preserving fusion, scaled percentage economy, Equip Best/Auto, five tickets with persisted 3-minute refresh, actual Bakery Level 30 (Kitchen subsequently removed), migrations, simulations and verification. This supersedes older deferrals, caps and prototype formulas below. Existing worksheet behavior and component theme remain.
-
-**Current component theme:** [BAKERY_COMPONENT_REVIEW.md](BAKERY_COMPONENT_REVIEW.md). The final theme stylesheet is replaced, not supplemented with another theme layer. Parent and iframe share local Nunito via styles/typography.css. bakeryIcon() in bakery-art.js supplies UI illustrations and must load before main.js; protocol, economy and saved state are unchanged.
-
-**Latest UI continuation:** [COZY_VISUAL_REVIEW.md](COZY_VISUAL_REVIEW.md). Inventory selection/pending confirmation are transient UI state; batch actions validate and save once. Resolved-order dialogs use an optional presentation variant with a fixed header and scrolling body. Existing reward/claim protocol and storage key are unchanged; Stage C remains on hold.
-
-**Current A/B checkpoint:** [CORRECTIVE_REDESIGN.md](CORRECTIVE_REDESIGN.md). Completion now retries until an attempt-scoped acknowledgement and can be recovered from a verified complete state; all existing action/combo/ticket checks remain. Worksheet animation errors cannot strand a valid addition, and a saved claim restores the in-page Collect view after reload. The two bridge files must ship together. Economy migrations are deferred until the owner reviews the visuals.
-
-## Running/deploying
-- Latest annotation-led UI: `styles/feedback-layout.css` and `worksheet/styles/responsive-workspace.css` load last. Parent `fitWorksheet()` sends presentation-only `layout` values; the child changes CSS dimensions and rerenders without resetting math/history. State reports include normalized protected surface geometry used only for reward routing. See [ANNOTATION_REDESIGN.md](ANNOTATION_REDESIGN.md) for implementation and the outstanding target-resolution visual checks.
-- The 2026-10-30 UX redesign adds `src/ui/bakery-art.js` (local SVG foods and order presentation), `src/ui/reward-feedback.js` (presentation-only flights), and last-loaded `styles/bakery-theme.css`. Worksheet visuals use its last-loaded `custom-theme.css`. Keep all files when serving the static site; no package/build step or external asset service was introduced.
-- Static site: root `index.html` imports classic scripts in precise order and CSS from `styles/`; use VS Code Live Server or any static local HTTP server. **No npm build or compilation.** Root GitHub Pages can deploy all files.
-- Data/saves stored via `localStorage` key **`panaderyaQuestV2`**. This key is a compatibility contract, NOT a code-version label to rename casually. An update that changes its format needs a migration plan.
-- Two browser documents: main page and an iframe for the interactive multiplication worksheet. They exchange `window.postMessage` notifications; `src/game/worksheet-bridge.js` is main side, `worksheet/src/parent-bridge.js` is worksheet side. Source markers must agree (`bc-shell` into worksheet, `pq-worksheet` back to main) and origin/iframe validation should be respected. Avoid dropping event data or breaking ready/start/state/complete/sound/tutorial controls.
-- Some worksheet modules were conservatively separated into **classic scripts sharing top-level lexical bindings**; they are not self-contained ES modules. Their order in `worksheet/worksheet-engine.html` is significant. Refactoring to explicit module imports is possible, but must be deliberately staged and tested.
-
-## Worksheet action rewards (approved implementation, 2026-10-30)
-
-- A ticket attempt owns `g.run.worksheetRewards = {version:1, attemptId, actions:{...}}`. This additive field is saved under the existing **panaderyaQuestV2** key. New tickets and explicit retries initialize a fresh attempt; dialogs, duplicate notifications, undo/redo and a saved-run reload retain the ledger.
-- `start` carries `attemptId`; child `started/state/complete/height` messages echo it. Parent also checks the current iframe window. Duplicate `ready`/`start` messages do not reset the mounted worksheet. Source markers and existing sound/tutorial controls are unchanged. Deploy both bridge files together.
-- Child bridge observes accepted worksheet states after the existing render function, including committed async placements. It keeps an append-only action map outside undo history. IDs are `attemptId/row/column/kind`; kinds are connect, reveal, place-ones, carry-down, carry-up or final place-tens, and combo. Temporary tens placement before lifting earns no additional reward. Polls carry the cumulative action list, so rapid actions and missed intermediate snapshots do not lose rewards. Completion includes the list to flush any outstanding actions.
-- Parent validates action IDs and mathematical eligibility, deduplicates before awarding, and requires necessary actions before sealing a combo. Each combo gets one chest opportunity and two correctness credits; final completion is separately guarded by `attemptId/complete`, matching ticket operands, and all sealed combos. Claim clears the run as before. Coins/Luck are no longer awarded merely because a poll's UI stage or carry counter changed.
-- Existing budget, 76% pending-action cap, action weight classes, mode payout formulas, chest probability formula/rarity distribution and final guaranteed chest are retained. Reliable recording of distinct necessary actions replaces timing-dependent rewards; incoming and outgoing carries retain their own rewards. Final completion tops up to the existing ticket payout.
-- Compatibility: pre-ledger saved runs retain coins/pool/chests and baseline previously completed pairs. If the old snapshot was mid-product, that pair's ambiguous prior action rewards are conservatively considered paid; its combo and subsequent pairs still earn normally. Old saves did not retain exact action identities, so this avoids retroactive replay awards. No whole-save reset or storage-key rename.
-- Page reload still restarts worksheet math; the ledger prevents replayed math from earning the same pending rewards again. Full math snapshot restoration is a separate feature. The child's standalone cosmetic money counter is not the parent economy.
-
-Run `node --test tests/smoke.test.mjs tests/worksheet-session.test.mjs tests/worksheet-rewards.test.mjs` for structural/session/action regressions. `node tests/browser-worksheet.mjs [path-to-Chromium-or-Edge]` runs a localhost, isolated-profile headless browser check using Node 22 built-in WebSocket/CDP APIs; it needs browser-launch permissions, no dependency install. The runner leaves only an isolated OS-temp profile for OS cleanup. See the audit follow-up for exact results and limitations.
-
-## Major files
-| Responsibility | Files |
-|---|---|
-| Food catalog, ingredients, modes, tutorial copy | `src/data/catalog.js` |
-| Store/load progress, menu value, rarity ticket generator | `src/game/state.js` |
-| Action rewards, luck, chest selection, ticket sessions | `src/game/rewards.js` |
-| Food upgrade/fusion/sale, decor, staff, mode changes | `src/game/economy.js` |
-| Parent iframe/session state and messaging | `src/game/worksheet-bridge.js` |
-| Main render/bootstrap | `src/main.js` |
-| Center menu, slots, in-progress worksheet wrapper | `src/ui/menu.js` |
-| Bakery rail/ticket board/scene | `src/ui/scene.js` |
-| Dialogs, settings, upgrade menus, onboarding | `src/ui/dialogs.js` |
-| CSS design | `styles/base.css`, `menu.css`, `tickets.css`, `worksheet.css` |
-| Worksheet HTML and script order | `worksheet/worksheet-engine.html` |
-| Worksheet math state | `worksheet/src/state.js` |
-| Sound and multiplication visual feedback | `worksheet/src/sound-and-multiplication-fx.js` |
-| Placement / carry logic | `worksheet/src/product-placement.js` |
-| Downward addition / partial products | `worksheet/src/partial-product-addition.js` |
-| Math layout and tutorial arrow rendering | `worksheet/src/worksheet-render-and-tutorial.js` |
-| Hitboxes, gestures, rounded capsule connection | `worksheet/src/tap-and-drag.js` |
-| Worksheet UI settings and gestures | `worksheet/src/worksheet-controls.js` |
-| Worksheet → parent bridge | `worksheet/src/parent-bridge.js` |
-| Embedded-app-specific controls | `worksheet/src/embedded-controls.js` |
-| Worksheet styles | `worksheet/styles/foundation.css`, `effects-and-guides.css`, `receipt-theme.css`, `embedded-layout.css`, `custom-theme.css` |
-| Testing guidance | `tests/smoke.test.mjs`, `tests/worksheet-manual-checklist.md` |
-
-## Known refactoring/implementation cautions
-- Reward action records may include optional normalized `point:{x,y}` coordinates for a presentation origin. The parent validates bounds and falls back to the worksheet center; coordinates never determine action eligibility or payouts. `theme` and `feedback` are presentation-only commands (decor tint and chest sound). Source markers, attempt IDs, the math engine and the save key remain unchanged.
-- Reward accounting is immediate; `reward-feedback.js` can briefly defer the dock's displayed total until arrival. `syncRewardPresentation()` cancels stale flights on claim/new run. Reduced motion fades without travel. Both reward arrival and worksheet placement/addition use bounded completion callbacks so paused compositor promises cannot strand UI totals or busy state. These helpers never award additional rewards.
-- Normal navigation is progressively shown at existing unlock counts. `showTutorial()` now points to live interactions instead of opening onboarding cards. Root `scene.js` no longer contains the superseded worksheet renderer; the current worksheet view belongs only to `worksheet-bridge.js`.
-- Active worksheet lifetime: `src/main.js` retains the mounted iframe when `render()` is called for the same `g.run` object in `engine` phase. Dialogs live in the separate `#modals` mount, so closing Help/Settings/other dialogs does not rebuild the worksheet. Claim, failure, abandonment, reset, and a new run still render normally. This preserves live child state and animations; it does not implement page-reload resume.
-- Tutorial messages are handled by `worksheet/src/embedded-controls.js`, separately from the parent bridge. The UX redesign fixes the addition-guide OFF issue and adds state-specific target focus/prompts. Switching OFF clears guidance synchronously, including when frame painting is paused. Mathematical selection/provisional-state styling is distinct from tutorial guidance.
-- A lot of code is extracted from a one-file prototype, including DOM-template strings and global functions. Avoid treating filenames as clean architecture boundaries without inspection.
-- Main app sends commands and receives worksheet progress to calculate coins/chests. Do not create independent reward payouts inside iframe; it is a math-input engine.
-- When renaming an iframe element ID or a message source string, change BOTH sender and receiver and relevant tests. Never blindly replace persistent storage keys or public APIs.
-- The worksheet's visual theme is **not fixed**; specifically requested changes can modify HTML/CSS or even input architecture, but preserve interaction semantics and run carrying/touch regression tests.
-- For UI tweaks, update only relevant visuals; for math logic and bridge changes, run end-to-end checks (e.g. `79 × 18 = 1422`, tutorial arrows on/off, sound toggles, dragging/carry placement, downward swipe).
-
-## Verification checklist
-1. `node --test tests/smoke.test.mjs` from repo root (syntax/import order/basic references).
-2. Serve with Live Server and confirm main menu grid/ticket board and food multiplier.
-3. Choose ticket, complete product/carry sequence and final addition, earn coins and chests, collect a Filipino food.
-4. Toggle arrows OFF (none should render), ON (only next-step hints), toggle sound/mute.
-5. Check slots and coin deductions, food upgrades/fusions, reload/saved state, and mobile/tablet layout.
-6. Summarize what was actually tested, what failed and what's still exploratory.
+`docs/history/` preserves earlier decisions, proposals and numerical comparisons. They do not override current code/specifications. `tests/check-economy-results.mjs` validates a historical Power-era dataset explicitly; the current food-only simulator is `tests/simulate-progression.mjs`. Write fresh reports under ignored `output/`, for example `node tests/simulate-progression.mjs output/progression.json` after creating `output/`.

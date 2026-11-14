@@ -1,5 +1,23 @@
 {
   "liveServer.settings.port": 5500,
   "liveServer.settings.root": "/",
-  "files.autoSave": "off"
+  "files.autoSave": "off",
+  "search.exclude": {
+    "**/.agents/**": true,
+    "**/.test-tools/**": true,
+    "**/.playwright-cli/**": true,
+    "**/output/**": true,
+    "**/docs/history/**": true,
+    "**/docs/previews/**": true,
+    "**/__pycache__/**": true
+  },
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/*.pyc": true
+  },
+  "files.watcherExclude": {
+    "**/.test-tools/**": true,
+    "**/output/**": true,
+    "**/.playwright-cli/**": true
+  }
 }

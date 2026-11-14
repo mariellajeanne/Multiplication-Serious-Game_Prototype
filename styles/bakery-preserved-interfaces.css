@@ -1,4 +1,6 @@
 /* Preserved production worksheet and Packages exceptions. */
+.package-opening-grid .food-art{object-fit:contain}
+.package-buy>strong{color:#725030}
 .boost-sparkle{display:inline-block;position:relative;width:1.15em;height:1.7em;flex:none;vertical-align:middle;filter:drop-shadow(0 0 3px #b4dbff);color:transparent}
 .boost-sparkle::before,.boost-sparkle i{content:"";position:absolute;inset:0;-webkit-mask:url('../assets/illustrated/boost-silhouette.svg') center/contain no-repeat;mask:url('../assets/illustrated/boost-silhouette.svg') center/contain no-repeat}
 .boost-sparkle::before{background:conic-gradient(from 30deg,#fdadbd,#e9a8ee,#a1b6ff,#83e1ec,#d1ec95,#ffe689,#fdadbd)}

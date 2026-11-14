@@ -70,7 +70,7 @@ try{
   assert.equal(await evaluate(`document.querySelector('.modal')===null`),true,'no reading assignment on first launch');
   assert.equal(await evaluate(`$('walletCoins').textContent`),'250');
   assert.equal(await evaluate(`document.querySelector('.topbar .wallet')===null&&document.querySelector('.menu-valuebar .wallet')!==null`),true);
-  const shots=resolve(root,'docs/previews/progression');await mkdir(shots,{recursive:true});
+  const shots=resolve(root,'output/playwright/progression');await mkdir(shots,{recursive:true});
   const screenshot=async name=>{
     await pause(280);
     const shot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});

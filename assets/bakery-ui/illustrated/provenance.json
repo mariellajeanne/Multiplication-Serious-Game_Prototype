@@ -1,0 +1,372 @@
+{
+  "tool": "Built-in image_gen",
+  "direction": "User references: illustrated bakery drawing and eight progressive ticket designs; Coin Bag blue, Coin Bucket purple, Coin Cart yellow.",
+  "construction": "Art in place: original panel footprints, source canvas roles, masks, scrolling, hit regions and popup placement retained. Reference illustrations fit the existing slots. Dynamic numbers stay live.",
+  "source_outputs": {
+    "room": "exec-d04d2f4d-320d-4aa3-aaec-cd3959767b8c.png",
+    "cabinet": "exec-6d1e2acc-6980-4c56-8c0c-9467810b50f2.png",
+    "clipboard": "exec-3d39d346-34e2-4e4c-8e89-4fc818dd0925.png",
+    "title": "exec-8f412706-7d6d-4aee-99b1-be7f576e7a23.png",
+    "register": "exec-39d71d25-8eff-403d-85a0-86d7db92cc29.png",
+    "home-controls": "exec-fba99596-4894-48e9-80a5-91b554ba6b68.png",
+    "tickets": "exec-93d1b6b4-bc50-4068-bb35-1fe743fc2e8b.png",
+    "coins": "exec-c56f9ca0-96db-4f45-b84a-5c95e73c530a.png",
+    "foods": "exec-916f6593-78cf-46c6-a3c3-310fc2d0466c.png",
+    "controls": "exec-d8bec8ad-78de-4d82-8d39-5f0bde397520.png"
+  },
+  "assets": {
+    "room": {
+      "size": [
+        1620,
+        971
+      ]
+    },
+    "cabinet": {
+      "size": [
+        1328,
+        1024
+      ]
+    },
+    "clipboard": {
+      "size": [
+        1052,
+        1494
+      ]
+    },
+    "title": {
+      "size": [
+        2170,
+        725
+      ]
+    },
+    "register": {
+      "size": [
+        1456,
+        1080
+      ]
+    },
+    "ticket-01": {
+      "size": [
+        701,
+        280
+      ]
+    },
+    "ticket-02": {
+      "size": [
+        701,
+        280
+      ]
+    },
+    "ticket-03": {
+      "size": [
+        701,
+        281
+      ]
+    },
+    "ticket-04": {
+      "size": [
+        701,
+        281
+      ]
+    },
+    "ticket-05": {
+      "size": [
+        701,
+        281
+      ]
+    },
+    "ticket-06": {
+      "size": [
+        701,
+        281
+      ]
+    },
+    "ticket-07": {
+      "size": [
+        701,
+        280
+      ]
+    },
+    "ticket-08": {
+      "size": [
+        701,
+        280
+      ]
+    },
+    "coin-01": {
+      "size": [
+        444,
+        444
+      ]
+    },
+    "coin-02": {
+      "size": [
+        443,
+        444
+      ]
+    },
+    "coin-03": {
+      "size": [
+        443,
+        444
+      ]
+    },
+    "coin-04": {
+      "size": [
+        444,
+        444
+      ]
+    },
+    "coin-05": {
+      "size": [
+        444,
+        443
+      ]
+    },
+    "coin-06": {
+      "size": [
+        443,
+        443
+      ]
+    },
+    "coin-07": {
+      "size": [
+        443,
+        443
+      ]
+    },
+    "coin-08": {
+      "size": [
+        444,
+        443
+      ]
+    },
+    "food-01": {
+      "size": [
+        280,
+        280
+      ]
+    },
+    "food-02": {
+      "size": [
+        281,
+        280
+      ]
+    },
+    "food-03": {
+      "size": [
+        281,
+        280
+      ]
+    },
+    "food-04": {
+      "size": [
+        280,
+        280
+      ]
+    },
+    "food-05": {
+      "size": [
+        280,
+        281
+      ]
+    },
+    "food-06": {
+      "size": [
+        281,
+        281
+      ]
+    },
+    "food-07": {
+      "size": [
+        281,
+        281
+      ]
+    },
+    "food-08": {
+      "size": [
+        280,
+        281
+      ]
+    },
+    "food-09": {
+      "size": [
+        280,
+        280
+      ]
+    },
+    "food-10": {
+      "size": [
+        281,
+        280
+      ]
+    },
+    "food-11": {
+      "size": [
+        281,
+        280
+      ]
+    },
+    "food-12": {
+      "size": [
+        280,
+        280
+      ]
+    },
+    "food-13": {
+      "size": [
+        280,
+        281
+      ]
+    },
+    "food-14": {
+      "size": [
+        281,
+        281
+      ]
+    },
+    "food-15": {
+      "size": [
+        281,
+        281
+      ]
+    },
+    "food-16": {
+      "size": [
+        280,
+        281
+      ]
+    },
+    "food-17": {
+      "size": [
+        280,
+        280
+      ]
+    },
+    "button-cream": {
+      "size": [
+        390,
+        170
+      ]
+    },
+    "button-teal": {
+      "size": [
+        391,
+        171
+      ]
+    },
+    "help": {
+      "size": [
+        326,
+        332
+      ]
+    },
+    "settings": {
+      "size": [
+        326,
+        333
+      ]
+    },
+    "close": {
+      "size": [
+        326,
+        332
+      ]
+    },
+    "boost": {
+      "size": [
+        329,
+        274
+      ]
+    },
+    "cloche": {
+      "size": [
+        390,
+        288
+      ]
+    },
+    "thumb": {
+      "size": [
+        143,
+        363
+      ]
+    },
+    "nav-packages": {
+      "size": [
+        705,
+        249
+      ]
+    },
+    "nav-play": {
+      "size": [
+        728,
+        207
+      ]
+    },
+    "nav-collection": {
+      "size": [
+        727,
+        271
+      ]
+    },
+    "packages-entry": {
+      "size": [
+        720,
+        327
+      ]
+    },
+    "menu-heading": {
+      "size": [
+        739,
+        180
+      ]
+    },
+    "wallet": {
+      "size": [
+        1024,
+        284
+      ]
+    }
+  },
+  "prompts": [
+    "Faithfully recreate reference bakery composition and simplified dimensional illustration, leaving center empty for independent live UI.",
+    "Illustrated empty caramel display cabinet and clipboard; reference-style My Panaderya sign; teal/cream register.",
+    "Eight blank wide ticket frames following reference silhouettes and ornaments, cream/mint/blue/purple/yellow/coral/gold/rainbow; three empty internal panels and blank top plaque.",
+    "Eight isolated coin reward silhouettes, from modest stack to crowned winged treasury, consistent cell bounds.",
+    "Seventeen Filipino bakery foods in catalog order. Remove grain, crumbs and speckling; broad clean cel shading and consistent outlines.",
+    "Matching illustrated cream/gold/teal blank pill controls, help/settings/close, boost diamond, serving cloche and scrollbar thumb.",
+    "Reusable cream popup frame, caramel wood rim, gold inner bevel, narrow teal accent, nine-slice compatible edges.",
+    "Art in place: use original cabinet, clipboard, title, register and room as exact geometry templates; cleaner reference drawing style only. Preserve all silhouettes, openings, stiles, padding and nine-slice seams.",
+    "Ticket geometry blueprint locks original two side notches, narrow reward column and expression/progress fields; reference-inspired tier ornament stays inside the existing mask."
+  ],
+  "geometry": {
+    "coordinate_system": [
+      2000,
+      1200
+    ],
+    "menu_showcase": [
+      520,
+      207,
+      900,
+      700
+    ],
+    "orders_board": [
+      1430,
+      149,
+      410,
+      727
+    ],
+    "order_viewport": [
+      1478,
+      378,
+      314,
+      443
+    ],
+    "preserved_masks": [
+      "assets/bakery-ui/order-ticket-mask.svg",
+      "assets/bakery-ui/register-cutout.svg"
+    ],
+    "popup_layout": "Existing popup sizing and package workspace retained."
+  },
+  "control_spacing": "Dedicated icon+text sprites keep natural proportions and original grouping; no inserted or stretched pixel columns between icons and lettering."
+}

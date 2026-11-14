@@ -7,6 +7,19 @@ const ORDER_LIMIT=5, ORDER_REFRESH_MS=180000;
 // Saved Bakery Power is archived during hub migration; it no longer progresses.
 const PACKAGE_TYPES=['Standard','Lucky','Fortunate','Charmed','Blessed','Miraculous','Divine','Fate','Sovereign'];
 const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:ECONOMY_BALANCE.unlocks[rank],orders:[0,4,12,24,45,75,120,180,260][rank],priceOrders:ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank)}));
+function packageTierAvailable(state,rank){return !!PACKAGE_SHOP[rank]&&(state.completed>=PACKAGE_SHOP[rank].orders||state.packageTierUnlocks?.includes(rank)===true)}
+function packageAcknowledgements(ranks){return [...new Set([0,...(Array.isArray(ranks)?ranks:[])].filter(rank=>Number.isInteger(rank)&&!!PACKAGE_SHOP[rank]))].sort((a,b)=>a-b)}
+function migratePackageCelebrations(state){
+ // Established saves start from their existing availability. New saves carry an
+ // explicit receipt list so future earned tiers remain pending across reloads.
+ if(state.packageCelebrations?.version!==1)state.packageCelebrations={version:1,acknowledged:PACKAGE_SHOP.filter(type=>packageTierAvailable(state,type.rank)).map(type=>type.rank)};
+ state.packageCelebrations.acknowledged=packageAcknowledgements(state.packageCelebrations.acknowledged);
+ return state;
+}
+function mergePackageAcknowledgements(state,stored){
+ if(stored?.packageCelebrations?.version===1)state.packageCelebrations.acknowledged=packageAcknowledgements([...state.packageCelebrations.acknowledged,...(Array.isArray(stored.packageCelebrations.acknowledged)?stored.packageCelebrations.acknowledged:[])]);
+}
+function pendingPackageCelebrations(state){return PACKAGE_SHOP.filter(type=>type.rank>0&&packageTierAvailable(state,type.rank)&&!state.packageCelebrations.acknowledged.includes(type.rank)).map(type=>type.rank)}
 const MASTERY_STEP=.4, PURCHASE_UNDO_MS=10000;
 function recipeMastery(o){return Math.max(0,Math.floor(o.mastery??((o.level||1)-1)))}
 function masteryFactor(n){return n<5?LEVEL_FACTORS[n+1]:2.3+(n-4)*MASTERY_STEP}

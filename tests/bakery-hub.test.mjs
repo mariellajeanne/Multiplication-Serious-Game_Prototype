@@ -31,8 +31,8 @@ test('hub reads equipped recipes without empty boxes or demo state and exposes r
  assert.equal((h.run('html').match(/class="[^"]*\bhub-food\b/g)||[]).length,1);
  assert.equal((h.run('html').match(/class="[^"]*\bhub-package\b/g)||[]).length,1);
  assert.match(h.run('html'),/openHubFood\(1\)/);assert.match(h.run('html'),/data-hub-action="packages"/);
- assert.match(h.run('html'),/assets\/bakery-ui\/bakery-room.png/);
- assert.match(h.run('html'),/assets\/bakery-ui\/food-01.png/);
+ assert.match(h.run('html'),/assets\/bakery-ui\/illustrated\/room.png/);
+ assert.match(h.run('html'),/assets\/bakery-ui\/illustrated\/food-01.png/);
  assert.doesNotMatch(h.run('html'),/Buy Slot|locked display|Bakery Power/);
 });
 
@@ -53,6 +53,8 @@ test('refined tickets preserve every existing type, saved progress and reward st
  assert.equal(h.run('JSON.stringify(g)'),h.run('before'));
  for(const name of h.json('COIN_ORDER_LABELS.map(names=>names[1])'))assert.ok(h.run('html').includes(name));
  assert.equal((h.run('html').match(/role="progressbar"/g)||[]).length,8);
+ assert.doesNotMatch(h.run('html'),/class="(?:order-name|order-type-icon|order-tier)"/);
+ assert.equal((h.run('html').match(/class="order-math"/g)||[]).length,8);
  assert.match(h.run('html'),/Collect<\/span><strong>100%/);
  assert.doesNotMatch(h.run('html'),/class="ticket-(?:play|reward)"|\d+ coins<|<small>/);
 });

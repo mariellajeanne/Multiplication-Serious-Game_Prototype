@@ -34,7 +34,7 @@ def check(pw, engine):
     try:
         page.goto(f'http://127.0.0.1:{server.server_port}/index.html?view=legacy')
         page.wait_for_function("typeof render==='function'")
-        page.evaluate("""g.coins=999999;g.completed=40;g.bakeryLevel=14;g.menuSlots=6;
+        page.evaluate("""g.coins=999999;g.completed=40;g.packageCelebrations.acknowledged=PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).map(t=>t.rank);g.bakeryLevel=14;g.menuSlots=6;
             for(const food of FOOD)if(!g.owned.some(o=>o.id===food.id))discoverFood(food);render()""")
         # Zoom changes the CSS viewport. These extra sizes correspond to a
         # 1194x834 window at 80%, 125%, 150% and 200% browser zoom.

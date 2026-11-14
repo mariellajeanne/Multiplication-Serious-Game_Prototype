@@ -30,7 +30,7 @@ def check(pw, engine, port):
     page.on('pageerror', lambda error: errors.append(str(error)))
     page.on('request', lambda request: gameplay_requests.append(request.url)
             if '/src/game/' in request.url or '/src/main.js' in request.url else None)
-    shots = ROOT / ('docs/previews/environment' if engine == 'edge' else '.test-tools/environment-shots')
+    shots = ROOT / 'output/playwright/environment'
     shots.mkdir(parents=True, exist_ok=True)
     base = f'http://127.0.0.1:{port}/index.html?view=environment'
     try:

@@ -1,0 +1,41 @@
+/* Standalone viewport layer: no sizing, masks or anchors of the bakery change. */
+body.package-unlock-open{overflow:hidden}
+/* Blur the existing roots directly: WebKit cannot reliably sample the isolated
+ * illustrated stage through backdrop-filter. These filters do not resize it. */
+body.package-unlock-open>:is(#app,#modals,#notificationDock){filter:blur(4px)}
+.package-unlock-overlay{position:fixed;inset:0;z-index:200;display:grid;grid-template-columns:minmax(0,1fr);overflow:auto;overscroll-behavior:contain;padding:24px;padding:max(20px,env(safe-area-inset-top)) max(20px,env(safe-area-inset-right)) max(20px,env(safe-area-inset-bottom)) max(20px,env(safe-area-inset-left));background:#281626c9;isolation:isolate;animation:package-unlock-dim 180ms ease-out both}
+.package-unlock-content{position:relative;width:min(640px,100%);min-width:0;margin:auto;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;color:#fff3d8;font-family:var(--game-font);animation:package-unlock-enter 580ms cubic-bezier(.2,.8,.2,1) both}
+.package-unlock-content.p8{--package-fill:#ffe29b}
+.package-unlock-heading{display:grid;gap:10px;width:100%;position:relative;z-index:1}
+.package-unlock-heading h1{font:900 clamp(28px,4.6vw,54px)/1.08 var(--game-font);color:#fff0be;letter-spacing:.4px;text-shadow:0 3px 0 #6b3525,0 5px 12px #130d15;paint-order:stroke fill;-webkit-text-stroke:3px #8a4b28}
+.package-unlock-heading h1 span{display:block}
+.package-unlock-heading h2{font:900 clamp(22px,3vw,34px)/1.2 var(--game-font);color:var(--package-fill,#ffe6a2);text-shadow:0 2px 4px #170a21}
+.package-unlock-reveal{position:relative;isolation:isolate;display:grid;place-items:center;width:clamp(150px,32vmin,275px);aspect-ratio:1;flex:none;margin:4px 0}
+.package-unlock-reveal::before{content:"";position:absolute;inset:-15%;z-index:-1;border-radius:50%;background:radial-gradient(circle,var(--package-fill,#ffe6a2),transparent 66%);opacity:.22;animation:package-unlock-glow 850ms ease-out both}
+.package-unlock-rays{position:absolute;inset:-8%;width:116%;height:116%;color:var(--package-fill,#ffe6a2);opacity:.15;z-index:-1;animation:package-unlock-rays 850ms ease-out both}
+.package-unlock-art{width:80%;height:80%;filter:drop-shadow(0 10px 8px #130c2599);animation:package-unlock-package 650ms cubic-bezier(.2,.8,.2,1) both}
+.package-unlock-art>.package-art{display:block;width:100%;height:100%;object-fit:contain}
+.package-unlock-sparkles{position:absolute;inset:0;pointer-events:none}
+.package-unlock-sparkles svg{position:absolute;width:25px;height:32px;left:5%;top:27%;animation:package-unlock-spark 750ms ease-out both;animation-delay:calc(90ms + var(--spark)*45ms)}
+.package-unlock-sparkles svg:nth-child(2){left:auto;right:3%;top:50%;width:19px}
+.package-unlock-sparkles svg:nth-child(3){left:69%;top:2%;width:20px}
+.package-unlock-sparkles svg:nth-child(4){left:12%;top:78%;width:17px}
+.package-unlock-sparkles svg:nth-child(5){left:35%;top:0%;width:16px}
+.package-unlock-sparkles svg:nth-child(6){left:79%;top:81%;width:19px}
+.package-unlock-message{font-size:clamp(18px,2vw,23px);font-weight:800;line-height:1.4;text-shadow:0 2px 3px #1b1229}
+.package-unlock-awesome{flex:none;width:min(240px,100%);aspect-ratio:391/171;min-height:64px;padding:10px 22px 19px;background:transparent url('../assets/bakery-ui/illustrated/button-teal.png') center/contain no-repeat;color:#fff8df;font:900 clamp(24px,3vw,30px)/1 var(--game-font);paint-order:stroke fill;-webkit-text-stroke:1.5px #2c654a;text-shadow:0 2px 1px #245a42;filter:drop-shadow(0 5px 6px #120d2070);transition:transform 120ms ease,filter 120ms ease}
+.package-unlock-awesome:hover{filter:brightness(1.1) drop-shadow(0 5px 6px #120d2070)}
+.package-unlock-awesome:active{transform:translateY(2px) scale(.98)}
+.package-unlock-awesome:focus-visible{outline:3px solid #fff2c3;outline-offset:3px;border-radius:50px}
+.package-unlock-error{max-width:440px;color:#fff1cd;font-size:16px;line-height:1.4}
+.package-unlock-overlay.is-leaving{animation:package-unlock-dim 160ms ease-in reverse both}
+.package-unlock-overlay.is-leaving .package-unlock-content{animation:package-unlock-exit 160ms ease-in both}
+@keyframes package-unlock-dim{from{background-color:#28162600}to{background-color:#281626c9}}
+@keyframes package-unlock-enter{0%{opacity:0;transform:scale(.83) translateY(18px)}65%{opacity:1;transform:scale(1.035) translateY(-4px)}100%{opacity:1;transform:none}}
+@keyframes package-unlock-package{0%,12%{opacity:0;transform:scale(.65) rotate(-6deg)}68%{opacity:1;transform:scale(1.07) rotate(2deg)}100%{opacity:1;transform:none}}
+@keyframes package-unlock-glow{0%{opacity:0;transform:scale(.6)}40%{opacity:.52}100%{opacity:.22;transform:none}}
+@keyframes package-unlock-rays{from{opacity:0;transform:scale(.6) rotate(-12deg)}to{opacity:.15;transform:none}}
+@keyframes package-unlock-spark{0%{opacity:0;transform:scale(.2)}35%{opacity:1;transform:scale(1.15)}100%{opacity:.75;transform:scale(.8)}}
+@keyframes package-unlock-exit{to{opacity:0;transform:scale(.95) translateY(8px)}}
+@media(max-height:600px){.package-unlock-content{gap:8px}.package-unlock-heading{gap:5px}.package-unlock-heading h1{font-size:clamp(26px,4vw,38px)}.package-unlock-heading h2{font-size:24px}.package-unlock-reveal{width:clamp(120px,28vmin,185px)}.package-unlock-awesome{width:190px}}
+@media(prefers-reduced-motion:reduce){.package-unlock-overlay,.package-unlock-overlay *,.package-unlock-overlay::before{animation:none!important;transition:none!important}.package-unlock-awesome:active{transform:none}}

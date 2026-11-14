@@ -1,10 +1,10 @@
 # Worksheet engine — editable, not frozen
 
-The worksheet keeps the **the established digit-connection, carrying, and merging interactions** because those are the UX requirements. Its artwork, theme, layout, and animations can change.
+The worksheet keeps **the established digit-connection, carrying, and merging interactions** because those are the UX requirements. Its artwork, theme, layout, and animations can change.
 
 ## Where Codex should make changes
 
-- **Appearance:** `styles/custom-theme.css` (last-loaded override; ideal for design experiments). Existing cascade: `foundation.css` → `effects-and-guides.css` → `receipt-theme.css` → `embedded-layout.css` → `custom-theme.css`.
+- **Appearance:** `styles/custom-theme.css`, `styles/responsive-workspace.css` and `styles/illustrated-bakery.css`. Existing cascade: `foundation.css`, `effects-and-guides.css`, `receipt-theme.css`, `embedded-layout.css`, `custom-theme.css`, shared `../styles/typography.css`, `responsive-workspace.css`, then `illustrated-bakery.css`.
 - **HTML structure / interactive tile hooks:** `worksheet-engine.html` and `src/worksheet-render-and-tutorial.js`.
 - **State / math operations:** `src/state.js`.
 - **Sound, product reveal / float animation:** `src/sound-and-multiplication-fx.js`.

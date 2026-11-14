@@ -1,6 +1,8 @@
 ﻿/* Main rendering preserves the mounted worksheet between menu visits. */
 let mountedWorksheetRun=null;
 function render(){
+ if(typeof schedulePackageBatchRecovery==='function')schedulePackageBatchRecovery();
+ if(typeof schedulePackageUnlockCelebration==='function')schedulePackageUnlockCelebration();
  if(typeof isBakeryHub==='function'&&isBakeryHub()){renderBakeryHub();return;}
  if(g.run?.phase==='engine'&&mountedWorksheetRun===g.run&&$('worksheetFrame')){
   const wasPaused=$('liveOrder')?.hidden,scroll=document.querySelector?.('.menu-grid')?.scrollTop||0;paintPausedOrder();
@@ -20,7 +22,7 @@ if(typeof window!=='undefined'){
  window.addEventListener('resize',()=>{positionNotifications();if(g.run?.phase==='engine'&&typeof fitWorksheet==='function')fitWorksheet();if(typeof revealCurrentBakery==='function')revealCurrentBakery();if((!g.run||g.run.paused)&&oddsCollapsed===null){const odds=document.querySelector('.ticket-odds');if(odds)odds.outerHTML=renderTicketOdds()}});
  document.addEventListener('scroll',positionNotifications,true);
 }
-setInterval(()=>{tickStaff();updateOrderRefresh();validatePurchaseUndo();paintPurchaseUndo()},1000);refillBoard();render();save();
+setInterval(()=>{tickStaff();updateOrderRefresh();validatePurchaseUndo();paintPurchaseUndo();if(typeof syncPackageExperience==='function')syncPackageExperience();if(typeof schedulePackageBatchRecovery==='function')schedulePackageBatchRecovery();if(typeof schedulePackageUnlockCelebration==='function')schedulePackageUnlockCelebration()},1000);refillBoard();render();save();
 
 function paintPausedOrder(){
  const live=$('liveOrder'),menu=$('pausedMenu');if(!live||!menu)return;

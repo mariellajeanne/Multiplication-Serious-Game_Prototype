@@ -3,7 +3,14 @@ function economyUnit(){return balancedPriceUnit(pricingMenuBase(),g.bakeryLevel,
 function earningUnit(){return expectedTicketBase(ticketLuckMastery())*bakeryValue()}
 function slotCost(){return balancedSlotCost(pricingMenuBase(),g.bakeryLevel,g.menuSlots,g.completed)}
 function packagePrice(rank){return balancedPackagePrice(rank,pricingMenuBase(),g.bakeryLevel,g.completed)}
-function packageUnlocked(rank){return !!PACKAGE_SHOP[rank]&&(g.completed>=PACKAGE_SHOP[rank].orders||g.packageTierUnlocks?.includes(rank)===true)}
+function packageUnlocked(rank){return packageTierAvailable(g,rank)}
+function acknowledgePackageUnlock(rank){
+ if(!Number.isInteger(rank)||!packageUnlocked(rank))return false;
+ const previous=[...g.packageCelebrations.acknowledged];
+ g.packageCelebrations.acknowledged=packageAcknowledgements([...previous,rank]);
+ if(save())return true;
+ g.packageCelebrations.acknowledged=previous;return false;
+}
 function foodEarningShare(o){return expectedTicketBase(ticketLuckMastery())*foodValue(o)*decorBonus()}
 function foodLevelCost(o){return balancedMasteryCost(tierBase(o),recipeMastery(o),g.bakeryLevel,g.completed)}
 function foodLevelPrice(o){return foodLevelCost(o)}

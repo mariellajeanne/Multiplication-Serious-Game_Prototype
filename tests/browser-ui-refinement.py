@@ -28,8 +28,8 @@ def run(pw,engine):
  p.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
  try:
   p.goto(URL);p.wait_for_selector('.hub-food');p.wait_for_load_state('networkidle')
-  assert p.locator('#title-sign').get_attribute('src').endswith('title-sign-refined.png')
-  for selector,asset in [('#help-button','control-help.svg'),('#settings-button','control-settings.svg')]:
+  assert p.locator('#title-sign').get_attribute('src').endswith('illustrated/title.png')
+  for selector,asset in [('#help-button','help.png'),('#settings-button','settings.png')]:
    assert p.locator(selector+' img').get_attribute('src').endswith(asset)
    rect=p.locator(selector).bounding_box();p.locator(selector).dispatch_event('pointerdown',{'pointerId':9,'pointerType':'touch'})
    assert p.locator(selector).bounding_box()==rect
@@ -37,9 +37,9 @@ def run(pw,engine):
    assert not p.locator(selector).evaluate('e=>e.classList.contains("is-pressed")')
   for width,height in [(2000,1200),(1280,800),(1024,768)]:
    p.set_viewport_size({'width':width,'height':height})
-   assert p.locator('#title-sign').evaluate('''e=>{const r=e.getBoundingClientRect(),c=document.querySelector('#menu-cabinet').getBoundingClientRect(),h=document.querySelector('.cabinet-header').getBoundingClientRect(),stage=document.querySelector('#stage').getBoundingClientRect(),bottom=r.top+r.height*705/725,top=r.top+r.height*29/725;return Math.abs((r.left+r.right-c.left-c.right)/2)<1&&top>=stage.top&&bottom>c.top&&bottom<h.top}''')
+   assert p.locator('#title-sign').evaluate('e=>{const r=e.getBoundingClientRect(),c=document.querySelector("#menu-cabinet").getBoundingClientRect(),h=document.querySelector(".cabinet-header").getBoundingClientRect(),stage=document.querySelector("#stage").getBoundingClientRect(),top=r.top+r.height*29/725,bottom=r.top+r.height*705/725;return Math.abs((r.left+r.right-c.left-c.right)/2)<1&&top>=stage.top&&bottom<h.top}')
    assert p.locator('#boost-status').evaluate('e=>{const r=e.getBoundingClientRect();return document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)?.closest("#boost-status")===e}')
-   targets=p.locator('#help-button,#settings-button,.board-footer,.board-scroll-end').evaluate_all('es=>es.every(e=>{const r=e.getBoundingClientRect();return r.width>=43.8&&r.height>=43.8})')
+   targets=p.locator('#help-button,#settings-button,.board-footer,.board-scroll-end').evaluate_all('es=>es.every(e=>{const r=e.getBoundingClientRect(),hit=getComputedStyle(e,"::after"),scale=document.querySelector("#stage").getBoundingClientRect().width/2000;return Math.max(r.width,(parseFloat(hit.width)||0)*scale)>=43.8&&Math.max(r.height,(parseFloat(hit.height)||0)*scale)>=43.8})')
    assert targets,'Tablet touch targets shrank with the scene'
    shot(p,f'{engine}-{width}-home')
    for selector in ['#help-button','#settings-button','#boost-status','#wallet-button','[data-hub-action="odds"]']:
@@ -66,10 +66,10 @@ def run(pw,engine):
   p.evaluate('''()=>{g.board=Array.from({length:8},(_,rank)=>({id:9900+rank,rarity:rank,coinTier:rank,orderLabel:COIN_ORDER_LABELS[rank][1],orderIcon:COIN_ORDER_ICONS[rank],a:rank<3?79:rank<5?799:7999,b:rank?99:9,foodId:'pandesal',base:ticketBase(rank)}));render()}''')
   assert p.locator('.hub-ticket').count()==8
   assert p.locator('.ticket-play,.ticket-reward,.coin-hero small').count()==0
-  assert p.locator('.hub-ticket .order-name').all_text_contents()==p.evaluate('g.board.map(t=>(t.orderIcon||COIN_ORDER_ICONS[t.coinTier])+ticketOrderLabel(t))')
+  assert p.locator('.hub-ticket .order-name,.hub-ticket .order-type-icon,.hub-ticket .order-tier').count()==0
+  assert p.locator('.hub-ticket').evaluate_all('es=>es.every(e=>e.ariaLabel.includes("Order")||e.ariaLabel.includes("Feast"))')
   assert p.locator('.hub-ticket .hub-ticket-progress').count()==8
   assert p.locator('.hub-ticket .order-math').evaluate_all('es=>es.every(e=>e.scrollWidth<=e.clientWidth+1)')
-  assert p.locator('.hub-ticket .order-name').evaluate_all('es=>es.every(e=>e.scrollWidth<=e.clientWidth+1)')
   for rank in [0,3,6,7]:
    p.locator(f'.hub-ticket.coin-tier-{rank}').scroll_into_view_if_needed();shot(p,f'{engine}-tier-{rank+1}')
   p.locator('.hub-ticket').first.tap();p.wait_for_selector('#worksheetFrame')

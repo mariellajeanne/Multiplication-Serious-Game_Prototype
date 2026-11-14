@@ -1,7 +1,7 @@
-// Run after simulate-progression.mjs; checks design outcomes, not just numeric validity.
+// Validate the retained historical Power comparison; current food-only simulation is separate.
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
-const data=JSON.parse(readFileSync(process.argv[2]||new URL('../docs/progression-simulation.json',import.meta.url),'utf8'));
+const data=JSON.parse(readFileSync(process.argv[2]||new URL('../docs/history/progression-simulation.json',import.meta.url),'utf8'));
 const before=data.reports.find(r=>r.name==='before');
 const after=data.reports.find(r=>r.name==='bakery_milestones');
 assert.ok(before&&after,'Both historical baseline and selected model must finish.');

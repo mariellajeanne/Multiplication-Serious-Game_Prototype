@@ -51,21 +51,15 @@ def fixture(page,count):
  page.wait_for_function("[...document.querySelectorAll('#stage img')].every(i=>i.complete&&i.naturalWidth)")
 def normalize(value):return re.sub(r'http://127\.0\.0\.1:\d+','http://local',json.dumps(value,sort_keys=True))
 def preserved_interfaces(page,engine):
- page.evaluate("g.coins=1e9;g.completed=300;save();openPackages('buy',0)")
- page.wait_for_timeout(150)
- assert page.locator('.package-workspace').is_visible() and page.locator('.package-type-card').count()==9
- assert page.locator('.package-shop-modal.bakery-popup').count()==0
- if engine=='edge':
-  before=json.loads((ROOT/'tests/fixtures/preserved-interfaces.json').read_text(encoding='utf-8'))['package']
-  now=page.locator('.package-shop-modal').evaluate('''root=>[root,...root.querySelectorAll('*')].map(el=>{const s=getComputedStyle(el);return [el.tagName,el.className,...['display','position','fontFamily','fontSize','fontWeight','color','background','border','borderRadius','boxShadow','padding','gap','minHeight'].map(k=>s[k])]})''')
-  assert normalize(before)==normalize(now),'Original Packages appearance changed'
- screenshot(page,f'{engine}-preserved-packages')
+ # Established all-tier fixture; earned milestone presentation has its own runner.
+ page.evaluate("g.coins=1e9;g.completed=300;g.packageCelebrations.acknowledged=PACKAGE_SHOP.map(t=>t.rank);save();openPackages()")
+ page.wait_for_timeout(300)
+ assert page.locator('.packages-collection-modal').is_visible() and page.locator('.packages-collection-card').count()==9
+ assert page.locator('.packages-collection-modal').evaluate('e=>getComputedStyle(e).borderImageSource.includes("popup-frame.svg")')
+ screenshot(page,f'{engine}-packages-collection')
  page.evaluate("closeModal();g.board=[{id:9001,rarity:1,coinTier:1,a:79,b:18,base:ticketBase(1),foodId:'pandesal'}];g.ticketSeq=9001;refillBoard();save();startTicket(9001)")
  page.wait_for_function("$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9001")
- if engine=='edge':
-  before=json.loads((ROOT/'tests/fixtures/preserved-interfaces.json').read_text(encoding='utf-8'))['worksheet']
-  now=page.locator('.hub-order-workspace').evaluate('''root=>[root,...root.querySelectorAll('*')].filter(e=>e.tagName!=='IFRAME').map(el=>{const s=getComputedStyle(el);return [el.tagName,el.className?.baseVal??el.className,...['display','position','fontFamily','fontSize','fontWeight','color','background','border','borderRadius','boxShadow','padding','gap','minHeight'].map(k=>s[k])]})''')
-  assert normalize(before)==normalize(now),'Original worksheet shell appearance changed'
+ # The shell is harmonized; the original iframe engine and mounted session persist.
  assert page.locator('#worksheetFrame').get_attribute('src')=='worksheet/worksheet-engine.html'
  assert page.locator('#answer').count()==0
  screenshot(page,f'{engine}-preserved-worksheet')
@@ -79,11 +73,11 @@ def run(pw,engine):
  page.on('pageerror',lambda e:errors.append(str(e)));page.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
  try:
   page.goto(URL);page.wait_for_selector('.hub-food');page.wait_for_load_state('networkidle')
-  assert page.locator('.stage-background').get_attribute('src')=='assets/bakery-ui/bakery-room.png'
+  assert page.locator('.stage-background').get_attribute('src')=='assets/bakery-ui/illustrated/room.png'
   assert page.locator('.hub-brand,.package-shelf-art,.hub-package-grid,.illustrated-room,.showcase-heading').count()==0
   preserved_interfaces(page,engine)
   for width,height in [(2000,1200),(1280,800)]:
-   page.set_viewport_size({'width':width,'height':height});stationary=page.locator('#menu-cabinet').bounding_box()
+   page.set_viewport_size({'width':width,'height':height});page.wait_for_function('Math.abs(document.querySelector("#stage").getBoundingClientRect().width-2000*Math.min(innerWidth/2000,innerHeight/1200))<.1');stationary=page.locator('#menu-cabinet').bounding_box()
    for count in [1,3,5,9,10,16,17]:
     fixture(page,count);assert page.locator('.hub-food').count()==count
     box=page.locator('#menu-cabinet').bounding_box();assert all(abs(box[k]-stationary[k])<1 for k in box)
@@ -109,6 +103,8 @@ def run(pw,engine):
    if engine=='edge':
     top(page,'.hub-collection .menu-grid');touch_drag(page,'.hub-collection .menu-grid')
     assert grid.evaluate('e=>e.scrollTop')>0 and page.evaluate('selectedFoods.size')==0
+    # Finish native momentum before the next independent navigation gesture.
+    page.wait_for_timeout(450)
    page.locator('.hub-collection-back').tap();page.locator('.nav-collection').tap()
    assert page.locator('.hub-collection .menu-grid').evaluate('e=>e.scrollTop')==0
    page.locator('.hub-collection-back').tap()
@@ -124,19 +120,19 @@ def run(pw,engine):
     assert page.locator('#modals .modalbody').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
     screenshot(page,f'{engine}-{width}-popup-{selector.replace("#","").replace("[","").replace("]","").replace("=","").replace(chr(34),"")}')
     page.locator('#modals .close').tap()
-   # Every home Packages entry reaches the original shop, never the demo popup.
+   # Every home Packages entry reaches the production collection.
    for selector in ['#packages-plaque','.alcove-hit','.nav-packages']:
-    before=page.locator('#package-station').bounding_box();page.locator(selector).tap();assert page.locator('.package-workspace').is_visible();page.locator('#modals .close').tap();assert page.locator('#package-station').bounding_box()==before
+    before=page.locator('#package-station').bounding_box();page.locator(selector).tap();assert page.locator('.packages-collection-modal').is_visible();page.locator('#modals .close').tap();assert page.locator('#package-station').bounding_box()==before
   page.set_viewport_size({'width':1440,'height':900});fixture(page,9);screenshot(page,f'{engine}-1440-home')
   page.set_viewport_size({'width':1280,'height':800});fixture(page,17)
   # Real package opening supplies a duplicate, unlocking paid Mastery through existing logic.
   page.evaluate("g.coins=1e9;g.completed=300;save();window.savedRandom=Math.random;Math.random=()=>0")
-  page.locator('.nav-packages').tap();page.locator('[data-package-type="0"]').tap();page.locator('#packageBuy').tap()
-  token=page.locator('.package-open-slot:not(.opened-package)').first.get_attribute('data-package-token')
-  page.locator('.package-open-slot:not(.opened-package)').first.tap();assert page.locator('.opened-package').count()==1
-  assert not page.evaluate('token=>openPackageSlot(0,token)',token)
-  assert page.locator('.package-shop-modal .illustrated-food').count()==0
-  page.evaluate('Math.random=savedRandom');page.locator('#modals .close').tap()
+  page.locator('.nav-packages').tap();page.locator('[data-package-rank="0"]').tap()
+  offer=page.locator('[data-package-count="1"]').get_attribute('data-package-offer');page.locator('[data-package-count="1"]').tap()
+  page.evaluate('revealAllPackageRewards()');assert page.locator('.batch-reward.is-revealed').count()==1
+  assert not page.evaluate('id=>purchasePackageBatch(id)',offer)
+  assert page.locator('#packageBatch .illustrated-food').count()==1
+  page.evaluate('Math.random=savedRandom');page.locator('#packageBatchCollect').tap();page.wait_for_selector('#packageBatch',state='detached');page.locator('#modals .close').tap()
   page.locator('.hub-food[data-food="pandesal"]').tap();before=page.evaluate('bakeryValue()');wallet=page.evaluate('g.coins');price=page.evaluate('foodLevelPrice(g.owned.find(o=>o.id==="pandesal"))')
   assert page.locator('.action-mastery').is_enabled();page.locator('.action-mastery').tap()
   assert page.evaluate('bakeryValue()')>before and page.evaluate('g.coins')==wallet-price
@@ -149,7 +145,7 @@ def run(pw,engine):
   saved=page.evaluate('JSON.stringify({coins:g.coins,menu:g.activeMenu,owned:g.owned})');page.reload();page.wait_for_selector('.hub-food')
   assert page.evaluate('JSON.stringify({coins:g.coins,menu:g.activeMenu,owned:g.owned})')==saved
   assert not errors,errors
-  (OUT/f'{engine}-integration-results.json').write_text(json.dumps({'passed':True,'actual_project':str(ROOT),'viewports':[[2000,1200],[1280,800],[1440,900]],'counts':[1,3,5,9,10,16,17],'native_touch_gestures':engine=='edge','exceptions_preserved':True,'errors':errors},indent=2),encoding='utf-8')
+  (OUT/f'{engine}-integration-results.json').write_text(json.dumps({'passed':True,'actual_project':str(ROOT),'viewports':[[2000,1200],[1280,800],[1440,900]],'counts':[1,3,5,9,10,16,17],'native_touch_gestures':engine=='edge','worksheet_engine_and_package_controllers_preserved':True,'errors':errors},indent=2),encoding='utf-8')
   print(f'PASS {engine}: actual-project art/data, seven food counts, both scrollbars, touch, navigation, real Packages/duplicates/Mastery/equipment, save/reload and original worksheet',flush=True)
  except Exception:
   screenshot(page,f'{engine}-integration-FAILURE');print('ERRORS',errors,flush=True);raise

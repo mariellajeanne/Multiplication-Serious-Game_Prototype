@@ -76,27 +76,23 @@ def check(pw, engine):
         assert page.evaluate("document.querySelector('.hub-order-scroll').scrollHeight>document.querySelector('.hub-order-scroll').clientHeight")
         page.locator('.hub-order-scroll').evaluate('e=>e.scrollTop=e.scrollHeight')
         page.locator('.hub-order-scroll').evaluate('e=>e.scrollTop=0')
-        # Every package invokes the real workspace and a durable transaction.
-        page.evaluate('g.coins=1e9;g.completed=300;save()')
+        # Every package invokes the production featured view and a durable batch.
+        # This fixture represents an established all-tier bakery.
+        page.evaluate('g.coins=1e9;g.completed=300;g.packageCelebrations.acknowledged=PACKAGE_SHOP.map(t=>t.rank);save()')
         for rank in [0,4,7,8]:
             page.locator('.hub-package').tap()
-            page.locator(f'[data-package-type="{rank}"]').tap()
-            assert page.locator('#packageSelectedHeading').inner_text().startswith(str(rank+1)+'★')
+            page.locator(f'[data-package-rank="{rank}"]').tap()
+            assert page.locator('#modalTitle').inner_text()==page.evaluate('rank=>PACKAGE_TYPES[rank]+" Package"',rank)
             before=page.evaluate('g.coins')
-            page.locator('#packageBuy').tap()
+            offer=page.locator('[data-package-count="1"]').get_attribute('data-package-offer')
+            page.locator('[data-package-count="1"]').tap()
             assert page.evaluate('g.coins')<before
-            token=page.locator('.package-open-slot:not(.opened-package)').first.get_attribute('data-package-token')
-            page.locator('.package-open-slot:not(.opened-package)').first.tap()
-            assert page.locator('.opened-package').count()==1
-            assert page.locator('.package-shop-modal .illustrated-food').count()==0
-            if rank==0:
-                # The new non-package overlay skin must have no effect here.
-                style_check=page.evaluate('''()=>{const snapshot=()=>['.package-shop-modal','.package-workspace','#packageBuy'].map(s=>{
-                    const c=getComputedStyle(document.querySelector(s));return [c.background,c.border,c.borderRadius,c.boxShadow,c.fontFamily]});
-                    const before=snapshot(),sheet=document.querySelector('link[href="styles/bakery-interface.css"]');sheet.disabled=true;
-                    const after=snapshot();sheet.disabled=false;return JSON.stringify(before)===JSON.stringify(after)}''')
-                assert style_check
-            assert not page.evaluate('''args=>openPackageSlot(args[0],args[1])''',[rank,token])
+            page.evaluate('revealAllPackageRewards()')
+            assert page.locator('.batch-reward.is-revealed').count()==1
+            assert page.locator('#packageBatch .illustrated-food').count()==1
+            assert not page.evaluate('id=>purchasePackageBatch(id)',offer)
+            page.locator('#packageBatchCollect').tap();page.wait_for_selector('#packageBatch',state='detached')
+            assert page.locator('.packages-selected-modal').is_visible()
             page.locator('.modalhead .close').tap()
         # Food management uses real equipment and derived Boost.
         page.locator('.hub-food').first.tap()
@@ -140,6 +136,10 @@ def check(pw, engine):
         page.evaluate("window.hubFrame=$('worksheetFrame')")
         budget=page.evaluate('g.run.budget')
         page.locator('.worksheet-exit').tap()
+        # Shopping and the full-screen reveal retain the paused iframe/session.
+        page.locator('.nav-packages').tap();page.locator('[data-package-rank="0"]').tap();page.locator('[data-package-count="1"]').tap()
+        page.evaluate('revealAllPackageRewards()');page.locator('#packageBatchCollect').tap();page.wait_for_selector('#packageBatch',state='detached');page.locator('#modals .close').tap()
+        assert page.evaluate("hubFrame===$('worksheetFrame')") and page.evaluate('g.run.budget')==budget
         page.locator('.hub-ticket[data-ticket-id="9001"]').tap()
         assert page.evaluate("hubFrame===$('worksheetFrame')")
         page.reload()
@@ -187,7 +187,7 @@ def check(pw, engine):
         assert page.locator('canvas').count()==0
         assert page.locator('.bakery-room-art').is_visible()
         page.locator('.hub-package').first.tap()
-        assert page.locator('.package-workspace').is_visible()
+        assert page.locator('.packages-collection-modal').is_visible()
         assert not errors,errors
         print(f'PASS {engine}: counts, clipping, both scroll areas, 4 package tiers, equipment/Boost, iframe retention, reload, claim once, 5 viewports and fallback',flush=True)
     except Exception:

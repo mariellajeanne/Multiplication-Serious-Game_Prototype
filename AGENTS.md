@@ -1,74 +1,36 @@
-# Panaderya Quest — agent instructions
+# My Panaderya - agent guide
 
-**Precise geometry and scrollbar correction (2026-11-10, latest owner request):** [Current composition](docs/UI_GEOMETRY_REFINEMENT.md) supersedes the smaller register, fixed-width Boost and separate scrollbar column below. Keep symmetric shared showcase-header anchors, content-sized rainbow-diamond Boost, compact CSS pills with large transparent touch targets, connected front wood behind Orders utilities, rounded recessed clipping and the rail embedded on the right stile. Center the visible thumb and map native scroll endpoints exactly to both travel limits. The 280px register is counter-anchored and may overlap the lower list; every ticket must scroll above it. Preserve all gameplay, Packages/worksheet interfaces, saves and art. Run Orders/refinement/replacement/hub in Edge/WebKit, Node tests, responsive checks and the worksheet runner with `PANADERYA_TEST_VIEW=hub`. No push/deployment.
+Tablet-first static web game for practicing long multiplication. Root `index.html` is the production illustrated bakery. No build, npm install, or CDN is required.
 
-**Orders containment and utility polish (2026-11-10, latest owner request):** [Current focused refinement](docs/UI_LAYOUT_POLISH.md) supersedes the earlier two-slip layout and stretched button backgrounds. Keep the nine-slice clipboard with separate title/utility/list sections, three complete contained slips, matching die-cut artwork/mask, aligned cabinet/board bodies and window clearance. New Orders/Skip, Reward Odds and spark/value-only Boost share native CSS outlined controls. The smaller register stays grounded and clear of tickets. Preserve all production gameplay, Packages/worksheet UI, saves and art below. Run the Orders, refinement, replacement and hub runners in Edge/WebKit, Node tests and the worksheet runner with `PANADERYA_TEST_VIEW=hub`. No push/deployment.
+## Start and test
 
-**Order slips and register (2026-11-10, latest owner request):** [Current Orders presentation](docs/ORDER_PRESENTATION.md) supersedes the previous ticket/card and lower-board layout. Use matching die-cut SVG artwork/mask, separate paper/effect/content layers and unchanged production order tiers. Keep reward art/tier, order type, food/tray math and progress; no payout/type labels or Play arrow. Heading and New Orders/Skip + Odds stay above the scrolling slips. Register faces the reference direction, retains the right-hand bell and rests on the countertop while overlapping only the board's reserved lower area. Preserve all worksheet/package/gameplay/save requirements below. Run `python tests/browser-order-presentation.py edge webkit` plus existing Node, integration and worksheet suites. No push/deployment.
+Serve the repository with VS Code Live Server, or `python -m http.server 5500 --bind 127.0.0.1`; open `http://127.0.0.1:5500/index.html`.
 
-**UI refinement (2026-11-09, latest owner request):** [Current visual cleanup](docs/UI_REFINEMENT.md) supersedes the initial integration's header/ticket/popup presentation. Use saved production order types/icons and real progress; no visible reward-name/payout text or separate ticket play arrow. The repaired transparent logo is enlarged and centered with a slight cabinet-frame overlap, clearing the Menu/Boost controls. The room asset itself has a reconstructed upper-left arch. Popups use content-driven sizes, clean SVG 9-slice framing, concise illustrated content, and tablet-sized controls. Preserve original worksheet UI/engine/bridges, package-shop UI/economy, all gameplay and `panaderyaQuestV2`. Run the existing integration/worksheet suites plus `python tests/browser-ui-refinement.py edge webkit`. No push or deployment.
+- All Node regressions: `node --test tests/*.test.mjs` (minimum for code changes: `node --test tests/smoke.test.mjs`).
+- Production integration: `python tests/browser-hub.py edge webkit` and `python tests/browser-ui-replacement.py edge webkit`.
+- UI/Orders: `python tests/browser-ui-refinement.py edge webkit` and `python tests/browser-order-presentation.py edge webkit`.
+- Worksheet, in PowerShell: `$env:PANADERYA_TEST_VIEW='hub'; node tests/browser-worksheet.mjs`. It exercises real carrying math, click/drag, Undo, swipe addition, settings, reload and one-time claims.
+- Layout changes: `python tests/browser-responsive.py`. Environment route: `python tests/browser-environment.py edge webkit`.
+- Python browser runners require Playwright, its WebKit browser and installed Edge. Existing local dependencies may live in ignored `.test-tools/`; keep that installation. Worksheet CDP runner needs Node 22+ and Edge. If sandboxed Edge stalls, stop that attempt and rerun with permitted browser-launch access; never claim an unperformed check passed.
+- Browser artifacts belong under ignored `output/` or `.test-tools/`, never source/docs. Validate current home at 2000x1200 and 1280x800.
 
-**Full production UI replacement (2026-11-09, latest owner request):** [Current integration](docs/PRODUCTION_UI_REPLACEMENT.md) supersedes the earlier home visuals below. Root `index.html` uses the repaired ZIP UI transferred into `assets/bakery-ui/`, `src/ui/bakery-hub.js`, `src/ui/illustrated-controls.js`, and the hub/interface styles. The actual game owns all data and actions; never load the standalone demo's `app.js`, sample catalog/economy, answer input or state into production. Preserve the original long-multiplication worksheet UI/engine/bridge and existing Packages popup as explicit visual exceptions. Their original art paths and styles are isolated in `styles/bakery-preserved-interfaces.css`. Keep catalog IDs, ownership, Mastery, equipment, food-only Boost, existing prices/probabilities, frozen payouts, one-time claims and `panaderyaQuestV2`. Main Packages props are decorative; the station, plaque and bottom button open the existing nine-tier shop. Run `node --test tests/*.test.mjs`, `python tests/browser-hub.py edge webkit`, `python tests/browser-ui-replacement.py edge webkit`, and the worksheet runner with `PANADERYA_TEST_VIEW=hub`. Do not push or deploy.
+## Production map
 
-**Illustrated bakery and complete food refinement (2026-11-09, current owner requests):** [Current visual handoff](docs/ILLUSTRATED_BAKERY.md) supersedes the Three.js renderer, Phase 1-only restriction and older main-screen art directions below. Default is the playable modular 2D/2.5D diorama: original bakery concept composition, matte miniature rendering, and all 17 food sprites with minimal detail and strong volume. Preserve the existing package popup's visual design. Keep food IDs, rarity, Mastery, equipment, food-only Boost/economy, frozen order payouts and the `panaderyaQuestV2` key. Tickets store a real equipped-food `foodId`; started worksheets retain it. Order claims award coins only; food acquisition comes from opening packages. No Three.js runtime is loaded by default. `?view=legacy` and isolated `?view=environment` remain. Run `node --test tests/*.test.mjs`, `python tests/browser-hub.py edge webkit`, and the worksheet runner with `PANADERYA_TEST_VIEW=hub`. No push or deployment.
+- `index.html`, `src/environment-entry.js`: ordered classic-script loading; default hub, preserved `?view=legacy`, isolated scenery at `?view=environment`.
+- `src/ui/bakery-hub.js`: illustrated home, collection and shared popups; calls existing game controllers. `src/ui/illustrated-controls.js`: synchronized native scrollbars.
+- `styles/bakery-hub.css`, `styles/bakery-interface.css`: current hub/popups. `styles/bakery-preserved-interfaces.css`: original Packages and worksheet shell exceptions. Other loaded styles support shared/legacy interfaces; do not remove them based on age.
+- `assets/bakery-ui/`: current artwork, including dynamically named `food-01..17.png` and `coin-01..08.png`. `assets/illustrated/` retains worksheet/package art; `assets/environment/` supports the explicit scenery route; `assets/fonts/` includes font license.
+- `src/data/catalog.js`: recipe IDs/content. `src/game/state.js`: saves, migrations, order identities. `progression.js`, `economy-balance.js`, `progression-economy.js`, `economy.js`: formulas and transactions. `rewards.js`: runs, frozen payouts and claims.
+- `src/ui/menu.js`, `scene.js`, `dialogs.js`, `bakery-art.js`, `illustrated-art.js`, `reward-feedback.js`: shared/preserved renderers, package controllers and feedback; still active.
+- `worksheet/worksheet-engine.html`, `worksheet/src/`, `worksheet/styles/`: multiplication engine and gestures. Both bridges are `src/game/worksheet-bridge.js` and `worksheet/src/parent-bridge.js`.
+- `tests/`: regression runners, fixtures and simulations. Keep migration/legacy tests. `docs/hub-progression-simulation.json` is retained numerical evidence.
 
-**Environment overhaul, PHASE 1 ONLY (2026-11-08, revised art direction):** [Bakery environment implementation](docs/BAKERY_ENVIRONMENT.md) supersedes earlier main-screen visual directions. Use modern geometric 2D game art with bold cel shading, crisp shadow planes and deliberate outlines in cream, blush, caramel and dark cocoa; the earlier painterly arches/ornate trim/sage/vintage register were explicitly rejected. On `main`, the default page shows only the room, architecture, full-width modern counter and decorative right POS register. No gameplay UI or placeholders. The preserved game is available at `index.html?view=legacy`; it retains its original scripts, worksheet, economy and save key. The environment does not load game scripts or touch saves. Do not begin Phase 2 without an owner request. Run `python tests/browser-environment.py`; existing browser runners explicitly use the preserved-game URL.
+## Constraints
 
-**Accelerating economy (2026-11-05):** [Current formulas, migration and simulation evidence](docs/ECONOMY_REBALANCE.md) supersedes earlier prices, doubling coin-tier bases, package gates and the 100-purchase Bakery cap. Power keeps its existing 8.5% gain with 5,000 purchases; prices grow below income, and old assets, unlocked package types and frozen rewards are preserved. Run `node tests/simulate-progression.mjs docs/progression-simulation.json`.
+- Preserve the illustrated composition and original worksheet/Packages visuals unless specifically asked. Current geometry: [UI spec](docs/UI_GEOMETRY_REFINEMENT.md).
+- Preserve digit tap/drag connection, rounded capsule, floating product reveal, flexible tile/carry placement, swipe addition, sounds and tutorial-only arrows. Test a carrying case such as 79 x 18 after worksheet changes.
+- Classic scripts share global lexical bindings; load order matters. Keep both postMessage bridges in sync, including source/origin/frame/attempt validation and duplicate-action/claim protection.
+- Keep `panaderyaQuestV2`, food IDs, ownership, equipment, paid Mastery, prices/odds, saved worksheets and frozen started-order payouts. Boost is food-only; new order claims grant coins, food acquisition comes from packages. Do not reintroduce Bakery Power, Kitchen or a separate demo economy.
+- Changes must stay scoped; do not start a Unity port. No reset/discard of existing changes, push or deployment without explicit authorization.
 
-**Packages workspace (2026-11-05):** [Three-column interface and automatic collection](docs/PACKAGES_INTERFACE.md) supersedes separate Buy/Unbox tabs and reward dialogs: all eight types, 50-per-type purchasing capacity (old excess stock retained), immediate food/Mastery credit and selected-type-only Open All. Verify with `python tests/browser-packages.py`.
-
-**Coin-only orders (2026-11-04):** [Order Ticket tiers and rewards](docs/ORDER_COIN_TIERS.md) supersedes package drops, temporary Package Luck and challenge coin modifiers below. New orders pay base coins times saved Baker's Boost; packages come from the Package Counter. Preserve migration of already-earned packages and fixed legacy budgets. Verify with `python tests/browser-order-coins.py` and the full worksheet runner.
-
-**Frame 12 food selection (2026-11-04):** [Floating popup implementation](docs/FOOD_SELECTION_IMPLEMENTATION.md) replaces sheet references: 75%-width single/multi alternatives overlay the grid without resizing it. Verify with `python tests/browser-food-selection.py` and the browser zoom runner.
-
-**Bakery Power wireframe (2026-11-04):** [Current panel](docs/BAKERY_POWER_PANEL.md) supersedes carousel references. The latest owner correction replaces the 40vh cap: the full-height sidebar uses 60% Bakery Power / 40% Packages, with a current-bakery image and fixed action footers; verify with `python tests/browser-bakery-power.py`.
-
-**Viewport layout (2026-11-04):** [Responsive implementation](docs/VIEWPORT_RESPONSIVENESS.md) supersedes fixed layout caps and panel heights. Preserve independent scrolling and run `python tests/browser-responsive.py` for layout changes.
-
-**Compact Menu header (2026-11-04):** [Current layout](docs/MENU_HEADER_IMPLEMENTATION.md): bakery icon/name/Settings grouped left, clickable Boost/Coins counters right, no standalone topbar or Menu heading.
-
-**Kitchen removed (2026-11-04):** See [removal and migration](docs/KITCHEN_REMOVAL.md). Do not reintroduce Kitchen tools, tabs or bonuses. Existing saves discard obsolete equipment fields; the save key and saved order budgets remain unchanged.
-
-**Current owner corrections (2026-11-04):** [Tablet UX implementation](docs/TABLET_UX_IMPLEMENTATION.md) and [Unity migration reference](UNITY_MIGRATION_REFERENCE.md) supersede Frame 11 on duplicate ownership: one owned instance per Food Index recipe, duplicates unlock paid-Mastery capacity, slots cap at the complete Food Index. Legacy modes are outside this phase and remain unchanged. Keep the web prototype reliable; do not begin a Unity port.
-
-Current behavior and verification: [docs/FRAME_11_IMPLEMENTATION.md](docs/FRAME_11_IMPLEMENTATION.md) (2026-11-04). Frame 11 supersedes older layout/cap references: all owned foods, one starting slot, duplicate-unlocked unbounded Recipe Mastery, Bakery Power with 100 internal purchases, coin packages, safe ten-second Undo and persistent independent order worksheets. Keep both bridges in sync. Run `node --test tests/*.test.mjs` and the focused WebKit/Edge runner when changing these paths.
-
-## The project and the goal
-Panaderya Quest is a tablet-first educational incremental bakery game for practicing **long multiplication procedure** after students have learned basic multiplication facts. The user is both designer and product owner. Their priority is a delightful, approachable learning experience, not a complicated bakery-management simulator.
-
-- Start with `docs/GAME_VISION.md` when learning the project, changing gameplay, or making UX decisions.
-- Read `docs/REWARDS_AND_PROGRESSION.md` for rewards, economy, bakery, levels, mastery, game modes, and unlocks. It distinguishes **agreed direction** from **proposals** and **existing prototype shortcuts**.
-- Read `docs/ARCHITECTURE.md` when refactoring code, debugging, modifying the worksheet or integrating features.
-- Read only relevant files for a focused visual edit; do **not** exhaustively reread all docs for every small task.
-- Latest visual pass: `docs/BAKERY_COMPONENT_REVIEW.md`. References are aesthetic guidance only: no scenic wallpaper or translucent UI over an illustration. Theme the actual components with paper, light wood, pastry-box motifs, illustrated icons and shared rounded sans-serif type. The owner subsequently authorized Stage C/D; see `docs/STAGE_C_D_IMPLEMENTATION.md` for implemented eight ranks, Level/Tier 5 conservation, Auto Equip, five tickets/3-minute refresh, Bakery 30, migration and tests. Preserve the accepted component theme.
-
-## Non-negotiable interaction and UX principles
-- Preserve the **behavior**, not a particular version's appearance, of the long multiplication worksheet: digit tap/drag connection with rounded capsule, floating `M × N` button revealing product tiles, flexible tile placement and carry handling, downward swipe to merge partial-product rows, satisfying sound effects, and guidance arrows only when tutorial is ON.
-- A child's cognitive effort must go toward math. Make rewards immediately comprehensible, controls generous and clear, menus easy to scan, and introduce systems gradually.
-- The main screen centers the **food menu grid**. Latest approved layout: upper-left food multiplier/base, upper-right rarity, center food art/name, lower level/tier contributions and direct Level Up/Fuse controls. Purchased empty slots display `+`; unpurchased slots show `Buy Slot` and price. Integrate **Menu, Bakery Value Multiplier and yellow wallet** above the grid; colorful rarity-filled order tickets sit right. See `docs/ANNOTATION_REDESIGN.md` for the newest user-directed layout and validation status.
-- Filipino panaderia foods are the collection focus. Passive hired staff are supplemental; active math should be approximately 3×+ stronger at a comfortable solving pace.
-- Reward mathematical progress, not repeated clicks; don't pressure students to rush. Preserve a generous tutorial and undo/accidental-tap tolerance.
-- Do not change unrelated functionality, game rules, prices, imagery, learning intent, saved data, or layouts when the requested change is narrow.
-
-## Development workflow
-- The entire workspace is available: **the user never has to tell you which source file to open**. Search and identify the relevant files yourself.
-- For an initial codebase analysis, inspect all relevant files **read-only** and produce a map of functions, screens, data flow, risks, and tests; do not refactor until asked.
-- After a substantive accepted implementation/design decision, update appropriate docs so the next Codex conversation can recover the rationale. Distinguish current behavior from proposed changes.
-- Static HTML/CSS/JS, no build; VS Code Live Server hosts `index.html`. Classic scripts load in deliberate order and share global lexical bindings; be mindful of this before splitting/refactoring.
-- Main app↔worksheet iframe uses a `postMessage` protocol: `src/game/worksheet-bridge.js` and `worksheet/src/parent-bridge.js`. Preserve the protocol contract in both locations. **The `panaderyaQuestV2` localStorage key must remain unchanged unless a tested data migration is requested.**
-- For code changes, run `node --test tests/smoke.test.mjs`. For worksheet changes also complete a carrying math case (e.g., 79 × 18), test click and drag, tutorials ON/OFF, sounds ON/OFF, and swipe-to-add. Never claim an unperformed test passed.
-- Test manually in Live Server as appropriate, summarize exact files changed, and flag risks. No Git push unless explicitly requested.
-
-## Existing structure
-- Data: `src/data/catalog.js`.
-- Deterministic progression/migration: `src/game/progression.js`; economy transactions/formulas: `src/game/progression-economy.js`.
-- Progress/save/ticket generator: `src/game/state.js`.
-- Coins/chests/gameplay run: `src/game/rewards.js`.
-- Food levels/fusions/sales, decor, staff, modes: `src/game/economy.js`.
-- Menu/screens: `src/ui/menu.js`, `src/ui/scene.js`, `src/ui/dialogs.js`.
-- Main app entry: `src/main.js`, UI styles: `styles/`.
-- Worksheet entry: `worksheet/worksheet-engine.html`; input, placement, carries, add, SFX, render, tutorial, and iframe protocol in `worksheet/src/`; themes in `worksheet/styles/`.
-
-## Naming and refactoring
-Use **behavior-based names** such as `worksheet-engine`, `worksheet-bridge`, `renderWorksheet`; do not name permanent components after historical versions such as v33. Do not mass search/replace externally visible data keys without migration. You can redesign the worksheet visuals freely when asked, while keeping the tested interactions unless the user specifically changes them.
+Read [vision](docs/GAME_VISION.md), [architecture](docs/ARCHITECTURE.md) or [progression](docs/REWARDS_AND_PROGRESSION.md) only as relevant. `docs/history/` contains superseded checkpoints/proposals, not current instructions. Normal ripgrep/VS Code searches exclude history, generated output, local test tools and `.agents/` skill data. Source artwork/provenance and historical test fixtures remain available by explicit path.

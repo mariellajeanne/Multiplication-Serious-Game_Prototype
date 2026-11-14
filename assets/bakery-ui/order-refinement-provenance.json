@@ -12,5 +12,21 @@
     "order-ticket-mask.svg": "Same die-cut path as HUB_TICKET_PATH and inline ticket artwork; rounded corners and two side notches per side.",
     "register-cutout.svg": "Native connected-alpha outline traced from the selected generated register, retaining antialiasing margin. Used as the sprite boundary mask to exclude faint disconnected generation debris; the PNG itself is unchanged."
   },
-  "unchanged": ["room artwork", "logo", "window", "foliage", "Packages interface", "worksheet", "economy and save data"]
+  "unchanged": [
+    "room artwork",
+    "logo",
+    "window",
+    "foliage",
+    "Packages interface",
+    "worksheet",
+    "economy and save data"
+  ],
+  "clipboard_revision": {
+    "date": "2026-11-10",
+    "tool": "built-in image_gen",
+    "asset": "assets/bakery-ui/clipboard-wood.png",
+    "source": "Existing production clipboard-wood.png, edited in place at the owner request",
+    "prompt_summary": "Reconstruct the actual raised wooden front beneath the blank cream title plaque as continuous wood grain with space for two real HTML utility pills; carve one integrated rounded ticket recess; preserve the gold clip, beveled stiles/base, cozy orange/caramel wood, front-facing perspective and transparent exterior. No baked labels, controls, tickets, scrollbar, register or scenery.",
+    "integration": "Nine-slice top/sides/base; native HTML controls and clipped native scrolling remain production-owned."
+  }
 }
