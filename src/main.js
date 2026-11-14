@@ -1,6 +1,7 @@
 ﻿/* Main rendering preserves the mounted worksheet between menu visits. */
 let mountedWorksheetRun=null;
 function render(){
+ if(typeof scheduleWorksheetSummaryRecovery==='function')scheduleWorksheetSummaryRecovery();
  if(typeof schedulePackageBatchRecovery==='function')schedulePackageBatchRecovery();
  if(typeof schedulePackageUnlockCelebration==='function')schedulePackageUnlockCelebration();
  if(typeof isBakeryHub==='function'&&isBakeryHub()){renderBakeryHub();return;}

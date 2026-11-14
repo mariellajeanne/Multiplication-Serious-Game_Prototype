@@ -12,7 +12,7 @@ function render(){const active=productActive(),last=lastDigit();$('addRows').hid
  for(let r=0;r<s.B.length;r++){if(r>s.row&&s.phase!=='complete'&&s.phase!=='sum')continue;html+=line('productline',r?'＋':'',c=>{let n=s.rows[r][c],filled=n!==undefined,provisional=active&&r===s.row&&!s.mixed&&((s.onesPlaced&&c===currentCol())||(s.tensPlaced&&s.tensLocation==='row'&&c===currentCol()+1));return box('rowcell '+(filled?'filled ':'')+(provisional?'provisional ':'')+(s.carryArmed&&r===s.row&&c===currentCol()&&s.onesPlaced?'targeted ':'')+(active&&r===s.row&&s.tensLocation==='row'&&c===currentCol()+1&&!last?'liftable ':'')+(c<r?'zero ':''),filled?n:'',`data-slot="${r}:${c}"`,`Product row ${r+1} column ${c+1}`)})}
  if(s.B.length>1&&s.phase==='complete')html+=line('finalline','=',c=>box('rowcell '+(s.sum[c]!==undefined?'filled':''),s.sum[c]??'',`data-sum="${c}"`,`Sum column ${c+1}`));
  }
- $('math').innerHTML=html;updateAdditionHelp();updateAdditionSwipeGuide();$('progressTag').textContent=s.phase==='complete'?'✓ ORDER READY':`${s.done} DIGIT PAIRS`;positionFloater();requestAnimationFrame(positionFloater);
+ $('math').innerHTML=html;if(worksheetExternalCalculator)paintWorksheetDigitEntry();updateAdditionHelp();updateAdditionSwipeGuide();$('progressTag').textContent=s.phase==='complete'?'✓ ORDER READY':`${s.done} DIGIT PAIRS`;positionFloater();requestAnimationFrame(positionFloater);
 }
 function positionFloater(){
  const float=$('floating'),svg=$('pair');
@@ -29,6 +29,7 @@ function positionFloater(){
  float.setAttribute('aria-label',`Product ${value()}; select either digit`);
  const leftVisible=T>0;
  let markup=`${leftVisible?`<button class="ftile ${s.tensPlaced?'done ':''}${s.chosen==='tens'?'selected ':''}${!s.mixed?'pretend ':''}" data-part="tens" aria-label="Tens digit ${T}">${T}</button>`:''}<button class="ftile ${s.onesPlaced?'done ':''}${s.chosen==='ones'?'selected ':''}${s.carryArmed?'targeted ':''}${!s.mixed?'pretend ':''}" data-part="ones" aria-label="Ones digit ${O}">${O}</button>`;
+ if(worksheetExternalCalculator){float.classList.remove('show');float.innerHTML='';delete float.dataset.markup;updateTutorial();return}
  if(!s.revealed){
    markup=`<button type="button" id="equationReveal" class="equation-reveal" aria-label="Multiply ${s.B[s.row]} by ${s.A[s.k]} and show the product">${s.B[s.row]} × ${s.A[s.k]}</button>`;
  }
@@ -78,8 +79,10 @@ function updateTutorial(){
   text=s.first?'Now touch the other digit.':'Connect these two digits.';
  }else if(s.phase==='sum'){text='Swipe down to add the rows.';updateAdditionSwipeGuide();}
  else if(!s.revealed){
-  to=$('equationReveal');text='Tap to see the product.';
+  to=$('equationReveal');text=worksheetExternalCalculator?(worksheetChallengeInput?'Try the keypad on the right.':'Get an answer on the right, then place it.'):'Tap to see the product.';
   const p=pointOf(to);if(p){const cue=document.createElement('span');cue.className='tap-cue';cue.style.left=p.x+'px';cue.style.top=p.y+'px';layer.append(cue)}
+ }else if(worksheetExternalCalculator){
+  text=worksheetDigitEntry.feedback||(s.carryArmed?'Carry selected. Tap its product ones tile.':s.incoming&&!s.mixed?'Select the waiting carry, then its product ones tile.':'Select a worksheet tile, then write a digit with the keypad.');
  }else{
   const onesSource=s.onesPlaced?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
   if(s.incoming&&!s.mixed){from=Q(`[data-carry="${s.k}"]`);to=onesSource;text='Bring the carry into the ones.';}

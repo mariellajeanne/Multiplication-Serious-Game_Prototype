@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-function sendEngine(type,data={}){const fr=$('worksheetFrame');if(fr?.contentWindow)fr.contentWindow.postMessage({source:'bc-shell',type,...data},'*')}
+function sendEngine(type,data={}){const fr=$('worksheetFrame');if(fr?.contentWindow)fr.contentWindow.postMessage({source:'bc-shell',type,...data},typeof location!=='undefined'&&location.origin!=='null'?location.origin:'*')}
 function worksheetGuideLabel(){return `${bakeryIcon('guide')}<span>Guide ${g.tutorialArrows?'ON':'OFF'}</span>`}
 function worksheetSoundLabel(){return `${bakeryIcon(g.sound?'sound':'mute')}<span>Sound ${g.sound?'ON':'OFF'}</span>`}
 function toggleArrows(){g.tutorialArrows=!g.tutorialArrows;save();sendEngine('tutorial',{enabled:g.tutorialArrows});const b=$('arrowToggle');if(b){b.innerHTML=worksheetGuideLabel();b.setAttribute('aria-pressed',String(g.tutorialArrows))}}
@@ -50,14 +50,28 @@ function applyWorksheetActions(r,actions){
   // A combo is sealed only after all of its necessary placements/carries.
   if(action.kind==='combo'&&!worksheetActionKinds(step).filter(k=>k!=='combo')
    .every(k=>ledger.actions[worksheetActionId(ledger.attemptId,step.row,step.col,k)]))continue;
+  const before=typeof usesStepCoins==='function'&&usesStepCoins(r)&&action.kind==='combo'?{
+   coins:JSON.stringify(r.stepCoins),practice:JSON.stringify(g.mathPractice),pool:r.pool,base:r.baseCoins,correct:r.correct,done:r.bridgeDone
+  }:null;
   ledger.actions[id]=true;
   r.index=index;
   if(action.kind==='combo'){
    r.bridgeDone=Math.max(r.bridgeDone||0,index+1);r.correct+=2;
   }
-  const carry=action.kind==='carry-up'||action.kind==='carry-down';
-  earnCoin(carry||action.kind==='combo'?1.2:.65,{point:action.point});
+  if(typeof usesStepCoins==='function'&&usesStepCoins(r)){
+   if(action.kind==='combo'){
+    const receipt=grantWorksheetStepCoin(r,step);
+    if(receipt===false||!save()){
+     r.stepCoins=JSON.parse(before.coins);g.mathPractice=JSON.parse(before.practice);r.pool=before.pool;r.baseCoins=before.base;r.correct=before.correct;r.bridgeDone=before.done;delete ledger.actions[id];return false;
+    }
+    if(receipt&&typeof animateWorksheetStepCoin==='function')animateWorksheetStepCoin(receipt,{point:action.point,attemptId:ledger.attemptId});
+   }
+  }else{
+   const carry=action.kind==='carry-up'||action.kind==='carry-down';
+   earnCoin(carry||action.kind==='combo'?1.2:.65,{point:action.point});
+  }
  }
+ return true;
 }
 function updateWorksheetPool(){
  const r=g.run;if(!r)return;
@@ -71,26 +85,29 @@ function updateWorksheetPool(){
 function handleWorksheetMessage(ev){
  const frame=$('worksheetFrame');
  if(!frame||ev.source!==frame.contentWindow||!ev.data||ev.data.source!=='pq-worksheet')return;
+ if(typeof location!=='undefined'&&ev.origin!==location.origin)return;
  const m=ev.data,r=g.run;if(!r||r.phase!=='engine')return;
+ if(typeof usesStepCoins==='function'&&usesStepCoins(r)&&!worksheetPracticeIsCurrent())return;
  const ledger=ensureWorksheetRewards(r);
  if(m.type==='ready'){
   // Duplicate ready notifications must not restart an already mounted document.
   if(frame.worksheetAttemptId===ledger.attemptId&&frame.worksheetStarted)return;
   frame.worksheetAttemptId=ledger.attemptId;
-  save();sendEngine('start',{ticket:r.ticket,attemptId:ledger.attemptId,session:r.worksheetSession});
+  save();sendEngine('start',{ticket:r.ticket,attemptId:ledger.attemptId,session:r.worksheetSession,calculationPanel:typeof paintWorksheetExperience==='function'});
   sendEngine('sound',{enabled:g.sound,volume:1});sendEngine('tutorial',{enabled:g.tutorialArrows});sendEngine('theme',{level:themeLevel()});fitWorksheet();return;
  }
  if(m.attemptId!==ledger.attemptId)return;
+ if(m.type==='fact-key'&&typeof handleWorksheetCalcMessage==='function'){handleWorksheetCalcMessage(m);return}
  if(m.type==='started'){
   if(frame.worksheetStarted)return;
   frame.worksheetStarted=true;r.bridgeSig='';return;
  }
  if(m.type==='height'){frame.style.height=Math.max(200,Math.min(2400,Number(m.height||460)+2))+'px';return;}
  if(m.type!=='state'&&m.type!=='complete')return;
+ if(m.session?.attemptId===ledger.attemptId&&m.session.state?.a===r.ticket.a&&m.session.state?.b===r.ticket.b)r.worksheetSession=m.session;
  if(m.type==='complete'&&(m.ticket?.id!==r.ticket.id||m.top!==r.ticket.a||m.bottom!==r.ticket.b))return;
  if(m.type==='state'){
   if(m.surface)frame.worksheetSurface=m.surface;
-  if(m.session?.attemptId===ledger.attemptId)r.worksheetSession=m.session;
   const old=r.bridgePrev||{};
   if(m.errors>Number(old.errors||0)){
    r.mistakes+=m.errors-Number(old.errors||0);g.learning.mistakes+=m.errors-Number(old.errors||0);
@@ -102,16 +119,17 @@ function handleWorksheetMessage(ev){
   if(m.bestCombo>r.bestStreak)r.bestStreak=m.bestCombo;
   r.bridgePrev={phase:m.phase,errors:Math.max(Number(old.errors||0),Number(m.errors||0))};
  }
- applyWorksheetActions(r,m.actions);
+ if(applyWorksheetActions(r,m.actions)===false)return;
+ if(typeof paintWorksheetExperience==='function')paintWorksheetExperience();
  // A verified completed state is a second delivery path if the final event was lost.
  if(m.type==='complete'||m.complete===true){
   if(m.ticket?.id!==r.ticket.id||m.top!==r.ticket.a||m.bottom!==r.ticket.b)return;
   if(!r.steps.every(step=>ledger.actions[worksheetActionId(ledger.attemptId,step.row,step.col,'combo')]))return;
   const id=`${ledger.attemptId}/complete`;
+  sendEngine('completion-ack',{attemptId:ledger.attemptId});
   if(ledger.actions[id])return;
   ledger.actions[id]=true;
-  sendEngine('completion-ack',{attemptId:ledger.attemptId});
-  r.correct+=1;earnCoin(.65);finishSum();return;
+  r.correct+=1;if(!(typeof usesStepCoins==='function'&&usesStepCoins(r)))earnCoin(.65);finishSum();return;
  }
  updateWorksheetPool();save();
 }

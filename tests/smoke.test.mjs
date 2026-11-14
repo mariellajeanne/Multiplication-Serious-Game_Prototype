@@ -6,9 +6,9 @@ import { spawnSync } from 'node:child_process';
 const root=resolve(import.meta.dirname,'..');
 const html=readFileSync(resolve(root,'index.html'),'utf8');
 const scripts=[
- 'src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js',
+ 'src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/golden-challenges.js','src/game/state.js','src/game/rewards.js',
  'src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/ui/illustrated-art.js','src/ui/illustrated-controls.js','src/ui/dialogs.js','src/game/package-batches.js','src/ui/scene.js',
- 'src/ui/menu.js','src/ui/reward-feedback.js','src/game/worksheet-bridge.js','src/ui/bakery-hub.js','src/ui/package-unlocks.js','src/ui/package-experience.js','src/main.js','src/environment-entry.js'
+ 'src/ui/menu.js','src/ui/reward-feedback.js','src/game/worksheet-bridge.js','src/ui/bakery-hub.js','src/ui/package-unlocks.js','src/ui/package-experience.js','src/ui/worksheet-experience.js','src/main.js','src/environment-entry.js'
 ];
 test('all classic scripts are included in dependency order',()=>{
   let prev=-1;
@@ -39,7 +39,7 @@ test('worksheet uses modular worksheet engine, bridge and tutorial/sound control
   assert.match(bridge,/function handleWorksheetMessage/);
 });
 test('CSS and menu/ticket renderer are present',()=>{
-  for(const s of ['styles/base.css','styles/menu.css','styles/tickets.css','styles/worksheet.css','styles/bakery-theme.css','styles/feedback-layout.css','styles/progression.css','styles/bakery-environment.css','styles/bakery-hub.css','styles/bakery-interface.css','styles/bakery-preserved-interfaces.css','styles/package-unlocks.css','styles/package-experience.css']) {
+  for(const s of ['styles/base.css','styles/menu.css','styles/tickets.css','styles/worksheet.css','styles/bakery-theme.css','styles/feedback-layout.css','styles/progression.css','styles/bakery-environment.css','styles/bakery-hub.css','styles/bakery-interface.css','styles/bakery-preserved-interfaces.css','styles/package-unlocks.css','styles/package-experience.css','styles/worksheet-experience.css']) {
     assert.ok(existsSync(resolve(root,s)));
     assert.ok(html.includes(`href="${s}"`));
   }
@@ -52,7 +52,7 @@ test('CSS and menu/ticket renderer are present',()=>{
 
 test('worksheet engine scripts load in order and parse',()=>{
   const document=readFileSync(resolve(root,'worksheet/worksheet-engine.html'),'utf8');
-  const files=['src/state.js','src/sound-and-multiplication-fx.js','src/product-placement.js',
+  const files=['src/state.js','src/sound-and-multiplication-fx.js','src/product-placement.js','src/digit-entry.js',
     'src/partial-product-addition.js','src/worksheet-render-and-tutorial.js','src/tap-and-drag.js',
     'src/worksheet-controls.js','src/parent-bridge.js','src/embedded-controls.js'];
   let last=-1;

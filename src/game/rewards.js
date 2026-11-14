@@ -44,7 +44,10 @@ function ensureWorksheetRewards(r,reset=false){
  r.worksheetRewards=ledger;return ledger;
 }
 // Shared by the real run and its UI quote; started runs retain their saved budget.
-function orderCoinQuote(ticket,boost=bakeryValue()){return Math.round(ticket.base*boost)}
+function orderCoinQuote(ticket,boost=bakeryValue()){
+ const base=typeof stepCoinOptions==='function'?stepCoinOptions(ticketCoinTier(ticket)).reduce((sum,type)=>sum+type.chance*type.base,0)*String(ticket.a).length*String(ticket.b).length:ticket.base;
+ return Math.round(base*boost);
+}
 function startTicket(id){
  if(g.claimedOrders[id])return false;
  if(g.run?.ticket.id===id){commitPurchaseUndo('An order is being resumed');g.run.paused=false;save();render();return true}
@@ -55,6 +58,7 @@ function startTicket(id){
  const steps=generateSteps(t.a,t.b);
  g.run={ticket:t,steps,index:0,phase:'engine',paused:false,partial:{},pool:0,earnedActive:0,coinRewardsVersion:1,baseCoins:t.base,bakersBoost:bakeryValue(),mistakes:0,correct:0,streak:0,bestStreak:0,livesLeft:g.lives,retriesLeft:retryLimit(),budget:orderCoinQuote(t),mode:g.mode,bridgeDone:0,bridgeSig:'',bridgeErrors:0};
  ensureWorksheetRewards(g.run,true);
+ if(typeof initializeStepCoins==='function')initializeStepCoins(g.run);
  g.orderRuns[t.id]=g.run;
  refillBoard();save();render();toast('New order, baker!');
 }
@@ -69,14 +73,17 @@ function addCarry(){const r=g.run,s=runCurrent();if(!r||r.phase!=='place'||r.add
 function maybeFinishCombo(){const r=g.run,s=runCurrent();if(!r||r.phase!=='place')return;if(r.addedCarry&&r.placedOnes&&(s.tens===0||r.placedTens)){if(!r.partial[s.row])r.partial[s.row]={};r.partial[s.row][s.col+s.row]=s.ones;if(s.last&&s.tens)r.partial[s.row][s.col+s.row+1]=s.tens;finishCombo()}}
 function mistake(msg){const r=g.run;if(!r)return;r.mistakes++;g.learning.mistakes++;r.streak=0;if(r.mode==='survival'){r.livesLeft--;if(r.livesLeft<=0){r.phase='failed';save();render();toast('Out of lives — the challenge ended.');return}}save();render();toast(msg+' You can try again.')}
 function finishCombo(){const r=g.run;r.streak++;r.bestStreak=Math.max(r.bestStreak,r.streak);const last=r.index===r.steps.length-1;r.index++;r.selectedTile=null;r.placedOnes=false;r.placedTens=false;r.addedCarry=false;r.phase=last?'sum':'chooseB';save()}
-function finishSum(){const r=g.run;if(!r||r.phase==='claim')return;r.phase='claim';r.pool=r.budget;save();render();coinFly(7);toast('Order complete! Your coins are ready to collect. \u{1f389}')}
+function finishSum(){const r=g.run;if(!r||r.phase==='claim')return;if(typeof usesStepCoins==='function'&&usesStepCoins(r)){if(!completeWorksheetProcedure(r))return;save();if(typeof paintWorksheetExperience==='function')paintWorksheetExperience();return}r.phase='claim';r.pool=r.budget;save();render();coinFly(7);toast('Order complete! Your coins are ready to collect. \u{1f389}')}
 function coinRewardMarkup(r){
  const rank=ticketCoinTier(r.ticket),base=r.baseCoins??r.ticket.base??r.pool,boost=r.bakersBoost??r.pool/base;
  const boostLabel=Math.abs(boost)>=1e12?largeNumberLabel(boost,2):new Intl.NumberFormat('en-US',{maximumSignificantDigits:12}).format(boost);
  return `<section class="coin-order-reward coin-tier-${rank}" aria-label="Coin reward"><div class="coin-reward-tier">${coinTierArt(rank)}<h3>${rank+1}\u2605 ${COIN_TIERS[rank]}</h3></div><p class="reward-equation" aria-label="Base coins times Baker's Boost equals total coins">${amountLabel(base)} <span>×</span> ${boostLabel} <span>=</span> <strong>${amountLabel(r.pool)}</strong></p><dl><div><dt>Base coins</dt><dd>${fmt(base)} \u{1fa99}</dd></div><div><dt>Baker's Boost${r.savedReward?' (saved)':''}</dt><dd>\u00d7${boostLabel} ${typeof boostSymbol==='function'?boostSymbol():''}</dd></div><div class="coin-reward-total"><dt>Total coins earned</dt><dd>${fmt(r.pool)} \u{1fa99}</dd></div></dl></section>`;
 }
-function prizeItems(){
- const r=g.run;if(!r||r.phase!=='claim'||g.claimedOrders[r.ticket.id])return false;
+function creditCompletedOrder(r=g.run){
+ if(!r||g.claimedOrders[r.ticket.id])return false;
+ const stepOrder=typeof usesStepCoins==='function'&&usesStepCoins(r);
+ if(stepOrder){if(!r.procedureComplete||!r.settlement||!allWorksheetStepsSealed(r))return false;r.pool=stepCoinTotals(r).total}
+ else if(r.phase!=='claim')return false;
  // A second tab with an old worksheet must not claim a persisted receipt again.
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(stored?.claimedOrders?.[r.ticket.id]){toast('This order has already been collected.');return false}}catch(_){}
  commitPurchaseUndo('Rewards collected');
@@ -86,6 +93,12 @@ function prizeItems(){
  g.mastery+=r.mode==='normal'||r.mode==='lookup'?1:2;g.permanentLuck=Math.max(old,Math.floor(g.mastery/4));
  g.board=g.board.filter(t=>t.id!==r.ticket.id);delete g.orderRuns[r.ticket.id];g.run=null;
  if(!save()){g=JSON.parse(backup);migrateFrame11(g);render();return false}
+ return true;
+}
+function prizeItems(){
+ const r=g.run;
+ if(typeof usesStepCoins==='function'&&usesStepCoins(r))return typeof beginWorksheetSettlement==='function'?beginWorksheetSettlement():false;
+ if(!creditCompletedOrder(r))return false;
  render();showModal('Order complete!',coinRewardMarkup(r),'order-reward-modal coin-reward-modal');checkUnlocks();return true;
 }
 
@@ -105,7 +118,7 @@ function captureActiveWorksheet(){
  try{const session=frame?.contentWindow?.getWorksheetSession?.();if(session&&session.attemptId===r.worksheetRewards?.attemptId){
   // Flush accepted actions AND errors synchronously before unmounting the child.
   const state=session.state,metrics=session.metrics;
-  handleWorksheetMessage({source:frame.contentWindow,data:{source:'pq-worksheet',type:'state',attemptId:session.attemptId,
+  handleWorksheetMessage({source:frame.contentWindow,origin:typeof location!=='undefined'?location.origin:undefined,data:{source:'pq-worksheet',type:'state',attemptId:session.attemptId,
    session,actions:session.actions,errors:metrics.errors,bestCombo:metrics.bestCombo,phase:state.phase,
    ticket:r.ticket,top:state.a,bottom:state.b,complete:state.complete}});
  }}catch(_){}

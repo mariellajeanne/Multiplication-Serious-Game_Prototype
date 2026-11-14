@@ -1,19 +1,56 @@
 ﻿/* Presentation only. Accounting is committed by rewards.js before any flight. */
 const FEEDBACK_TIMING=Object.freeze({routine:180,gain:280,hold:120,flight:360,reveal:480});
 function feedbackPulse(node){if(!node)return;node.classList.remove('ui-pulse');void node.offsetWidth;node.classList.add('ui-pulse');setTimeout(()=>node.classList.remove('ui-pulse'),FEEDBACK_TIMING.gain)}
-const rewardPresentation={epoch:0,pending:0,timers:new Set(),nodes:new Set()};
+const rewardPresentation={epoch:0,pending:0,timers:new Set(),nodes:new Set(),stepFlights:new Map()};
 function animateRewardElement(node,frames,options){try{return node.animate?.(frames,options)}catch(error){return null}}
 function rewardFlightsPending(){return rewardPresentation.pending>0}
 function paintRewardDock(r){
  if(!r)return;
  const pc=$('pendingCoins');if(pc)pc.textContent='\u{1fa99} '+fmt(r.pool);
+ if(typeof usesStepCoins==='function'&&usesStepCoins(r)){
+  for(const option of r.stepCoins.options){
+   const flying=[...rewardPresentation.stepFlights.values()].filter(item=>item.rank===option.rank).length;
+   const lifetime=Math.max(0,g.mathPractice.lifetimeCoins[option.rank]-flying),ticket=Math.max(0,r.stepCoins.counts[option.rank]-flying);
+   const all=document.querySelector(`[data-lifetime-count="${option.rank}"]`),current=document.querySelector(`[data-ticket-count="${option.rank}"]`);
+   if(all)all.textContent=amountLabel(lifetime);if(current)current.textContent=fmt(ticket);
+   document.querySelector(`.worksheet-coin-display[data-coin-rank="${option.rank}"]`)?.classList.toggle('has-earned',lifetime>0);
+  }
+ }
 }
 function bumpPrizeDock(){const dock=$('prizejar');if(!dock)return;dock.classList.remove('dock-bump');void dock.offsetWidth;dock.classList.add('dock-bump')}
 function syncRewardPresentation(){
  rewardPresentation.epoch++;rewardPresentation.pending=0;
  for(const timer of rewardPresentation.timers)clearTimeout(timer);rewardPresentation.timers.clear();
  for(const node of rewardPresentation.nodes){node.getAnimations?.().forEach(a=>a.cancel());node.remove()}rewardPresentation.nodes.clear();
+ rewardPresentation.stepFlights.clear();
  paintRewardDock(g.run);
+}
+function animateWorksheetStepCoin(receipt,data){
+ const r=g.run,frame=$('worksheetFrame'),destination=document.querySelector(`.worksheet-coin-display[data-coin-rank="${receipt.rank}"]`);
+ if(!r||!frame||!destination||data.attemptId!==r.worksheetRewards?.attemptId||rewardPresentation.stepFlights.has(receipt.id))return;
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduced){paintRewardDock(r);feedbackPulse(destination);return}
+ const epoch=rewardPresentation.epoch,node=document.createElement('div');node.className='worksheet-step-flight';
+ node.innerHTML=`${worksheetCoinArt(receipt.rank)}<strong>+${fmt(receipt.baseAmount)}</strong>${receipt.multiplier>1?`<b class="flight-golden-bonus">×${receipt.multiplier}</b>`:''}`;
+ node.setAttribute('aria-hidden','true');document.body.appendChild(node);
+ const rect=frame.getBoundingClientRect(),point=data.point||{x:.5,y:.65},box=node.getBoundingClientRect();
+ const x=Math.max(8,Math.min(innerWidth-box.width-8,rect.left+rect.width*Math.max(0,Math.min(1,point.x))-box.width/2));
+ const y=Math.max(12,Math.min(innerHeight-box.height-12,rect.top+rect.height*Math.max(0,Math.min(1,point.y))-box.height-10));
+ node.style.left=x+'px';node.style.top=y+'px';
+ rewardPresentation.nodes.add(node);rewardPresentation.stepFlights.set(receipt.id,receipt);rewardPresentation.pending++;
+ paintRewardDock(r);animateRewardElement(node,[{opacity:0,transform:'scale(.72)'},{opacity:1,transform:'scale(1.06)',offset:.65},{opacity:1,transform:'scale(1)'}],{duration:200,easing:'ease-out'});
+ const hold=setTimeout(()=>{
+  rewardPresentation.timers.delete(hold);
+  if(epoch!==rewardPresentation.epoch)return;
+  const target=destination.getBoundingClientRect(),dx=target.left+target.width/2-x-box.width/2,dy=target.top+target.height/2-y-box.height/2;
+  animateRewardElement(node,[{transform:'translate(0,0) scale(1)',opacity:1},{transform:`translate(${dx*.5}px,${dy*.5-26}px) scale(.85)`,opacity:1,offset:.5},{transform:`translate(${dx}px,${dy}px) scale(.4)`,opacity:0}],{duration:620,easing:'cubic-bezier(.3,.1,.2,1)',fill:'forwards'});
+  const arrival=setTimeout(()=>{
+   rewardPresentation.timers.delete(arrival);node.remove();rewardPresentation.nodes.delete(node);
+   if(epoch!==rewardPresentation.epoch)return;
+   rewardPresentation.stepFlights.delete(receipt.id);rewardPresentation.pending=Math.max(0,rewardPresentation.pending-1);
+   if(g.run?.worksheetRewards?.attemptId===data.attemptId){paintRewardDock(g.run);feedbackPulse(destination)}
+  },640);rewardPresentation.timers.add(arrival);
+ },650);rewardPresentation.timers.add(hold);
 }
 function rewardProtectedArea(frame){
  if(!frame)return null;const fr=frame.getBoundingClientRect(),surface=frame.worksheetSurface;

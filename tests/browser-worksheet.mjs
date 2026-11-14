@@ -71,37 +71,42 @@ try{
   await evaluate(`window.auditFrame=$('worksheetFrame');window.auditChild=auditFrame.contentWindow;
     auditChild.eval("operand('bottom',0)")`);
   const preserve=async()=>{
-    const before=await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound})'))`);
+    const before=await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound,entry:worksheetDigitEntry})'))`);
     const board=await evaluate('JSON.stringify(g.board)');
     await evaluate('abandonTicket()');
     assert.ok(await evaluate(hubMode?"g.run.paused&&!$('hubHome').hidden&&$('hubOrder').hidden":"g.run.paused&&$('liveOrder').hidden&&!$('pausedMenu').hidden"));
     await evaluate('startTicket(g.run.ticket.id)');
     assert.ok(await evaluate(hubMode?"!g.run.paused&&$('worksheetFrame')===auditFrame&&!$('hubOrder').hidden":"!g.run.paused&&$('worksheetFrame')===auditFrame&&!$('liveOrder').hidden"));
     assert.equal(await evaluate('JSON.stringify(g.board)'),board);
-    assert.equal(await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound})'))`),before);
+    assert.equal(await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound,entry:worksheetDigitEntry})'))`),before);
     for(const dialog of ['openSettings()','showTutorial(2)','openProbabilities()','openMenu()']){
       await evaluate(`${dialog};closeModal();render()`);
       assert.ok(await evaluate(`$('worksheetFrame')===auditFrame&&auditFrame.contentWindow===auditChild`));
-      assert.equal(await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound})'))`),before);
+      assert.equal(await evaluate(`JSON.stringify(auditChild.eval('({s,history,tutorial,sound,entry:worksheetDigitEntry})'))`),before);
     }
   };
   await preserve();
   await evaluate(`auditChild.eval("operand('top',0)")`);await preserve();
-  await evaluate(`auditChild.eval('revealProduct()')`);await preserve();
-  await evaluate(`auditChild.eval("place('ones','slot',0)")`);
+  await evaluate(`auditChild.eval('bridgePoll()')`);await pause(100);await evaluate('generateWorksheetAnswer()');await waitFor(`auditChild.eval('s.revealed')`);await preserve();
+  await evaluate(`auditChild.eval("selectWorksheetDigit({kind:'slot',r:0,c:0});worksheetDigitKey('2');worksheetDigitKey('Enter')")`);
   await waitFor(`auditChild.eval('!busy&&s.onesPlaced')`);await preserve();
-  await evaluate(`auditChild.eval("place('tens','slot',1)")`);
+  await evaluate(`auditChild.eval("selectWorksheetDigit({kind:'slot',r:0,c:1});worksheetDigitKey('7');worksheetDigitKey('Enter')")`);
   await waitFor(`auditChild.eval('!busy&&s.tensPlaced')`);await preserve();
-  await evaluate(`auditChild.eval('liftTens()')`);
+  await evaluate(`auditChild.eval("selectWorksheetDigit({kind:'carry',c:1});worksheetDigitKey('7');worksheetDigitKey('Enter')")`);
   await waitFor(`auditChild.eval("!busy&&s.k===1")`);await preserve();
   await evaluate(`toggleArrows();toggleSfx()`);await pause(100);await preserve();
   assert.equal(await evaluate(`auditChild.eval('tutorial')`),false);
   assert.equal(await evaluate(`auditChild.eval('sound')`),false);
-  console.log('PASS browser: dialogs retain frame, connection, floating product, provisional digits, carry, history and settings');
+  console.log('PASS browser: dialogs retain frame, connection, typed input, provisional digits, carry, history and settings');
 
   // Continue the same actual worksheet with mouse/pointer events and its normal
   // animations. Geometry is measured through both documents; no test-fast mode.
   const point=async selector=>{
+    if(selector==='#equationReveal'){
+      await evaluate(`document.getElementById('generateAnswer')?.scrollIntoView({block:'center'})`);await pause(100);
+      return evaluate(`(()=>{const r=document.getElementById('generateAnswer').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
+    }
+    await evaluate(`auditFrame.scrollIntoView({block:'center'})`);
     await waitFor(`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
     await pause(180);
     return evaluate(`(()=>{
@@ -112,9 +117,20 @@ try{
     return {x:b.left+a.left+a.width/2,y:b.top+a.top+a.height/2};
   })()`);
   };
-  let touchMode=false;
+  let touchMode=false,pendingPart=null;
+  const writeDigit=async part=>{
+    const digit=String(await evaluate(`auditChild.eval('${part==='ones'?'ones()':'tens()'}')`));
+    await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:digit,text:digit});
+    await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:digit});
+    await cdp('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+    await cdp('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+    await pause(140);
+  };
   const click=async selector=>{
-    await waitFor(`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
+    if(selector.includes('[data-part=')){pendingPart=selector.includes('ones')?'ones':'tens';return;}
+    if(selector==='#equationReveal'){await evaluate(`auditChild.eval('bridgePoll()')`);await pause(80);if(await evaluate(`auditChild.eval('s.revealed')`))return;}
+
+    await waitFor(selector==='#equationReveal'?`document.querySelector('#generateAnswer:not(:disabled)')!==null`:`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
     const p=await point(selector);
     if(touchMode){
       await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});
@@ -125,8 +141,14 @@ try{
       await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...p});
     }
     await pause(120);
+    if(pendingPart){const part=pendingPart;pendingPart=null;await writeDigit(part);}
   };
   const drag=async(from,to)=>{
+    if(from.includes('[data-part=')){await click(to);await writeDigit(from.includes('ones')?'ones':'tens');return;}
+    if(to.includes('[data-part=')){
+      await click(from);const [row,col]=await evaluate(`auditChild.eval('[s.row,currentCol()]')`);await click(`[data-slot="${row}:${col}"]`);return;
+    }
+
     const a=await point(from),b=await point(to);
     if(touchMode)await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...a,id:1}]});
     else await cdp('Input.dispatchMouseEvent',{type:'mousePressed',button:'left',clickCount:1,...a});
@@ -150,28 +172,29 @@ try{
   await waitFor('!rewardFlightsPending()');
   assert.equal(await evaluate(`$('pendingCoins').textContent`),await evaluate(`'🪙 '+fmt(g.run.pool)`));
   console.log('PASS browser: duplicate ready/state messages and parent renders do not add rewards or reset the frame');
-  // Fix RNG only in this isolated test profile to guarantee that all earlier
-  // chest rolls miss. The last-combo guarantee and the claim can then be exact.
+  // Fix step-coin RNG only in this isolated test profile for exact payout checks.
   await evaluate(`Math.random=()=>.999`);
-  const initialWallet=await evaluate('g.coins'),budget=await evaluate('g.run.budget');
+  const initialWallet=await evaluate('g.coins');let budget=await evaluate('g.run.budget');
   await click('[data-bottom="0"]');await click('[data-top="1"]');
-  await waitFor(`auditChild.document.querySelector('#equationReveal')!==null`);
+  await waitFor(`auditChild.eval('s.revealed')||document.querySelector('#generateAnswer:not(:disabled)')!==null`);
   await click('#equationReveal');await flush();
   const revealRewards=await rewardSnapshot();
   await click('#undo');
-  await waitFor(`auditChild.document.querySelector('#equationReveal')!==null`);
+  await waitFor(`auditChild.eval('s.revealed')||document.querySelector('#generateAnswer:not(:disabled)')!==null`);
   await click('#equationReveal');await flush();
   assert.equal(await rewardSnapshot(),revealRewards,'undo/reveal must not farm coins or Luck');
   await click('[data-part="ones"]');await click('[data-slot="0:1"]');
   await waitFor(`auditChild.eval('!busy&&s.onesPlaced')`);await preserve();
   await click('[data-carry="1"]');await click('[data-slot="0:1"]');
   await waitFor(`auditChild.eval('!busy&&s.mixed')`);await preserve();
-  assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),3,'56 + carry 7 updates placed ones to 3');
+  assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),undefined,'Adding carry reopens the provisional ones for typed correction');
+  await click('[data-slot="0:1"]');await writeDigit('ones');
+  assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),3);
   await drag('[data-part="tens"]','[data-slot="0:2"]');
   await waitFor(`auditChild.eval('!busy&&s.row===1')`);await preserve();
   for(let col=0;col<2;col++){
     await drag('[data-bottom="1"]',`[data-top="${col}"]`);
-    await waitFor(`auditChild.document.querySelector('#equationReveal')!==null`);
+    await waitFor(`auditChild.eval('s.revealed')||document.querySelector('#generateAnswer:not(:disabled)')!==null`);
     await click('#equationReveal');
     await drag('[data-part="ones"]',`[data-slot="1:${col+1}"]`);
     await waitFor(col===0?`auditChild.eval('!busy&&s.k===1')`:`auditChild.eval("!busy&&s.phase==='sum'")`);
@@ -189,7 +212,8 @@ try{
   await cdp('Input.dispatchMouseEvent',{type:'mouseMoved',buttons:1,x:swipe.x,y:swipe.y+70});
   await pause(60);
   await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,x:swipe.x,y:swipe.y+70});
-  await waitFor(`g.run?.phase==='claim'`);
+  await waitFor(`g.run?.procedureComplete===true`);
+  budget=await evaluate('stepCoinTotals(g.run).total');
   assert.equal(await evaluate('g.run.pool'),budget);
   assert.equal(await evaluate('g.run.chests'),undefined);
   assert.equal(await evaluate('g.run.correct'),9);
@@ -197,19 +221,19 @@ try{
   assert.equal(await evaluate(`(()=>{const run=g.run,before=JSON.stringify(run);return refreshOrders()&&g.run===run&&JSON.stringify(g.run)===before&&g.board.length===5})()`),true,'refresh keeps unclaimed rewards and the completed ticket untouched');
   // The claim is durable; a reload before collecting must not strand or repay it.
   await cdp('Page.reload');
-  await waitFor(`typeof startTicket==='function'&&g.run?.phase==='claim'&&document.querySelector('.claim-screen .primary')!==null`);
+  await waitFor(`typeof startTicket==='function'&&g.run?.procedureComplete===true&&document.querySelector('#collectRewards')!==null`);
   assert.equal(await evaluate('g.run.pool'),budget);
-  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.claim-screen')).display!=='none'`),true);
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('.worksheet-modern')).display!=='none'`),true);
   const shots=resolve(root,'.test-tools/worksheet-shots');await mkdir(shots,{recursive:true});
   await cdp('Emulation.setDeviceMetricsOverride',{width:1194,height:834,deviceScaleFactor:1,mobile:false});
   await pause(250);
   const completedShot=await cdp('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
   await writeFile(join(shots,'completed-order-1194.png'),Buffer.from(completedShot.data,'base64'));
-  await evaluate(`Math.random=()=>.999;window.completedAttempt=structuredClone(g.run);prizeItems();prizeItems()`);
+  await evaluate(`Math.random=()=>.999;window.completedAttempt=structuredClone(g.run);beginWorksheetSettlement();beginWorksheetSettlement();finishWorksheetSummaryAnimation();acknowledgeWorksheetSummary();acknowledgeWorksheetSummary()`);
   assert.equal(await evaluate('g.coins'),initialWallet+budget);
   assert.equal(await evaluate('g.completed'),1);
   console.log('PASS browser: reload restores the in-page completed-order claim; repeated collection pays once');
-  console.log(`PASS browser: 79 × 18 = 1422, click/drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins claimed exactly once; no package drop`);
+  console.log(`PASS browser: 79 × 18 = 1422, typed digits/connector drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins claimed exactly once; no package drop`);
   const levelCost=await evaluate('foodLevelCost(g.owned[0])');
   await evaluate("closeModal();discoverFood(F('pandesal'));if(typeof isBakeryHub==='function'&&isBakeryHub())openHubFood(1);else openFoodItem(1)");await pause(280);
   const upgrade=await evaluate(`(()=>{const r=document.querySelector('.action-mastery').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
@@ -238,14 +262,14 @@ try{
   assert.equal(await evaluate(`auditChild.eval('sound&&tutorial')`),true);
   await drag('[data-part="tens"]','[data-slot="0:2"]');await waitFor(`auditChild.eval('!busy&&s.tensPlaced')`);
   await click('[data-part="ones"]');await click('[data-slot="0:1"]');
-  await waitFor(`g.run?.phase==='claim'`);
-  assert.equal(await evaluate('g.run.pool'),await evaluate('g.run.budget'));
+  await waitFor(`g.run?.procedureComplete===true`);
+  assert.equal(await evaluate('g.run.pool'),await evaluate('stepCoinTotals(g.run).total'));
   assert.equal(await evaluate('g.run.chests'),undefined);
-  console.log('PASS browser: 19 × 9 = 171 at 390px with emulated touch taps/drags, outgoing/incoming carry before placement; tutorial/SFX enabled');
+  console.log('PASS browser: 19 × 9 = 171 at 390px with emulated touch taps, typed digits and outgoing/incoming carry before placement; tutorial/SFX enabled');
 
   // Tablet touch completion with both deliveries lost once and broken motion.
   // All math is still performed through the real touch targets and swipe.
-  await evaluate(`prizeItems();closeModal();Math.random=()=>.999;g.sound=false;g.tutorialArrows=true;
+  await evaluate(`beginWorksheetSettlement();finishWorksheetSummaryAnimation();acknowledgeWorksheetSummary();Math.random=()=>.999;g.sound=false;g.tutorialArrows=true;
     g.board=[{id:9003,a:79,b:18,rarity:1,base:304}];startTicket(9003)`);
   await cdp('Emulation.setDeviceMetricsOverride',{width:1024,height:768,deviceScaleFactor:1,mobile:false});
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9003`);
@@ -267,17 +291,17 @@ try{
     window.addEventListener('message',e=>{if(e.data?.source==='pq-worksheet'&&
       (e.data.type==='complete'||e.data.complete===true)&&droppedCompletionMessages<2){droppedCompletionMessages++;e.stopImmediatePropagation()}},true);
     auditChild.eval("Array.prototype.findLastIndex=undefined;Element.prototype.animate=()=>{throw Error('Simulated unavailable animation API')}")`);
-  const tabletWallet=await evaluate('g.coins'),tabletBudget=await evaluate('g.run.budget');
+  const tabletWallet=await evaluate('g.coins'),tabletBudget=await evaluate('stepCoinTotals(g.run).total');
   const tabletSwipe=await point('[data-slot="0:0"]');
   await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...tabletSwipe,id:1}]});
   await pause(70);
   await cdp('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:[{x:tabletSwipe.x,y:tabletSwipe.y+75,id:1}]});
   await pause(70);await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
-  await waitFor(`g.run?.phase==='claim'`);
+  await waitFor(`g.run?.procedureComplete===true`);
   assert.equal(await evaluate('droppedCompletionMessages'),2);
   assert.equal(await evaluate('g.run.pool'),tabletBudget);
   assert.equal(await evaluate('g.run.chests'),undefined);
-  await evaluate('prizeItems();prizeItems()');assert.equal(await evaluate('g.coins'),tabletWallet+tabletBudget);
+  await evaluate('beginWorksheetSettlement();finishWorksheetSummaryAnimation();acknowledgeWorksheetSummary();acknowledgeWorksheetSummary()');assert.equal(await evaluate('g.coins'),tabletWallet+tabletBudget);
   console.log('PASS browser: 79 × 18 tablet touch/swipe completes with findLastIndex absent, animation APIs throwing, and first two completion deliveries dropped; claim pays once');
   assert.deepEqual(errors,[],'browser runtime exceptions');
 }finally{

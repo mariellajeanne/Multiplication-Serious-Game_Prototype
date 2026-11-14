@@ -23,6 +23,19 @@ function targetClicked(el){
 }
 function worksheetTap(el){
  if(!el||busy)return;
+ if(worksheetExternalCalculator&&productActive()&&s.revealed){
+  if(el.hasAttribute('data-carry')){
+   const c=Number(el.dataset.carry);
+   if(!s.mixed&&s.incoming&&c===s.k){armCarry();bridgePoll();return}
+   selectWorksheetDigit({kind:'carry',c});return;
+  }
+  if(el.hasAttribute('data-slot')){
+   const [r,c]=el.dataset.slot.split(':').map(Number);
+   if(s.carryArmed&&r===s.row&&c===currentCol())addCarry(s.onesPlaced?'placed':'floating');
+   selectWorksheetDigit({kind:'slot',r,c});return;
+  }
+  if(el.hasAttribute('data-part'))return;
+ }
  if(el.closest('#equationReveal')){revealProduct();return}
  if(el.hasAttribute('data-part')){if(s.carryArmed){if(el.dataset.part==='ones')addCarry('floating');else{invalid();status('Carry must combine with the ones part of the product.',true)}}else chooseTile(el.dataset.part);return}
  targetClicked(el);
@@ -62,7 +75,7 @@ function up(e){if(!pointer||pointer.pid!==e.pointerId)return;const p=pointer;poi
  // Commit the tap here; the following compatibility click must not repeat it.
  if(e.pointerType==='touch'){ignoreClick=true;setTimeout(()=>ignoreClick=false,450);worksheetTap(p.el)}
  return;
-}ignoreClick=true;setTimeout(()=>ignoreClick=false,450);let target=document.elementFromPoint(e.clientX,e.clientY)?.closest('button');if(p.kind==='carry'&&target&&productActive()&&!s.mixed&&p.c===s.k){if(target.dataset.part==='ones'&&!s.onesPlaced)addCarry('floating');else if(target.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row&&c===currentCol()&&s.onesPlaced)addCarry('placed');else{invalid();status('Carry must join the ones digit.',true)}}return;}if(p.kind==='rowtens'&&target?.hasAttribute('data-carry')&&Number(target.dataset.carry)===s.k+1){liftTens();return}if(p.kind==='tile'&&target){if(target.hasAttribute('data-slot')){let [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row)place(p.part,'slot',c)}else if(target.hasAttribute('data-carry'))place(p.part,'carry',Number(target.dataset.carry));return}if((p.kind==='top'||p.kind==='bottom')&&target){if(target.hasAttribute('data-top')||target.hasAttribute('data-bottom')){let kind=target.hasAttribute('data-top')?'top':'bottom',c=Number(target.dataset[kind]);if(kind!==p.kind&&s.phase==='select'){operand(p.kind,p.c);operand(kind,c)}}}}
+}ignoreClick=true;setTimeout(()=>ignoreClick=false,450);let target=document.elementFromPoint(e.clientX,e.clientY)?.closest('button');if(worksheetExternalCalculator&&!['top','bottom'].includes(p.kind)){if(target)worksheetTap(target);return}if(p.kind==='carry'&&target&&productActive()&&!s.mixed&&p.c===s.k){if(target.dataset.part==='ones'&&!s.onesPlaced)addCarry('floating');else if(target.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row&&c===currentCol()&&s.onesPlaced)addCarry('placed');else{invalid();status('Carry must join the ones digit.',true)}}return;}if(p.kind==='rowtens'&&target?.hasAttribute('data-carry')&&Number(target.dataset.carry)===s.k+1){liftTens();return}if(p.kind==='tile'&&target){if(target.hasAttribute('data-slot')){let [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row)place(p.part,'slot',c)}else if(target.hasAttribute('data-carry'))place(p.part,'carry',Number(target.dataset.carry));return}if((p.kind==='top'||p.kind==='bottom')&&target){if(target.hasAttribute('data-top')||target.hasAttribute('data-bottom')){let kind=target.hasAttribute('data-top')?'top':'bottom',c=Number(target.dataset[kind]);if(kind!==p.kind&&s.phase==='select'){operand(p.kind,p.c);operand(kind,c)}}}}
 $('sheet').addEventListener('pointerdown',down);window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up);window.addEventListener('pointercancel',()=>{hidePreview();pointer?.ghost?.remove();pointer=null});
 // Connector style is fixed to capsule for this lab.
 

@@ -51,8 +51,9 @@ test('save failure rolls back the entire purchase/opening and acknowledgement re
    localStorage.setItem=()=>{throw Error('quota')};ok=commitPackageBatch(quote.id)`);
   assert.equal(h.run('ok'),false);assert.equal(h.run('JSON.stringify(g)'),h.run('before'));
  }
- const h=progressionHarness();h.run(`quote=quotePackageBatch(0,1);commitPackageBatch(quote.id);before=JSON.stringify(g);localStorage.setItem=()=>{throw Error('quota')};ok=collectPackageBatch(g.packageBatchReceipt.id)`);
- assert.equal(h.run('ok'),false);assert.equal(h.run('JSON.stringify(g)'),h.run('before'));
+ // Saving advances the monotonic order clock even when storage rejects a write.
+ const h=progressionHarness();h.run(`quote=quotePackageBatch(0,1);commitPackageBatch(quote.id);before=JSON.stringify({...g,orderClock:0});localStorage.setItem=()=>{throw Error('quota')};ok=collectPackageBatch(g.packageBatchReceipt.id)`);
+ assert.equal(h.run('ok'),false);assert.equal(h.run('JSON.stringify({...g,orderClock:0})'),h.run('before'));
 });
 test('pending receipts prevent a second purchase; stale tabs cannot resurrect collected batches',()=>{
  const h=progressionHarness();h.run(`g.coins=1e9;quote=quotePackageBatch(0,5);commitPackageBatch(quote.id);pending=JSON.stringify(g);

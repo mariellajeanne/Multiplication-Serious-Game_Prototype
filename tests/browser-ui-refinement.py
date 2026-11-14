@@ -84,8 +84,8 @@ def run(pw,engine):
   assert p.locator('#refreshOrders').inner_text().startswith('Skip (')
   p.locator('#refreshOrders').tap();popup_checks(p);shot(p,f'{engine}-refresh-confirmation')
   assert p.locator('.popup-small').is_visible();p.locator('#modals .close').tap()
-  # The external receipt uses the new popup; claim accounting stays original.
-  p.evaluate('g.run.phase="claim";g.run.paused=false;g.run.pool=g.run.budget;save();render();window.receiptWallet=g.coins;window.receiptBudget=g.run.budget')
+  # Older saved fixed-payout receipts retain their promised reward and popup.
+  p.evaluate('delete g.run.stepCoins;g.run.phase="claim";g.run.paused=false;g.run.pool=g.run.budget;save();render();window.receiptWallet=g.coins;window.receiptBudget=g.run.budget')
   p.locator('.claim-screen .primary').tap();popup_checks(p)
   assert p.evaluate('g.coins===receiptWallet+receiptBudget')
   assert not p.evaluate('prizeItems()')

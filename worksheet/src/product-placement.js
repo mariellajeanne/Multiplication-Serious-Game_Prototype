@@ -20,13 +20,14 @@ function spark(el,txt='✦'){if(!el||window.__BATCH_TEST_FAST||matchMedia('(pref
 // a temporary place in the partial-product row. The latter is not finalized.
 function place(part,kind,c){
  if(!productActive()||busy||!s.revealed)return;
+ if(worksheetExternalCalculator&&!worksheetDigitAuthorized)return;
  const cc=currentCol(),isLast=lastDigit();
  let valid=part==='ones'?(kind==='slot'&&c===cc):((kind==='slot'&&c===cc+1)||(kind==='carry'&&!isLast&&c===s.k+1));
  if(!valid){invalid();status('Try another place for this digit.',true);return}
  if(part==='ones'&&s.onesPlaced||part==='tens'&&s.tensPlaced)return;
  if(part==='tens'&&!tens())return;
  snapshot();const source=originFor(part),dest=destinationFor(part,kind),n=part==='ones'?ones():tens();
- animateMove(source,dest,n,part==='tens'&&kind==='carry'?'up':'down');
+ if(!worksheetExternalCalculator)animateMove(source,dest,n,part==='tens'&&kind==='carry'?'up':'down');
   if(part==='ones'){s.onesPlaced=true;s.rows[s.row][cc]=ones()}
   else {s.tensPlaced=true;s.tensLocation=kind==='slot'?'row':'carry';
    if(kind==='slot')s.rows[s.row][cc+1]=tens();
@@ -37,8 +38,9 @@ function place(part,kind,c){
 // shelf, without insisting that the previous incoming carry has already landed.
 function liftTens(){
  if(!productActive()||busy||!s.revealed||!s.tensPlaced||s.tensLocation!=='row'||lastDigit())return;
+ if(worksheetExternalCalculator&&!worksheetDigitAuthorized)return;
  snapshot();const cc=currentCol();const source=Q(`[data-slot="${s.row}:${cc+1}"]`),dest=Q(`[data-carry="${s.k+1}"]`);
- animateMove(source,dest,tens(),'up');delete s.rows[s.row][cc+1];s.tensLocation='carry';
+ if(!worksheetExternalCalculator)animateMove(source,dest,tens(),'up');delete s.rows[s.row][cc+1];s.tensLocation='carry';
   s.carrySlots[s.k+1]={value:tens(),provisional:!s.mixed};s.chosen=null;selection=null;
   play('carry');render();pulseWorksheet(Q(`[data-carry="${s.k+1}"]`));maybeAdvance();
 }
@@ -56,14 +58,16 @@ function addCarry(target){
  if(target==='placed'&&!s.onesPlaced || target==='floating'&&s.onesPlaced){invalid();status('Select a current product digit.',true);return;}
  const current=s.carrySlots[s.k];if(!current)return;
  snapshot();const from=Q(`[data-carry="${s.k}"]`);
- const to=target==='placed'?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
+ const to=target==='placed'||worksheetExternalCalculator?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
  animateMove(from,to,s.incoming,'down');s.mixed=true;s.carryArmed=false;delete s.carrySlots[s.k];
- if(s.onesPlaced)s.rows[s.row][currentCol()]=ones();
+ if(s.onesPlaced){if(worksheetExternalCalculator){delete s.rows[s.row][currentCol()];s.onesPlaced=false}else s.rows[s.row][currentCol()]=ones()}
  if(s.tensPlaced){
-  if(tens()===0){s.tensPlaced=false;if(s.tensLocation==='row')delete s.rows[s.row][currentCol()+1];else delete s.carrySlots[s.k+1];s.tensLocation=null}
+  const oldTens=s.tensLocation==='row'?s.rows[s.row][currentCol()+1]:s.carrySlots[s.k+1]?.value;
+  if(tens()===0||worksheetExternalCalculator&&oldTens!==tens()){s.tensPlaced=false;if(s.tensLocation==='row')delete s.rows[s.row][currentCol()+1];else delete s.carrySlots[s.k+1];s.tensLocation=null}
   else if(s.tensLocation==='row')s.rows[s.row][currentCol()+1]=tens();
   else s.carrySlots[s.k+1]={value:tens(),provisional:false};
  }
- s.chosen=null;selection=null;play('mix');render();pulseWorksheet(target==='placed'?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]'));status('Combined.');maybeAdvance();
+ if(worksheetExternalCalculator){worksheetDigitEntry.guidance[digitStepKey()+'/carry-down']={mistakes:0};worksheetDigitEntry.feedback='Carry added. Write the updated digits.';worksheetDigitEntry.level=0}
+ s.chosen=null;selection=null;play('mix');render();pulseWorksheet(target==='placed'||worksheetExternalCalculator?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]'));status('Combined.');maybeAdvance();
 }
 function maybeAdvance(){if(busy||!productActive()||!s.revealed||!s.mixed||!s.onesPlaced||(tens()>0&&(!s.tensPlaced||(!lastDigit()&&s.tensLocation!=='carry'))))return;s.done++;s.boxes++;money+=5;play('done');s.k++;s.raw=0;s.mixed=false;s.incoming=0;s.onesPlaced=false;s.tensPlaced=false;s.tensLocation=null;s.chosen=null;s.carryArmed=false;s.first=null;selection=null;if(s.k<s.A.length){s.phase='select';render();status('');return}if(s.row<s.B.length-1){s.row++;s.k=0;s.phase='select';s.carrySlots={};render();status('New row.');return}if(s.B.length>1){s.phase='sum';s.sumCol=0;s.sumCarry=0;render();status('Partial products ready.');return}finish();}

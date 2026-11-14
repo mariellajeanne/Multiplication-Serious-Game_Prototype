@@ -5,7 +5,7 @@
 const bridgeMetrics={errors:0,carryUp:0,carryDown:0,bestCombo:0,currentCombo:0,cycles:0,lastDone:0,lastRow:0,sent:false,completionAck:false,lastCompleteReport:0,startedAt:performance.now(),pausedSince:0};
 let worksheetAttemptId=null;
 let worksheetActions=new Map();
-const report=(type,additional={})=>window.parent.postMessage({source:'pq-worksheet',type,attemptId:worksheetAttemptId,...additional},'*');
+const report=(type,additional={})=>window.parent.postMessage({source:'pq-worksheet',type,attemptId:worksheetAttemptId,...additional},typeof location!=='undefined'&&location.origin!=='null'?location.origin:'*');
 // Observe accepted state transitions at render time, including async placements.
 // This ledger lives outside undo snapshots. Optional temporary tens placement is
 // not an extra reward: the required outgoing carry is recorded when lifted.
@@ -20,8 +20,9 @@ function recordWorksheetActions(){
    kind==='carry-down'&&!s.onesPlaced?Q('[data-part="ones"]'):
    Q(`[data-slot="${row}:${kind==='place-tens'?cc+1:cc}"]`);
   const rect=target?.getBoundingClientRect();
-  const point=rect&&window.innerWidth&&window.innerHeight?
-   {x:(rect.left+rect.width/2)/window.innerWidth,y:(rect.top+rect.height/2)/window.innerHeight}:undefined;
+  const placedPoint=kind==='combo'?worksheetActions.get(`${worksheetAttemptId}/${row}/${col}/place-ones`)?.point:null;
+  const point=placedPoint||(rect&&window.innerWidth&&window.innerHeight?
+   {x:(rect.left+rect.width/2)/window.innerWidth,y:(rect.top+rect.height/2)/window.innerHeight}:undefined);
   worksheetActions.set(id,{id,row,col,kind,...(point?{point}:{})});
  };
  if(s.phase==='product'){
@@ -42,11 +43,11 @@ const baseInvalid=invalid;
 invalid=function(...args){bridgeMetrics.errors++;bridgeMetrics.currentCombo=0;return baseInvalid(...args)};
 const basePlace=place;
 place=function(part,kind,c){
- if(s&&s.phase==='product'&&s.revealed&&!busy&&part==='tens'&&kind==='carry'&&s.k!==s.A.length-1&&c===s.k+1&&!s.tensPlaced&&tens()>0) bridgeMetrics.carryUp++;
+ if(s&&s.phase==='product'&&s.revealed&&!busy&&(!worksheetExternalCalculator||worksheetDigitAuthorized)&&part==='tens'&&kind==='carry'&&s.k!==s.A.length-1&&c===s.k+1&&!s.tensPlaced&&tens()>0) bridgeMetrics.carryUp++;
  return basePlace(part,kind,c);
 };
 const baseLift=liftTens;
-liftTens=function(...args){if(s&&s.phase==='product'&&!busy&&s.tensLocation==='row'&&s.k!==s.A.length-1) bridgeMetrics.carryUp++;return baseLift(...args)};
+liftTens=function(...args){if(s&&s.phase==='product'&&!busy&&(!worksheetExternalCalculator||worksheetDigitAuthorized)&&s.tensLocation==='row'&&s.k!==s.A.length-1) bridgeMetrics.carryUp++;return baseLift(...args)};
 const baseAddCarry=addCarry;
 addCarry=function(target){if(s&&s.phase==='product'&&!busy&&!s.mixed&&s.incoming&&((target==='placed'&&s.onesPlaced)||(target==='floating'&&!s.onesPlaced))) bridgeMetrics.carryDown++;return baseAddCarry(target)};
 function bridgeStats(){return {cycles:bridgeMetrics.cycles,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,errors:bridgeMetrics.errors,lookup:0,recall:0,tempo:1};}
@@ -86,12 +87,12 @@ function bridgePoll(){
  if(signature!==lastReport){lastReport=signature;report('state',dat)}
  if(s.complete&&!bridgeMetrics.completionAck&&(!bridgeMetrics.sent||performance.now()-bridgeMetrics.lastCompleteReport>=500)){
   bridgeMetrics.sent=true;bridgeMetrics.lastCompleteReport=performance.now();
-  report('complete',{...completion,stats:bridgeStats(),actions:[...worksheetActions.values()]});
+  report('complete',{...completion,session:window.getWorksheetSession(),stats:bridgeStats(),actions:[...worksheetActions.values()]});
  }
  const height=Math.ceil($('app').getBoundingClientRect().height||Math.max(document.documentElement.scrollHeight,document.body.scrollHeight));
  if(Math.abs(height-lastHeight)>24){lastHeight=height;report('height',{height})}
 }
-window.getWorksheetSession=()=>({version:1,attemptId:worksheetAttemptId,state:cloneWorksheetState(s),
+window.getWorksheetSession=()=>({version:1,attemptId:worksheetAttemptId,state:cloneWorksheetState(s),entry:typeof worksheetDigitEntry==='undefined'?undefined:cloneWorksheetState(worksheetDigitEntry),
  history:cloneWorksheetState(history),money,metrics:{...bridgeMetrics},actions:[...worksheetActions.values()]});
 setInterval(bridgePoll,180);
 function externalStart(ticket,attemptId,forceRestart=false,session=null){
@@ -107,6 +108,7 @@ function externalStart(ticket,attemptId,forceRestart=false,session=null){
  $('customA').value=a;$('customB').value=b;$('tryCustom').click();
  if(session?.attemptId===attemptId&&session.state?.a===a&&session.state?.b===b){
   s=cloneWorksheetState(session.state);history=cloneWorksheetState(session.history||[]);money=session.money||0;
+  if(session.entry?.version===1&&typeof worksheetDigitEntry!=='undefined')worksheetDigitEntry=cloneWorksheetState(session.entry);
   worksheetActions=new Map((session.actions||[]).map(action=>[action.id,action]));
   Object.assign(bridgeMetrics,session.metrics||{},{sent:false,completionAck:false});
   additionCollapsed=s.complete===true;busy=false;selection=s.chosen;render();
@@ -114,9 +116,20 @@ function externalStart(ticket,attemptId,forceRestart=false,session=null){
  report('started',{a,b});bridgePoll();
 }
 window.addEventListener('message',event=>{
- const m=event.data;if(event.source!==window.parent||!m||m.source!=='bc-shell')return;
+ const m=event.data;if(event.source!==window.parent||(typeof location!=='undefined'&&event.origin!==location.origin)||!m||m.source!=='bc-shell')return;
  if(m.type==='hello')report('ready');
- if(m.type==='start')externalStart(m.ticket,m.attemptId,false,m.session);
+ if(m.type==='start'){
+  worksheetExternalCalculator=!!m.calculationPanel;document.body.classList.toggle('external-calculator',worksheetExternalCalculator);
+  externalStart(m.ticket,m.attemptId,false,m.session);
+ }
+ if(m.type==='fact-answer'&&m.attemptId===worksheetAttemptId&&worksheetExternalCalculator&&productActive()&&m.row===s.row&&m.col===s.k){
+  if(typeof setWorksheetPlacementPath==='function')setWorksheetPlacementPath(m.progressive);
+  worksheetAnswerAuthorized=true;try{revealProduct(!!m.restore)}finally{worksheetAnswerAuthorized=false}bridgePoll();
+ }
+ if(m.type==='challenge-input'&&m.attemptId===worksheetAttemptId){const changed=worksheetChallengeInput!==!!m.enabled;worksheetChallengeInput=!!m.enabled;if(productActive()&&s.revealed&&typeof setWorksheetPlacementPath==='function')setWorksheetPlacementPath(m.progressive);if(changed)updateTutorial()}
+ if(m.type==='digit-key'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k)worksheetDigitKey(m.key);
+ if(m.type==='summary-celebrate'&&m.attemptId===worksheetAttemptId&&s.complete)play('finish');
+ if(m.type==='undo'&&m.attemptId===worksheetAttemptId){undo();bridgePoll()}
  if(m.type==='completion-ack'&&m.attemptId===worksheetAttemptId)bridgeMetrics.completionAck=true;
  if(m.type==='restart'&&window.__ACTIVE_WORKSHEET_TICKET)externalStart(window.__ACTIVE_WORKSHEET_TICKET,worksheetAttemptId,true);
  if(m.type==='sound'){$('sound').textContent=m.enabled?'♫ Sound on':'♫ Sound off';sound=!!m.enabled;}
@@ -125,5 +138,14 @@ window.addEventListener('message',event=>{
  // Rewards are coins only; the shell owns accounting and presentation.
 });
 setTimeout(()=>report('ready'),0);
+window.addEventListener('keydown',event=>{
+ if(event.ctrlKey||event.metaKey||event.altKey||!worksheetExternalCalculator||!productActive()||!/^\d$|^Enter$|^Backspace$/.test(event.key))return;
+ if(event.key==='Enter'){
+  const button=event.target.closest?.('button');
+  if(button&&(!button.matches('[data-slot],[data-carry]')||button!==Q(digitTargetSelector(worksheetDigitEntry.selected)||'.no-entry-target')))return;
+ }
+ if(s.revealed){event.preventDefault();worksheetDigitKey(event.key)}
+ else if(worksheetChallengeInput){event.preventDefault();report('fact-key',{key:event.key,row:s.row,col:s.k})}
+});
 
 reset();

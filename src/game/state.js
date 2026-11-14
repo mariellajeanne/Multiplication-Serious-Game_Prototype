@@ -80,6 +80,7 @@ if(previousSave&&g.uniqueFoodsVersion!==1){try{if(!localStorage.getItem('panader
 migrateFrame11(g);
 migrateBakeryHub(g);
 migratePackageCelebrations(g);
+if(typeof migrateWorksheetPractice==='function')migrateWorksheetPractice(g);
 // One-time removal preserves assets and frozen order budgets, never recalculates rewards.
 function migrateBakeryHub(state){
  if(state.bakeryHubVersion===1)return state;
@@ -147,6 +148,8 @@ function refreshSkipCost(){return Math.max(1,Math.round(economyUnit()*.5))}
 function requestRefreshSkip(){const cost=refreshSkipCost();showModal('Refresh untouched orders?',`<p>Saved orders and their rewards stay exactly where they are.</p><button class="primary" ${g.coins<cost?'disabled':''} onclick="if(refreshOrders(true))closeModal()">Skip · 🪙 ${fmt(cost)}</button>`)}
 function updateOrderRefresh(){const button=$('refreshOrders');if(!button)return;const remaining=refreshRemaining(),seconds=Math.ceil(remaining/1000);button.disabled=remaining>0;button.textContent=remaining?`Refresh in ${Math.floor(seconds/60)}:${String(seconds%60).padStart(2,'0')}`:'Refresh Orders';}
 function save(){
+ if(typeof migrateWorksheetPractice==='function'&&!g.mathPractice)migrateWorksheetPractice(g);
+ if(typeof worksheetPracticeIsCurrent==='function'&&!worksheetPracticeIsCurrent())return false;
  // Refuse to overwrite newer rewards or inventory from another tab.
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}if((stored?.packageRevision||0)>(g.packageRevision||0)){toast('Packages changed in another tab. Reload to continue.');return false}mergePackageAcknowledgements(g,stored)}catch(_){}
  reconcileAutoEquip();reconcileOrderFoods();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}

@@ -104,16 +104,17 @@ function startMultiplySequence(){
  clearTimeout(connectionTimer);
  $('pair').classList.add('live');
  render();
- status('Tap the multiplication expression to reveal its product.');
+ status(worksheetExternalCalculator?'Use Generate Answer or try the Golden Challenge.':'Tap the multiplication expression to reveal its product.');
 }
-function revealProduct(){
+function revealProduct(restore=false){
  if(!productActive()||busy||s.revealed)return;
- snapshot();
+ if(worksheetExternalCalculator&&!worksheetAnswerAuthorized)return;
+ if(!restore)snapshot();
  s.revealed=true;
  clearTimeout(connectionTimer);
  $('pair').classList.remove('live');
  playMultiplyStamp();
  render();
- status('Place either product digit, or add a waiting carry.');
+ status(worksheetExternalCalculator?'Select an empty worksheet tile and write its digit.':'Place either product digit, or add a waiting carry.');
 }
 

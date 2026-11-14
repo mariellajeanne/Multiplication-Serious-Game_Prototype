@@ -34,7 +34,8 @@ def check(pw,engine):
   assert p.locator('#packageUnlock').count()==0 and p.locator('#worksheetFrame').is_visible()
   p.locator('.worksheet-exit').tap();p.wait_for_timeout(1100)
   assert p.locator('#packageUnlock').count()==0
-  p.evaluate('g.completed=3;g.run.phase="claim";g.run.pool=g.run.budget;prizeItems()');p.wait_for_timeout(1100)
+  # A historical fixed-payout order also earns the existing practice milestone.
+  p.evaluate('g.completed=3;delete g.run.stepCoins;g.run.phase="claim";g.run.pool=g.run.budget;prizeItems()');p.wait_for_timeout(1100)
   assert p.locator('.coin-reward-modal').is_visible() and p.locator('#packageUnlock').count()==0
   original_geometry=geometry(p)
   p.locator('.coin-reward-modal .primary').tap();p.wait_for_selector('#packageUnlock')

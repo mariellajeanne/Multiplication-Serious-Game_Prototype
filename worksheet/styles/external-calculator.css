@@ -1,0 +1,19 @@
+/* The shell owns answers and rewards. Keep every procedural cell and the
+ * floating RESULT digits, carries, connector capsule, Undo and addition intact. */
+.external-calculator :is(.top,.side,.machine-canopy,.feed-mouth,.receipt-caption,.receipt-rule,.receipt-footer,.cash-terminal,.modes,.multiplication-lab,.addition-lab,.addition-help,.footnote,.head,.sheethead){display:none!important}
+.external-calculator :is(.workspace,.receipt-wrapper){padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.external-calculator .guide-prompt{height:28px!important;min-height:28px!important;font-size:13px!important;line-height:1.25!important}
+.external-calculator .statusbar{display:none!important}
+.external-calculator .actions{min-height:44px!important;padding:3px 5px 5px!important}
+.external-calculator .actions button{position:relative;isolation:isolate;border:0!important;min-height:44px;background:transparent!important;box-shadow:none!important}
+.external-calculator .actions button::before{content:'';position:absolute;inset:0;border:15px solid transparent;border-image:url('../../assets/bakery-ui/illustrated/button-cream.png') 84 90 fill stretch;z-index:-1;pointer-events:none}
+.external-calculator #complete,.external-calculator #receiptStamp{display:none!important}
+.external-calculator #selectedLabel{display:none!important}
+.external-calculator .scroller{padding-bottom:0!important}
+.external-calculator .sheet{border-radius:12px!important}
+.external-calculator .cell.entry-selected{outline:3px solid #376f82;outline-offset:2px;border-color:#376f82!important;background:#e3f3ed!important;box-shadow:inset 0 2px 0 #fff9e7,0 3px 0 #315d6c!important;z-index:2}
+.external-calculator .cell.entry-draft{color:#377786}
+.external-calculator .cell.entry-hint{outline:4px solid #da9d24;outline-offset:3px;background:#fff0ad!important;box-shadow:0 0 0 7px #ffdc6d40!important}
+.external-calculator .cell.entry-selected.entry-hint{border-color:#376f82!important;outline-color:#da9d24}
+.external-calculator .cell.filled{color:#604123;background:#efdcaf;border-color:#b18a51}
+.external-calculator .product-focus .cell.number.connecting{opacity:1!important;filter:none!important}

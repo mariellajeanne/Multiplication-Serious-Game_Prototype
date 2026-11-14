@@ -148,19 +148,20 @@ def check(pw, engine):
         page.evaluate('''const r=g.run,ledger=ensureWorksheetRewards(r);
             const actions=r.steps.flatMap(s=>worksheetActionKinds(s).map(kind=>({
               id:worksheetActionId(ledger.attemptId,s.row,s.col,kind),row:s.row,col:s.col,kind})));
-            handleWorksheetMessage({source:$('worksheetFrame').contentWindow,data:{source:'pq-worksheet',
+            handleWorksheetMessage({source:$('worksheetFrame').contentWindow,origin:location.origin,data:{source:'pq-worksheet',
               type:'complete',attemptId:ledger.attemptId,ticket:r.ticket,top:79,bottom:18,actions}})''')
         page.wait_for_selector('#collectRewards')
         page.screenshot(path=str(shots/f'{engine}-claim.png'))
         before=page.evaluate('g.coins')
+        payout=page.evaluate('stepCoinTotals(g.run).total')
         page.locator('#collectRewards').tap()
-        assert page.evaluate('g.coins')==before+budget
-        assert not page.evaluate('prizeItems()')
+        page.wait_for_selector('#acknowledgeWorksheetSummary:enabled');page.locator('#acknowledgeWorksheetSummary').tap()
+        assert page.evaluate('g.coins')==before+payout
+        assert not page.evaluate('acknowledgeWorksheetSummary()')
         page.wait_for_timeout(250)
         page.screenshot(path=str(shots/f'{engine}-completed.png'))
-        page.locator('.modalhead .close').tap()
         page.reload();page.wait_for_selector('.hub-food')
-        assert page.evaluate('g.coins')==before+budget
+        assert page.evaluate('g.coins')==before+payout
         for width,height in [(2000,1200),(1194,834),(1024,768),(960,600),(375,812)]:
             page.set_viewport_size({'width':width,'height':height})
             page.wait_for_timeout(100)
