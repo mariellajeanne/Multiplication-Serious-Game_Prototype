@@ -1,0 +1,9 @@
+/* Co-Baker remote test mode (development only) */
+/* Narrow, opt-in test controls. No changes to normal worksheet or popups. */
+.co-baker-remote-setup{display:grid;gap:8px;padding-bottom:12px;margin-bottom:12px;border-bottom:1px solid #dbb884}
+.co-baker-remote-setup h3{margin:0}
+.co-baker-remote-setup p{margin:0;font-size:13px}
+.co-baker-remote-setup label{font-weight:800;font-size:13px}
+.co-baker-remote-setup input{width:100%;min-width:0;box-sizing:border-box}
+.co-baker-remote-setup button{justify-self:start}
+.co-baker-remote-setup [role=status]:empty{display:none}

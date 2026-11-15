@@ -3,14 +3,15 @@
  const core=CoBakerCore,debug=new URLSearchParams(location.search).get('cobaker')==='debug';
  let profile,service;
  try{profile=core.identity(localStorage)}catch(_){/* Solo play never depends on profile storage. */}
- const native=window.PanaderyaLan;
- const webTest=!native&&debug&&new URLSearchParams(location.search).get('webrelay')==='1';
- const transport=native?{label:'Android Native',start:m=>native.start(JSON.stringify(m)),stop:()=>native.stop(),send:(id,m)=>native.send(id,JSON.stringify(m))}:webTest?new BrowserTestTransport(event=>service?.receive(event)):null;
- if(profile){service=new core.Discovery(profile,transport);service.start()}
+ const native=window.PanaderyaLan,params=new URLSearchParams(location.search);
+ const remoteTest=!native&&debug&&params.get('remoteRelay')==='1';
+ const webTest=!native&&!remoteTest&&debug&&params.get('webrelay')==='1';
+ const transport=native?{label:'Android Native',start:m=>native.start(JSON.stringify(m)),stop:()=>native.stop(),send:(id,m)=>native.send(id,JSON.stringify(m))}:remoteTest?new RemoteTestTransport(event=>service?.receive(event)):webTest?new BrowserTestTransport(event=>service?.receive(event)):null;
+ if(profile){service=new core.Discovery(profile,transport);if(!remoteTest)service.start()}
  window.addEventListener('co-baker-native',e=>{try{service?.receive(e.detail)}catch(_){}});
  window.addEventListener('co-baker-resume',()=>service?.start());
- document.addEventListener('visibilitychange',()=>{if(webTest){if(!document.hidden)service?.coordinator?.resume();return;}if(document.hidden)service?.stop();else service?.start()});
- window.addEventListener('pagehide',()=>{if(webTest)service?.stop()});
+ document.addEventListener('visibilitychange',()=>{if(webTest||remoteTest){if(!document.hidden)service?.coordinator?.resume();return;}if(document.hidden)service?.stop();else service?.start()});
+ window.addEventListener('pagehide',()=>{if(webTest||remoteTest)service?.stop()});
  setInterval(()=>service?.expire(),1000);
  window.addEventListener('storage',e=>{if(e.key===core.KEY)try{profile=core.identity(localStorage);if(service){service.stop();service.profile=profile;service.start()}}catch(_){}});
  const escape=text=>String(text).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -34,7 +35,34 @@
   panel.querySelectorAll('details').forEach((d,i)=>d.open=!!expanded[i]);if(focused)panel.querySelector(`[data-peer="${focused}"]`)?.focus({preventScroll:true});
   panel.querySelectorAll('[data-peer]').forEach(button=>button.onclick=()=>service.sendTest(button.dataset.peer));
  }
- function openTest(){showModal('Co-Baker · Network test','<div id="coBakerTest"></div>','co-baker-test');paint()}
+ function openTest(){
+  const remoteSetup=remoteTest?`<form id="coBakerRemoteSetup" class="co-baker-remote-setup">
+   <h3>Remote browser testing</h3>
+   <p>Development only. Use the temporary tunnel address from your test organizer, not your GitHub Pages URL.</p>
+   <label for="coBakerRelayUrl">Relay HTTPS/WSS address</label>
+   <input id="coBakerRelayUrl" type="url" placeholder="https://example.trycloudflare.com" required autocomplete="off">
+   <label for="coBakerTestGroup">Test group</label>
+   <input id="coBakerTestGroup" maxlength="32" placeholder="our-class" required autocomplete="off">
+   <label for="coBakerTestPassword">Shared testing password (12+ characters)</label>
+   <input id="coBakerTestPassword" type="password" minlength="12" maxlength="128" required autocomplete="off">
+   <button type="submit" class="secondary">Connect to test Bakers</button>
+   <p id="coBakerRemoteStatus" role="status" aria-live="polite"></p>
+  </form>`:'';
+  showModal('Co-Baker · Network test',remoteSetup+'<div id="coBakerTest"></div>','co-baker-test');
+  const form=document.getElementById('coBakerRemoteSetup');
+  if(form){
+   try{const saved=JSON.parse(sessionStorage.getItem('coBakerRemoteTestSettings')||'{}');form.querySelector('#coBakerRelayUrl').value=saved.url||'';form.querySelector('#coBakerTestGroup').value=saved.group||''}catch(_){}
+   form.addEventListener('submit',e=>{e.preventDefault();
+    const status=form.querySelector('#coBakerRemoteStatus');
+    try{
+     const config=transport.configure({url:form.querySelector('#coBakerRelayUrl').value,group:form.querySelector('#coBakerTestGroup').value,passphrase:form.querySelector('#coBakerTestPassword').value});
+     try{sessionStorage.setItem('coBakerRemoteTestSettings',JSON.stringify(config))}catch(_){}
+     service?.stop();service?.start();status.textContent='Connecting to remote test Bakers…';
+    }catch(error){status.textContent=String(error.message||error)}
+   });
+  }
+  paint();
+ }
  service?.observe(paint);
 })();
 
