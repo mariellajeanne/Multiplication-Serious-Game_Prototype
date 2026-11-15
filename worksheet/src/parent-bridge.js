@@ -60,7 +60,7 @@ function worksheetSurface(){
 function applyWorksheetLayout(layout){
  const cell=Math.max(44,Math.min(148,Math.round(Number(layout.cell)||72)));
  const gap=Math.max(4,Math.min(8,Number(layout.gap)||8));
- const carry=Math.max(44,Math.round(cell*.65)),floating=Math.max(44,Math.round(cell*.62)),operandGap=Math.max(56,Math.round(cell*.95));
+ const carry=Math.max(44,Math.round(cell*.65)),floating=Math.max(44,Math.round(cell*.62)),operandGap=worksheetExternalCalculator?Math.max(40,Math.round(cell*.55)):Math.max(56,Math.round(cell*.95));
  const style=document.documentElement.style;
  style.setProperty('--cell',cell+'px');style.setProperty('--gap',gap+'px');
  style.setProperty('--carry-cell',carry+'px');style.setProperty('--float-cell',floating+'px');style.setProperty('--operand-gap',operandGap+'px');
@@ -131,6 +131,7 @@ window.addEventListener('message',event=>{
  if(m.type==='digit-drop'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k&&m.target&&Number.isInteger(m.target.c)&&['slot','carry'].includes(m.target.kind)){const accepted=worksheetDropDigit(m.part,m.target,m.value);report('digit-drop-result',{dropId:m.dropId,accepted,row:m.row,col:m.col})}
  if(m.type==='arm-carry'&&m.attemptId===worksheetAttemptId){armCarry();bridgePoll()}
  if(m.type==='resolve-carry'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k){addCarry(s.onesPlaced?'placed':'floating');bridgePoll()}
+ if(m.type==='invalid-carry-target'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k)worksheetCarryTarget({kind:'carry',c:-1});
  if(m.type==='focus-phase'&&m.attemptId===worksheetAttemptId){document.body.dataset.focusPhase=m.phase;document.body.dataset.guideLevel=String(m.guideLevel);updateTutorial()}
  if(m.type==='summary-celebrate'&&m.attemptId===worksheetAttemptId&&s.complete)play('finish');
  if(m.type==='undo'&&m.attemptId===worksheetAttemptId){undo();bridgePoll()}

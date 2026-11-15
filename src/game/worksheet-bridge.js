@@ -101,6 +101,7 @@ function handleWorksheetMessage(ev){
  if(m.type==='placement-target'&&typeof handleWorksheetPlacementTarget==='function'){handleWorksheetPlacementTarget(m);return}
  if(m.type==='digit-drop-result'&&typeof handleWorksheetDropResult==='function'){handleWorksheetDropResult(m);return}
  if(m.type==='carry-result-drop'&&typeof handleWorksheetCarryResultDrop==='function'){handleWorksheetCarryResultDrop(m);return}
+ if(m.type==='carry-combined'&&typeof showCalculatorCarryCombination==='function'){showCalculatorCarryCombination(m);return}
  if(m.type==='started'){
   if(frame.worksheetStarted)return;
   frame.worksheetStarted=true;r.bridgeSig='';return;

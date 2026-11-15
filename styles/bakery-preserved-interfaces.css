@@ -2,22 +2,20 @@
 .package-opening-grid .food-art{object-fit:contain}
 .package-buy>strong{color:#725030}
 .hub-order-workspace{position:fixed;inset:0;z-index:10;background:#f4e4cb;padding:12px;overflow:auto}
-.hub-order-workspace .worksheet-stage{height:100%;max-width:1200px;margin:auto}
+.hub-order-workspace .worksheet-stage:not(.worksheet-modern){height:100%;max-width:1200px;margin:auto}
 .package-type.p8{--package-color:#deb347;--package-ribbon:#9b67c7;background:#fff1c7}
 body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) :is(.primary,.secondary,.close),
-body[data-view="hub"] .hub-order-workspace :is(.primary,.secondary,.close,.worksheet-exit){background:#f8dfb5;color:#653f29;border:1.5px solid #bc9865;border-bottom:3px solid #ad7e4c;box-shadow:none;border-radius:12px;min-height:44px;font-weight:900;transition:background .15s}
+body[data-view="hub"] .hub-order-workspace :is(.primary,.secondary,.close,.worksheet-exit){--preserved-button-art:url('../assets/bakery-ui/button-cream.svg');position:relative;isolation:isolate;background:none;color:#653f29;border:0;box-shadow:none;border-radius:12px;min-height:44px;font-weight:900;padding-top:9px;padding-bottom:13px}
 body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) .primary,
-body[data-view="hub"] .hub-order-workspace .primary{background:#f2bf62;border-color:#bd853e;border-bottom-color:#a66c32;color:#55331f}
-body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) :is(.primary,.secondary,.close),
-body[data-view="hub"] .hub-order-workspace :is(.primary,.secondary,.close,.worksheet-exit){background:transparent url('../assets/illustrated/action-control.svg') center/100% 100% no-repeat;border:0;box-shadow:none;padding-top:9px;padding-bottom:13px}
-body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) .primary,
-body[data-view="hub"] .hub-order-workspace .primary{background-image:url('../assets/illustrated/action-control-primary.svg')}
+body[data-view="hub"] .hub-order-workspace .primary{--preserved-button-art:url('../assets/bakery-ui/button-teal.svg');color:#fff7df}
+body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) :is(.primary,.secondary,.close)::before,
+body[data-view="hub"] .hub-order-workspace :is(.primary,.secondary,.close,.worksheet-exit):not(.illustrated-worksheet-button)::before{content:'';position:absolute;inset:0;border:20px solid transparent;border-image:var(--preserved-button-art) 84 90 fill stretch;z-index:-1;pointer-events:none}
 body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) :is(.primary,.secondary,.close):hover,
 body[data-view="hub"] .hub-order-workspace :is(.primary,.secondary,.close,.worksheet-exit):hover{filter:brightness(1.035);transform:none}
 body[data-view="hub"] .bakery-overlay:not(.bakery-popup-backdrop) button:focus-visible,
 body[data-view="hub"] .hub-order-workspace :is(button,select):focus-visible{outline:3px solid #9462aa;outline-offset:3px}
 body[data-view="hub"] .hub-order-workspace{background:#e6c99e}
-body[data-view="hub"] .hub-order-workspace .worksheet-stage{background:#fff2d7;border:2px solid #b38a56;border-radius:22px;box-shadow:0 5px 0 #8d6037;overflow:hidden}
+body[data-view="hub"] .hub-order-workspace .worksheet-stage:not(.worksheet-modern){background:#fff2d7;border:2px solid #b38a56;border-radius:22px;box-shadow:0 5px 0 #8d6037;overflow:hidden}
 body[data-view="hub"] .hub-order-workspace .worksheet-toolbar{background:#efd3aa;border-bottom:1px solid #d1af7e}
 body[data-view="hub"] .hub-order-workspace .worksheet-order{color:#6c4429;background:#fff0d4}
 body[data-view="hub"] .hub-order-workspace .worksheet-order h2{color:#72492c;font-family:Georgia,serif;letter-spacing:-.02em}
@@ -32,5 +30,5 @@ body[data-view="hub"] .hub-order-workspace .claim-screen .coin-reward-tier svg{f
 body[data-view="hub"] .hub-order-workspace .reward-equation{display:flex;align-items:center;justify-content:center;gap:.5em;flex-wrap:wrap;color:#714927;font-weight:900;padding:10px;background:#f4dfb9;border-radius:12px}
 body[data-view="hub"] .hub-order-workspace .coin-reward-total{background:#f4d7a0;color:#70471f;border-radius:12px}
 body[data-view="hub"] .hub-order-workspace .claim-screen h2{font-family:Georgia,serif;color:#70472b}
-body[data-view="hub"] .hub-order-workspace .claim-screen #collectRewards{background:#efbd5c;color:#593a22;border-color:#b3813c;border-bottom:4px solid #a67333;box-shadow:none}
-@media(max-width:560px){body[data-view="hub"] .hub-order-workspace .worksheet-stage{border-radius:12px}}
+body[data-view="hub"] .hub-order-workspace .claim-screen #collectRewards{color:#fff7df;box-shadow:none}
+@media(max-width:560px){body[data-view="hub"] .hub-order-workspace .worksheet-stage:not(.worksheet-modern){border-radius:12px}}

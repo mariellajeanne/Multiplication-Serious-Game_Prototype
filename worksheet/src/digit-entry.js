@@ -5,7 +5,7 @@ let worksheetDigitAuthorized=false;
 function resetWorksheetDigitEntry(){worksheetDigitEntry={version:1,step:null,selected:null,value:'',feedback:'',level:0,guidance:{},paths:{}}}
 resetWorksheetDigitEntry();
 function worksheetDropDigit(part,target,digit){
- if(!worksheetExternalCalculator||!productActive()||!s.revealed||busy||!s.mixed)return false;
+ if(!worksheetExternalCalculator||!productActive()||!s.revealed||busy)return false;
  if(!['ones','tens'].includes(part)||part==='tens'&&!tens())return false;
  if(Number(digit)!==(part==='ones'?ones():tens()))return false;
  // Reuse the persisted action guidance and the original placement validators.
@@ -18,6 +18,7 @@ function worksheetDropDigit(part,target,digit){
  const matches=part==='ones'?target.kind==='slot'&&target.r===s.row&&target.c===currentCol():
   target.kind==='carry'&&!lastDigit()&&target.c===s.k+1||!relocating&&target.kind==='slot'&&target.r===s.row&&target.c===currentCol()+1;
  worksheetDigitEntry.selected=target;worksheetDigitEntry.value=String(digit);
+ s.carryArmed=false;
  if(!matches){
   worksheetDigitEntry.hintPart=part;
   const expected=worksheetPlacementExpected(part),record=worksheetDigitEntry.guidance[expected.key]||(worksheetDigitEntry.guidance[expected.key]={mistakes:0});
@@ -26,8 +27,14 @@ function worksheetDropDigit(part,target,digit){
   worksheetDigitEntry.selected=null;worksheetDigitEntry.value='';invalid();render();bridgePoll();return false;
  }
  const accepted=worksheetDigitKey('Enter');
- if(accepted){s.digitSources=s.digitSources||{};s.digitSources[key]={...(s.digitSources[key]||{}),[part]:sourcePart};worksheetDigitEntry.liftArmed=false;if(s.phase==='product'&&s.tensLocation==='row'&&!lastDigit()){worksheetDigitEntry.feedback='Move the written tens digit up to the carry row.';render()}bridgePoll()}
+ if(accepted){s.digitSources=s.digitSources||{};s.digitSources[key]={...(s.digitSources[key]||{}),[part]:sourcePart};worksheetDigitEntry.liftArmed=false;if(s.phase==='product'&&!s.mixed&&s.onesPlaced){worksheetDigitEntry.feedback='This digit is waiting for the carry. Add it here on the sheet.';render()}else if(s.phase==='product'&&s.tensLocation==='row'&&!lastDigit()){worksheetDigitEntry.feedback='Move the written tens digit up to the carry row.';render()}bridgePoll()}
  return accepted;
+}
+function worksheetCarryTarget(target){
+ if(!productActive()||!s.revealed||s.mixed||!s.incoming)return false;
+ if(target.kind==='slot'&&target.r===s.row&&target.c===currentCol()){addCarry(s.onesPlaced?'placed':'floating');bridgePoll();return true}
+ const expected=worksheetPlacementExpected(),entry=worksheetDigitEntry,record=entry.guidance[expected.key]||(entry.guidance[expected.key]={mistakes:0});
+ record.mistakes++;entry.level=entry.paths[digitStepKey()]===false?2:Math.min(3,record.mistakes);entry.feedback=entry.level===1?'Try again!':entry.level>=3?expected.exact:expected.hint;invalid();render();bridgePoll();return false;
 }
 function digitStepKey(){return `${s.row}:${s.k}`}
 function digitColumnName(c){return ['ones','tens','hundreds','thousands','ten-thousands','hundred-thousands','millions'][c]||`column ${c+1}`}
@@ -35,7 +42,7 @@ function digitTargetSelector(target){return !target?null:target.kind==='carry'?`
 function worksheetPlacementExpected(part=null){
  if(!productActive()||!s.revealed)return null;
  const key=digitStepKey(),c=currentCol(),slot={kind:'slot',r:s.row,c};
- if(s.incoming&&!s.mixed)return {key:key+'/carry-down',target:slot,source:{kind:'carry',c:s.k},hint:'Bring the waiting carry into the product first.',exact:`Add the carry ${s.incoming}, then put ${(s.raw+s.incoming)%10} in the ${digitColumnName(c)} column.`};
+ if(s.incoming&&!s.mixed&&!part)return {key:key+'/carry-down',target:slot,source:{kind:'carry',c:s.k},hint:'Add the waiting carry to the ones digit in the calculator or on the sheet.',exact:`Move carry ${s.incoming} onto the ones digit ${s.raw%10} to make ${s.raw%10+s.incoming}.`};
  if(part==='ones'||!s.onesPlaced&&part!=='tens')return {key:key+'/ones',target:slot,digit:ones(),hint:`Check the ${digitColumnName(c)} column!`,exact:`Put ${ones()} in the ${digitColumnName(c)} column.`};
  if(tens()>0){
   const target=lastDigit()?{kind:'slot',r:s.row,c:c+1}:{kind:'carry',c:s.k+1};

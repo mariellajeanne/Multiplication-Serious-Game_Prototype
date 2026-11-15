@@ -6,7 +6,7 @@
 .external-calculator .statusbar{display:none!important}
 .external-calculator .actions{min-height:44px!important;padding:3px 5px 5px!important}
 .external-calculator .actions button{position:relative;isolation:isolate;border:0!important;min-height:44px;background:transparent!important;box-shadow:none!important}
-.external-calculator .actions button::before{content:'';position:absolute;inset:0;border:15px solid transparent;border-image:url('../../assets/bakery-ui/illustrated/button-cream.png') 84 90 fill stretch;z-index:-1;pointer-events:none}
+.external-calculator .actions button::before{content:'';position:absolute;inset:0;border:15px solid transparent;border-image:url('../../assets/bakery-ui/button-cream.svg') 84 90 fill stretch;z-index:-1;pointer-events:none}
 .external-calculator #complete,.external-calculator #receiptStamp{display:none!important}
 .external-calculator #selectedLabel{display:none!important}
 .external-calculator .scroller{padding-bottom:0!important}
@@ -19,10 +19,16 @@
 .external-calculator .product-focus .cell.number.connecting{opacity:1!important;filter:none!important}
 .external-calculator #undo{display:none!important}
 .external-calculator .actions:has(#addRows[hidden]){display:none!important}
-.external-calculator .math{margin-left:auto!important;margin-right:10px!important}
+.external-calculator .math{margin-inline:auto!important}
 .external-calculator .cell.drop-hover{outline:3px solid #578b97;outline-offset:2px}
 .external-calculator[data-focus-phase='carry'] .cell.hold.waiting{outline:3px solid #a77dc0;outline-offset:2px}
 .external-calculator[data-focus-phase='calculate'] .cell.rowcell{opacity:.72}
 .external-calculator[data-focus-phase='place'] .cell.number:not(.connecting){opacity:.7}
 .external-calculator[data-guide-level='1'] .tutorial-stream{opacity:.55;scale:.85}
 .external-calculator[data-guide-level='1'] .tutorial-stream .stream-chevron:nth-of-type(n+2){display:none}
+
+.external-calculator{background:transparent!important}
+.external-calculator .cell.rowcell.provisional{background:#fff0c3!important;border-style:dashed!important;color:#876337}
+.carry-combination{position:absolute;z-index:45;padding:8px 12px;background:#fff0c8;border:2px solid #795034;border-radius:12px;box-shadow:0 3px 0 #79503422;font-size:19px;font-weight:900;pointer-events:none;animation:carry-combine-note 1s ease-out both}
+@keyframes carry-combine-note{0%{opacity:0;translate:0 6px}20%,80%{opacity:1;translate:0 0}100%{opacity:0;translate:0 -5px}}
+@media(prefers-reduced-motion:reduce){.carry-combination{animation:none}}

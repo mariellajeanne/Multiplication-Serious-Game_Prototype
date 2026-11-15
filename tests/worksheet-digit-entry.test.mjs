@@ -44,12 +44,51 @@ test('legacy draft migration and Undo retain unresolved mistake counts without w
  w.select('slot',2);w.enter(8);assert.match(w.exec('worksheetDigitEntry.feedback'),/ones column/);
  assert.equal(w.exec('worksheetDigitEntry.guidance["0:0/ones"].mistakes'),2);
 });
-test('new placement waits for carry resolution and uses the adjusted digits',()=>{
+test('a provisional ones digit accepts its carry without advancing or requiring re-entry',()=>{
  const w=worksheet(19,9);w.connect();w.select('carry',1);w.enter(8);w.select('slot',0);w.enter(1);
- w.connect();assert.equal(w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:1},9)`),false);assert.equal(w.exec('s.rows[0][1]'),undefined);
- w.exec(`addCarry('floating')`);assert.equal(w.exec('value()'),17);assert.equal(w.exec('s.rows[0][1]'),undefined);assert.equal(w.exec('s.onesPlaced'),false);
- w.select('slot',1);w.enter(7);assert.equal(w.exec('s.complete'),false);w.select('slot',2);w.enter(1);
+ w.connect();assert.equal(w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:1},9)`),true);assert.equal(w.exec('s.rows[0][1]'),9);assert.equal(w.exec('s.done'),1);
+ w.exec(`addCarry('placed')`);assert.equal(w.exec('value()'),17);assert.equal(w.exec('s.rows[0][1]'),7);assert.equal(w.exec('s.onesPlaced'),true);
+ assert.equal(w.exec('s.complete'),false);w.select('slot',2);w.enter(1);
  assert.equal(w.exec('s.complete'),true);assert.deepEqual(w.json('s.rows[0]'),{0:1,1:7,2:1});
+});
+test('both carry orders produce identical rows across zeros, overflow and long shifted products',()=>{
+ for(const [a,b] of [[97,28],[84,47],[19,9],[178,7],[64,7],[1005,24],[99999,99],[305,4],[248,26]]){
+  const rows=[];
+  for(const after of [false,true]){
+   const w=worksheet(a,b);let guard=0;
+   while(w.exec('s.phase')!=='sum'&&w.exec('s.phase')!=='complete'){
+    assert.ok(++guard<30);w.connect();
+    if(w.exec('s.incoming&&!s.mixed')){
+     if(after){w.exec(`worksheetDropDigit('ones',{kind:'slot',r:s.row,c:currentCol()},ones())`);assert.equal(w.exec('s.phase'),'product');w.exec("addCarry('placed')")}
+     else w.exec("addCarry('floating')");
+    }
+    w.exec(`if(!s.onesPlaced)worksheetDropDigit('ones',{kind:'slot',r:s.row,c:currentCol()},ones())`);
+    if(w.exec("s.phase==='product'&&tens()>0&&!s.tensPlaced"))w.exec(`worksheetDropDigit('tens',lastDigit()?{kind:'slot',r:s.row,c:currentCol()+1}:{kind:'carry',c:s.k+1},tens())`);
+   }
+   const actual=w.json('s.rows');rows.push(actual);assert.equal(actual.reduce((sum,row)=>sum+Object.entries(row).reduce((n,[c,v])=>n+v*10**c,0),0),a*b);
+  }
+  assert.deepEqual(rows[0],rows[1],`${a} x ${b}`);
+ }
+});
+test('carry overflow updates provisional outgoing tens and survives saved-session restoration',()=>{
+ const w=worksheet(178,7);w.connect();w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:0},6);worksheetDropDigit('tens',{kind:'carry',c:1},5)`);w.connect();
+ w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:1},9);worksheetDropDigit('tens',{kind:'carry',c:2},4);saved=window.getWorksheetSession()`);
+ assert.equal(w.exec('s.done'),1);assert.equal(w.exec('s.carrySlots[2].provisional'),true);
+ w.exec(`externalStart({id:77,a:178,b:7},'A',true,saved);worksheetCarryTarget({kind:'slot',r:0,c:1})`);
+ assert.equal(w.exec('s.rows[0][1]'),4);assert.equal(w.exec('s.carrySlots[2].value'),5);assert.equal(w.exec('s.done'),2);
+ w.exec('s=history.pop().s;render()');assert.equal(w.exec('s.mixed'),false);assert.equal(w.exec('s.rows[0][1]'),9);assert.equal(w.exec('s.carrySlots[2].value'),4);
+ w.exec(`worksheetCarryTarget({kind:'slot',r:0,c:1})`);w.connect();w.exec(`addCarry('floating');worksheetDropDigit('ones',{kind:'slot',r:0,c:2},2);worksheetDropDigit('tens',{kind:'slot',r:0,c:3},1)`);
+ assert.equal(w.exec('s.complete'),true);assert.deepEqual(w.json('s.rows[0]'),{0:6,1:4,2:2,3:1});
+});
+
+test('wrong carry targets use progressive hints; a resolved or replayed carry cannot add twice',()=>{
+ const w=worksheet(97,28);w.connect();w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:0},6);worksheetDropDigit('tens',{kind:'carry',c:1},5)`);w.connect();
+ for(let i=1;i<=3;i++){assert.equal(w.exec(`worksheetCarryTarget({kind:'slot',r:0,c:3})`),false);assert.equal(w.exec('worksheetDigitEntry.level'),i);assert.equal(w.exec('s.done'),1)}
+ assert.match(w.exec('worksheetDigitEntry.feedback'),/carry 5/);
+ w.exec(`worksheetDropDigit('ones',{kind:'slot',r:0,c:1},2);worksheetCarryTarget({kind:'slot',r:0,c:1})`);
+ assert.equal(w.exec('s.rows[0][1]'),7);const resolved=w.json('s');w.exec("addCarry('placed')");assert.deepEqual(w.json('s'),resolved);
+ w.exec('s=history.pop().s;render()');assert.equal(w.exec('s.mixed'),false);assert.equal(w.exec('s.rows[0][1]'),2);
+ w.exec(`worksheetCarryTarget({kind:'slot',r:0,c:1})`);assert.equal(w.exec('s.rows[0][1]'),7);assert.equal(w.exec('s.done'),1);
 });
 test('Golden placement feedback and authenticated digit messages cannot spend fact attempts or duplicate seals',()=>{
  const w=worksheet();w.connect();w.exec('setWorksheetPlacementPath(false)');w.select('slot',2);w.enter(8);

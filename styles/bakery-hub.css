@@ -134,9 +134,9 @@ body[data-view="hub"] .hub-home .board-utilities{position:absolute;left:var(--op
 body[data-view="hub"] .hub-home .board-footer{--utility-height:44px;min-width:0;height:100%;display:flex;align-items:center;justify-content:center;font-size:21px;line-height:1;text-shadow:0 1px #fff7df;white-space:nowrap;font-weight:900}
 /* Compact visible pills keep independent, generous transparent touch targets. */
 body[data-view="hub"] .hub-home .bakery-utility{position:relative;border:0;background:none;box-shadow:none;border-radius:999px;color:#633b29}
-body[data-view="hub"] .hub-home .bakery-utility::before{content:"";position:absolute;left:0;right:0;top:50%;height:var(--utility-height);transform:translateY(-50%);border:3px solid #8a4b28;border-radius:999px;background:linear-gradient(#fffce7 0%,#fff0c9 60%,#e9c48c 100%);box-shadow:0 3px 0 #66351f,0 5px 6px #47241140,inset 0 0 0 2px #e4b175,inset 0 0 0 4px #fff9dd;pointer-events:none}
+body[data-view="hub"] .hub-home .bakery-utility::before{content:"";position:absolute;left:0;right:0;top:50%;height:var(--utility-height);transform:translateY(-50%);border:3px solid #8a4b28;border-radius:999px;background:#fff0c9;box-shadow:0 3px 0 #66351f;pointer-events:none}
 body[data-view="hub"] .hub-home .bakery-utility>*{position:relative;z-index:1}
-body[data-view="hub"] .hub-home .bakery-utility[aria-pressed=true]::before{box-shadow:0 3px 0 #66351f,0 0 0 3px #fff1b9,inset 0 0 0 2px #e4b175,inset 0 0 0 4px #fff9dd}
+body[data-view="hub"] .hub-home .bakery-utility[aria-pressed=true]::before{background:#f2d6a5;box-shadow:0 1px 0 #66351f}
 body[data-view="hub"] .hub-home .top-hud{position:absolute;right:34px;top:18px;width:458px;height:87px;display:grid;grid-template-columns:288px 73px 73px;gap:12px;align-items:center;z-index:8}
 body[data-view="hub"] .hub-home .top-hud .picture-button{width:100%;height:82px}
 body[data-view="hub"] .hub-home .wallet-count{position:absolute;left:83px;right:67px;top:26px;text-align:center;font-size:28px;line-height:1;white-space:nowrap;color:#fff1d4;text-shadow:0 2px 1px #3d1d10}

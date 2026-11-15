@@ -4,7 +4,7 @@ function isBakeryHub(){return typeof document!=='undefined'&&document.body?.data
 function hubEscape(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function hubAsset(name){
  if(name==='bakers-sparkle.png')return 'assets/bakery-ui/boost-prism.svg';
- const art={'bakery-room.png':'room','cash-register-facing.png':'register','cabinet-wood.png':'cabinet','title-sign-refined.png':'title','nav-packages.png':'nav-packages','nav-play.png':'nav-play','nav-collection.png':'nav-collection','packages-entry-button.png':'packages-entry','menu-heading.png':'menu-heading','hud-coin-shell.png':'wallet','bakers-sparkle.png':'boost','tray-icon.png':'cloche','control-help.svg':'help','control-settings.svg':'settings','control-close.svg':'close','scroll-thumb-clean.png':'thumb'};
+ const art={'bakery-room.png':'room','cash-register-facing.png':'register','cabinet-wood.png':'cabinet','title-sign-refined.png':'title','nav-packages.png':'nav-packages','nav-play.png':'nav-play','nav-collection.png':'nav-collection','packages-entry-button.png':'packages-entry','menu-heading.png':'menu-heading','hud-coin-shell.png':'wallet','bakers-sparkle.png':'boost','tray-icon.png':'cloche','scroll-thumb-clean.png':'thumb'};
  const sprite=/^(food|coin)-\d\d\.png$/.test(name)?name.replace('.png',''):art[name];
  return 'assets/bakery-ui/'+(sprite?'illustrated/'+sprite+'.png':name);
 }

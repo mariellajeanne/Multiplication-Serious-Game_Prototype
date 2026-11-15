@@ -30,6 +30,7 @@ function animateWorksheetStepCoin(receipt,data){
  if(!r||!frame||!destination||data.attemptId!==r.worksheetRewards?.attemptId||rewardPresentation.stepFlights.has(receipt.id))return;
  const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
  if(reduced){paintRewardDock(r);feedbackPulse(destination);return}
+ const firstCollection=g.mathPractice.lifetimeCoins[receipt.rank]===1;
  const epoch=rewardPresentation.epoch,node=document.createElement('div');node.className='worksheet-step-flight';
  node.innerHTML=`${worksheetCoinArt(receipt.rank)}<strong>+${fmt(receipt.baseAmount)}</strong>${receipt.multiplier>1?`<b class="flight-golden-bonus">×${receipt.multiplier}</b>`:''}`;
  node.setAttribute('aria-hidden','true');document.body.appendChild(node);
@@ -48,7 +49,7 @@ function animateWorksheetStepCoin(receipt,data){
    rewardPresentation.timers.delete(arrival);node.remove();rewardPresentation.nodes.delete(node);
    if(epoch!==rewardPresentation.epoch)return;
    rewardPresentation.stepFlights.delete(receipt.id);rewardPresentation.pending=Math.max(0,rewardPresentation.pending-1);
-   if(g.run?.worksheetRewards?.attemptId===data.attemptId){paintRewardDock(g.run);feedbackPulse(destination)}
+   if(g.run?.worksheetRewards?.attemptId===data.attemptId){paintRewardDock(g.run);feedbackPulse(destination);if(firstCollection){destination.classList.add('first-earned');setTimeout(()=>destination.classList.remove('first-earned'),850)}}
   },640);rewardPresentation.timers.add(arrival);
  },650);rewardPresentation.timers.add(hold);
 }

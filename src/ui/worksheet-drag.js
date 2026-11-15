@@ -2,18 +2,17 @@
 let worksheetTraySelection=null,worksheetPointer=null,worksheetDropFlight=null;
 let worksheetDropSequence=0;
 function worksheetAvailableDigits(context){
- if(!context?.state.revealed||!context.state.mixed)return [];
- const state=context.state,value=context.step.p+state.incoming,key=context.key;
+ if(!context?.state.revealed)return [];
+ const state=context.state,value=context.step.p+(state.mixed?state.incoming:0),key=context.key;
  const used=Object.values(state.digitSources?.[key]||{});
  return [{part:'tens',value:Math.floor(value/10),placed:state.tensPlaced&&state.tensLocation!=='row'},{part:'ones',value:value%10,placed:state.onesPlaced}]
   .filter(item=>!(item.part==='tens'&&!item.value)&&!(used.length?used.includes(item.part):item.placed));
 }
 function worksheetDigitTrayMarkup(context){
  const state=context.state;
- if(!state.mixed&&state.incoming)return `<div class="calculator-carry-task"><button class="illustrated-worksheet-button ${state.carryArmed?'is-selected':''}" onclick="armCalculatorCarry()">+${state.incoming} waiting carry</button><button id="carryResultTarget" class="illustrated-worksheet-button worksheet-primary" onclick="resolveCalculatorCarry()" ${state.carryArmed?'':'disabled'}>Add to ${context.step.p}</button><small>Tap the carry, then add it. Or drag the waiting carry here.</small></div>`;
  const digits=worksheetAvailableDigits(context);
- if(worksheetTraySelection&&!digits.some(d=>d.part===worksheetTraySelection.part&&worksheetTraySelection.key===context.key))worksheetTraySelection=null;
- return `<div class="worksheet-digit-tray" role="group" aria-label="Answer digits"><span>Place the digits</span><div>${digits.map(d=>`<button class="illustrated-worksheet-button answer-digit ${worksheetTraySelection?.part===d.part?'is-selected':''}" data-answer-digit="${d.part}" data-digit-value="${d.value}" aria-label="Place digit ${d.value}" aria-pressed="${worksheetTraySelection?.part===d.part}">${d.value}</button>`).join('')}</div>${g.tutorialArrows&&g.completed===0&&state.done===0?`<small class="digit-drag-demo" data-demo-digit="${digits.at(-1)?.value??''}" aria-hidden="true">← Drag to the worksheet</small>`:''}</div>`;
+ if(state.carryArmed||worksheetTraySelection&&!digits.some(d=>d.part===worksheetTraySelection.part&&d.value===worksheetTraySelection.value&&worksheetTraySelection.key===context.key))worksheetTraySelection=null;
+ return `<div class="worksheet-digit-tray" role="group" aria-label="Answer digits">${!state.mixed&&state.incoming?`<button class="carry-source illustrated-worksheet-button ${state.carryArmed?'is-selected':''}" onclick="armCalculatorCarry()">+${state.incoming} waiting carry</button>`:''}<span>${state.onesPlaced&&!state.mixed?'Add the waiting carry':'Place the digits'}</span><div>${digits.map(d=>`<button class="illustrated-worksheet-button answer-digit ${worksheetTraySelection?.part===d.part?'is-selected':''} ${d.part==='ones'&&!state.mixed?'carry-target':''}" ${d.part==='ones'&&!state.mixed?'id="carryResultTarget"':''} data-answer-digit="${d.part}" data-digit-value="${d.value}" aria-label="Place digit ${d.value}" aria-pressed="${worksheetTraySelection?.part===d.part}">${d.value}</button>`).join('')}</div>${g.tutorialArrows&&g.completed===0&&state.done===0?`<small class="digit-drag-demo" data-demo-digit="${digits.at(-1)?.value??''}" aria-hidden="true">← Drag to the worksheet</small>`:''}</div>`;
 }
 function armCalculatorCarry(){const c=currentWorksheetCalculation();if(c&&!c.state.mixed)sendEngine('arm-carry',{attemptId:g.run.worksheetRewards.attemptId})}
 function resolveCalculatorCarry(){const c=currentWorksheetCalculation();if(c?.state.carryArmed)sendEngine('resolve-carry',{attemptId:g.run.worksheetRewards.attemptId,row:c.step.row,col:c.step.col})}
@@ -36,6 +35,7 @@ function worksheetDropTarget(x,y){
 }
 function cancelWorksheetDrag(){
  worksheetPointer?.ghost?.remove();worksheetPointer=null;worksheetDropFlight?.ghost?.remove();worksheetDropFlight=null;
+ document.querySelectorAll('.calculator-combination').forEach(note=>note.remove());
  $('worksheetFrame')?.contentDocument?.querySelectorAll('.drop-hover').forEach(e=>e.classList.remove('drop-hover'));
 }
 document.addEventListener('pointerdown',event=>{
@@ -55,7 +55,7 @@ document.addEventListener('pointermove',event=>{
 },{passive:false});
 document.addEventListener('pointerup',event=>{
  const drag=worksheetPointer;if(!drag||drag.id!==event.pointerId)return;worksheetPointer=null;
- if(!drag.ghost){worksheetTraySelection={key:drag.key,part:drag.part,value:drag.value};paintWorksheetExperience();return}
+ if(!drag.ghost){const c=currentWorksheetCalculation();if(c?.state.carryArmed&&drag.part==='ones'){resolveCalculatorCarry();return}worksheetTraySelection={key:drag.key,part:drag.part,value:drag.value};paintWorksheetExperience();return}
  const target=worksheetDropTarget(event.clientX,event.clientY);target?.element.classList.remove('drop-hover');
  if(!target){drag.ghost.remove();return}
  worksheetDropFlight={...drag,target};submitWorksheetDrop(drag,target.target);
@@ -64,7 +64,7 @@ document.addEventListener('pointerup',event=>{
 document.addEventListener('pointercancel',cancelWorksheetDrag);
 window.addEventListener('blur',cancelWorksheetDrag);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)cancelWorksheetDrag()});
-document.addEventListener('click',event=>{const tile=event.target.closest('[data-answer-digit]');if(tile&&event.detail===0){const c=currentWorksheetCalculation();worksheetTraySelection={key:c.key,part:tile.dataset.answerDigit,value:Number(tile.dataset.digitValue)};paintWorksheetExperience()}});
+document.addEventListener('click',event=>{const tile=event.target.closest('[data-answer-digit]');if(tile&&event.detail===0){const c=currentWorksheetCalculation();if(c?.state.carryArmed&&tile.dataset.answerDigit==='ones'){resolveCalculatorCarry();return}worksheetTraySelection={key:c.key,part:tile.dataset.answerDigit,value:Number(tile.dataset.digitValue)};paintWorksheetExperience()}});
 function handleWorksheetDropResult(message){
  const flight=worksheetDropFlight;if(!flight||flight.dropId!==message.dropId)return;worksheetDropFlight=null;
  const target=flight.target,rect=target.rect,frame=$('worksheetFrame').getBoundingClientRect();
@@ -77,4 +77,9 @@ function handleWorksheetDropResult(message){
 function handleWorksheetCarryResultDrop(message){
  const target=$('carryResultTarget')?.getBoundingClientRect(),c=currentWorksheetCalculation();
  if(target&&c&&message.row===c.step.row&&message.col===c.step.col&&message.point?.x>=target.left&&message.point.x<=target.right&&message.point.y>=target.top&&message.point.y<=target.bottom)sendEngine('resolve-carry',{attemptId:g.run.worksheetRewards.attemptId,row:c.step.row,col:c.step.col});
+ else if(c){const hit=document.elementFromPoint(message.point?.x??-1,message.point?.y??-1);if(hit?.closest('[data-answer-digit]'))sendEngine('invalid-carry-target',{attemptId:g.run.worksheetRewards.attemptId,row:c.step.row,col:c.step.col})}
+}
+function showCalculatorCarryCombination(message){
+ const target=document.querySelector('[data-answer-digit="ones"]')||$('calculationAnswer');if(!target)return;
+ const rect=target.getBoundingClientRect(),note=document.createElement('div');note.className='calculator-combination';note.textContent=`${message.before} + ${message.carry} → ${message.before+message.carry}`;note.style.left=rect.left+rect.width/2+'px';note.style.top=Math.max(8,rect.top-46)+'px';document.body.append(note);setTimeout(()=>note.remove(),1100);
 }

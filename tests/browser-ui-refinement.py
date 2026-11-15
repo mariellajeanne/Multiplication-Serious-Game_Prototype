@@ -17,6 +17,7 @@ def popup_checks(p):
  popup=p.locator('.bakery-popup:visible').last
  assert popup.locator('.popup-surface,.popup-heading').count()==0
  assert popup.evaluate('e=>getComputedStyle(e).borderImageSource.includes("popup-frame.svg")')
+ assert popup.evaluate('e=>getComputedStyle(e).outlineStyle==="none"'), 'Focused popup root adds a browser halo'
  assert popup.locator('.popup-body').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
  assert popup.evaluate('e=>{const r=e.getBoundingClientRect();return r.top>=10&&r.bottom<=innerHeight-10&&r.left>=10&&r.right<=innerWidth-10}')
  controls=popup.locator('button:visible,select:visible').evaluate_all('''es=>es.map(e=>({text:e.innerText||e.ariaLabel,r:e.getBoundingClientRect()})).filter(e=>e.r.width<43.8||e.r.height<43.8).map(e=>({text:e.text,w:e.r.width,h:e.r.height}))''')
@@ -29,7 +30,7 @@ def run(pw,engine):
  try:
   p.goto(URL);p.wait_for_selector('.hub-food');p.wait_for_load_state('networkidle')
   assert p.locator('#title-sign').get_attribute('src').endswith('illustrated/title.png')
-  for selector,asset in [('#help-button','help.png'),('#settings-button','settings.png')]:
+  for selector,asset in [('#help-button','control-help.svg'),('#settings-button','control-settings.svg')]:
    assert p.locator(selector+' img').get_attribute('src').endswith(asset)
    rect=p.locator(selector).bounding_box();p.locator(selector).dispatch_event('pointerdown',{'pointerId':9,'pointerType':'touch'})
    assert p.locator(selector).bounding_box()==rect

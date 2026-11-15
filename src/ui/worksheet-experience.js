@@ -2,12 +2,17 @@
  * the existing iframe; all fact evidence and coin receipts belong to the shell. */
 const previousWorksheetRenderer=renderWorksheet,previousWorksheetFit=fitWorksheet,previousWorksheetClose=closeModal;
 let calculationNotice='',calculationIdentity='',worksheetSummaryView=null,worksheetSummaryTimer=null;
-function worksheetCoinArt(rank){return typeof hubCoinArt==='function'?hubCoinArt(rank):coinTierArt(rank)}
+const WORKSHEET_COIN_CROPS=[[82,175,292,237,444,444],[90,53,258,359,443,444],[39,44,333,368,443,444],[37,13,359,399,444,444],[23,63,400,357,444,443],[19,44,367,375,443,443],[0,38,405,377,443,443],[0,0,444,418,444,443]];
+function worksheetCoinArt(rank){
+ if(typeof hubAsset!=='function')return coinTierArt(rank);
+ const [x,y,w,h,width,height]=WORKSHEET_COIN_CROPS[rank];
+ return `<svg class="coin-tier-art illustrated-coin" viewBox="${x} ${y} ${w} ${h}" role="img" aria-label="${worksheetCoinName(rank)}"><image href="${hubAsset(`coin-${String(rank+1).padStart(2,'0')}.png`)}" width="${width}" height="${height}"/></svg>`;
+}
 function worksheetFoodArt(id){return typeof hubFoodArt==='function'?hubFoodArt(id):foodArt(id)}
 function worksheetCoinName(rank){return typeof hubCoinTierName==='function'?hubCoinTierName(rank):COIN_TIERS[rank]}
 function worksheetRewardDisplays(r){
  if(!usesStepCoins(r))return `<div class="worksheet-saved-reward">${worksheetCoinArt(ticketCoinTier(r.ticket))}<span>Saved order reward <b>${fmt(r.budget)} coins</b></span></div>`;
- return `<div class="worksheet-reward-row" aria-label="Possible step rewards">${r.stepCoins.options.map(option=>`<section class="worksheet-coin-display coin-tier-${option.rank}" data-coin-rank="${option.rank}" aria-label="${worksheetCoinName(option.rank)}, ${Math.round(option.chance*100)} percent chance"><div class="worksheet-coin-art">${worksheetCoinArt(option.rank)}</div><div class="worksheet-coin-copy"><strong>${worksheetCoinName(option.rank)}</strong><span>${Math.round(option.chance*100)}% · ${fmt(option.base)} base coins</span><b><span data-lifetime-count="${option.rank}">${fmt(g.mathPractice.lifetimeCoins[option.rank])}</span> <small>all time</small></b><span><b data-ticket-count="${option.rank}">${fmt(r.stepCoins.counts[option.rank])}</b> this order</span></div></section>`).join('')}</div>`;
+ return `<div class="worksheet-reward-row" aria-label="Possible step rewards">${r.stepCoins.options.map(option=>`<section class="worksheet-coin-display coin-tier-${option.rank}" data-coin-rank="${option.rank}" aria-label="${worksheetCoinName(option.rank)}, ${Math.round(option.chance*100)} percent chance"><strong class="reward-name">${worksheetCoinName(option.rank)}</strong><div class="worksheet-coin-art">${worksheetCoinArt(option.rank)}</div><div class="reward-counters"><span aria-label="Probability">${Math.round(option.chance*100)}%</span><b aria-label="Lifetime containers">&times;<span data-lifetime-count="${option.rank}">${fmt(g.mathPractice.lifetimeCoins[option.rank])}</span></b></div><small class="reward-detail">Base: ${fmt(option.base)} &middot; Order: <b data-ticket-count="${option.rank}">${fmt(r.stepCoins.counts[option.rank])}</b></small></section>`).join('')}</div>`;
 }
 renderWorksheet=function(){
  const r=g.run;if(!r||r.phase==='failed'||!usesStepCoins(r)&&r.phase==='claim')return previousWorksheetRenderer();
@@ -37,13 +42,14 @@ function calculationPanelMarkup(context){
  const resolved=answer&&answer.status!=='waiting',manual=answer?.accepted&&!resolved,entry=r?.worksheetSession?.entry;
  const carryAdded=resolved&&context.state.mixed&&context.state.incoming>0;
  const display=resolved?String(step.p+(carryAdded?context.state.incoming:0)):manual?(answer.entry||'—'):'?';
- const status=resolved?(entry?.feedback||(context.state.carryArmed?'Carry selected. Tap its product ones tile.':!context.state.mixed&&context.state.incoming?'Tap the waiting carry, then its product ones tile.':answer.status==='success'?`×${answer.multiplier} bonus ready. Place each digit to earn it.`:'Drag a digit, or tap it and then its destination.')):
+ const status=resolved?(entry?.feedback||(context.state.carryArmed?'Carry selected. Tap the ones digit here or on the sheet.':!context.state.mixed&&context.state.incoming?'Add the carry now, or place the ones first.':answer.status==='success'?`×${answer.multiplier} bonus ready. Place each digit to earn it.`:'Drag a digit, or tap it and then its destination.')):
   calculationNotice||(manual?`${3-answer.attempts.length} ${3-answer.attempts.length===1?'try':'tries'} left`:active?'Get an answer, then write its digits.':'Connect the two digits first.');
  return `<header class="calculator-heading"><span>BAKER’S CALCULATOR</span><h2 id="calculationExpression">${step?`${step.a} × ${step.b}`:'Ready?'}</h2></header>${carryAdded?`<div class="calculator-carry-equation">${step.p} + ${context.state.incoming} carry =</div>`:''}<output class="calculator-answer ${answer?.status==='success'?'is-golden':''}" id="calculationAnswer" ${manual?'tabindex="0" aria-label="Golden Challenge answer"':''}>${display}</output>${answer?.offered&&!answer.accepted&&!resolved?`<button class="golden-challenge-button illustrated-worksheet-button" id="goldenChallenge" onclick="chooseWorksheetChallenge()"><span aria-hidden="true">✦</span><span>Golden Challenge!<small>Solve it yourself for bonus coins!</small></span><b>×${answer.multiplier}</b></button>`:''}${manual?`<div class="golden-active-label">Golden Challenge <b>×${answer.multiplier}</b></div>`:''}${resolved?worksheetDigitTrayMarkup(context):''}${manual?calculationKeypadMarkup('Golden Challenge keypad'):''}<p class="calculator-note ${entry?.level?'is-placement-error':answer?.status==='success'?'is-success':''}" role="status">${status}</p>${!resolved?`<button class="illustrated-worksheet-button ${!answer?.offered&&!manual?'worksheet-primary':''} ${active&&g.tutorialArrows&&!answer?.offered&&!manual?'calculator-guide':''}" id="generateAnswer" ${active?'':'disabled'} onclick="generateWorksheetAnswer()">Generate Answer</button>`:''}`;
 }
 function paintWorksheetExperience(){
  const r=g.run,panel=$('calculationPanel');if(!r||!panel)return;
  const context=currentWorksheetCalculation(),identity=`${r.ticket.id}/${context?.key||'none'}`;
+ if(context?.state.incoming&&!context.state.mixed)document.querySelectorAll('.calculator-combination').forEach(note=>note.remove());
  if(identity!==calculationIdentity){calculationIdentity=identity;calculationNotice=''}
  if(context?.state.phase==='product'){
   const answer=ensureFactAnswer(r,context.step);
@@ -107,14 +113,19 @@ fitWorksheet=function(){
  const frame=$('worksheetFrame'),stage=document.querySelector('.worksheet-modern');
  if(!stage||!frame)return previousWorksheetFit();
  if(!g.run||g.run.paused)return;
- syncRewardPresentation();
- if(typeof cancelWorksheetDrag==='function')cancelWorksheetDrag();
- const left=stage.querySelector('.worksheet-left'),width=left.getBoundingClientRect().width-48,rows=String(g.run.ticket.b).length,cols=String(g.run.ticket.a*g.run.ticket.b).length;
- const chrome=left.getBoundingClientRect().height-frame.getBoundingClientRect().height;
- const available=Math.max(260,innerHeight-frame.getBoundingClientRect().top-chrome-100),gap=innerWidth<1000?5:8;
- let cell=Math.max(44,Math.min(120,Math.floor((width-66-gap*(cols-1))/cols)));
- const estimatedHeight=size=>Math.max(44,Math.round(size*.65))+(2+rows)*size+Math.max(56,Math.round(size*.95))+80;
+ syncRewardPresentation();if(typeof cancelWorksheetDrag==='function')cancelWorksheetDrag();
+ const rows=String(g.run.ticket.b).length,cols=String(g.run.ticket.a*g.run.ticket.b).length,gap=6;
+ const style=getComputedStyle(stage),spacing=parseFloat(style.rowGap)||12;
+ const edges=2*(parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop));
+ const rewardSize=innerHeight>=1000?156:150;stage.style.setProperty('--reward-size',rewardSize+'px');
+ const header=stage.querySelector('.worksheet-order-header').getBoundingClientRect().height;
+ const footer=stage.querySelector('.worksheet-complete-bar').getBoundingClientRect().height;
+ const available=Math.max(300,innerHeight-stage.getBoundingClientRect().top-edges-header-footer-rewardSize-spacing*3-20);
+ const calculator=innerWidth<=1100?260:280,byWidth=Math.floor((innerWidth-calculator-edges-spacing-114-gap*(cols-1))/cols);
+ let cell=Math.max(44,Math.min(104,byWidth));
+ const estimatedHeight=size=>Math.max(44,Math.round(size*.65))+(2+rows)*size+Math.max(40,Math.round(size*.55))+122;
  while(cell>44&&estimatedHeight(cell)>available)cell--;
+ stage.style.setProperty('--worksheet-area',Math.max(474,cols*cell+(cols-1)*gap+90)+'px');
  sendEngine('layout',{cell,gap,rows});paintWorksheetExperience();
 };
 function worksheetSummaryMarkup(r){
