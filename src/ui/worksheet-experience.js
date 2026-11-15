@@ -17,7 +17,7 @@ function worksheetRewardDisplays(r){
 renderWorksheet=function(){
  const r=g.run;if(!r||r.phase==='failed'||!usesStepCoins(r)&&r.phase==='claim')return previousWorksheetRenderer();
  const food=orderFood(r.ticket);
- return `<main class="worksheet-stage worksheet-modern"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div><div class="worksheet-header-actions"><button class="worksheet-settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">${hubImage('control-settings.svg')}</button><button class="worksheet-exit illustrated-worksheet-button" onclick="abandonTicket()">Save &amp; Exit</button></div></header>${worksheetRewardDisplays(r)}<section class="worksheet-left"><div class="worksheet-engine-wrap"><iframe id="worksheetFrame" class="worksheet-frame" title="Work out your customer's order" sandbox="allow-scripts allow-same-origin"></iframe></div></section><aside class="worksheet-calculator" aria-label="Bakery calculation panel"><div id="calculationPanel"></div></aside><footer class="worksheet-complete-bar"><button class="illustrated-worksheet-button" onclick="sendEngine('undo',{attemptId:g.run.worksheetRewards.attemptId})">Undo</button><span id="worksheetStepProgress">${r.bridgeDone||0} / ${r.steps.length} pairs placed</span><button id="collectRewards" class="illustrated-worksheet-button worksheet-primary" ${r.procedureComplete?'':'disabled'} onclick="beginWorksheetSettlement()">Complete Order</button><span id="pendingCoins" hidden>${fmt(r.pool)}</span></footer><span id="bridgeStatus" hidden></span></main>`;
+ return `<main class="worksheet-stage worksheet-modern"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div><div class="worksheet-header-actions"><button class="worksheet-settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">${hubImage('control-settings.svg')}</button><button class="worksheet-exit illustrated-worksheet-button" onclick="abandonTicket()">Save &amp; Exit</button></div></header>${worksheetRewardDisplays(r)}${WorksheetComponents.workspace({done:r.bridgeDone||0,total:r.steps.length,complete:r.procedureComplete,pool:fmt(r.pool)})}</main>`;
 };
 function currentWorksheetCalculation(){
  const r=g.run,state=r?.worksheetSession?.state;
@@ -25,18 +25,16 @@ function currentWorksheetCalculation(){
  const step=r.steps.find(item=>item.row===state.row&&item.col===state.k);
  return step?{r,state,step,key:worksheetStepKey(step)}:null;
 }
-function calculationKeypadMarkup(label){
- return `<div class="calculation-keypad" role="group" aria-label="${label}">${[1,2,3,4,5,6,7,8,9,'Backspace',0,'Enter'].map(key=>`<button class="illustrated-worksheet-button" data-calc-key="${key}" onclick="worksheetCalcKey('${key}')" aria-label="${key==='Backspace'?'Backspace':key==='Enter'?'Submit answer':key}">${key==='Backspace'?'⌫':key==='Enter'?'Enter':key}</button>`).join('')}</div>`;
-}
+function calculationKeypadMarkup(label){return WorksheetComponents.keypad(label)}
 function worksheetSelectedTargetLabel(context){
  const target=context.r.worksheetSession?.entry?.selected;if(!target)return 'Select an empty worksheet tile';
  const columns=['ones','tens','hundreds','thousands','ten-thousands','hundred-thousands','millions'];
  return target.kind==='carry'?`Carry above ${context.state.A[target.c]}`:`Row ${target.r+1} · ${columns[target.c]||`column ${target.c+1}`} column`;
 }
-function calculationPanelMarkup(context){
+function calculationPanelView(context){
  const r=g.run;
- if(r?.procedureComplete)return `<header class="calculator-heading"><span>BAKER’S CALCULATOR</span><h2>All placed!</h2></header><div class="calculator-answer">✓</div><p class="calculator-note">Your order is ready to complete.</p>`;
- if(r?.worksheetSession?.state.phase==='sum')return `<header class="calculator-heading"><span>BAKER’S CALCULATOR</span><h2>Add the rows</h2></header><div class="calculator-answer" aria-hidden="true">+</div><p class="calculator-note">Swipe down on the worksheet to finish your order.</p>`;
+ if(r?.procedureComplete)return {mode:'complete'};
+ if(r?.worksheetSession?.state.phase==='sum')return {mode:'sum'};
  const step=context?.step||r?.steps[Math.min(r?.bridgeDone||0,(r?.steps.length||1)-1)],active=context?.state.phase==='product';
  const answer=active?ensureFactAnswer(r,step):null;
  const resolved=answer&&answer.status!=='waiting',manual=answer?.accepted&&!resolved,entry=r?.worksheetSession?.entry;
@@ -44,8 +42,10 @@ function calculationPanelMarkup(context){
  const display=resolved?String(step.p+(carryAdded?context.state.incoming:0)):manual?(answer.entry||'—'):'?';
  const status=resolved?(entry?.feedback||(context.state.carryArmed?'Carry selected. Tap the ones digit here or on the sheet.':!context.state.mixed&&context.state.incoming?'Add the carry now, or place the ones first.':answer.status==='success'?`×${answer.multiplier} bonus ready. Place each digit to earn it.`:'Drag a digit, or tap it and then its destination.')):
   calculationNotice||(manual?`${3-answer.attempts.length} ${3-answer.attempts.length===1?'try':'tries'} left`:active?'Get an answer, then write its digits.':'Connect the two digits first.');
- return `<header class="calculator-heading"><span>BAKER’S CALCULATOR</span><h2 id="calculationExpression">${step?`${step.a} × ${step.b}`:'Ready?'}</h2></header>${carryAdded?`<div class="calculator-carry-equation">${step.p} + ${context.state.incoming} carry =</div>`:''}<output class="calculator-answer ${answer?.status==='success'?'is-golden':''}" id="calculationAnswer" ${manual?'tabindex="0" aria-label="Golden Challenge answer"':''}>${display}</output>${answer?.offered&&!answer.accepted&&!resolved?`<button class="golden-challenge-button illustrated-worksheet-button" id="goldenChallenge" onclick="chooseWorksheetChallenge()"><span aria-hidden="true">✦</span><span>Golden Challenge!<small>Solve it yourself for bonus coins!</small></span><b>×${answer.multiplier}</b></button>`:''}${manual?`<div class="golden-active-label">Golden Challenge <b>×${answer.multiplier}</b></div>`:''}${resolved?worksheetDigitTrayMarkup(context):''}${manual?calculationKeypadMarkup('Golden Challenge keypad'):''}<p class="calculator-note ${entry?.level?'is-placement-error':answer?.status==='success'?'is-success':''}" role="status">${status}</p>${!resolved?`<button class="illustrated-worksheet-button ${!answer?.offered&&!manual?'worksheet-primary':''} ${active&&g.tutorialArrows&&!answer?.offered&&!manual?'calculator-guide':''}" id="generateAnswer" ${active?'':'disabled'} onclick="generateWorksheetAnswer()">Generate Answer</button>`:''}`;
+ return {mode:'fact',expression:step?`${step.a} \u00d7 ${step.b}`:'Ready?',display,carryEquation:carryAdded?`${step.p} + ${context.state.incoming} carry =`:'',golden:answer?.status==='success',manual:!!manual,offered:!!(answer?.offered&&!answer.accepted&&!resolved),multiplier:answer?.multiplier||1,tray:resolved?worksheetDigitTrayView(context):null,status,placementError:!!entry?.level,generate:!resolved,active:!!active,guide:!!(active&&g.tutorialArrows&&!answer?.offered&&!manual)};
 }
+function calculationPanelMarkup(context){return WorksheetComponents.calculator(calculationPanelView(context))}
+
 function paintWorksheetExperience(){
  const r=g.run,panel=$('calculationPanel');if(!r||!panel)return;
  const context=currentWorksheetCalculation(),identity=`${r.ticket.id}/${context?.key||'none'}`;
@@ -70,6 +70,7 @@ function paintWorksheetExperience(){
  const progress=$('worksheetStepProgress');if(progress)progress.textContent=`${r.bridgeDone||0} / ${r.steps.length} pairs placed`;
  if(typeof paintRewardDock==='function')paintRewardDock(r);
  if(r.settlement&&!worksheetSummaryView)scheduleWorksheetSummaryRecovery();
+ window.panaderyaCoBaker?.observation?.publish(r.worksheetSession);
 }
 function changeWorksheetCalculation(change){
  const context=currentWorksheetCalculation();if(!context||context.state.phase!=='product'||g.run.procedureComplete||!worksheetPracticeIsCurrent())return false;
@@ -122,10 +123,8 @@ fitWorksheet=function(){
  const footer=stage.querySelector('.worksheet-complete-bar').getBoundingClientRect().height;
  const available=Math.max(300,innerHeight-stage.getBoundingClientRect().top-edges-header-footer-rewardSize-spacing*3-20);
  const calculator=innerWidth<=1100?260:280,byWidth=Math.floor((innerWidth-calculator-edges-spacing-114-gap*(cols-1))/cols);
- let cell=Math.max(44,Math.min(104,byWidth));
- const estimatedHeight=size=>Math.max(44,Math.round(size*.65))+(2+rows)*size+Math.max(40,Math.round(size*.55))+122;
- while(cell>44&&estimatedHeight(cell)>available)cell--;
- stage.style.setProperty('--worksheet-area',Math.max(474,cols*cell+(cols-1)*gap+90)+'px');
+ const {cell,area}=WorksheetComponents.layout({rows,cols,available,byWidth,gap});
+ stage.style.setProperty('--worksheet-area',area+'px');
  sendEngine('layout',{cell,gap,rows});paintWorksheetExperience();
 };
 function worksheetSummaryMarkup(r){

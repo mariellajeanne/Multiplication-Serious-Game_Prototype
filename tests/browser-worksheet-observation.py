@@ -24,13 +24,18 @@ def call(p, target=None):
         p.locator('[data-help-action="all"]').click()
 
 def synced(learner, helper):
-    expected=learner.evaluate('CoBakerWorksheet.snapshot(document.querySelector("#worksheetFrame").contentWindow.getWorksheetSession())')
-    assert expected, 'Invalid local snapshot'
+    expected=None
     deadline=time.monotonic()+15
     while time.monotonic()<deadline:
+        expected=learner.evaluate('CoBakerWorksheet.snapshot(g.run.worksheetSession,panaderyaCoBaker.observation.presentation(g.run.worksheetSession))')
         latest=helper.evaluate('panaderyaCoBaker.observation.latest')
-        rendered=helper.evaluate('()=>{try{return CoBakerWorksheet.snapshot({state:document.querySelector("#coBakerObservation iframe")?.contentWindow?.eval("s")})}catch(_){return null}}')
-        if latest==expected and rendered==expected:return expected
+        rendered=helper.evaluate('()=>{try{return CoBakerWorksheet.snapshot({state:document.querySelector("#coBakerObservation iframe")?.contentWindow?.getObservedWorksheetState()},panaderyaCoBaker.observation.latest?.presentation)}catch(_){return null}}')
+        panel_script="""()=>{const p=PANEL;if(!p)return null;const clone=p.cloneNode(true);for(const el of clone.querySelectorAll('*'))for(const a of ['onclick','disabled','aria-disabled','tabindex','data-inactive'])el.removeAttribute(a);return clone.innerHTML}"""
+        local_panel=learner.evaluate(panel_script.replace('PANEL','document.querySelector("#calculationPanel")'))
+        mirror_panel=helper.evaluate(panel_script.replace('PANEL','document.querySelector("#coBakerObservation iframe")?.contentDocument?.querySelector("#calculationPanel")'))
+        prompts=learner.evaluate('document.querySelector("#worksheetFrame").contentDocument.querySelector("#guidePrompt").textContent')
+        mirrored_prompt=helper.evaluate('()=>{try{return document.querySelector("#coBakerObservation iframe").contentDocument.querySelector("#worksheetFrame").contentDocument.querySelector("#guidePrompt").textContent}catch(_){return null}}')
+        if expected and latest==expected and rendered==expected and local_panel==mirror_panel and prompts==mirrored_prompt:return expected
         helper.wait_for_timeout(100)
     helper.screenshot(path=str(out/'failure.png'));print('ERRORS',errors,flush=True);raise AssertionError((expected,latest,rendered))
 
@@ -62,11 +67,41 @@ try:
         synced(learner,helper);learner.locator('#modals .close').click()
         fr=learner.locator('#worksheetFrame').element_handle().content_frame()
         fr.locator('[data-top="0"]').click();fr.locator('[data-bottom="0"]').click()
-        learner.locator('#generateAnswer:enabled').click();wait(learner,'document.querySelector("#worksheetFrame").contentWindow.eval("s.revealed")');synced(learner,helper)
+        wait(learner,'g.run.worksheetSession.state.phase==="product"')
+        # Deterministic offer fixture; production challenge acceptance/answer rules run unchanged.
+        learner.evaluate('const a=ensureFactAnswer(g.run,g.run.steps[0]);a.offered=true;a.multiplier=3;paintWorksheetExperience()')
+        synced(learner,helper);helper.screenshot(path=str(out/'helper-golden-offer.png'))
+        observer=helper.locator('#coBakerObservation iframe').element_handle().content_frame()
+        assert observer.locator('#goldenChallenge').is_disabled()
+        assert observer.locator('#generateAnswer').is_disabled()
+        learner.locator('#goldenChallenge').click();synced(learner,helper)
+        for key in ('7','0','Enter'):
+            learner.locator(f'[data-calc-key="{key}"]').click();synced(learner,helper)
+        helper.screenshot(path=str(out/'helper-golden-wrong.png'))
+        for width,height in [(1024,768),(1280,800),(2000,1200)]:
+            helper.set_viewport_size({'width':width,'height':height});helper.wait_for_timeout(180)
+            bounds=observer.evaluate("""()=>{const r=document.querySelector('#observedWorkbench').getBoundingClientRect();return {right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight,scroll:document.documentElement.scrollHeight}}""")
+            assert bounds['right']<=bounds['width']+2 and bounds['bottom']<=bounds['height']+2,bounds
+            assert bounds['scroll']<=bounds['height']+2,bounds
+            assert observer.locator('[data-calc-key]:enabled').count()==0
+            helper.screenshot(path=str(out/f'helper-golden-{width}.png'))
+        helper.set_viewport_size({'width':1280,'height':800})
+        for key in ('7','2','Enter'):
+            learner.locator(f'[data-calc-key="{key}"]').click();synced(learner,helper)
+        wait(learner,'document.querySelector("#worksheetFrame").contentWindow.eval("s.revealed")');synced(learner,helper)
+        assert observer.locator('#calculationAnswer').inner_text()=='72'
+        assert observer.locator('[data-answer-digit]').count()==2
+        helper.screenshot(path=str(out/'helper-golden-success.png'))
         # Probe synthetic input and parent input commands against the observer.
         before=helper.evaluate('JSON.stringify(panaderyaCoBaker.observation.latest)')
-        helper.evaluate('''()=>{const f=document.querySelector('#coBakerObservation iframe');f.contentWindow.document.querySelector('[data-top]').click();f.contentWindow.postMessage({source:'bc-shell',type:'undo'},location.origin);f.contentWindow.postMessage({source:'bc-shell',type:'start',ticket:{a:1,b:1},attemptId:'intruder'},location.origin)}''')
+        learner_before=learner.evaluate('JSON.stringify(g.run)');helper_before=helper.evaluate('localStorage.panaderyaQuestV2')
+        helper.evaluate('''()=>{const f=document.querySelector('#coBakerObservation iframe');f.contentWindow.document.querySelector('#generateAnswer')?.click();f.contentWindow.document.querySelector('#worksheetFrame').contentWindow.document.querySelector('[data-top]').click();f.contentWindow.postMessage({source:'bc-shell',type:'undo'},location.origin);f.contentWindow.postMessage({source:'bc-shell',type:'start',ticket:{a:1,b:1},attemptId:'intruder'},location.origin)}''')
+        helper.evaluate('document.querySelector("#coBakerObservation").focus()');helper.keyboard.type('12')
+        assert observer.evaluate('typeof generateWorksheetAnswer')=='undefined'
+        assert observer.evaluate('typeof sendEngine')=='undefined'
         helper.wait_for_timeout(250);assert helper.evaluate('JSON.stringify(panaderyaCoBaker.observation.latest)')==before;synced(learner,helper)
+        assert learner.evaluate('JSON.stringify(g.run)')==learner_before
+        assert helper.evaluate('localStorage.panaderyaQuestV2')==helper_before
         # Real provisional placement: write the ones and temporarily put tens in the row.
         fr.evaluate('worksheetDropDigit("ones",{kind:"slot",r:0,c:0},2)');fr.wait_for_function('!busy')
         fr.evaluate('worksheetDropDigit("tens",{kind:"slot",r:0,c:1},7)');fr.wait_for_function('!busy');synced(learner,helper)
@@ -107,7 +142,7 @@ try:
         helper.locator('[data-observer-end]').click();wait(learner,'!panaderyaCoBaker.help.active');assert helper.locator('#coBakerObservation').count()==0
         assert helper.evaluate('panaderyaCoBaker.observation.latest') is None
         assert not errors,errors
-        print('PASS isolated Edge/WebKit relay: snapshot, live 79x18/provisional/carries/Undo/completion, read-only, reconnect/refresh, privacy, helper/other saves and end')
+        print('PASS isolated Edge/WebKit relay: shared calculator DOM, Golden Challenge attempts/success, live 79x18/digits/provisional/carry/Undo/completion, read-only, reconnect/refresh, privacy, own saves, endings and 1024/1280/2000 layouts')
         for ctx in contexts:ctx.close()
         edge.close();webkit.close()
 finally:

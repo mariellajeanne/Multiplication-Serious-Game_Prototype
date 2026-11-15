@@ -57,6 +57,12 @@ public class LanProtocolTest {
         h.put("kind","worksheet").remove("previousSession");h.put("version",1);
         JSONObject state=new JSONObject("{\"a\":79,\"b\":18,\"A\":[9,7],\"B\":[8,1],\"cols\":4,\"row\":0,\"k\":0,\"first\":null,\"phase\":\"select\",\"revealed\":false,\"raw\":0,\"mixed\":false,\"incoming\":0,\"onesPlaced\":false,\"tensPlaced\":false,\"tensLocation\":null,\"chosen\":null,\"carrySlots\":{},\"rows\":[{},{\"0\":0}],\"sum\":{},\"sumCol\":0,\"sumCarry\":0,\"done\":0,\"boxes\":0,\"complete\":false,\"carryArmed\":false}");
         h.put("snapshot",new JSONObject().put("schema",1).put("state",state));parse(m.toString());
+        JSONObject presentation=new JSONObject("{\"calculator\":{\"mode\":\"sum\"},\"phase\":\"add\",\"tutorial\":true,\"guideLevel\":2,\"entry\":{\"selected\":null,\"value\":\"\",\"feedback\":\"\",\"level\":0,\"hintTargets\":[]}}");
+        h.getJSONObject("snapshot").put("schema",2).put("presentation",presentation);parse(m.toString());
+        JSONObject calc=new JSONObject("{\"mode\":\"fact\",\"expression\":\"9 x 8\",\"display\":\"72\",\"carryEquation\":\"\",\"golden\":true,\"manual\":false,\"offered\":false,\"multiplier\":3,\"status\":\"Place the digits.\",\"placementError\":false,\"generate\":false,\"active\":true,\"guide\":false,\"tray\":{\"waiting\":0,\"armed\":false,\"label\":\"Place the digits\",\"digits\":[{\"part\":\"tens\",\"value\":7},{\"part\":\"ones\",\"value\":2}],\"selected\":null,\"demo\":false,\"demoDigit\":\"2\"}}");
+        presentation.put("calculator",calc);parse(m.toString());calc.put("generate","false");rejects(m);calc.put("generate",false);calc.getJSONObject("tray").getJSONArray("digits").put(1,JSONObject.NULL);rejects(m);calc.getJSONObject("tray").getJSONArray("digits").put(1,new JSONObject().put("part","ones").put("value",2));parse(m.toString());
+        presentation.put("coins",99);rejects(m);presentation.remove("coins");
+        presentation.getJSONObject("entry").put("selected",new JSONObject().put("kind","slot").put("r",7).put("c",0));rejects(m);presentation.getJSONObject("entry").put("selected",JSONObject.NULL);
         state.put("coins",10);rejects(m);state.remove("coins");state.put("phase","<script>");rejects(m);
         state.put("phase","select");h.put("version",0);rejects(m);h.put("version","1");rejects(m);
     }

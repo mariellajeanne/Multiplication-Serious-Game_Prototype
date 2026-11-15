@@ -190,6 +190,37 @@ public final class LanDiscovery {
         org.json.JSONArray rows=s.getJSONArray("rows");if(rows.length()!=bl)throw new JSONException("Invalid rows");for(int i=0;i<rows.length();i++)worksheetDigits(rows.getJSONObject(i));worksheetDigits(s.getJSONObject("sum"));
         JSONObject carries=s.getJSONObject("carrySlots");if(carries.length()>6)throw new JSONException("Invalid carries");Iterator<String> it=carries.keys();while(it.hasNext()){String k=it.next();if(!k.matches("[0-5]"))throw new JSONException("Invalid carry column");JSONObject carry=carries.getJSONObject(k);onlyKeys(carry,"value","provisional");worksheetInt(carry,"value",9);if(!(carry.opt("provisional") instanceof Boolean))throw new JSONException("Invalid carry");}
     }
+    private static void worksheetText(JSONObject o,String k,int max)throws JSONException{
+        Object v=o.opt(k);if(!(v instanceof String)||((String)v).length()>max||((String)v).matches("(?s).*[\\x00-\\x1f].*"))throw new JSONException("Invalid presentation text");
+    }
+    private static void worksheetFlags(JSONObject o,String... names)throws JSONException{
+        for(String k:names)if(!(o.opt(k) instanceof Boolean))throw new JSONException("Invalid presentation flag");
+    }
+    private static void worksheetTarget(Object value)throws JSONException{
+        if(value==JSONObject.NULL)return;
+        if(!(value instanceof JSONObject))throw new JSONException("Invalid target");JSONObject t=(JSONObject)value;
+        onlyKeys(t,"kind","r","c");worksheetInt(t,"c",6);
+        if("slot".equals(t.opt("kind")))worksheetInt(t,"r",1);
+        else if(!"carry".equals(t.opt("kind"))||t.has("r"))throw new JSONException("Invalid target kind");
+    }
+    private static void validatePresentation(JSONObject p)throws JSONException{
+        onlyKeys(p,"calculator","phase","tutorial","guideLevel","entry");worksheetFlags(p,"tutorial");worksheetInt(p,"guideLevel",2);
+        if(!Arrays.asList("connect","calculate","carry","place","add","complete").contains(p.opt("phase")))throw new JSONException("Invalid view phase");
+        JSONObject e=p.getJSONObject("entry");onlyKeys(e,"selected","value","feedback","level","hintTargets");worksheetTarget(e.get("selected"));worksheetText(e,"value",1);worksheetText(e,"feedback",240);worksheetInt(e,"level",3);
+        if(!e.getString("value").matches("[0-9]?"))throw new JSONException("Invalid entry");
+        org.json.JSONArray targets=e.getJSONArray("hintTargets");if(targets.length()>2)throw new JSONException("Too many targets");for(int i=0;i<targets.length();i++){if(targets.isNull(i))throw new JSONException("Missing target");worksheetTarget(targets.get(i));}
+        JSONObject c=p.getJSONObject("calculator");onlyKeys(c,"mode","expression","display","carryEquation","golden","manual","offered","multiplier","tray","status","placementError","generate","active","guide");
+        if(Arrays.asList("sum","complete").contains(c.opt("mode"))){if(c.length()!=1)throw new JSONException("Unexpected calculator fields");return;}
+        if(!"fact".equals(c.opt("mode")))throw new JSONException("Invalid calculator mode");
+        worksheetText(c,"expression",20);worksheetText(c,"display",2);worksheetText(c,"carryEquation",32);worksheetText(c,"status",240);
+        if(!c.getString("display").matches("[0-9]{1,2}|[?\u2014]")||worksheetInt(c,"multiplier",15)<1)throw new JSONException("Invalid calculator value");
+        worksheetFlags(c,"golden","manual","offered","placementError","generate","active","guide");
+        if(!c.has("tray"))throw new JSONException("Missing tray");if(c.isNull("tray"))return;
+        JSONObject t=c.getJSONObject("tray");onlyKeys(t,"waiting","armed","label","digits","selected","demo","demoDigit");worksheetInt(t,"waiting",9);worksheetFlags(t,"armed","demo");worksheetText(t,"demoDigit",1);
+        if(!t.getString("demoDigit").matches("[0-9]?")||!Arrays.asList("Add the waiting carry","Place the digits").contains(t.opt("label"))||!t.has("selected")||!t.isNull("selected")&&!Arrays.asList("ones","tens").contains(t.opt("selected")))throw new JSONException("Invalid tray");
+        org.json.JSONArray digits=t.getJSONArray("digits");if(digits.length()>2)throw new JSONException("Too many tray digits");Set<String> parts=new HashSet<>();
+        for(int i=0;i<digits.length();i++){JSONObject d=digits.getJSONObject(i);onlyKeys(d,"part","value");worksheetInt(d,"value",9);String part=d.getString("part");if(!Arrays.asList("ones","tens").contains(part)||!parts.add(part))throw new JSONException("Invalid digit part");}
+    }
     private static void validateHelp(JSONObject h)throws JSONException{
         String kind=h.getString("kind");
         switch(kind){
@@ -198,8 +229,9 @@ public final class LanDiscovery {
             case "worksheet":
                 onlyKeys(h,"kind","sessionId","streamId","version","snapshot");id(h,"sessionId");id(h,"streamId");
                 if(!(h.opt("version") instanceof Number)||h.getDouble("version")!=h.getLong("version")||h.getLong("version")<1||h.getLong("version")>9007199254740991L)throw new JSONException("Invalid worksheet version");
-                JSONObject snapshot=h.getJSONObject("snapshot");onlyKeys(snapshot,"schema","state");
-                if(!(snapshot.opt("schema") instanceof Number)||snapshot.getDouble("schema")!=1)throw new JSONException("Invalid worksheet schema");
+                JSONObject snapshot=h.getJSONObject("snapshot");onlyKeys(snapshot,"schema","state","presentation");
+                int schema=worksheetInt(snapshot,"schema",2);if(schema<1||schema==1&&snapshot.has("presentation"))throw new JSONException("Invalid worksheet schema");
+                if(schema==2)validatePresentation(snapshot.getJSONObject("presentation"));
                 validateWorksheet(snapshot.getJSONObject("state"));return;
             case "presence":
                 onlyKeys(h,"kind","available","busy");

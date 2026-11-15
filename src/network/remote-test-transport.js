@@ -1,7 +1,7 @@
 /* Opt-in remote browser test transport. Never selected in ordinary play or Android. */
 (function(root){
  'use strict';
- const PROTOCOL=3;
+ const PROTOCOL=4;
  const ERRORS={
   'identity-in-use':'This Baker is already connected in another tab. Waiting for that tab to close.',
   'authentication-failed':'Remote relay authentication failed. Re-enter the shared testing password.',

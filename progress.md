@@ -47,3 +47,17 @@ Original prompt: Investigate and fix remote Co-Baker multiplayer after Phase 2; 
 - Final source/package/check refresh in progress. Stop after Phase 3A: no hints, pointing, editing or helper rewards.
 
 - Final verification complete: new observation browser test rerun passes; generate-answer test now waits for the accepted reveal before the next action. Final smoke/focused tests and git diff --check pass. Current debug APK rebuilt successfully; 9 native tests remain passing. Inspected current home at 1280x800 and 2000x1200, final skill screenshot/text and observer screenshots. No outstanding Phase 3A implementation work; external Android/tunnel verification remains unperformed. Stop here.
+
+
+## Phase 3A.1 - faithful read-only workbench
+- Request: share current production worksheet/calculator/tray/Golden Challenge presentation; keep scope read-only, no hints/pointing/new rewards.
+- Cause: Phase 3A mirrored only arithmetic iframe, deliberately disabling external-calculator mode; current calculator lives in parent shell.
+- Extracted shared pure calculator/tray/workspace/layout components. Learner creates authoritative visual model (schema 2); helper loads presentation-only document plus existing engine in read-only mode. No input/reward/game-state scripts loaded by viewer.
+- State includes calculator output, Golden Challenge offer/entry/tries/success, actual available digits, carry equation, selection and placement guidance. Keeps existing session/version/grace logic; remote protocol 4 rejects outdated relay. Native validator extended to schema 2.
+- 205 baseline Node tests pass after extraction. Live Edge/WebKit relay test passes including added challenge offer/wrong/correct attempts and calculator DOM equality; adjusting observer-only sizing after screenshot revealed footer clipping. Further focused/native/regression verification underway.
+
+- Final Phase 3A.1: 208 Node tests pass, including visual-only update ordering, malformed presentation rejection and pure shared renderer/read-only checks. Existing help and remote TLS browser suites pass; production UI replacement passes Edge/WebKit. Existing CDP worksheet regression passes carrying/tap/drag/Undo/swipe/settings/reload/claim-once and animation fallback.
+- Real Edge/WebKit isolated relay test compares calculator DOM and live guidance text, exercises deterministic Golden Challenge offer/wrong/correct attempts, provisional/carry correction/Undo/completion, blocked input, own saves, session ending, socket reconnect/helper refresh. Landscape 1024x768, 1280x800 and 2000x1200 bounds and screenshots pass.
+- Observer-only transform sizing avoids nested scrolling/iframe distortion; local render acknowledgements retry delayed inner updates with ordered render versions. Learner layout and gameplay unchanged.
+- 9 native JVM tests pass (including schema 2 full calculator/tray); debug APK build succeeds. No physical device/LAN, deployed Pages or live tunnel verification. Remote relay now protocol 4: restart from source and refresh both browsers.
+- Skill client passed; reviewed worksheet screenshot/text, final helper challenge/provisional/completion screenshots and current home at 1280x800 and 2000x1200. Artifacts remain in output/. Existing sharing doc updated in place. No new dependencies, pushes or deployment. Stop after Phase 3A.1; no pointing/hints/helper rewards.

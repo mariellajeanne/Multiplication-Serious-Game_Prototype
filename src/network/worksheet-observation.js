@@ -19,15 +19,30 @@
   if(s.first!==null&&(!keys(s.first,['kind','c'])||!['top','bottom'].includes(s.first.kind)||!int(s.first.c,s.first.kind==='top'?s.A.length-1:s.B.length-1)))return false;
   return Array.isArray(s.rows)&&s.rows.length===s.B.length&&s.rows.every(r=>digits(r))&&digits(s.sum)&&object(s.carrySlots)&&Object.keys(s.carrySlots).length<=6&&Object.entries(s.carrySlots).every(([k,v])=>/^[0-5]$/.test(k)&&keys(v,['value','provisional'])&&int(v.value,9)&&typeof v.provisional==='boolean');
  }
- function snapshot(session){
+ const text=(s,max=240)=>typeof s==='string'&&s.length<=max&&!/[\u0000-\u001f]/.test(s);
+ const target=t=>t===null||keys(t,['kind','r','c'])&&['slot','carry'].includes(t.kind)&&int(t.c,6)&&(t.kind==='carry'?!('r'in t):int(t.r,1));
+ function validPresentation(p){
+  if(!keys(p,['calculator','phase','tutorial','guideLevel','entry'])||!['connect','calculate','carry','place','add','complete'].includes(p.phase)||typeof p.tutorial!=='boolean'||!int(p.guideLevel,2))return false;
+  const e=p.entry;
+  if(!keys(e,['selected','value','feedback','level','hintTargets'])||!target(e.selected)||!/^\d?$/.test(e.value)||!text(e.feedback)||!int(e.level,3)||!Array.isArray(e.hintTargets)||e.hintTargets.length>2||!e.hintTargets.every(t=>t!==null&&target(t)))return false;
+  const c=p.calculator;
+  if(!keys(c,['mode','expression','display','carryEquation','golden','manual','offered','multiplier','tray','status','placementError','generate','active','guide']))return false;
+  if(c.mode==='sum'||c.mode==='complete')return Object.keys(c).length===1;
+  if(c.mode!=='fact'||!text(c.expression,20)||!/^\d{1,2}$|^[?—]$/.test(c.display)||!text(c.carryEquation,32)||!text(c.status)||!int(c.multiplier,15)||c.multiplier<1||!['golden','manual','offered','placementError','generate','active','guide'].every(k=>typeof c[k]==='boolean'))return false;
+  if(c.tray===null)return true;
+  const t=c.tray;
+  return keys(t,['waiting','armed','label','digits','selected','demo','demoDigit'])&&int(t.waiting,9)&&typeof t.armed==='boolean'&&['Add the waiting carry','Place the digits'].includes(t.label)&&[null,'ones','tens'].includes(t.selected)&&typeof t.demo==='boolean'&&/^\d?$/.test(t.demoDigit)&&Array.isArray(t.digits)&&t.digits.length<=2&&t.digits.every(d=>keys(d,['part','value'])&&['ones','tens'].includes(d.part)&&int(d.value,9))&&new Set(t.digits.map(d=>d.part)).size===t.digits.length;
+ }
+ function validSnapshot(data){return keys(data,['schema','state','presentation'])&&validState(data.state)&&(data.schema===1?!('presentation'in data):data.schema===2&&validPresentation(data.presentation))}
+ function snapshot(session,presentation){
   if(!session?.state)return null;
   const state={};for(const key of fields)state[key]=session.state[key];
-  const data={schema:1,state:JSON.parse(JSON.stringify(state))};return validState(data.state)?data:null;
+  const data={schema:presentation?2:1,state:JSON.parse(JSON.stringify(state)),...(presentation?{presentation:JSON.parse(JSON.stringify(presentation))}:{})};return validSnapshot(data)?data:null;
  }
  function validMessage(h){
   if(!ID.test(h?.sessionId)||!ID.test(h?.streamId))return false;
   if(h.kind==='watch')return keys(h,['kind','sessionId','streamId','previousSession'])&&(!('previousSession'in h)||ID.test(h.previousSession));
-  return h.kind==='worksheet'&&keys(h,['kind','sessionId','streamId','version','snapshot'])&&Number.isSafeInteger(h.version)&&h.version>0&&keys(h.snapshot,['schema','state'])&&h.snapshot.schema===1&&validState(h.snapshot.state);
+  return h.kind==='worksheet'&&keys(h,['kind','sessionId','streamId','version','snapshot'])&&Number.isSafeInteger(h.version)&&h.version>0&&validSnapshot(h.snapshot);
  }
  class Observation{
   constructor(discovery){
@@ -55,7 +70,7 @@
   publish(session){
    const a=this.d.help.active;
    if(!a||a.role!=='Learner'||a.lostAt||!this.streamId||!this.d.help.activeWorksheet()||this.d.peers.get(a.otherId)?.session!==a.otherSession)return false;
-   const data=snapshot(session);if(!data)return false;
+   const data=snapshot(session,this.presentation?.(session));if(!data)return false;
    const signature=JSON.stringify(data);if(signature===this.signature)return false;
    const ok=this.d.help.send(a.otherId,{kind:'worksheet',sessionId:a.sessionId,streamId:this.streamId,version:++this.version,snapshot:data});
    if(ok){this.signature=signature;this.latest=data}return ok;
@@ -77,5 +92,5 @@
    if(h.kind==='worksheet'&&a.role==='Helper'&&h.streamId===this.streamId&&h.version>this.received){this.previousSession=null;this.received=h.version;this.latest=h.snapshot;this.changed()}
   }
  }
- root.CoBakerWorksheet={snapshot,validState,validMessage,Observation};
+ root.CoBakerWorksheet={snapshot,validState,validPresentation,validSnapshot,validMessage,Observation};
 })(globalThis);

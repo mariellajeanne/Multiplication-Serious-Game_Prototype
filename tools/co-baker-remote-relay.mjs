@@ -10,7 +10,7 @@ import '../src/network/worksheet-observation.js';
 import '../src/network/co-baker.js';
 const core=globalThis.CoBakerCore;
 // Registration acknowledgement version: Phase 3A observation + explicit lifecycle errors.
-const PROTOCOL=3;
+const PROTOCOL=4;
 const GROUP=/^[a-zA-Z0-9_-]{3,32}$/;
 const sha256=s=>createHash('sha256').update(s,'utf8').digest();
 const validPassword=(received,expected)=>typeof received==='string'&&received.length<=128&&timingSafeEqual(sha256(received),sha256(expected));

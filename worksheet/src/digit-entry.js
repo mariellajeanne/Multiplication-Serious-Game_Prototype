@@ -64,11 +64,12 @@ function syncWorksheetDigitEntry(){
 }
 function paintWorksheetDigitEntry(){
  if(!worksheetExternalCalculator)return;
- syncWorksheetDigitEntry();
+ if(typeof worksheetReadOnly==='undefined'||!worksheetReadOnly)syncWorksheetDigitEntry();
  document.querySelectorAll('.entry-selected,.entry-hint').forEach(el=>{el.classList.remove('entry-selected','entry-hint');el.removeAttribute('aria-pressed')});
  const selected=Q(digitTargetSelector(worksheetDigitEntry.selected)||'.no-entry-target');
  if(selected){selected.classList.add('entry-selected');selected.setAttribute('aria-pressed','true');selected.classList.toggle('entry-draft',!!worksheetDigitEntry.value);selected.textContent=worksheetDigitEntry.value}
- if(worksheetDigitEntry.level>=3){const expected=worksheetPlacementExpected(worksheetDigitEntry.hintPart);for(const target of [expected?.target,expected?.source])Q(digitTargetSelector(target)||'.no-entry-target')?.classList.add('entry-hint')}
+ if(typeof worksheetReadOnly!=='undefined'&&worksheetReadOnly){for(const target of worksheetDigitEntry.hintTargets||[])Q(digitTargetSelector(target)||'.no-entry-target')?.classList.add('entry-hint')}
+ else if(worksheetDigitEntry.level>=3){const expected=worksheetPlacementExpected(worksheetDigitEntry.hintPart);for(const target of [expected?.target,expected?.source])Q(digitTargetSelector(target)||'.no-entry-target')?.classList.add('entry-hint')}
 }
 function selectWorksheetDigit(target){
  if(!worksheetExternalCalculator||!productActive()||!s.revealed||busy)return;

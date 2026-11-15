@@ -12,7 +12,8 @@
   if(host){host.focus();return}
   host=document.createElement('section');host.id='coBakerObservation';host.className='cobaker-observation';host.tabIndex=-1;host.setAttribute('role','dialog');host.setAttribute('aria-modal','true');host.setAttribute('aria-label','Read-only Co-Baker worksheet');
   host.innerHTML='<header><div><strong id="coBakerObserverName"></strong><small>Read-only · The learner controls every step</small></div><button class="secondary" data-observer-close>Back to bakery</button><button class="secondary" data-observer-end>End Helping</button></header><p id="coBakerObserverStatus" role="status"></p><h2 id="coBakerObserverProblem"></h2><p id="coBakerObserverStep"></p><iframe title="Read-only learner worksheet" sandbox="allow-scripts allow-same-origin"></iframe>';
-  frame=host.querySelector('iframe');frame.onload=()=>frame?.contentWindow.postMessage({source:'bc-shell',type:'hello'},location.origin);frame.src='worksheet/worksheet-engine.html?observe=1';
+  host.addEventListener('keydown',event=>{if(/^\d$|^Enter$|^Backspace$/.test(event.key)&&!(event.key==='Enter'&&event.target.tagName==='BUTTON')){event.preventDefault();event.stopImmediatePropagation()}},true);
+  frame=host.querySelector('iframe');frame.onload=()=>frame?.contentWindow.postMessage({source:'bc-shell',type:'hello'},location.origin);frame.src='worksheet/worksheet-observer.html';
   host.querySelector('[data-observer-close]').onclick=close;host.querySelector('[data-observer-end]').onclick=()=>d.help.end();document.body.appendChild(host);host.focus();paint();
  }
  function paint(){
@@ -28,10 +29,14 @@
   host.querySelector('#coBakerObserverStep').textContent=s?`${steps(s)} · ${s.done} / ${s.A.length*s.B.length} digit pairs`:'';
   send();
  }
- observation.onSnapshot=()=>{
-  const own=document.getElementById('worksheetFrame');
-  try{observation.publish(own?.contentWindow?.getWorksheetSession?.())}catch(_){}
+ observation.presentation=session=>{
+  const r=g.run,s=session?.state;if(!r||r.worksheetSession!==session)return undefined;
+  const step=r.steps.find(item=>item.row===s.row&&item.col===s.k),context=step?{r,state:s,step,key:worksheetStepKey(step)}:null;
+  const phase=r.procedureComplete?'complete':s.phase==='sum'?'add':s.phase==='select'?'connect':s.phase==='product'?(s.revealed?s.mixed?'place':'carry':'calculate'):'connect';
+  const e=session.entry||{},visual=document.getElementById('worksheetFrame')?.worksheetVisual;
+  return {calculator:calculationPanelView(context),phase,tutorial:!!g.tutorialArrows,guideLevel:g.tutorialArrows?(g.completed===0?2:g.completed<3?1:0):0,entry:{selected:e.selected||null,value:e.value||'',feedback:e.feedback||'',level:e.level||0,hintTargets:visual?.hintTargets||[]}};
  };
+ observation.onSnapshot=()=>observation.publish(g.run?.worksheetSession);
  window.addEventListener('message',e=>{
   if(e.source!==frame?.contentWindow||e.origin!==location.origin||e.data?.source!=='pq-worksheet'||e.data.type!=='observer-ready')return;
   ready=true;lastVersion=0;send();

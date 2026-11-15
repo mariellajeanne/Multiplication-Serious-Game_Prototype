@@ -111,6 +111,7 @@ function handleWorksheetMessage(ev){
  if(m.session?.attemptId===ledger.attemptId&&m.session.state?.a===r.ticket.a&&m.session.state?.b===r.ticket.b)r.worksheetSession=m.session;
  if(m.type==='complete'&&(m.ticket?.id!==r.ticket.id||m.top!==r.ticket.a||m.bottom!==r.ticket.b))return;
  if(m.type==='state'){
+  if(m.visual)frame.worksheetVisual=m.visual;
   if(m.surface)frame.worksheetSurface=m.surface;
   const old=r.bridgePrev||{};
   if(m.errors>Number(old.errors||0)){
@@ -123,8 +124,6 @@ function handleWorksheetMessage(ev){
   if(m.bestCombo>r.bestStreak)r.bestStreak=m.bestCombo;
   r.bridgePrev={phase:m.phase,errors:Math.max(Number(old.errors||0),Number(m.errors||0))};
  }
- // Observation is outbound only and is independent of the reward ledger.
- window.panaderyaCoBaker?.observation?.publish(m.session);
  if(applyWorksheetActions(r,m.actions)===false)return;
  if(typeof paintWorksheetExperience==='function')paintWorksheetExperience();
  // A verified completed state is a second delivery path if the final event was lost.

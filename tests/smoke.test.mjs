@@ -8,7 +8,7 @@ const html=readFileSync(resolve(root,'index.html'),'utf8');
 const scripts=[
  'src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/golden-challenges.js','src/game/state.js','src/game/rewards.js',
  'src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/ui/illustrated-art.js','src/ui/illustrated-controls.js','src/ui/dialogs.js','src/game/package-batches.js','src/ui/scene.js',
- 'src/ui/menu.js','src/ui/reward-feedback.js','src/game/worksheet-bridge.js','src/ui/bakery-hub.js','src/ui/package-unlocks.js','src/ui/package-experience.js','src/ui/worksheet-experience.js','src/ui/worksheet-drag.js','src/main.js','src/environment-entry.js'
+ 'src/ui/menu.js','src/ui/reward-feedback.js','src/game/worksheet-bridge.js','src/ui/bakery-hub.js','src/ui/package-unlocks.js','src/ui/package-experience.js','src/ui/worksheet-components.js','src/ui/worksheet-experience.js','src/ui/worksheet-drag.js','src/main.js','src/environment-entry.js'
 ];
 test('all classic scripts are included in dependency order',()=>{
   let prev=-1;

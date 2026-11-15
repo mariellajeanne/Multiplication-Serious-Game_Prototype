@@ -9,9 +9,12 @@ or settles the worksheet. A completed order cannot start another invitation.
 ## Data flow and authority
 
 `src/network/worksheet-observation.js` projects the existing engine session into
-schema 1: operands, digit arrays, row/column, procedural flags, partial rows,
-carry slots, sum and completion. It excludes history, reward actions, coordinates,
-calculator guidance, ticket metadata, timestamps, economy and bakery saves.
+schema 2: operands, digit arrays, row/column, procedural flags, partial rows,
+carry slots, sum, completion, and the learner-owned calculator/tray/guidance view.
+Calculator paints also publish changes, including Golden Challenge input before
+the engine changes. Schema 1 remains valid for arithmetic-only compatibility.
+History, reward ledgers, coordinates, ticket metadata, timestamps, economy and
+bakery saves are excluded.
 The same bounded validator is used by browsers and the development relays; the
 native Java validator accepts the corresponding bounded schema.
 
@@ -28,12 +31,17 @@ Receivers reject unrelated roles, peers, connections, sessions, streams, malform
 fields and non-increasing versions. Only the helper's observation cache accepts
 network state; the learner's iframe, run and reward ledger have no inbound path.
 
-`worksheet/worksheet-engine.html?observe=1` reuses the production renderer in a
-separate frame. It never starts a worksheet attempt or reports gameplay actions.
-Input events are intercepted, controls hidden, audio/guides disabled, and the
-parent bridge accepts only validated observation snapshots and readiness probes.
-No network-supplied strings are interpreted as HTML. The shell checks the
-observer frame's source and origin separately from its personal worksheet bridge.
+`worksheet/worksheet-observer.html` loads the same pure calculator, digit tray,
+workspace and sizing components (`src/ui/worksheet-components.js`) and production
+styles. Its nested `worksheet-engine.html?observe=1` uses the existing renderer
+with external-calculator mode and learner guidance. Only observer container sizing
+changes; learner geometry stays unchanged. Calculator numbers come from the
+learner's view model. No bakery state, challenge/reward logic or command functions
+are loaded in the observer document. All worksheet controls have handlers removed,
+are disabled, and inputs are blocked in capture phase. Its inner bridge accepts
+only validated snapshots and readiness probes. Render acknowledgements retry a
+delayed frame update. Source/origin and network session/version checks stay in
+place; network strings are escaped. The helper's personal iframe stays mounted.
 
 ## Disconnects and limits
 
@@ -45,7 +53,7 @@ safely; its worksheet uses ordinary solo persistence, and a new Call for Help is
 required. Expired sessions require a new invitation. Coordinator replacement does
 not own or reset observation. Solo play needs no transport.
 
-The remote development relay now requires protocol **3**. Restart the Node relay
+The remote development relay now requires protocol **4**. Restart the Node relay
 from current source and refresh both browsers together. No cloud service is added
 to the Android app; it uses the existing native direct LAN transport.
 

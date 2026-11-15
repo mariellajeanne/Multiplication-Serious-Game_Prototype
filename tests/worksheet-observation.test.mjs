@@ -56,3 +56,22 @@ test('refreshed helper proves previous connection within grace; old connection s
  bo.refresh();n.flush();assert.equal(a.help.active.sessionId,sessionId);assert.equal(a.help.active.otherSession,b.session);assert.deepEqual(bo.latest.state,initial);
  a.receive({kind:'message',message:{...api.packet(b.profile,previous,'help'),help:{kind:'watch',sessionId,streamId:'a'.repeat(32)}}});assert.equal(a.help.active.otherSession,b.session);
 });
+
+await import('../src/ui/worksheet-components.js');
+const view={calculator:{mode:'fact',expression:'9 \u00d7 8',display:'72',carryEquation:'',golden:true,manual:false,offered:false,multiplier:3,tray:{waiting:0,armed:false,label:'Place the digits',digits:[{part:'tens',value:7},{part:'ones',value:2}],selected:null,demo:false,demoDigit:'2'},status:'Place each digit.',placementError:false,generate:false,active:true,guide:false},phase:'place',tutorial:true,guideLevel:2,entry:{selected:null,value:'',feedback:'',level:0,hintTargets:[]}};
+test('presentation snapshots update calculator/challenge state without a math change and preserve ordering',()=>{
+ const {n,a,b,ao,bo}=pair();ao.presentation=()=>view;ao.publish({state:initial});n.flush();assert.equal(bo.latest.schema,2);assert.deepEqual(bo.latest.presentation,view);const version=bo.received;
+ const typing=structuredClone(view);typing.calculator.manual=true;typing.calculator.golden=false;typing.calculator.generate=true;typing.calculator.display='7';typing.calculator.tray=null;
+ ao.presentation=()=>typing;ao.publish({state:initial});n.flush();assert.ok(bo.received>version);assert.equal(bo.latest.presentation.calculator.display,'7');
+ b.receive({kind:'message',message:{...api.packet(a.profile,a.session,'help'),help:{kind:'worksheet',sessionId:a.help.active.sessionId,streamId:bo.streamId,version,snapshot:w.snapshot({state:initial},view)}}});assert.equal(bo.latest.presentation.calculator.display,'7');
+});
+test('presentation schema rejects commands, economic fields, unsafe targets and unbounded text',()=>{
+ for(const change of [p=>p.coins=99,p=>p.calculator.onclick='undo()',p=>p.calculator.status='x'.repeat(241),p=>p.calculator.tray.digits.push({part:'tens',value:2}),p=>p.calculator.tray.digits=[null],p=>p.entry.selected={kind:'slot',r:9,c:0},p=>p.entry.hintTargets=[{kind:'pixel',c:0}]]){const p=structuredClone(view);change(p);assert.equal(w.validPresentation(p),false)}
+ assert.equal(w.validSnapshot({schema:2,state:initial,presentation:view}),true);assert.equal(w.validSnapshot({schema:2,state:initial}),false);
+});
+test('shared observer components render supplied calculator values and strip executable controls',()=>{
+ const p=structuredClone(view.calculator);p.display='73';p.status='<img src=x onerror=alert(1)>';
+ const html=WorksheetComponents.readOnly(WorksheetComponents.calculator(p)+WorksheetComponents.workspace({done:0,total:4,complete:false}));
+ assert.match(html,/>73<\/output>/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img| onclick=/);assert.match(html,/button disabled aria-disabled="true"/);
+ const small=WorksheetComponents.layout({rows:2,cols:4,available:390,byWidth:90});assert.ok(small.cell>=44&&small.height<=390);
+});

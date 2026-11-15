@@ -8,12 +8,14 @@ function worksheetAvailableDigits(context){
  return [{part:'tens',value:Math.floor(value/10),placed:state.tensPlaced&&state.tensLocation!=='row'},{part:'ones',value:value%10,placed:state.onesPlaced}]
   .filter(item=>!(item.part==='tens'&&!item.value)&&!(used.length?used.includes(item.part):item.placed));
 }
-function worksheetDigitTrayMarkup(context){
+function worksheetDigitTrayView(context){
  const state=context.state;
  const digits=worksheetAvailableDigits(context);
  if(state.carryArmed||worksheetTraySelection&&!digits.some(d=>d.part===worksheetTraySelection.part&&d.value===worksheetTraySelection.value&&worksheetTraySelection.key===context.key))worksheetTraySelection=null;
- return `<div class="worksheet-digit-tray" role="group" aria-label="Answer digits">${!state.mixed&&state.incoming?`<button class="carry-source illustrated-worksheet-button ${state.carryArmed?'is-selected':''}" onclick="armCalculatorCarry()">+${state.incoming} waiting carry</button>`:''}<span>${state.onesPlaced&&!state.mixed?'Add the waiting carry':'Place the digits'}</span><div>${digits.map(d=>`<button class="illustrated-worksheet-button answer-digit ${worksheetTraySelection?.part===d.part?'is-selected':''} ${d.part==='ones'&&!state.mixed?'carry-target':''}" ${d.part==='ones'&&!state.mixed?'id="carryResultTarget"':''} data-answer-digit="${d.part}" data-digit-value="${d.value}" aria-label="Place digit ${d.value}" aria-pressed="${worksheetTraySelection?.part===d.part}">${d.value}</button>`).join('')}</div>${g.tutorialArrows&&g.completed===0&&state.done===0?`<small class="digit-drag-demo" data-demo-digit="${digits.at(-1)?.value??''}" aria-hidden="true">← Drag to the worksheet</small>`:''}</div>`;
+ return {waiting:!state.mixed?state.incoming:0,armed:!!state.carryArmed,label:state.onesPlaced&&!state.mixed?'Add the waiting carry':'Place the digits',digits:digits.map(({part,value})=>({part,value})),selected:worksheetTraySelection?.part||null,demo:!!(g.tutorialArrows&&g.completed===0&&state.done===0),demoDigit:String(digits.at(-1)?.value??'')};
 }
+function worksheetDigitTrayMarkup(context){return WorksheetComponents.tray(worksheetDigitTrayView(context))}
+
 function armCalculatorCarry(){const c=currentWorksheetCalculation();if(c&&!c.state.mixed)sendEngine('arm-carry',{attemptId:g.run.worksheetRewards.attemptId})}
 function resolveCalculatorCarry(){const c=currentWorksheetCalculation();if(c?.state.carryArmed)sendEngine('resolve-carry',{attemptId:g.run.worksheetRewards.attemptId,row:c.step.row,col:c.step.col})}
 function handleWorksheetPlacementTarget(message){

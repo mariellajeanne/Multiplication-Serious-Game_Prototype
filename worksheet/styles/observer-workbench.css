@@ -1,0 +1,10 @@
+html,body{margin:0;background:transparent;min-height:100%;overflow:hidden}
+body{position:fixed;inset:0;padding:6px;box-sizing:border-box}
+#observedWorkbench{position:absolute;left:50%;top:6px;transform:translateX(-50%);transform-origin:top center;grid-template-areas:"order order" "sheet calculator" "footer footer";width:max-content;max-width:calc(100% - 12px);min-width:0}
+#observedWorkbench .worksheet-frame{height:400px}
+#observedWorkbench button:disabled{opacity:1;filter:none;cursor:default}
+#observedWorkbench button[aria-disabled="true"]{cursor:default}
+#observedWorkbench .worksheet-header-actions{font-size:12px;white-space:nowrap}
+#observedWorkbench .worksheet-left{opacity:1}
+#observedWorkbench button[data-inactive]{opacity:.42;filter:saturate(.45)}
+@media(max-width:800px){#observedWorkbench{grid-template-columns:minmax(300px,1fr) 240px;--bench-gap:12px}#observedWorkbench .worksheet-complete-bar>#collectRewards{width:180px}}

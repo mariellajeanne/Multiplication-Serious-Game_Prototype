@@ -51,7 +51,7 @@ liftTens=function(...args){if(s&&s.phase==='product'&&!busy&&(!worksheetExternal
 const baseAddCarry=addCarry;
 addCarry=function(target){if(s&&s.phase==='product'&&!busy&&!s.mixed&&s.incoming&&((target==='placed'&&s.onesPlaced)||(target==='floating'&&!s.onesPlaced))) bridgeMetrics.carryDown++;return baseAddCarry(target)};
 function bridgeStats(){return {cycles:bridgeMetrics.cycles,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,errors:bridgeMetrics.errors,lookup:0,recall:0,tempo:1};}
-let lastReport='',lastHeight=0,lastReadyReport=0,observerMounted=false;
+let lastReport='',lastHeight=0,lastReadyReport=0,observerMounted=false,observerVersion=0;
 function worksheetSurface(){
  if(!window.innerWidth||!window.innerHeight)return null;
  const rect=el=>{if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left/window.innerWidth,y:r.top/window.innerHeight,w:r.width/window.innerWidth,h:r.height/window.innerHeight}};
@@ -83,7 +83,10 @@ function bridgePoll(){
  if(s.row!==bridgeMetrics.lastRow){bridgeMetrics.currentCombo=0;bridgeMetrics.lastRow=s.row;}
  const stage=s.phase==='select'?'connect':s.phase==='product'?(s.revealed?(s.onesPlaced?(s.incoming&&!s.mixed?'applyCarry':(tens()>0&&(!s.tensPlaced||s.tensLocation==='row')?'liftCarry':'rowFinish')):'place'):'fact'):s.phase==='sum'?'addDigit':s.phase==='complete'?'result':s.phase;
  const completion={complete:s.complete===true,ticket:window.__ACTIVE_WORKSHEET_TICKET||{id:'none'},top:s.a,bottom:s.b};
- const dat={session:window.getWorksheetSession(),...completion,surface:worksheetSurface(),actions:[...worksheetActions.values()],step:stage,combo:bridgeMetrics.currentCombo,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,row:s.row,done:s.done,phase:s.phase,factLookups:s.done+(s.phase==='product'&&s.revealed?1:0),factRecalls:s.done,hadOld:!!s.incoming,errors:bridgeMetrics.errors};
+ const entry=typeof worksheetDigitEntry==='undefined'?{}:worksheetDigitEntry;
+ const hintTargets=Array.from(document.querySelectorAll('.entry-hint')).map(el=>el.hasAttribute('data-carry')?{kind:'carry',c:Number(el.dataset.carry)}:el.hasAttribute('data-slot')?{kind:'slot',r:Number(el.dataset.slot.split(':')[0]),c:Number(el.dataset.slot.split(':')[1])}:null).filter(Boolean).slice(0,2);
+ const visual={selected:entry.selected||null,value:entry.value||'',feedback:entry.feedback||'',level:entry.level||0,hintTargets};
+ const dat={session:window.getWorksheetSession(),visual,...completion,surface:worksheetSurface(),actions:[...worksheetActions.values()],step:stage,combo:bridgeMetrics.currentCombo,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,row:s.row,done:s.done,phase:s.phase,factLookups:s.done+(s.phase==='product'&&s.revealed?1:0),factRecalls:s.done,hadOld:!!s.incoming,errors:bridgeMetrics.errors};
  const signature=JSON.stringify({...dat,session:{...dat.session,metrics:undefined}});
  if(signature!==lastReport){lastReport=signature;report('state',dat)}
  if(s.complete&&!bridgeMetrics.completionAck&&(!bridgeMetrics.sent||performance.now()-bridgeMetrics.lastCompleteReport>=500)){
@@ -120,13 +123,19 @@ window.addEventListener('message',event=>{
  const m=event.data;if(event.source!==window.parent||(typeof location!=='undefined'&&event.origin!==location.origin)||!m||m.source!=='bc-shell')return;
  if(typeof worksheetReadOnly!=='undefined'&&worksheetReadOnly){
   if(m.type==='hello')report('observer-ready');
-  if(m.type==='observe'&&CoBakerWorksheet.validState(m.snapshot?.state)){
+  if(m.type==='observe'&&CoBakerWorksheet.validSnapshot(m.snapshot)){
+   if(Number.isSafeInteger(m.renderVersion)&&m.renderVersion<observerVersion)return;
+   observerVersion=m.renderVersion||0;
    observerMounted=true;
-   run++;multiplySerial++;multiplyRunning=false;clearMultiplyFx();busy=false;history=[];sound=false;tutorial=false;worksheetExternalCalculator=false;
+   run++;multiplySerial++;multiplyRunning=false;clearMultiplyFx();busy=false;history=[];sound=false;
+   const view=m.snapshot.presentation;
+   tutorial=view?.tutorial||false;worksheetExternalCalculator=!!view;worksheetChallengeInput=!!view?.calculator.manual;document.body.classList.toggle('external-calculator',!!view);
+   if(view){worksheetDigitEntry={...cloneWorksheetState(view.entry),step:null,guidance:{},paths:{}};document.body.dataset.focusPhase=view.phase;document.body.dataset.guideLevel=String(view.guideLevel)}
    s=cloneWorksheetState(m.snapshot.state);selection=s.chosen;additionCollapsed=s.complete;
    document.body.dataset.rows=String(s.B.length);document.body.classList.add('worksheet-observer');
-   render();applyWorksheetLayout({cell:64,gap:6});
+   render();applyWorksheetLayout(m.layout||{cell:64,gap:6});
    status(s.complete?'Order complete!':'Read-only · Watching the learner');
+   report('observer-applied',{renderVersion:observerVersion});
   }
   return;
  }
