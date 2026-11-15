@@ -1,0 +1,1 @@
+{"name":"my-panaderya-dev-tools","private":true,"scripts":{"dev:cobaker":"node tools/co-baker-dev.mjs","test":"node --test tests/*.test.mjs"},"engines":{"node":">=22"},"devDependencies":{"ws":"8.23.0"}}

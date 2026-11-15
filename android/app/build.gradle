@@ -1,0 +1,20 @@
+plugins { id 'com.android.application' }
+android {
+    namespace 'com.mypanaderya.game'
+    compileSdk 35
+    defaultConfig { applicationId 'com.mypanaderya.game'; minSdk 26; targetSdk 35; versionCode 1; versionName '1.0-phase1a' }
+    buildFeatures { buildConfig true }
+    compileOptions { sourceCompatibility JavaVersion.VERSION_17; targetCompatibility JavaVersion.VERSION_17 }
+    sourceSets.main.assets.srcDir layout.buildDirectory.dir('game-assets')
+}
+// Package the production files directly. No second game or web build required.
+tasks.register('stageGame', Sync) {
+    from('../..') { include 'index.html', 'src/**', 'styles/**', 'assets/**', 'worksheet/**'; exclude '**/README.md' }
+    into layout.buildDirectory.dir('game-assets/game')
+}
+tasks.named('preBuild').configure { dependsOn 'stageGame' }
+dependencies {
+    implementation 'androidx.webkit:webkit:1.12.1'
+    testImplementation 'junit:junit:4.13.2'
+    testImplementation 'org.json:json:20240303'
+}
