@@ -29,6 +29,8 @@
   if(debug){const button=document.createElement('button');button.className='secondary';button.textContent='Co-Baker network test';button.onclick=openTest;body.querySelector('details')?.append(button)}
  };
  function paint(){const panel=document.getElementById('coBakerTest');if(!panel)return;const expanded=[...panel.querySelectorAll('details')].map(d=>d.open),focused=document.activeElement?.dataset?.peer;const peers=service?[...service.peers.values()].sort((a,b)=>a.id.localeCompare(b.id)):[];
+  const remoteStatus=document.getElementById('coBakerRemoteStatus');
+  if(remoteStatus&&!remoteStatus.dataset.validationError)remoteStatus.textContent=service?.error||(transport?.phase==='ready'?'Registered with remote relay'+(peers.length?` · ${peers.length} nearby Bakers.`:'. Waiting for other Bakers in this test group.'):transport?.active?'Connecting to remote test Bakers…':'');
   panel.innerHTML=`<h3>This Player</h3><p>${escape(profile?.name||'Unavailable')} #${profile?.number||'----'}</p><p role="status">${escape(service?.status||'unavailable')}${service?.status==='searching'&&!peers.length?' · No players found':''}</p><p>${escape(service?.error||'')}</p><h3>Nearby Bakers · ${peers.length}</h3><div class="co-baker-peers">${peers.map((p,i)=>`<div><span>${escape(p.name)} #${p.number}${peers.some(q=>q.id!==p.id&&q.name===p.name&&q.number===p.number)?` · nearby ${i+1}`:''}<small>${service?.help?.state(p.id).status||p.status}</small></span><button class="secondary" data-peer="${p.id}">Send test</button></div>`).join('')}</div><h3>Test messages</h3><ul>${(service?.messages||[]).map(m=>`<li>${escape(m.label)}: ${m.text}</li>`).join('')}</ul><details><summary>Debug identity</summary><code>${profile?.id||'Unavailable'}</code><p>Display identities are unverified. No game data is shared.</p></details>`;
   const c=service?.coordinator?.snapshot();
   if(c){const section=document.createElement('section');section.id='coBakerCoordinator';section.dataset.leader=c.leader?.id||'';section.dataset.role=c.role;section.dataset.status=c.status;section.dataset.term=String(c.term);
@@ -61,8 +63,10 @@
     try{
      const config=transport.configure({url:form.querySelector('#coBakerRelayUrl').value,group:form.querySelector('#coBakerTestGroup').value,passphrase:form.querySelector('#coBakerTestPassword').value});
      try{sessionStorage.setItem('coBakerRemoteTestSettings',JSON.stringify(config))}catch(_){}
-     service?.stop();service?.start();status.textContent='Connecting to remote test Bakers…';
-    }catch(error){status.textContent=String(error.message||error)}
+     delete status.dataset.validationError;
+     if(service?.running&&transport.active&&!transport.configChanged){paint();return}
+     service?.stop();service?.start();paint();
+    }catch(error){status.dataset.validationError='true';status.textContent=String(error.message||error)}
    });
   }
   paint();
@@ -83,7 +87,7 @@
   const peers=[...window.panaderyaCoBaker.peers.values()].sort((a,b)=>a.name.localeCompare(b.name)||a.number.localeCompare(b.number));
   const filtered=peers.filter(p=>(p.name+' '+p.number).toLowerCase().includes(search.toLowerCase()));
   const active=help.active,request=help.outgoing;
-  const markup=active?`<div class="cobaker-help-connection"><strong>Connected with ${escape(name(active.otherId))}</strong><p>Worksheet sharing will be available in the next phase. You can keep solving your order.</p><button class="secondary" data-help-action="end">End help</button></div>`:
+  const markup=active?`<div class="cobaker-help-connection"><strong>Connected with ${escape(name(active.otherId))}</strong><p>Your helper can watch this worksheet read-only. Keep solving your order.</p><button class="secondary" data-help-action="end">End help</button></div>`:
    request?`<div class="cobaker-help-connection"><strong>Calling nearby Bakers…</strong><p>${request.declined.size} declined · ${Math.max(0,request.recipients.size-request.declined.size)} awaiting responses</p><button class="secondary" data-help-action="cancel">Cancel request</button></div>`:
    `<button class="primary cobaker-call-all" data-help-action="all" ${!peers.some(p=>help.eligible(p.id))?'disabled':''}>📣 Call All</button>
    <p class="cobaker-help-subtitle">Ask an available Baker for help with this order!</p>
@@ -102,9 +106,10 @@
   const invitations=[...help.incoming.values()].filter(invite=>invite.expiresAt>Date.now()&&!help.active);
   const currently=help.accepting;
   const active=help.active;
-  holder.innerHTML=(currently?`<div class="cobaker-invite"><strong>Waiting for ${escape(name(currently.ownerId))}…</strong><small>You can continue playing.</small></div>`:'')+
-   (active?`<div class="cobaker-invite"><strong>Co-Baker: ${escape(name(active.otherId))}</strong><small>${active.lostAt?'Reconnecting…':active.role==='Helper'?'Connected as helper · Worksheet sharing coming soon':'Connected · Keep practicing!'}</small><button data-help-end="1">End help</button></div>`:'')+
+  const markup=(currently?`<div class="cobaker-invite"><strong>Waiting for ${escape(name(currently.ownerId))}…</strong><small>You can continue playing.</small></div>`:'')+
+   (active?`<div class="cobaker-invite"><strong>Co-Baker: ${escape(name(active.otherId))}</strong><small>${active.lostAt?'Reconnecting…':active.role==='Helper'?'Connected as helper · Read-only worksheet':'Connected · Keep practicing!'}</small>${active.role==='Helper'?'<button data-help-watch="1">Watch worksheet</button>':''}<button data-help-end="1">End help</button></div>`:'')+
    invitations.slice(0,3).map(i=>`<div class="cobaker-invite"><strong>${escape(name(i.ownerId))} needs help!</strong><div class="cobaker-invite-actions"><button data-help-accept="${i.requestId}" ${currently||help.isBusy()?'disabled':''}>Help</button><button data-help-decline="${i.requestId}" class="secondary">Not Now</button></div></div>`).join('');
+  if(holder.coBakerMarkup!==markup){holder.coBakerMarkup=markup;holder.innerHTML=markup}
   holder.hidden=!holder.childElementCount;
  }
  function open(){if(!get()||!sheetActive())return;
@@ -117,6 +122,7 @@
   if(target.dataset.helpAction==='all'){const outcome=help.request([...window.panaderyaCoBaker.peers.keys()]);if(!outcome.ok)help.note(outcome.error)}
   if(target.dataset.helpAction==='cancel')help.cancel();
   if(target.dataset.helpAction==='end'||target.dataset.helpEnd)help.end();
+  if(target.dataset.helpWatch)window.openCoBakerObservation?.();
   if(target.dataset.helpAccept)help.accept(target.dataset.helpAccept);
   if(target.dataset.helpDecline)help.decline(target.dataset.helpDecline);
   renderHelp();notices();
@@ -134,5 +140,5 @@
  const existingHeader=document.querySelector('.worksheet-modern .worksheet-header-actions');
  if(existingHeader&&!existingHeader.querySelector('.cobaker-help-button'))existingHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" onclick="openCoBakerHelp()">Call for Help</button>');
  const current=window.panaderyaCoBaker;
- if(current?.help){current.help.worksheet=sheetActive;current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
+ if(current?.help){current.help.worksheet=()=>sheetActive()||!!(current.help.active?.role==='Learner'&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
 })();

@@ -27,6 +27,11 @@
   peer(id){
    const session=this.d.peers.get(id)?.session;
    if(this.active?.otherId===id&&this.active.otherSession&&session!==this.active.otherSession){
+    // A refreshed observer must prove its old reservation before sharing resumes.
+    if(this.d.observation&&this.active.role==='Learner'){
+     if(!this.active.lostAt)this.active.lostAt=this.clock();
+     this.changed();return;
+    }
     this.active=null;this.note('Co-Baker restarted. The previous help session ended safely.');
    }
    this.presence.delete(id);this.send(id,{kind:'presence',available:this.available,busy:this.isBusy()});if(this.active?.otherId===id){this.active.lostAt=0}this.changed()}
@@ -70,7 +75,7 @@
     if(this.incoming.has(h.requestId)||this.incoming.size>=MAX_INVITES)return;
     this.incoming.set(h.requestId,{requestId:h.requestId,ownerId:id,expiresAt:h.expiresAt});this.note(`${m.player.name} #${m.player.number} needs help!`);return;
    }
-   if(h.kind==='cancel'){const invite=this.incoming.get(h.requestId);if(invite?.ownerId===id){this.incoming.delete(h.requestId);if(this.accepting?.requestId===h.requestId)this.accepting=null;this.broadcastPresence();this.changed()}return}
+   if(h.kind==='cancel'){const invite=this.incoming.get(h.requestId);if(invite?.ownerId===id||this.accepting?.requestId===h.requestId&&this.accepting.ownerId===id){this.incoming.delete(h.requestId);if(this.accepting?.requestId===h.requestId)this.accepting=null;this.broadcastPresence();this.changed()}return}
    if(h.kind==='unavailable'){
     const invite=this.incoming.get(h.requestId);
     if(invite?.ownerId===id||this.accepting?.requestId===h.requestId&&this.accepting.ownerId===id){this.incoming.delete(h.requestId);
@@ -84,7 +89,7 @@
    }
    if(h.kind==='accept'){
     const o=this.outgoing;
-    if(!o||o.requestId!==h.requestId||o.expiresAt<=now||!this.activeWorksheet()||!o.recipients.has(id)||this.active){this.send(id,{kind:'unavailable',requestId:h.requestId,reason:o?.expiresAt<=now?'expired':'taken'});return}
+    if(!o||o.requestId!==h.requestId||o.expiresAt<=now||!this.activeWorksheet()||!o.recipients.has(id)||o.declined.has(id)||this.active){this.send(id,{kind:'unavailable',requestId:h.requestId,reason:o?.expiresAt<=now?'expired':'taken'});return}
     // Owner serializes acceptances. Only the learner can make the helper lock definitive.
     const sessionId=makeId(),targets=[...o.recipients];this.outgoing=null;
     this.active={sessionId,requestId:h.requestId,otherId:id,otherSession:this.d.peers.get(id)?.session,role:'Learner',lostAt:0};
@@ -93,8 +98,11 @@
     this.broadcastPresence();this.note(`${m.player.name} #${m.player.number} is helping!`);return;
    }
    if(h.kind==='assigned'){
-    if(h.helperId!==this.d.profile.id||this.active)return;
-    if(!this.accepting||this.accepting.requestId!==h.requestId||this.accepting.ownerId!==id||this.accepting.expiresAt<=now)return;
+    if(h.helperId!==this.d.profile.id)return;
+    if(this.active?.otherId===id&&this.active.sessionId===h.sessionId)return;
+    // Release the owner's lock when confirmation arrives after our wait ended.
+    // An end for an old session cannot affect a newer reservation.
+    if(this.active||!this.accepting||this.accepting.requestId!==h.requestId||this.accepting.ownerId!==id||this.accepting.expiresAt<=now){this.send(id,{kind:'end',sessionId:h.sessionId});return}
     this.accepting=null;this.incoming.delete(h.requestId);
     this.active={sessionId:h.sessionId,requestId:h.requestId,otherId:id,otherSession:m.session,role:'Helper',lostAt:0};
     this.broadcastPresence();this.note(`Connected with ${m.player.name} #${m.player.number}!`);return;

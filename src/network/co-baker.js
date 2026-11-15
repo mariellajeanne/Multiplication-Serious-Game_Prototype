@@ -1,4 +1,4 @@
-/* Co-Baker identity, discovery and coordinator protocol. No game/economy/worksheet state crosses this boundary. */
+/* Co-Baker identity, discovery and coordinator envelopes. Read-only worksheet payloads use the bounded observation schema; saves/economy never cross this boundary. */
 (function(root){
  'use strict';
  const KEY='panaderyaPlayerV1',ID=/^[a-f0-9]{32}$/;
@@ -20,6 +20,7 @@
    (c.leader===null||keys(c.leader,['id','session','term'])&&typeof c.leader.id==='string'&&ID.test(c.leader.id)&&typeof c.leader.session==='string'&&ID.test(c.leader.session)&&validTerm(c.leader.term)&&c.leader.term>0&&c.leader.term<=c.term);
  }
  function validHelp(h){
+  if(h?.kind==='watch'||h?.kind==='worksheet')return !!root.CoBakerWorksheet?.validMessage(h);
   if(!keys(h,['kind','available','busy','requestId','expiresAt','sessionId','helperId','reason']))return false;
   if(h.kind==='presence')return keys(h,['kind','available','busy'])&&typeof h.available==='boolean'&&typeof h.busy==='boolean';
   if(!['invite','accept','decline','cancel','assigned','unavailable','end'].includes(h.kind))return false;
@@ -34,21 +35,23 @@
   (m.type==='reply'?typeof m.replyTo==='string'&&ID.test(m.replyTo):!('replyTo'in m))&&(m.type==='coord'?validCoord(m.coord):!('coord'in m))&&(m.type==='help'?validHelp(m.help):!('help'in m))}
 
  class Discovery{
-  constructor(profile,transport,now=()=>root.performance?.now()??Date.now()){this.profile=profile;this.transport=transport;this.now=now;this.session=randomId();this.peers=new Map();this.seen=new Set();this.pending=new Map();this.messages=[];this.listeners=new Set();this.status='disconnected';this.error='';this.running=false;this.coordinator=root.CoBakerCoordinator?new root.CoBakerCoordinator(this):null;this.help=root.CoBakerHelp?new root.CoBakerHelp(this):null}
+  constructor(profile,transport,now=()=>root.performance?.now()??Date.now()){this.profile=profile;this.transport=transport;this.now=now;this.session=randomId();this.peers=new Map();this.seen=new Set();this.retiredSessions=new Set();this.pending=new Map();this.messages=[];this.listeners=new Set();this.status='disconnected';this.error='';this.running=false;this.coordinator=root.CoBakerCoordinator?new root.CoBakerCoordinator(this):null;this.help=root.CoBakerHelp?new root.CoBakerHelp(this):null}
   observe(fn){this.listeners.add(fn);fn(this);return ()=>this.listeners.delete(fn)}
   changed(){for(const fn of this.listeners)fn(this)}
   async start(){if(this.running)return;this.running=true;this.session=randomId();this.seen.clear();this.status=this.transport?'searching':'unavailable';this.error=this.transport?'':'LAN discovery requires the native Android app. Browsers cannot advertise or listen for LAN peers.';this.changed();if(this.transport)try{await this.transport.start(packet(this.profile,this.session,'hello'))}catch(e){this.running=false;this.coordinator?.offline();this.help?.offline();this.status='unavailable';this.error=String(e.message||e);this.changed()}}
-  stop(){this.running=false;this.coordinator?.offline();this.help?.offline();try{this.transport?.stop()}catch(_){}this.peers.clear();this.pending.clear();this.status='disconnected';this.changed()}
+  stop(){this.running=false;this.coordinator?.offline();this.help?.offline();try{this.transport?.stop()}catch(_){}this.peers.clear();this.pending.clear();this.status='disconnected';this.error='';this.changed()}
   receive(event){
    if(!this.running)return;
    if(event.kind==='status'){this.status=['searching','unavailable','disconnected'].includes(event.status)?event.status:'searching';this.error=String(event.error||'').slice(0,240);if(this.status!=='searching'){this.peers.clear();this.pending.clear();this.coordinator?.offline();this.help?.offline()}else {this.coordinator?.online();this.help?.online()};this.changed();return}
    if(event.kind==='left'){this.peers.delete(event.playerId);this.coordinator?.left(event.playerId);this.help?.left(event.playerId);if(this.status==='connected'&&!this.peers.size)this.status='searching';this.changed();return}
-   const m=event.message;if(event.kind!=='message'||!validPacket(m)||m.player.id===this.profile.id||this.seen.has(m.id)||!this.peers.has(m.player.id)&&this.peers.size>=128)return;
+   const m=event.message;if(event.kind!=='message'||!validPacket(m)||m.player.id===this.profile.id||this.seen.has(m.id)||this.retiredSessions.has(m.player.id+':'+m.session)||!this.peers.has(m.player.id)&&this.peers.size>=128)return;
    this.seen.add(m.id);if(this.seen.size>512)this.seen.delete(this.seen.values().next().value);
-   const isNew=!this.peers.has(m.player.id);
-   this.peers.set(m.player.id,{...m.player,session:m.session,lastSeen:this.now(),status:'Connected'});this.status='connected';
-   if(isNew){this.coordinator?.peer(m.player.id);this.help?.peer(m.player.id)}
-   if(m.type==='coord')this.coordinator?.receive(m);if(m.type==='help')this.help?.receive(m);
+   const previous=this.peers.get(m.player.id),isNew=!previous,sessionChanged=previous&&previous.session!==m.session;
+   // Tab takeover/refresh can replace a session without a player-left event.
+   if(sessionChanged){this.retiredSessions.add(m.player.id+':'+previous.session);if(this.retiredSessions.size>512)this.retiredSessions.delete(this.retiredSessions.values().next().value);this.coordinator?.left(m.player.id);this.help?.left(m.player.id);for(const [key,id]of this.pending)if(id===m.player.id)this.pending.delete(key)}
+   this.peers.set(m.player.id,{...m.player,session:m.session,lastSeen:this.now(),status:'Connected'});this.status='connected';this.error='';
+   if(isNew||sessionChanged){this.coordinator?.peer(m.player.id);this.help?.peer(m.player.id)}
+   if(m.type==='coord')this.coordinator?.receive(m);if(m.type==='help'){if(m.help.kind==='watch'||m.help.kind==='worksheet')this.observation?.receive(m);else this.help?.receive(m);}
    if(m.type==='test'||m.type==='reply'&&this.pending.get(m.replyTo)===m.player.id){this.messages.unshift({from:m.player.id,label:m.player.name+' #'+m.player.number,text:m.type==='test'?'Test received':'Response received'});this.messages.length=Math.min(30,this.messages.length);if(m.type==='reply')this.pending.delete(m.replyTo)}
    this.changed();
   }

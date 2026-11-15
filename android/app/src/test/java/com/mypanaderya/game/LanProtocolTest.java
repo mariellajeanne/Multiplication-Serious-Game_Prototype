@@ -48,7 +48,17 @@ public class LanProtocolTest {
     }
     @Test public void rejectsBadRepliesAndOversizedFrames() throws Exception {
         rejects(hello().put("type","reply"));rejects(hello().put("replyTo","bad"));
-        try{parse(" ".repeat(2049));fail("Oversized frame accepted");}catch(JSONException expected){}
+        try{parse(" ".repeat(8193));fail("Oversized frame accepted");}catch(JSONException expected){}
+    }
+    @Test public void observationUsesBoundedDataOnlyHelpMessages() throws Exception {
+        JSONObject h=new JSONObject().put("kind","watch").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32));
+        JSONObject m=hello().put("type","help").put("help",h);parse(m.toString());
+        h.put("previousSession","f".repeat(32));parse(m.toString());h.put("command","undo");rejects(m);h.remove("command");
+        h.put("kind","worksheet").remove("previousSession");h.put("version",1);
+        JSONObject state=new JSONObject("{\"a\":79,\"b\":18,\"A\":[9,7],\"B\":[8,1],\"cols\":4,\"row\":0,\"k\":0,\"first\":null,\"phase\":\"select\",\"revealed\":false,\"raw\":0,\"mixed\":false,\"incoming\":0,\"onesPlaced\":false,\"tensPlaced\":false,\"tensLocation\":null,\"chosen\":null,\"carrySlots\":{},\"rows\":[{},{\"0\":0}],\"sum\":{},\"sumCol\":0,\"sumCarry\":0,\"done\":0,\"boxes\":0,\"complete\":false,\"carryArmed\":false}");
+        h.put("snapshot",new JSONObject().put("schema",1).put("state",state));parse(m.toString());
+        state.put("coins",10);rejects(m);state.remove("coins");state.put("phase","<script>");rejects(m);
+        state.put("phase","select");h.put("version",0);rejects(m);h.put("version","1");rejects(m);
     }
     private String readFrame(byte[] bytes) throws Exception {
         try(ServerSocket server=new ServerSocket(0,1,InetAddress.getLoopbackAddress());
@@ -63,7 +73,7 @@ public class LanProtocolTest {
         String message=hello().toString();assertEquals(message,readFrame((message+"\n").getBytes(StandardCharsets.UTF_8)));
     }
     @Test public void rejectsTruncatedOversizedAndInvalidUtf8TcpFrames() throws Exception {
-        for(byte[] bytes:new byte[][]{"no newline".getBytes(StandardCharsets.UTF_8),("x".repeat(2049)+"\n").getBytes(StandardCharsets.UTF_8),new byte[]{(byte)0xc3,0x28,0x0a}}){
+        for(byte[] bytes:new byte[][]{"no newline".getBytes(StandardCharsets.UTF_8),("x".repeat(8193)+"\n").getBytes(StandardCharsets.UTF_8),new byte[]{(byte)0xc3,0x28,0x0a}}){
             try{readFrame(bytes);fail("Malformed frame accepted");}catch(IOException expected){}
         }
     }

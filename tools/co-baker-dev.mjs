@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 import {networkInterfaces} from 'node:os';
 import {randomBytes} from 'node:crypto';
 import {WebSocketServer} from 'ws';
+import '../src/network/worksheet-observation.js';
 import '../src/network/co-baker.js';
 const core=globalThis.CoBakerCore;
 export async function startDevServer({port=5500,host='0.0.0.0'}={}){
@@ -24,7 +25,7 @@ export async function startDevServer({port=5500,host='0.0.0.0'}={}){
    const body=await readFile(file);res.setHeader('Content-Type',mime[path.extname(file)]||'application/octet-stream');res.end(req.method==='HEAD'?undefined:body);
   }catch(_){res.writeHead(404).end('Not found')}
  });
- const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:false});
+ const wss=new WebSocketServer({noServer:true,maxPayload:8192,perMessageDeflate:false});
  server.on('upgrade',(req,socket,head)=>{
   const url=new URL(req.url,'http://local');if(!hosts.has(req.headers.host)||req.headers.origin!==`http://${req.headers.host}`||url.pathname!=='/__co-baker/socket'||url.searchParams.get('token')!==token){socket.destroy();return}
   if(wss.clients.size>=128){socket.destroy();return}wss.handleUpgrade(req,socket,head,ws=>wss.emit('connection',ws));

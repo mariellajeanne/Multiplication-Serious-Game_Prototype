@@ -15,7 +15,7 @@ function network(){
   d=new api.Discovery(player,transport,()=>now);d.help.clock=()=>now;d.help.storage=storage;d.help.worksheet=()=>!!d.isOnWorksheet;d.isOnWorksheet=false;d.start();return d;
  }
  function advance(ms){now+=ms;for(const d of connected.values())d.help.tick();flush()}
- return {join,flush,advance,connected,now:()=>now,id};
+ return {join,flush,advance,connected,queue,now:()=>now,id};
 }
 test('strict help protocol rejects malformed and unknown payloads',()=>{
  const p={id:'a'.repeat(32),name:'Baker',number:'0123'},m=api.packet(p,'b'.repeat(32),'help');
@@ -64,4 +64,64 @@ test('coordinator departure leaves direct helper reservation until helper leaves
  coordinator.stop();n.flush();assert.ok(a.help.active);assert.ok(b.help.active);
  b.stop();n.flush();assert.ok(a.help.active.lostAt);
  n.advance(15500);assert.equal(a.help.active,null);
+});
+
+test('same persistent player with a replacement session retires its old help reservation without left',()=>{
+ const n=network(),a=n.join(1),b=n.join(2);n.flush();a.isOnWorksheet=true;
+ a.help.request([b.profile.id]);n.flush();b.help.accept([...b.help.incoming.keys()][0]);n.flush();
+ assert.ok(a.help.active);
+ const old=b.session;b.session='e'.repeat(32);assert.notEqual(b.session,old);
+ a.receive({kind:'message',message:api.packet(b.profile,b.session,'hello')});
+ assert.equal(a.help.active,null);assert.equal(a.peers.get(b.profile.id).session,b.session);
+ assert.match(a.help.log[0].message,/restarted/);
+});
+
+test('cancel after helper accepts clears the pending confirmation immediately',()=>{
+ const n=network(),a=n.join(1),b=n.join(2);n.flush();a.isOnWorksheet=true;
+ const {requestId}=a.help.request([b.profile.id]);n.flush();
+ b.help.accept(requestId);a.help.cancel();
+ const cancel=n.queue.find(([,e])=>e.message?.help?.kind==='cancel')[1];b.receive(cancel);
+ assert.equal(b.help.accepting,null);assert.equal(b.help.status(),'Available');
+ n.flush();
+ assert.equal(a.help.active,null);
+});
+
+test('late assignment after confirmation timeout releases the learner reservation',()=>{
+ const n=network(),a=n.join(1),b=n.join(2);n.flush();a.isOnWorksheet=true;
+ const {requestId}=a.help.request([b.profile.id]);n.flush();b.help.accept(requestId);
+ const accept=n.queue.find(([,e])=>e.message?.help?.kind==='accept')[1];a.receive(accept);
+ const assigned=n.queue.find(([,e])=>e.message?.help?.kind==='assigned')[1];
+ b.help.clock=()=>n.now()+51000;b.help.tick();b.receive(assigned);n.flush();
+ assert.equal(b.help.active,null);assert.equal(a.help.active,null);
+});
+
+test('a helper that declined cannot win with a delayed acceptance',()=>{
+ const n=network(),a=n.join(1),b=n.join(2),c=n.join(3);n.flush();a.isOnWorksheet=true;
+ const {requestId}=a.help.request([b.profile.id,c.profile.id]);n.flush();b.help.decline(requestId);n.flush();
+ const m=api.packet(b.profile,b.session,'help');m.help={kind:'accept',requestId};a.receive({kind:'message',message:m});n.flush();
+ assert.equal(a.help.active,null);assert.ok(a.help.outgoing);
+});
+
+test('delayed packets from a replaced session cannot roll back the peer or end its new reservation',()=>{
+ const n=network(),a=n.join(1),b=n.join(2);n.flush();a.isOnWorksheet=true;
+ const old=b.session;b.session='e'.repeat(32);
+ a.receive({kind:'message',message:api.packet(b.profile,b.session,'hello')});
+ b.help.broadcastPresence();n.flush();a.help.request([b.profile.id]);n.flush();b.help.accept([...b.help.incoming.keys()][0]);n.flush();
+ const active=a.help.active;assert.ok(active);
+ a.receive({kind:'message',message:api.packet(b.profile,old,'hello')});
+ assert.equal(a.peers.get(b.profile.id).session,b.session);assert.equal(a.help.active,active);
+});
+
+test('replayed assignments and old session endings cannot release a current reservation',()=>{
+ const n=network(),a=n.join(1),b=n.join(2);n.flush();a.isOnWorksheet=true;
+ a.help.request([b.profile.id]);n.flush();b.help.accept([...b.help.incoming.keys()][0]);n.flush();
+ const current=b.help.active;
+ for(const sessionId of [current.sessionId,'f'.repeat(32)]){
+  const m=api.packet(a.profile,a.session,'help');
+  m.help={kind:'assigned',requestId:current.requestId,sessionId,helperId:b.profile.id};
+  b.receive({kind:'message',message:m});n.flush();
+  assert.equal(b.help.active,current);assert.equal(a.help.active.sessionId,current.sessionId);
+ }
+ a.isOnWorksheet=false;n.advance(1000);
+ assert.equal(a.help.active,null);assert.equal(b.help.active,null);
 });

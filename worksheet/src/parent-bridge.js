@@ -51,7 +51,7 @@ liftTens=function(...args){if(s&&s.phase==='product'&&!busy&&(!worksheetExternal
 const baseAddCarry=addCarry;
 addCarry=function(target){if(s&&s.phase==='product'&&!busy&&!s.mixed&&s.incoming&&((target==='placed'&&s.onesPlaced)||(target==='floating'&&!s.onesPlaced))) bridgeMetrics.carryDown++;return baseAddCarry(target)};
 function bridgeStats(){return {cycles:bridgeMetrics.cycles,bestCombo:bridgeMetrics.bestCombo,carryUp:bridgeMetrics.carryUp,carryDown:bridgeMetrics.carryDown,errors:bridgeMetrics.errors,lookup:0,recall:0,tempo:1};}
-let lastReport='',lastHeight=0,lastReadyReport=0;
+let lastReport='',lastHeight=0,lastReadyReport=0,observerMounted=false;
 function worksheetSurface(){
  if(!window.innerWidth||!window.innerHeight)return null;
  const rect=el=>{if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left/window.innerWidth,y:r.top/window.innerHeight,w:r.width/window.innerWidth,h:r.height/window.innerHeight}};
@@ -69,6 +69,7 @@ function applyWorksheetLayout(layout){
  render();lastHeight=0;bridgePoll();
 }
 function bridgePoll(){
+ if(typeof worksheetReadOnly!=='undefined'&&worksheetReadOnly){if(!observerMounted&&performance.now()-lastReadyReport>=400){lastReadyReport=performance.now();report('observer-ready')}return;}
  if(!s)return;
  // WebKit can deliver the first ready message during iframe WindowProxy setup.
  // Keep retrying until an authenticated start arrives, just like completion ACKs.
@@ -117,6 +118,18 @@ function externalStart(ticket,attemptId,forceRestart=false,session=null){
 }
 window.addEventListener('message',event=>{
  const m=event.data;if(event.source!==window.parent||(typeof location!=='undefined'&&event.origin!==location.origin)||!m||m.source!=='bc-shell')return;
+ if(typeof worksheetReadOnly!=='undefined'&&worksheetReadOnly){
+  if(m.type==='hello')report('observer-ready');
+  if(m.type==='observe'&&CoBakerWorksheet.validState(m.snapshot?.state)){
+   observerMounted=true;
+   run++;multiplySerial++;multiplyRunning=false;clearMultiplyFx();busy=false;history=[];sound=false;tutorial=false;worksheetExternalCalculator=false;
+   s=cloneWorksheetState(m.snapshot.state);selection=s.chosen;additionCollapsed=s.complete;
+   document.body.dataset.rows=String(s.B.length);document.body.classList.add('worksheet-observer');
+   render();applyWorksheetLayout({cell:64,gap:6});
+   status(s.complete?'Order complete!':'Read-only · Watching the learner');
+  }
+  return;
+ }
  if(m.type==='hello')report('ready');
  if(m.type==='start'){
   worksheetExternalCalculator=!!m.calculationPanel;document.body.classList.toggle('external-calculator',worksheetExternalCalculator);
@@ -142,7 +155,7 @@ window.addEventListener('message',event=>{
  if(m.type==='layout'&&s)applyWorksheetLayout(m);
  // Rewards are coins only; the shell owns accounting and presentation.
 });
-setTimeout(()=>report('ready'),0);
+setTimeout(()=>report(typeof worksheetReadOnly!=='undefined'&&worksheetReadOnly?'observer-ready':'ready'),0);
 window.addEventListener('keydown',event=>{
  if(event.ctrlKey||event.metaKey||event.altKey||!worksheetExternalCalculator||!productActive()||!/^\d$|^Enter$|^Backspace$/.test(event.key))return;
  if(event.key==='Enter'){

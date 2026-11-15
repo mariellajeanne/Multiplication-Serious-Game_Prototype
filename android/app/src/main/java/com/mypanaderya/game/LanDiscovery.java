@@ -149,7 +149,7 @@ public final class LanDiscovery {
         }catch(Exception e){if(expected!=null&&endpoint.generation==generation)try{emit.accept(new JSONObject().put("kind","left").put("playerId",expected).toString());}catch(JSONException ignored){}return null;}finally{sockets.remove(connection);}
     }
     private static String read(Socket s)throws IOException{
-        ByteArrayOutputStream bytes=new ByteArrayOutputStream();long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(3);int b;while((b=s.getInputStream().read())!=-1&&b!='\n'){if(bytes.size()>=2048||System.nanoTime()>deadline)throw new IOException("Message limit");bytes.write(b);}if(b!='\n')throw new IOException("Incomplete message");return StandardCharsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(bytes.toByteArray())).toString();
+        ByteArrayOutputStream bytes=new ByteArrayOutputStream();long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(3);int b;while((b=s.getInputStream().read())!=-1&&b!='\n'){if(bytes.size()>=8192||System.nanoTime()>deadline)throw new IOException("Message limit");bytes.write(b);}if(b!='\n')throw new IOException("Incomplete message");return StandardCharsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(bytes.toByteArray())).toString();
     }
     private static void write(Socket s,JSONObject m)throws IOException{s.getOutputStream().write((m.toString()+"\n").getBytes(StandardCharsets.UTF_8));s.getOutputStream().flush();}
     private static void onlyKeys(JSONObject value,String... allowed)throws JSONException{
@@ -169,9 +169,38 @@ public final class LanDiscovery {
         if(!c.has("leader"))throw new JSONException("Missing leader");
         if(!c.isNull("leader")){JSONObject leader=c.getJSONObject("leader");onlyKeys(leader,"id","session","term");id(leader,"id");id(leader,"session");long leaderTerm=term(leader,"term");if(leaderTerm==0||leaderTerm>epoch)throw new JSONException("Invalid leader term");}
     }
+    private static int worksheetInt(JSONObject s,String key,int max)throws JSONException{
+        Object n=s.opt(key);if(!(n instanceof Number)||s.getDouble(key)!=s.getInt(key)||s.getInt(key)<0||s.getInt(key)>max)throw new JSONException("Invalid worksheet number");return s.getInt(key);
+    }
+    private static void worksheetDigits(JSONObject v)throws JSONException{
+        if(v.length()>7)throw new JSONException("Too many digits");Iterator<String> it=v.keys();while(it.hasNext()){String k=it.next();if(!k.matches("[0-6]"))throw new JSONException("Invalid column");worksheetInt(v,k,9);}
+    }
+    private static void validateWorksheet(JSONObject s)throws JSONException{
+        String[] fields={"a","b","A","B","cols","row","k","first","phase","revealed","raw","mixed","incoming","onesPlaced","tensPlaced","tensLocation","chosen","carrySlots","rows","sum","sumCol","sumCarry","done","boxes","complete","carryArmed"};
+        onlyKeys(s,fields);for(String k:fields)if(!s.has(k))throw new JSONException("Missing worksheet field");
+        int a=worksheetInt(s,"a",99999),b=worksheetInt(s,"b",99);if(a<1||b<1)throw new JSONException("Invalid operands");
+        int al=String.valueOf(a).length(),bl=String.valueOf(b).length();
+        for(String key:Arrays.asList("A","B")){org.json.JSONArray arr=s.getJSONArray(key);String digits=new StringBuilder(String.valueOf(key.equals("A")?a:b)).reverse().toString();if(arr.length()!=digits.length())throw new JSONException("Invalid operand digits");for(int i=0;i<arr.length();i++)if(!(arr.opt(i) instanceof Number)||arr.getDouble(i)!=digits.charAt(i)-'0')throw new JSONException("Invalid operand digits");}
+        if(worksheetInt(s,"cols",7)!=String.valueOf(a*b).length())throw new JSONException("Invalid columns");
+        worksheetInt(s,"row",bl-1);int col=worksheetInt(s,"k",al);worksheetInt(s,"done",al*bl);worksheetInt(s,"boxes",10);worksheetInt(s,"raw",81);worksheetInt(s,"incoming",9);worksheetInt(s,"sumCol",7);worksheetInt(s,"sumCarry",9);
+        if(!Arrays.asList("select","product","sum","complete").contains(s.getString("phase"))||s.getString("phase").equals("product")&&col>=al)throw new JSONException("Invalid worksheet phase");
+        for(String k:Arrays.asList("revealed","mixed","onesPlaced","tensPlaced","complete","carryArmed"))if(!(s.opt(k) instanceof Boolean))throw new JSONException("Invalid worksheet flag");
+        if(!s.isNull("chosen")&&!Arrays.asList("ones","tens").contains(s.getString("chosen"))||!s.isNull("tensLocation")&&!Arrays.asList("row","carry").contains(s.getString("tensLocation")))throw new JSONException("Invalid selection");
+        if(!s.isNull("first")){JSONObject first=s.getJSONObject("first");onlyKeys(first,"kind","c");if(!Arrays.asList("top","bottom").contains(first.getString("kind")))throw new JSONException("Invalid operand");worksheetInt(first,"c",first.getString("kind").equals("top")?al-1:bl-1);}
+        org.json.JSONArray rows=s.getJSONArray("rows");if(rows.length()!=bl)throw new JSONException("Invalid rows");for(int i=0;i<rows.length();i++)worksheetDigits(rows.getJSONObject(i));worksheetDigits(s.getJSONObject("sum"));
+        JSONObject carries=s.getJSONObject("carrySlots");if(carries.length()>6)throw new JSONException("Invalid carries");Iterator<String> it=carries.keys();while(it.hasNext()){String k=it.next();if(!k.matches("[0-5]"))throw new JSONException("Invalid carry column");JSONObject carry=carries.getJSONObject(k);onlyKeys(carry,"value","provisional");worksheetInt(carry,"value",9);if(!(carry.opt("provisional") instanceof Boolean))throw new JSONException("Invalid carry");}
+    }
     private static void validateHelp(JSONObject h)throws JSONException{
         String kind=h.getString("kind");
         switch(kind){
+            case "watch":
+                onlyKeys(h,"kind","sessionId","streamId","previousSession");id(h,"sessionId");id(h,"streamId");if(h.has("previousSession"))id(h,"previousSession");return;
+            case "worksheet":
+                onlyKeys(h,"kind","sessionId","streamId","version","snapshot");id(h,"sessionId");id(h,"streamId");
+                if(!(h.opt("version") instanceof Number)||h.getDouble("version")!=h.getLong("version")||h.getLong("version")<1||h.getLong("version")>9007199254740991L)throw new JSONException("Invalid worksheet version");
+                JSONObject snapshot=h.getJSONObject("snapshot");onlyKeys(snapshot,"schema","state");
+                if(!(snapshot.opt("schema") instanceof Number)||snapshot.getDouble("schema")!=1)throw new JSONException("Invalid worksheet schema");
+                validateWorksheet(snapshot.getJSONObject("state"));return;
             case "presence":
                 onlyKeys(h,"kind","available","busy");
                 if(!(h.opt("available") instanceof Boolean)||!(h.opt("busy") instanceof Boolean))throw new JSONException("Invalid availability");
@@ -193,7 +222,7 @@ public final class LanDiscovery {
         }
     }
     private static JSONObject parse(String text)throws JSONException{
-        if(text==null||text.length()>2048)throw new JSONException("Message too large");JSONObject m=new JSONObject(text),p=m.getJSONObject("player");
+        if(text==null||text.length()>8192)throw new JSONException("Message too large");JSONObject m=new JSONObject(text),p=m.getJSONObject("player");
         Set<String> keys=new HashSet<>(Arrays.asList("v","id","session","player","type","replyTo","coord","help"));Iterator<String> it=m.keys();while(it.hasNext())if(!keys.contains(it.next()))throw new JSONException("Unknown field");
         for(String key:Arrays.asList("id","session","type"))if(!(m.opt(key) instanceof String))throw new JSONException("Invalid field type");
         for(String key:Arrays.asList("id","name","number"))if(!(p.opt(key) instanceof String))throw new JSONException("Invalid profile type");

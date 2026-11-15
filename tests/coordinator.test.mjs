@@ -28,6 +28,15 @@ test('coordinator departure elects remaining Bakers; returning old leader adopts
  a.stop();n.advance(7000);n.agree(b.profile.id);assert.ok(b.coordinator.snapshot().term>old);
  n.connect(1);n.advance(7000);n.agree(b.profile.id);
 });
+
+test('coordinator session replacement without player-left retires its old lease immediately',()=>{
+ const n=network(),a=n.connect(1),b=n.connect(2);n.advance(7000);n.agree(a.profile.id);
+ const old=a.session;a.coordinator.offline();a.session='f'.repeat(32);a.coordinator.online();
+ b.receive({kind:'message',message:core.packet(a.profile,a.session,'hello')});
+ assert.equal(b.coordinator.leader,null);assert.notEqual(a.session,old);
+ n.advance(10000);n.agree(a.profile.id);
+ assert.equal(b.coordinator.leader.session,a.session);
+});
 test('missing heartbeats become suspect, fail over without a transport-left event, and resume safely',()=>{
  const n=network(),a=n.connect(1),b=n.connect(2);n.advance(7000);n.agree(a.profile.id);
  n.suspended.add(a.profile.id);n.advance(7000);assert.equal(b.coordinator.snapshot().status,'Heartbeat delayed');

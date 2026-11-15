@@ -123,6 +123,8 @@ function handleWorksheetMessage(ev){
   if(m.bestCombo>r.bestStreak)r.bestStreak=m.bestCombo;
   r.bridgePrev={phase:m.phase,errors:Math.max(Number(old.errors||0),Number(m.errors||0))};
  }
+ // Observation is outbound only and is independent of the reward ledger.
+ window.panaderyaCoBaker?.observation?.publish(m.session);
  if(applyWorksheetActions(r,m.actions)===false)return;
  if(typeof paintWorksheetExperience==='function')paintWorksheetExperience();
  // A verified completed state is a second delivery path if the final event was lost.

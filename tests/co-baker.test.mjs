@@ -26,3 +26,12 @@ test('unavailable/failed networking cannot block the browser game',async()=>{
  const a=core(),p=a.identity(storage()),service=new a.Discovery(p,null);await service.start();assert.equal(service.status,'unavailable');assert.match(service.error,/Browsers/);
  const broken=new a.Discovery(p,{start(){throw Error('Wi-Fi unavailable')},stop(){}});await broken.start();assert.equal(broken.status,'unavailable');assert.equal(broken.running,false);
 });
+
+test('valid peer traffic clears stale send errors and stopping clears transport errors',async()=>{
+ const a=core(),p=a.identity(storage()),q=a.identity(storage());
+ const d=new a.Discovery(p,{start(){},stop(){},send(){throw Error('Temporary disconnect')}});
+ await d.start();d.receive({kind:'message',message:a.packet(q,'a'.repeat(32),'hello')});
+ d.sendTest(q.id);assert.equal(d.error,'Temporary disconnect');
+ d.receive({kind:'message',message:a.packet(q,'a'.repeat(32),'hello')});assert.equal(d.error,'');
+ d.error='old error';d.stop();assert.equal(d.error,'');
+});

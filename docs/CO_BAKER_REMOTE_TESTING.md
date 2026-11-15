@@ -7,7 +7,9 @@ This mode requires a current GitHub Pages deployment containing the patch. Ordin
 
 ## 1. Update and publish GitHub Pages
 
-Apply the patch, run `npm.cmd ci` and `npm.cmd test`, then commit/push the changes through your usual GitHub workflow. Confirm that GitHub Pages has deployed the updated `index.html`, new `src/network/remote-test-transport.js`, and the existing `src/ui/co-baker.js`. You do not need to publish the relay server code separately: it runs on your laptop.
+Apply the patch and run `npm.cmd test` (install development dependencies with `npm.cmd ci` only if needed). When you choose to publish through your usual GitHub workflow, confirm that GitHub Pages contains the updated `src/network/co-baker.js`, `src/network/remote-test-transport.js`, and `src/ui/co-baker.js`. Hard-refresh each testing browser after deployment. The relay code runs on your laptop.
+
+**Stop and restart the Node relay after updating the repository.** An already running Node process retains the previous packet validator. Phase 2 automatically sends `help` availability as soon as another Baker appears; the Phase 1 relay rejects that packet even after a successful WebSocket upgrade and registration. Updating GitHub Pages or restarting only Cloudflare does not update Node. Phase 3A adds bounded worksheet observation packets, so a Phase 2 relay also needs restarting. The current startup banner must say **`protocol 3, Phase 3A observation`**. The browser checks this protocol acknowledgement before discovery or coordinator election; an older relay now produces an explicit restart instruction.
 
 ## 2. Start a restricted relay (PowerShell on laptop)
 
@@ -15,7 +17,8 @@ From your project directory, after installing Node 22+ and dependencies (`npm.cm
 
 ```powershell
 $env:COBAKER_ALLOWED_ORIGINS = 'https://YOUR-USERNAME.github.io'
-$env:COBAKER_REMOTE_PASSPHRASE = Read-Host 'Choose a temporary shared test password (12+ characters)'
+$testSecret = Read-Host 'Choose a temporary shared test password (12+ characters)' -AsSecureString
+$env:COBAKER_REMOTE_PASSPHRASE = [System.Net.NetworkCredential]::new('', $testSecret).Password
 npm.cmd run dev:cobaker:remote
 ```
 
@@ -53,7 +56,27 @@ If two users choose **different test groups**, their discovery/message traffic s
 - Internet access is required for this remote mode. It **does not validate** Android's offline Wi-Fi/NSD transport or true device-to-device host migration.
 - The temporary relay is on the organizer's laptop. When that laptop, relay or tunnel stops, all remote browser clients temporarily disconnect, though each player's solo game remains playable from GitHub Pages.
 - This is an invitation-only **testing** service, not a production authentication system. Browser profile IDs are not cryptographic accounts. A shared password is sufficient only for your trusted group. Do not transmit private information.
-- If you see **connection rejected**, check that the password, exact GitHub Pages origin, test group and temporary tunnel address match.
+- **HTTP 101 only proves the WebSocket upgrade succeeded.** Registration, protocol compatibility, and peer discovery happen afterward. An origin outside the allowlist is refused before upgrade; a valid but different group registers successfully and sees a separate set of Bakers.
+- **Outdated/incompatible relay:** stop Node with Ctrl+C and restart `npm.cmd run dev:cobaker:remote` from the updated repository. Verify the protocol 3 banner, hard-refresh the game, then reconnect. Do not change the password merely because an older browser showed a generic rejection.
+- **Authentication failed:** re-enter the shared password. **Protocol/route/rate-limit error:** inspect that specific error and update both sides. A relay disconnect automatically retries; successful registration clears old errors and restarts election.
+- **Could not complete registration:** check the tunnel `/health` URL, the Node process, and the exact browser `location.origin` against `COBAKER_ALLOWED_ORIGINS`. Browsers do not expose the detailed HTTP upgrade failure, so this message does not assert a wrong password.
 - If two tabs share the same browser profile, they also share the same persistent Baker ID. Use Chrome and Edge or separate profiles for distinct players.
 - If the site doesn't show the remote setup form, confirm GitHub Pages has deployed the new source and the URL includes both debug flags.
 - When done, Ctrl+C both relay and tunnel, and clear the password from PowerShell. No inbound firewall or router port forwarding is needed.
+
+## 6. Retest checklist and local regression evidence
+
+After restarting Node and publishing the matching browser files yourself:
+
+1. Use two independent profiles (Chrome and Edge work), then add two more profiles/devices. Open the same Pages URL with `?cobaker=debug&remoteRelay=1`.
+2. Enter the same current tunnel URL, case-sensitive group, and password. Each of four Bakers should see **3 nearby Bakers**, **4 connected participants**, and the same healthy coordinator. Send tests in both directions.
+3. Click Connect repeatedly with unchanged settings, then close/reopen the popup. The connection should persist; the setup status should say **Registered with remote relay**, not remain on Connecting. The password field is blank when the popup is reopened, but the active connection keeps its in-memory configuration.
+4. Refresh one browser. Its persistent Baker ID should remain; re-enter the password and connect. A refresh intentionally does not store or recover the password.
+5. Open a second tab in one profile and connect it. It should wait with **already connected in another tab**, show no peers, and have no coordinator. Close the original tab: the waiting tab should become active automatically with the same Baker ID and its own session ID.
+6. Close the coordinator's active tab. The remaining Bakers should agree on a replacement. Reopen/reconnect the original profile and verify it joins the agreed coordinator.
+7. Stop/restart Node while leaving Cloudflare running on the same port. All clients should lose peers/leadership during the outage, then register and rediscover automatically without stale errors. Leave time for the 2-second retry and election gathering period.
+8. From an active order, use Call All and have two helpers accept. Exactly one should become the helper. End help and verify the other Bakers remain connected.
+
+Automated commands: `node --test tests/*.test.mjs`, `python tests/browser-co-baker-remote.py`, and `python tests/browser-coordinator.py`. The remote runner uses real Chrome, Edge, and WebKit with isolated browser contexts, real WSS, exact-origin authentication, and a **local TLS reverse proxy**. It requires `openssl` plus the existing Python Playwright browsers. Its temporary certificate is trusted only by those test contexts; production URL/security validation is unchanged. Artifacts go under `output/playwright/co-baker-remote/`.
+
+These tests do **not** validate a live Cloudflare tunnel, deployed GitHub Pages files, or an Android device's native LAN networking. The next external diagnostic is the checklist above, beginning with the running relay's protocol banner and the browser's protocol-3 registration acknowledgement. Avoid sharing WebSocket registration frames: they contain the temporary testing password.

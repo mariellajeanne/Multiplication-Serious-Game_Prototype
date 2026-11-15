@@ -5,8 +5,12 @@ import {createHash,timingSafeEqual} from 'node:crypto';
 import {fileURLToPath} from 'node:url';
 import path from 'node:path';
 import {WebSocketServer} from 'ws';
+import '../src/network/worksheet-observation.js';
+import '../src/network/worksheet-observation.js';
 import '../src/network/co-baker.js';
 const core=globalThis.CoBakerCore;
+// Registration acknowledgement version: Phase 3A observation + explicit lifecycle errors.
+const PROTOCOL=3;
 const GROUP=/^[a-zA-Z0-9_-]{3,32}$/;
 const sha256=s=>createHash('sha256').update(s,'utf8').digest();
 const validPassword=(received,expected)=>typeof received==='string'&&received.length<=128&&timingSafeEqual(sha256(received),sha256(expected));
@@ -22,7 +26,7 @@ export async function startRemoteRelay({port=5512,host='127.0.0.1',passphrase,al
   if(req.url==='/health'&&req.method==='GET'){res.writeHead(200,{'Content-Type':'text/plain; charset=utf-8'}).end('Co-Baker test relay online');return}
   res.writeHead(404).end('Not found');
  });
- const wss=new WebSocketServer({noServer:true,maxPayload:4096,perMessageDeflate:false});
+ const wss=new WebSocketServer({noServer:true,maxPayload:8192,perMessageDeflate:false});
  server.on('upgrade',(req,socket,head)=>{
   let url;try{url=new URL(req.url,'http://localhost')}catch(_){socket.destroy();return}
   if(url.pathname!=='/__co-baker/socket'||url.search||!origins.has(req.headers.origin)||wss.clients.size>=64){socket.destroy();return}
@@ -32,40 +36,45 @@ export async function startRemoteRelay({port=5512,host='127.0.0.1',passphrase,al
  const active=(group,id)=>groups.get(group)?.get(id)?.values().next().value;
  const broadcast=(group,event,except)=>{for(const [id]of groups.get(group)||[])if(id!==except){const peer=active(group,id);if(peer)send(peer,event)}};
  const presence=ws=>({kind:'message',message:core.packet(ws.player,ws.session,'hello')});
+ const ready=ws=>send(ws,{kind:'status',status:'searching',protocol:PROTOCOL});
+ const reject=(ws,code)=>{send(ws,{kind:'status',status:'unavailable',protocol:PROTOCOL,code});ws.close(1008,code)};
  wss.on('connection',ws=>{
   ws.alive=true;ws.on('pong',()=>ws.alive=true);ws.on('error',()=>{});
-  const deadline=setTimeout(()=>ws.close(1008,'Registration required'),5000);
+  const deadline=setTimeout(()=>reject(ws,'registration-timeout'),5000);
   let count=0,windowStart=Date.now();
   ws.on('message',(bytes,binary)=>{try{
    if(Date.now()-windowStart>1000){count=0;windowStart=Date.now()}
-   if(binary||++count>128)throw Error('Rate limit');
-   const frame=JSON.parse(bytes.toString());
-   if(!frame||!core.validPacket(frame.message))throw Error('Invalid packet');
+   if(binary)throw Error('invalid-packet');
+   if(++count>128)throw Error('rate-limit');
+   let frame;try{frame=JSON.parse(bytes.toString())}catch(_){throw Error('invalid-packet')}
+   if(!frame||!core.validPacket(frame.message))throw Error('invalid-packet');
    const m=frame.message;
    if(!ws.player){
     if(frame.kind!=='register'||m.type!=='hello'||
        Object.keys(frame).some(k=>!['kind','message','group','passphrase'].includes(k))||
-       !GROUP.test(frame.group)||!validPassword(frame.passphrase,passphrase))throw Error('Invalid registration');
+       typeof frame.group!=='string'||!GROUP.test(frame.group))throw Error('invalid-registration');
+    if(!validPassword(frame.passphrase,passphrase))throw Error('authentication-failed');
     clearTimeout(deadline);ws.player=m.player;ws.session=m.session;ws.group=frame.group;
     let peers=groups.get(ws.group);if(!peers)groups.set(ws.group,peers=new Map());
     let sockets=peers.get(m.player.id);if(!sockets)peers.set(m.player.id,sockets=new Set());
     sockets.add(ws);
-    if(sockets.size>1){send(ws,{kind:'status',status:'unavailable',error:'This Baker is already connected in another tab. Waiting for that tab to close.'});return}
-    send(ws,{kind:'status',status:'searching'});
+    if(sockets.size>1){send(ws,{kind:'status',status:'unavailable',protocol:PROTOCOL,code:'identity-in-use'});return}
+    ready(ws);
     for(const [id]of peers)if(id!==m.player.id){const other=active(ws.group,id);if(other)send(ws,presence(other))}
     broadcast(ws.group,presence(ws),m.player.id);return;
    }
    if(active(ws.group,ws.player.id)!==ws)return;
    if(frame.kind!=='send'||Object.keys(frame).some(k=>!['kind','to','message'].includes(k))||
-      !['test','reply','coord','help'].includes(m.type)||JSON.stringify(m.player)!==JSON.stringify(ws.player)||m.session!==ws.session)throw Error('Invalid route');
+      !['test','reply','coord','help'].includes(m.type)||typeof frame.to!=='string'||!/^[a-f0-9]{32}$/.test(frame.to)||
+      m.player.id!==ws.player.id||m.player.name!==ws.player.name||m.player.number!==ws.player.number||m.session!==ws.session)throw Error('invalid-route');
    const peer=active(ws.group,frame.to);if(peer)send(peer,{kind:'message',message:m});
-  }catch(_){ws.close(1008,'Invalid development message')}});
+  }catch(error){reject(ws,['invalid-packet','invalid-registration','authentication-failed','invalid-route','rate-limit'].includes(error.message)?error.message:'invalid-packet')}});
   ws.on('close',()=>{
    clearTimeout(deadline);if(!ws.player)return;
    const peers=groups.get(ws.group),sockets=peers?.get(ws.player.id),wasActive=active(ws.group,ws.player.id)===ws;
    sockets?.delete(ws);
    if(!sockets?.size){peers?.delete(ws.player.id);broadcast(ws.group,{kind:'left',playerId:ws.player.id},ws.player.id)}
-   else if(wasActive){const next=active(ws.group,ws.player.id);send(next,{kind:'status',status:'searching'});for(const [id]of peers)if(id!==next.player.id){const p=active(ws.group,id);if(p)send(next,presence(p))}broadcast(ws.group,presence(next),next.player.id)}
+   else if(wasActive){const next=active(ws.group,ws.player.id);ready(next);for(const [id]of peers)if(id!==next.player.id){const p=active(ws.group,id);if(p)send(next,presence(p))}broadcast(ws.group,presence(next),next.player.id)}
    if(peers&&!peers.size)groups.delete(ws.group);
   });
  });
@@ -83,7 +92,7 @@ export async function startRemoteRelay({port=5512,host='127.0.0.1',passphrase,al
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{
   const app=await startRemoteRelay({port:Number(process.env.COBAKER_REMOTE_PORT)||5512,passphrase:process.env.COBAKER_REMOTE_PASSPHRASE,allowedOrigins:process.env.COBAKER_ALLOWED_ORIGINS});
-  console.log(`Co-Baker TEMPORARY remote test relay listening at http://127.0.0.1:${app.port}`);
+  console.log(`Co-Baker TEMPORARY remote test relay (protocol ${PROTOCOL}, Phase 3A observation) listening at http://127.0.0.1:${app.port}`);
   console.log(`Allowed browser origins: ${process.env.COBAKER_ALLOWED_ORIGINS}`);
   console.log('Only /health and authenticated WebSockets are exposed. Stop with Ctrl+C.');
   process.on('SIGINT',async()=>{await app.close();process.exit(0)});
