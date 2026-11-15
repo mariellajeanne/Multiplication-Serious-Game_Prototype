@@ -107,13 +107,13 @@ with tempfile.TemporaryDirectory(dir=out) as tmp:
                 assert p.locator('#coBakerTestPassword').input_value() == ''
                 assert 'Registered with remote relay' in p.locator('#coBakerRemoteStatus').inner_text()
                 agree(pages)
-                # Refresh requires password again but keeps the persistent identity.
+                # Full refresh automatically restores tab authentication and persistent identity.
                 p = pages[1]; before = state(p)
                 p.reload(); p.wait_for_selector('.hub-food'); panel(p)
                 assert state(p)['id'] == before['id']
-                assert state(p)['coordinator']['role'] == 'Offline'
+                p.wait_for_function('panaderyaCoBaker.status==="connected"')
                 assert p.locator('#coBakerTestPassword').input_value() == ''
-                connect(p, endpoint); agree(pages)
+                agree(pages)
                 assert state(p)['session'] != before['session']
                 print('PASS repeat Connect, popup reopen, refresh and persistent identity', flush=True)
                 # Authentication is still enforced; correction clears every stale error.
@@ -132,7 +132,9 @@ with tempfile.TemporaryDirectory(dir=out) as tmp:
                 print('PASS wrong password recovery and group isolation', flush=True)
                 # Duplicate tab remains passive, then takes over with its own session.
                 old = pages[0]; before = state(old)
-                duplicate = new(chrome, context=old.context); connect(duplicate, endpoint)
+                duplicate = new(chrome, context=old.context)
+                duplicate.evaluate('saved=>sessionStorage.setItem("coBakerRemoteSessionV1",saved)',old.evaluate('sessionStorage.getItem("coBakerRemoteSessionV1")'))
+                duplicate.reload();duplicate.wait_for_selector('.hub-food');panel(duplicate)
                 duplicate.wait_for_function('panaderyaCoBaker.transport.phase==="waiting"')
                 assert state(duplicate)['id'] == before['id']
                 assert state(duplicate)['coordinator']['role'] == 'Offline'

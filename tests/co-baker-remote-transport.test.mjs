@@ -10,12 +10,13 @@ function setup(){
   send(text){this.sent.push(JSON.parse(text))}
   close(){this.readyState=3}
  }
- const ctx=vm.createContext({URL,WebSocket:MockWebSocket,
+ const store=new Map();const storage={getItem:k=>store.get(k),setItem:(k,v)=>store.set(k,v),removeItem:k=>store.delete(k)};
+ const ctx=vm.createContext({URL,sessionStorage:storage,WebSocket:MockWebSocket,
   setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId},clearTimeout:id=>timers.delete(id),globalThis:null});
  ctx.globalThis=ctx;
  vm.runInContext(readFileSync(new URL('../src/network/remote-test-transport.js',import.meta.url),'utf8'),ctx);
  const transport=new ctx.RemoteTestTransport(event=>received.push(event));
- return {transport,instances,received,timers};
+ return {transport,instances,received,timers,store};
 }
 test('remote browser mode requires explicit secure endpoint, group and password',()=>{
  const {transport}=setup();
@@ -104,4 +105,15 @@ test('stalled registration is bounded and restarting cancels old handshake deadl
  assert.equal(timers.size,1);[...timers.values()][0].fn();assert.equal(next.readyState,3);
  next.onclose({code:1006});assert.equal(transport.phase,'disconnected');
  transport.stop();assert.equal(timers.size,0);assert.equal(old.readyState,3);
+});
+
+
+test('reload credentials are scoped expiring bearer tokens, never the shared password',async()=>{
+ const {transport,instances,store}=setup();transport.configure(config);await transport.start(hello);
+ transport.remember({token:'a'.repeat(64),expires:Date.now()+60000});
+ assert.ok(!JSON.stringify([...store]).includes(config.passphrase));
+ transport.stop();assert.equal(transport.restore('f'.repeat(32)),false);
+ assert.equal(transport.restore(hello.player.id),true);assert.equal(transport.config.passphrase,undefined);
+ await transport.start(hello);instances.at(-1).onopen();assert.equal(instances.at(-1).sent[0].resumeToken,'a'.repeat(64));assert.equal(instances.at(-1).sent[0].passphrase,undefined);
+ const saved=JSON.parse(store.get('coBakerRemoteSessionV1'));saved.expires=Date.now()-1;store.set('coBakerRemoteSessionV1',JSON.stringify(saved));assert.equal(transport.restore(hello.player.id),false);
 });

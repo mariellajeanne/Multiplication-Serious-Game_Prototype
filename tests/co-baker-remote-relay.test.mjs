@@ -12,10 +12,10 @@ function connect(endpoint,origin=ORIGIN){
 test('remote WebSocket relay isolates test groups, requires password and exposes no files',async()=>{
  const app=await startRemoteRelay({port:0,passphrase:KEY,allowedOrigins:[ORIGIN]}),wslist=[],base=`http://127.0.0.1:${app.port}`,endpoint=`ws://127.0.0.1:${app.port}/__co-baker/socket`;
  try{
-  const reg=async(id,group,password=KEY)=>{
+  const reg=async(id,group,password=KEY,token=null)=>{
    const ws=await connect(endpoint);wslist.push(ws);const messages=[];ws.on('message',data=>messages.push(JSON.parse(data)));
    const player={id,name:'Baker',number:'4821'},session='b'.repeat(32);
-   ws.send(JSON.stringify({kind:'register',group,passphrase:password,message:core.packet(player,session,'hello')}));
+   ws.send(JSON.stringify({kind:'register',group,...(token?{resumeToken:token.token,resumeExpires:token.expires}:{passphrase:password}),message:core.packet(player,session,'hello')}));
    await wait(50);return {ws,player,session,messages};
   };
   assert.equal((await fetch(base+'/health')).status,200);
@@ -24,6 +24,11 @@ test('remote WebSocket relay isolates test groups, requires password and exposes
   await assert.rejects(connect(endpoint,'https://untrusted.example'));
   const first=await reg('a'.repeat(32),'alpha');
   assert.ok(first.messages.some(e=>e.status==='searching'&&e.protocol===6));
+  const ticket=first.messages.find(e=>e.reconnect)?.reconnect;
+  assert.match(ticket.token,/^[a-f0-9]{64}$/);assert.ok(ticket.expires>Date.now());
+  const wrongIdentity=await reg('9'.repeat(32),'alpha',null,ticket);assert.equal(wrongIdentity.messages.at(-1).code,'authentication-failed');
+  const wrongScope=await reg(first.player.id,'beta',null,ticket);assert.equal(wrongScope.messages.at(-1).code,'authentication-failed');
+  const duplicate=await reg(first.player.id,'alpha',null,ticket);assert.equal(duplicate.messages.at(-1).code,'identity-in-use');duplicate.ws.close();
   const other=await reg('c'.repeat(32),'beta');
   assert.equal(first.messages.filter(e=>e.message?.player.id===other.player.id).length,0);
   const second=await reg('d'.repeat(32),'alpha');

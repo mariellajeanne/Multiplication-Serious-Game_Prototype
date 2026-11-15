@@ -28,6 +28,7 @@ else:
 def connect(p):
     if remote:
         wait(p,'!!window.panaderyaCoBaker')
+        if p.evaluate('!!panaderyaCoBaker.transport.active'):return
         p.evaluate('config=>{panaderyaCoBaker.transport.configure(config);panaderyaCoBaker.start()}',{'url':server_config['endpoint'],'group':'worksheet-test','passphrase':password})
 
 def wait(p, expression):
@@ -199,11 +200,23 @@ try:
         # Each role refreshes its own page. Only local persistence supplies math.
         for p in (helper,learner):
             before=learner.evaluate('JSON.stringify(g.run.worksheetSession.state)');version=helper.evaluate('panaderyaCoBaker.observation.received')
-            p.reload();p.wait_for_selector('.hub-food, #worksheetFrame');connect(p)
+            p.reload();p.wait_for_selector('.hub-food, #worksheetFrame')
+            if remote:wait(p,'panaderyaCoBaker.status==="connected"')
+            else:connect(p)
             live(learner,helper,session);assert helper.evaluate('panaderyaCoBaker.observation.received')>version
             assert learner.evaluate('JSON.stringify(g.run.worksheetSession.state)')==before
         fr=learner.locator('#worksheetFrame').element_handle().content_frame()
         assert helper.evaluate('JSON.stringify(g.run.worksheetSession.state)')==own
+        if remote:
+            learner.evaluate('sessionStorage.removeItem("coBakerRemoteSessionV1")')
+            learner.reload();learner.wait_for_selector('#coBakerReconnect:visible')
+            attempt=learner.evaluate('g.run.worksheetRewards.attemptId')
+            learner.screenshot(path=str(out/'worksheet-reconnect-option.png'))
+            learner.locator('#coBakerReconnect').click()
+            learner.locator('#coBakerRelayUrl').fill(server_config['endpoint']);learner.locator('#coBakerTestGroup').fill('worksheet-test');learner.locator('#coBakerTestPassword').fill(password)
+            learner.get_by_role('button',name='Connect to test Bakers',exact=True).click();learner.locator('#modals .close').click()
+            live(learner,helper,session);assert learner.evaluate('g.run.worksheetRewards.attemptId')==attempt
+            fr=learner.locator('#worksheetFrame').element_handle().content_frame()
         # Third-party coordinator can leave and return with a new connection.
         other_id=other.evaluate('panaderyaCoBaker.profile.id');other.evaluate('panaderyaCoBaker.stop()')
         wait(learner,'panaderyaCoBaker.coordinator.snapshot().status==="Healthy" && panaderyaCoBaker.coordinator.leader?.id!=='+json.dumps(other_id))
@@ -260,9 +273,16 @@ try:
         wait(learner,'document.querySelector("#worksheetFrame")?.worksheetStarted');session=reserve(learner,helper)
         for target in ('top:0','top:1','bottom:0','bottom:1','carry:1'):point(learner,helper,target,touch=True)
         assert learner.evaluate('WorksheetCues.resolve("top:0")!==WorksheetCues.resolve("top:1") && WorksheetCues.resolve("top:0").textContent===WorksheetCues.resolve("top:1").textContent')
+        if remote:
+            helper.evaluate('panaderyaCoBaker.stop()');wait(learner,'!panaderyaCoBaker.help.active')
+            helper.reload();wait(helper,'panaderyaCoBaker.status==="connected"')
+            assert helper.evaluate('panaderyaCoBaker.help.active') is None
+            session=reserve(learner,helper)
         # Save & Exit is final even if a late watch arrives.
         learner.get_by_role('button',name='Save & Exit',exact=True).click();wait(helper,'!panaderyaCoBaker.help.active')
         assert learner.evaluate('g.run.paused && !!g.run.worksheetSession')
+        if remote:
+            learner.reload();wait(learner,'panaderyaCoBaker.status==="connected"');assert learner.evaluate('panaderyaCoBaker.help.active') is None
         after=json.loads(helper.evaluate('localStorage.panaderyaQuestV2'));save_before.pop('orderClock',None);after.pop('orderClock',None);assert after==save_before
         assert helper.evaluate('JSON.stringify(g.run.worksheetSession.state)')==own
         assert other.evaluate('localStorage.panaderyaQuestV2')==other_before

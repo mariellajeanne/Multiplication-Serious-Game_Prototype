@@ -7,7 +7,7 @@
  const remoteTest=!native&&debug&&params.get('remoteRelay')==='1';
  const webTest=!native&&!remoteTest&&debug&&params.get('webrelay')==='1';
  const transport=native?{label:'Android Native',start:m=>native.start(JSON.stringify(m)),stop:()=>native.stop(),send:(id,m)=>native.send(id,JSON.stringify(m))}:remoteTest?new RemoteTestTransport(event=>service?.receive(event)):webTest?new BrowserTestTransport(event=>service?.receive(event)):null;
- if(profile){service=new core.Discovery(profile,transport);window.panaderyaCoBaker=service;if(!remoteTest)service.start()}
+ if(profile){service=new core.Discovery(profile,transport);window.panaderyaCoBaker=service;if(!remoteTest||transport.restore(profile.id))service.start()}
  window.addEventListener('co-baker-native',e=>{try{service?.receive(e.detail)}catch(_){}});
  window.addEventListener('co-baker-resume',()=>service?.start());
  document.addEventListener('visibilitychange',()=>{if(webTest||remoteTest){if(!document.hidden)service?.coordinator?.resume();return;}if(document.hidden)service?.stop();else service?.start()});
@@ -71,7 +71,13 @@
   }
   paint();
  }
- service?.observe(paint);
+ function reconnectControl(){
+  const header=document.querySelector('.worksheet-modern .worksheet-header-actions');if(!header||!remoteTest)return;
+  let button=document.getElementById('coBakerReconnect');
+  if(!button){button=document.createElement('button');button.id='coBakerReconnect';button.className='secondary';button.textContent='Reconnect';button.onclick=openTest;header.appendChild(button)}
+  button.hidden=!!transport.active&&transport.phase==='ready';
+ }
+ service?.observe(()=>{paint();reconnectControl()});
 })();
 
 /* Phase 2 invitation UI: injected into the existing worksheet header only.

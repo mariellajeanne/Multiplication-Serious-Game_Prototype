@@ -48,6 +48,7 @@
   const p=d.peers.get(a.otherId);
   host.querySelector('#coBakerObserverName').textContent=p?`${p.name} #${p.number}`:'Your Co-Baker';
   host.querySelector('#coBakerObserverStatus').textContent=a.lostAt?'Your Co-Baker is reconnecting... You can keep practicing!':observation.latest?(d.help.log[0]?.message==='Connected again!'&&d.help.clock()-d.help.log[0].at<4000?'Connected again!':'Live worksheet'):'Waiting for the learner’s worksheet…';
+  frame.style.visibility=observation.latest?'visible':'hidden';
   const s=observation.latest?.state;
   host.querySelector('#coBakerObserverProblem').textContent=s?`${s.a} × ${s.b}`:'';
   host.querySelector('#coBakerObserverStep').textContent=s?`${steps(s)} · ${s.done} / ${s.A.length*s.B.length} digit pairs`:'';

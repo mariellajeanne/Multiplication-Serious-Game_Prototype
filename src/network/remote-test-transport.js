@@ -1,7 +1,7 @@
 /* Opt-in remote browser test transport. Never selected in ordinary play or Android. */
 (function(root){
  'use strict';
- const PROTOCOL=6;
+ const PROTOCOL=6,SESSION_KEY='coBakerRemoteSessionV1';
  const ERRORS={
   'identity-in-use':'This Baker is already connected in another tab. Waiting for that tab to close.',
   'authentication-failed':'Remote relay authentication failed. Re-enter the shared testing password.',
@@ -13,7 +13,7 @@
  };
  class RemoteTestTransport{
   constructor(receive){this.receive=receive;this.label='Remote Browser Test';this.epoch=0;this.config=null;this.phase='disconnected'}
-  configure({url,group,passphrase}){
+  configure({url,group,passphrase,resumeToken,resumeExpires}){
    const endpoint=new URL(String(url||'').trim());
    if(endpoint.protocol==='https:')endpoint.protocol='wss:';
    if(endpoint.protocol!=='wss:'||endpoint.username||endpoint.password||endpoint.search||endpoint.hash||
@@ -21,11 +21,22 @@
    endpoint.pathname='/__co-baker/socket';
    group=String(group||'').trim();
    if(!/^[a-zA-Z0-9_-]{3,32}$/.test(group))throw Error('Test group must be 3–32 letters, numbers, _ or -.');
-   if(typeof passphrase!=='string'||passphrase.length<12||passphrase.length>128)throw Error('Shared test password must be 12–128 characters.');
+   if(!(typeof resumeToken==='string'&&/^[a-f0-9]{64}$/.test(resumeToken)&&Number.isSafeInteger(resumeExpires)&&resumeExpires>Date.now()&&resumeExpires<=Date.now()+3600000)&&(typeof passphrase!=='string'||passphrase.length<12||passphrase.length>128))throw Error('Shared test password must be 12–128 characters.');
    url=endpoint.toString();
    this.configChanged=!this.config||this.config.url!==url||this.config.group!==group||this.config.passphrase!==passphrase;
-   this.config={url,group,passphrase};
+   this.config={url,group,...(passphrase?{passphrase}:{resumeToken,resumeExpires})};
    return {url:endpoint.origin,group};
+  }
+  restore(playerId){
+   try{const saved=JSON.parse(root.sessionStorage?.getItem(SESSION_KEY)||'null');
+    if(!saved||saved.playerId!==playerId||saved.expires<=Date.now()||saved.expires>Date.now()+3600000||!/^[a-f0-9]{64}$/.test(saved.token))return false;
+    this.configure({url:saved.url,group:saved.group,resumeToken:saved.token,resumeExpires:saved.expires});return true;
+   }catch(_){return false}
+  }
+  remember(reconnect){
+   if(!reconnect||typeof reconnect.token!=='string'||!/^[a-f0-9]{64}$/.test(reconnect.token)||!Number.isSafeInteger(reconnect.expires)||reconnect.expires<=Date.now()||reconnect.expires>Date.now()+3600000)return;
+   this.config.resumeToken=reconnect.token;this.config.resumeExpires=reconnect.expires;
+   try{root.sessionStorage?.setItem(SESSION_KEY,JSON.stringify({url:this.config.url,group:this.config.group,playerId:this.hello.player.id,token:reconnect.token,expires:reconnect.expires}))}catch(_){}
   }
   async start(hello){
    this.stop();
@@ -42,18 +53,19 @@
      this.deadline=setTimeout(()=>{if(current()&&!registered)ws.close()},8000);
      const fail=(code,error)=>{
       clearTimeout(this.deadline);this.phase='unavailable';this.active=false;
+      if(code==='authentication-failed')try{root.sessionStorage?.removeItem(SESSION_KEY)}catch(_){}
       this.receive({kind:'status',status:'unavailable',code,error});ws.close();
      };
      ws.onopen=()=>{if(!current()){ws.close();return}
       this.phase='registering';
-      ws.send(JSON.stringify({kind:'register',message:hello,group:config.group,passphrase:config.passphrase}));
+      ws.send(JSON.stringify({kind:'register',message:hello,group:config.group,...(config.passphrase?{passphrase:config.passphrase}:{resumeToken:config.resumeToken,resumeExpires:config.resumeExpires})}));
      };
      ws.onmessage=e=>{if(!current()||ws.readyState!==1)return;try{
       const event=JSON.parse(e.data);
       if(event.kind==='status'){
        if(event.status==='searching'||event.code==='identity-in-use'){
         if(event.protocol!==PROTOCOL){fail('protocol-mismatch','Remote relay is outdated or incompatible. Stop and restart the Node relay from the updated repository, then reconnect.');return}
-        registered=true;clearTimeout(this.deadline);
+        registered=true;clearTimeout(this.deadline);if(event.status==='searching')this.remember(event.reconnect);
         this.phase=event.code==='identity-in-use'?'waiting':'ready';
         this.receive({kind:'status',status:event.status,error:ERRORS[event.code]||''});return;
        }

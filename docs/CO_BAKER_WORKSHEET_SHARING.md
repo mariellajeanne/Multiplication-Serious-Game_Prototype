@@ -204,8 +204,55 @@ progression are outside this phase.
    ownership must remain independent. Close the test relay when finished.
 
 For remote browser verification, follow `CO_BAKER_REMOTE_TESTING.md` with protocol
-6, the same test group/password and independent profiles. After refresh, reconnect
-through Settings > Advanced > Co-Baker network test within grace: the password
-is deliberately kept only in memory. If that takes longer, use a new invitation.
+6, the same test group/password and independent profiles. After the first password-authenticated connection, refresh reconnects automatically
+using a relay-issued credential in tab sessionStorage. The shared password remains
+in memory only. If authentication cannot resume, use Reconnect in the worksheet
+header to open the existing connection panel without Save & Exit. If assistance
+has expired, reconnect networking and issue a new invitation.
 Physical Android Wi-Fi loss, background/resume, process death, router isolation,
 and real Cloudflare/deployed-site behavior require separate device/network checks.
+
+
+## Targeted full-page refresh recovery
+
+The prior remote adapter intentionally waited for manual configuration on each
+page load. Only endpoint/group survived reload; no authentication did. Save & Exit
+then independently ended assistance through the intended worksheet lifecycle.
+
+The remote test relay now issues an HMAC-SHA256 bearer token bound to the hidden
+player ID, group, allowed origin and one-hour expiry. Only the token, expiry and
+connection metadata enter `coBakerRemoteSessionV1` in sessionStorage. Nothing enters
+URLs, localStorage, bakery saves or repository credentials. Relay restart with the
+same password preserves valid tokens; changing the password invalidates them.
+The existing protocol 6 acknowledgement has additive reconnect metadata; restart
+the updated relay to enable it. Android networking is unchanged.
+
+This is a development-only convenience, not hardened account authentication.
+Same-origin scripts/XSS or someone with access to the browser can steal the bearer
+token until expiry. Closing a tab normally clears sessionStorage; browser session
+restore or tab duplication may copy it. Duplicate identities still remain passive
+until the active tab leaves. Clearing sessionStorage removes the local credential;
+rotating the relay password revokes issued tokens. No shared password is persisted.
+If storage is blocked, expired, cleared, or the relay/password changes, Reconnect
+opens the existing setup panel inside the active worksheet. It does not pause or
+exit the worksheet. No reconnect token authorizes a help reservation by itself:
+all existing attempt, session, peer, version, grace and helper checks still apply.
+
+Retest on updated browser files and a restarted relay:
+1. In independent profiles, connect once using the same relay/group/password.
+   Start a learner order and accept help in another profile.
+2. Refresh the learner without clicking Save & Exit or entering settings. Expect
+   automatic network registration, the same hidden identity, restored learner
+   work and a fresh helper snapshot within the 15-second assistance grace.
+3. Refresh the helper. Expect automatic networking and the valid helper role;
+   until a real snapshot arrives, the worksheet frame stays hidden with its
+   existing waiting status. Test pointing and hints after recovery.
+4. Disconnect a participant for over 15 seconds, reconnect, then refresh. Networking
+   may reconnect, but obsolete assistance must remain ended. Call for Help again.
+5. Duplicate a connected tab: it must wait passively. Close the active tab and
+   confirm safe takeover without two helpers. Disconnect/return a third coordinator.
+6. Delete `coBakerRemoteSessionV1` from sessionStorage and refresh the learner.
+   Click Reconnect in the worksheet header and enter the test credentials there.
+   The worksheet must remain open. Expired assistance needs a new invitation.
+7. Separately click Save & Exit while helping, then refresh. Assistance must stay
+   ended and the personal worksheet must remain saved.
