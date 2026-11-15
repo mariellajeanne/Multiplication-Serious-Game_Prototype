@@ -39,7 +39,12 @@ def call(p, target=None):
         p.locator('[data-help-action="all"]').click()
 
 def end(p, pages):
-    p.locator('[data-observer-end]' if p.locator('#coBakerObservation').count() else '#coBakerInvitations [data-help-end]').click(); idle(pages)
+    if p.locator('#coBakerObservation').count(): p.locator('[data-observer-end]').click()
+    elif p.locator('#coBakerInvitations [data-help-end]').count(): p.locator('#coBakerInvitations [data-help-end]').click()
+    else:
+        if not p.locator('[data-help-action="end"]').count(): p.get_by_role('button',name='Call for Help',exact=True).click()
+        p.locator('[data-help-action="end"]').click()
+    idle(pages)
 
 try:
     for _ in range(60):

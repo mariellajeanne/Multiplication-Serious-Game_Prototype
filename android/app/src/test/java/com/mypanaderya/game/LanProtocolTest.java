@@ -51,7 +51,7 @@ public class LanProtocolTest {
         try{parse(" ".repeat(8193));fail("Oversized frame accepted");}catch(JSONException expected){}
     }
     @Test public void observationUsesBoundedDataOnlyHelpMessages() throws Exception {
-        JSONObject h=new JSONObject().put("kind","watch").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32));
+        JSONObject h=new JSONObject().put("kind","watch").put("watchVersion",1).put("sessionId","d".repeat(32)).put("streamId","e".repeat(32));
         JSONObject m=hello().put("type","help").put("help",h);parse(m.toString());
         h.put("previousSession","f".repeat(32));parse(m.toString());h.put("command","undo");rejects(m);h.remove("command");
         h.put("kind","worksheet").remove("previousSession");h.put("version",1);
@@ -68,7 +68,7 @@ public class LanProtocolTest {
     }
     @Test public void guidanceIsBoundedAndNeverContainsCommandsOrFreeText() throws Exception {
         JSONObject h=new JSONObject().put("kind","point").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32))
-            .put("recipientId","f".repeat(32)).put("cueToken","a".repeat(32)).put("sequence",1).put("target","carry:1");
+            .put("recipientId","f".repeat(32)).put("cueToken","a".repeat(32)).put("sequence",1).put("stateVersion",1).put("target","carry:1");
         JSONObject m=hello().put("type","help").put("help",h);parse(m.toString());
         for(String target:new String[]{"slot:0:0","calculator:product","calculator:carry","control:undo"}){h.put("target",target);parse(m.toString());}
         for(Object target:new Object[]{"slot:9:0","#math","top:7",new JSONArray().put("top:0")}){h.put("target",target);rejects(m);}
@@ -77,6 +77,16 @@ public class LanProtocolTest {
         h.put("sequence",0);rejects(m);h.put("sequence","1");rejects(m);h.put("sequence",1);
         h.put("recipientId","invalid");rejects(m);h.put("recipientId","f".repeat(32));
         h.put("command","undo");rejects(m);
+    }
+    @Test public void recoveryAndSynchronizationVersionsAreStrictlyBounded() throws Exception {
+        JSONObject h=new JSONObject().put("kind","resume").put("sessionId","d".repeat(32)).put("previousSession","e".repeat(32));
+        JSONObject m=hello().put("type","help").put("help",h);parse(m.toString());
+        h.put("snapshot",new JSONObject());rejects(m);h.remove("snapshot");h.put("previousSession","bad");rejects(m);h.put("previousSession","e".repeat(32));
+        h.put("kind","watch").put("streamId","f".repeat(32)).put("watchVersion",1);parse(m.toString());
+        for(Object v:new Object[]{0,-1,1.5,"1",9007199254740992L}){h.put("watchVersion",v);rejects(m);}
+        h.remove("watchVersion");rejects(m);
+        h=new JSONObject().put("kind","hint").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32)).put("recipientId","f".repeat(32)).put("cueToken","a".repeat(32)).put("sequence",1).put("hint","carry").put("stateVersion",1);
+        m.put("help",h);parse(m.toString());h.remove("stateVersion");rejects(m);h.put("stateVersion","1");rejects(m);
     }
     private String readFrame(byte[] bytes) throws Exception {
         try(ServerSocket server=new ServerSocket(0,1,InetAddress.getLoopbackAddress());

@@ -87,7 +87,7 @@
   const peers=[...window.panaderyaCoBaker.peers.values()].sort((a,b)=>a.name.localeCompare(b.name)||a.number.localeCompare(b.number));
   const filtered=peers.filter(p=>(p.name+' '+p.number).toLowerCase().includes(search.toLowerCase()));
   const active=help.active,request=help.outgoing;
-  const markup=active?`<div class="cobaker-help-connection"><strong>Connected with ${escape(name(active.otherId))}</strong><p>Your helper can watch this worksheet read-only. Keep solving your order.</p><button class="secondary" data-help-action="end">End help</button></div>`:
+  const markup=active?`<div class="cobaker-help-connection"><strong>${active.lostAt?'Your Co-Baker is reconnecting...':'Connected with '+escape(name(active.otherId))}</strong><p>Your helper can watch this worksheet read-only. Keep solving your order.</p><button class="secondary" data-help-action="end">End help</button></div>`:
    request?`<div class="cobaker-help-connection"><strong>Calling nearby Bakers…</strong><p>${request.declined.size} declined · ${Math.max(0,request.recipients.size-request.declined.size)} awaiting responses</p><button class="secondary" data-help-action="cancel">Cancel request</button></div>`:
    `<button class="primary cobaker-call-all" data-help-action="all" ${!peers.some(p=>help.eligible(p.id))?'disabled':''}>📣 Call All</button>
    <p class="cobaker-help-subtitle">Ask an available Baker for help with this order!</p>
@@ -106,8 +106,13 @@
   const invitations=[...help.incoming.values()].filter(invite=>invite.expiresAt>Date.now()&&!help.active);
   const currently=help.accepting;
   const active=help.active;
+  const header=document.querySelector('.worksheet-modern .worksheet-header-actions');
+  if(header){let status=document.getElementById('coBakerConnectionStatus');if(!status){status=document.createElement('small');status.id='coBakerConnectionStatus';status.setAttribute('role','status');status.setAttribute('aria-live','polite');header.appendChild(status)}
+   const note=help.log[0],recent=note&&help.clock()-note.at<4000?note.message:'';
+   status.textContent=active?.role==='Learner'?(active.lostAt?'Your Co-Baker is reconnecting...':recent==='Connected again!'?recent:'Co-Baker connected'):/Your Co-Baker left/.test(recent)?recent:window.panaderyaCoBaker.transport&&['unavailable','disconnected'].includes(window.panaderyaCoBaker.status)?'Co-Baker offline. You can keep practicing!':'';
+  }
   const markup=(currently?`<div class="cobaker-invite"><strong>Waiting for ${escape(name(currently.ownerId))}…</strong><small>You can continue playing.</small></div>`:'')+
-   (active?`<div class="cobaker-invite"><strong>Co-Baker: ${escape(name(active.otherId))}</strong><small>${active.lostAt?'Reconnecting…':active.role==='Helper'?'Connected as helper · Read-only worksheet':'Connected · Keep practicing!'}</small>${active.role==='Helper'?'<button data-help-watch="1">Watch worksheet</button>':''}<button data-help-end="1">End help</button></div>`:'')+
+   (active&&!(active.role==='Learner'&&header)&&!document.getElementById('coBakerObservation')?`<div class="cobaker-invite"><strong>Co-Baker: ${escape(name(active.otherId))}</strong><small>${active.lostAt?'Your Co-Baker is reconnecting...':active.role==='Helper'?'Connected as helper · Read-only worksheet':'Connected · Keep practicing!'}</small>${active.role==='Helper'?'<button data-help-watch="1">Watch worksheet</button>':''}<button data-help-end="1">End help</button></div>`:'')+
    invitations.slice(0,3).map(i=>`<div class="cobaker-invite"><strong>${escape(name(i.ownerId))} needs help!</strong><div class="cobaker-invite-actions"><button data-help-accept="${i.requestId}" ${currently||help.isBusy()?'disabled':''}>Help</button><button data-help-decline="${i.requestId}" class="secondary">Not Now</button></div></div>`).join('');
   if(holder.coBakerMarkup!==markup){holder.coBakerMarkup=markup;holder.innerHTML=markup}
   holder.hidden=!holder.childElementCount;
@@ -140,5 +145,5 @@
  const existingHeader=document.querySelector('.worksheet-modern .worksheet-header-actions');
  if(existingHeader&&!existingHeader.querySelector('.cobaker-help-button'))existingHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" onclick="openCoBakerHelp()">Call for Help</button>');
  const current=window.panaderyaCoBaker;
- if(current?.help){current.help.worksheet=()=>sheetActive()||!!(current.help.active?.role==='Learner'&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
+ if(current?.help){current.help.worksheet=()=>sheetActive()||!!(current.help.active?.role==='Learner'&&!current.help.active.lostAt&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
 })();

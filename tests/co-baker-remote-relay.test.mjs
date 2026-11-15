@@ -23,7 +23,7 @@ test('remote WebSocket relay isolates test groups, requires password and exposes
   assert.equal((await fetch(base+'/src/network/co-baker.js')).status,404);
   await assert.rejects(connect(endpoint,'https://untrusted.example'));
   const first=await reg('a'.repeat(32),'alpha');
-  assert.ok(first.messages.some(e=>e.status==='searching'&&e.protocol===5));
+  assert.ok(first.messages.some(e=>e.status==='searching'&&e.protocol===6));
   const other=await reg('c'.repeat(32),'beta');
   assert.equal(first.messages.filter(e=>e.message?.player.id===other.player.id).length,0);
   const second=await reg('d'.repeat(32),'alpha');

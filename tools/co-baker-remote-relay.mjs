@@ -9,8 +9,8 @@ import '../src/network/worksheet-observation.js';
 import '../src/network/worksheet-observation.js';
 import '../src/network/co-baker.js';
 const core=globalThis.CoBakerCore;
-// Registration acknowledgement version: Phase 3B guidance + explicit lifecycle errors.
-const PROTOCOL=5;
+// Registration acknowledgement version: Phase 3C recovery + explicit lifecycle errors.
+const PROTOCOL=6;
 const GROUP=/^[a-zA-Z0-9_-]{3,32}$/;
 const sha256=s=>createHash('sha256').update(s,'utf8').digest();
 const validPassword=(received,expected)=>typeof received==='string'&&received.length<=128&&timingSafeEqual(sha256(received),sha256(expected));
@@ -92,7 +92,7 @@ export async function startRemoteRelay({port=5512,host='127.0.0.1',passphrase,al
 if(process.argv[1]&&path.resolve(process.argv[1])===fileURLToPath(import.meta.url)){
  try{
   const app=await startRemoteRelay({port:Number(process.env.COBAKER_REMOTE_PORT)||5512,passphrase:process.env.COBAKER_REMOTE_PASSPHRASE,allowedOrigins:process.env.COBAKER_ALLOWED_ORIGINS});
-  console.log(`Co-Baker TEMPORARY remote test relay (protocol ${PROTOCOL}, Phase 3B guidance) listening at http://127.0.0.1:${app.port}`);
+  console.log(`Co-Baker TEMPORARY remote test relay (protocol ${PROTOCOL}, Phase 3C recovery) listening at http://127.0.0.1:${app.port}`);
   console.log(`Allowed browser origins: ${process.env.COBAKER_ALLOWED_ORIGINS}`);
   console.log('Only /health and authenticated WebSockets are exposed. Stop with Ctrl+C.');
   process.on('SIGINT',async()=>{await app.close();process.exit(0)});

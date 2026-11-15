@@ -1,5 +1,7 @@
 /* Co-Baker Phase 2 only. Illustrated, compact worksheet-adjacent controls. */
 .cobaker-help-button{white-space:nowrap;min-height:42px;padding-inline:14px;font-weight:900}
+#coBakerConnectionStatus{max-width:220px;color:#805b46;font-size:.75rem;line-height:1.2;pointer-events:none}
+#coBakerConnectionStatus:empty{display:none}
 .cobaker-availability-setting{display:grid;gap:3px;margin-top:12px}
 .cobaker-availability-setting label{display:flex;align-items:center;gap:9px;font-weight:800}
 .cobaker-availability-setting input{width:19px;height:19px;accent-color:#468d75}

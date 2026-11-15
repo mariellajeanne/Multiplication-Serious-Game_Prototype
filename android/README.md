@@ -78,9 +78,7 @@ One tablet plus one emulator is **not a reliable physical-LAN test**: virtual Wi
 
 `PanaderyaLan.start/stop/send` crosses the native bridge; events return through `co-baker-native`. Android NSD advertises `_panaderya._tcp.` and direct Wi-Fi-bound TCP carries versioned hello/test/reply and advisory coordinator packets. Permissions: INTERNET, ACCESS_NETWORK_STATE, ACCESS_WIFI_STATE, CHANGE_WIFI_MULTICAST_STATE. No location/account/hardware identifiers are used. The foreground multicast lock and sockets are released on pause/stop.
 
-Frames are size/time bounded; native types/fields and response IDs are validated. Only coordinator probes/notices/status extend the Phase 1A schema; no chat,
-help, worksheet or reward commands exist. TCP messages are **not encrypted or authenticated**; `usesCleartextTraffic=false` does not encrypt raw Java sockets. This channel must remain restricted to harmless tests and advisory presence until a separate security
-design authorizes more. A coordinator term is not permission to change game data.
+Frames are size/time bounded; native types/fields and response IDs are validated. The bounded help schema includes learner-owned reservations, recovery proofs, increasing watch/state versions, read-only worksheet/calculator snapshots and ephemeral semantic cues. No remote editing, chat, bakery saves or reward commands exist. Phase 3C keeps the native envelope at version 1; rebuild/reinstall the matching APK on all participating tablets. No relay or cloud dependency is added. TCP messages are **not encrypted or authenticated**; `usesCleartextTraffic=false` does not encrypt raw Java sockets. Persistent player/connection IDs bind reservations under the existing trusted-LAN model; they are not cryptographic identity proofs. A coordinator term never authorizes game changes. See [session recovery and remaining device checks](../docs/CO_BAKER_WORKSHEET_SHARING.md).
 
 Validation fixes: explicit discovery stop now persists across network callbacks;
 pause/stop closes active sockets; callbacks cannot update a destroyed WebView;

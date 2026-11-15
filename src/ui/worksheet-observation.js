@@ -2,7 +2,7 @@
 (function(){
  'use strict';
  const d=window.panaderyaCoBaker;if(!d?.help)return;
- const observation=new CoBakerWorksheet.Observation(d);
+ const observation=new CoBakerWorksheet.Observation(d,{recoveryKey:()=>g.run?.phase==='engine'&&!g.run.paused&&!g.run.procedureComplete?g.run.worksheetRewards?.attemptId:null});
  const guidance=new CoBakerWorksheet.Guidance(d);
  let host=null,frame=null,ready=false,lastVersion=0,lastSession=null,lastSnapshot='';
  let hint=null,hintTimer=null,hintFrame=null,feedbackTimer=null;
@@ -47,7 +47,7 @@
   host.querySelector('[data-observer-hint]').disabled=!!a.lostAt||!observation.cueToken;
   const p=d.peers.get(a.otherId);
   host.querySelector('#coBakerObserverName').textContent=p?`${p.name} #${p.number}`:'Your Co-Baker';
-  host.querySelector('#coBakerObserverStatus').textContent=a.lostAt?'Reconnecting… Your bakery is safe.':observation.latest?'Live worksheet':'Waiting for the learner’s worksheet…';
+  host.querySelector('#coBakerObserverStatus').textContent=a.lostAt?'Your Co-Baker is reconnecting... You can keep practicing!':observation.latest?(d.help.log[0]?.message==='Connected again!'&&d.help.clock()-d.help.log[0].at<4000?'Connected again!':'Live worksheet'):'Waiting for the learner’s worksheet…';
   const s=observation.latest?.state;
   host.querySelector('#coBakerObserverProblem').textContent=s?`${s.a} × ${s.b}`:'';
   host.querySelector('#coBakerObserverStep').textContent=s?`${steps(s)} · ${s.done} / ${s.A.length*s.B.length} digit pairs`:'';

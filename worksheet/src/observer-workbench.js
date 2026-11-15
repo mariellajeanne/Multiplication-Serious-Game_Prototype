@@ -2,9 +2,10 @@
 (function(){
  'use strict';
  const stage=document.getElementById('observedWorkbench');
- let snapshot=null,ready=false,signature='',renderVersion=0,appliedVersion=-1;
+ let snapshot=null,ready=false,signature='',renderVersion=0,appliedVersion=-1,retryAt=performance.now()+6000;
  stage.innerHTML='<header class="worksheet-order-header"><div class="worksheet-order-expression" id="observedProblem"></div><div class="worksheet-header-actions">Read-only</div></header>'+WorksheetComponents.readOnly(WorksheetComponents.workspace({done:0,total:0,complete:false}));
  const frame=document.getElementById('worksheetFrame');frame.style.visibility='hidden';frame.src='worksheet-engine.html?observe=1';frame.title='Read-only multiplication worksheet';
+ frame.onload=()=>frame.contentWindow.postMessage({source:'bc-shell',type:'hello'},location.origin);
  const report=()=>parent.postMessage({source:'pq-worksheet',type:'observer-ready'},location.origin);
  // No handler names used by production markup exist here. Block real/synthetic
  // inputs before insertion/listeners; disabled controls remain visually legible.
@@ -46,7 +47,15 @@
   if(m.type==='observe'&&CoBakerWorksheet.validSnapshot(m.snapshot)){snapshot=m.snapshot;renderVersion++;paint()}
  });
  window.addEventListener('resize',layout);
- setInterval(()=>{if(!snapshot)report();else if(ready&&appliedVersion!==renderVersion)layout()},400);report();
+ setInterval(()=>{
+  if(!snapshot)report();
+  else if(ready&&appliedVersion!==renderVersion)layout();
+  else if(!ready)frame.contentWindow.postMessage({source:'bc-shell',type:'hello'},location.origin);
+  // An interrupted document load may miss the bridge script entirely. Retrying
+  // messages cannot repair that document. Reload only this read-only child;
+  // the learner and the helper's personal worksheet are never restarted.
+  if(snapshot&&appliedVersion<0&&navigator.onLine&&performance.now()>=retryAt){ready=false;retryAt=performance.now()+6000;frame.src='worksheet-engine.html?observe=1';}
+ },400);report();
  // Read-only test/inspection surface, never a command bridge.
  window.getObservedWorksheetState=()=>{try{return frame.contentWindow.eval('cloneWorksheetState(s)')}catch(_){return null}};
 })();

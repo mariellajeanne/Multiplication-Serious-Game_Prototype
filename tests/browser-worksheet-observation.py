@@ -144,7 +144,7 @@ try:
         assert learner.evaluate('localStorage.panaderyaQuestV2')==before
         learner.screenshot(path=str(out/'learner-pointer-hint.png'));helper.screenshot(path=str(out/'helper-pointing-1024.png'))
         # Third Baker forges otherwise valid reservation data; it cannot guide.
-        forged=helper.evaluate('({kind:"hint",sessionId:panaderyaCoBaker.help.active.sessionId,streamId:panaderyaCoBaker.observation.streamId,cueToken:panaderyaCoBaker.observation.cueToken,recipientId:panaderyaCoBaker.help.active.otherId,sequence:9000,hint:"retry"})')
+        forged=helper.evaluate('({kind:"hint",sessionId:panaderyaCoBaker.help.active.sessionId,streamId:panaderyaCoBaker.observation.streamId,cueToken:panaderyaCoBaker.observation.cueToken,stateVersion:panaderyaCoBaker.observation.received,recipientId:panaderyaCoBaker.help.active.otherId,sequence:9000,hint:"retry"})')
         learner_id=learner.evaluate('panaderyaCoBaker.profile.id')
         text=learner.locator('#coBakerProceduralHint').inner_text()
         other.evaluate('([id,h])=>panaderyaCoBaker.help.send(id,h)',[learner_id,forged]);helper.wait_for_timeout(200)

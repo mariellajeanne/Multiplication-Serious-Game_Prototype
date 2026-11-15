@@ -23,18 +23,22 @@
   state(id){return this.presence.get(id)||{available:false,busy:true,status:'Connecting'} }
   eligible(id){return this.d.peers.has(id)&&this.state(id).status==='Available'&&id!==this.d.profile.id}
   online(){this.lastAdvertise=0;this.broadcastPresence();this.changed()}
+  expired(){return !!this.active?.lostAt&&this.clock()-this.active.lostAt>=GRACE_MS}
+  reconnecting(){if(this.active&&!this.active.lostAt){this.active.lostAt=this.clock();this.changed()}}
+  reconnected(){if(!this.active||this.expired())return false;const lost=!!this.active.lostAt;this.active.lostAt=0;if(lost)this.note('Connected again!');else this.changed();return true}
   offline(){this.presence.clear();this.incoming.clear();this.lastAdvertise=0;if(this.outgoing){this.outgoing.waiting=true}if(this.active&&!this.active.lostAt)this.active.lostAt=this.clock();this.changed()}
   peer(id){
    const session=this.d.peers.get(id)?.session;
+   if(this.expired()){this.end();return}
    if(this.active?.otherId===id&&this.active.otherSession&&session!==this.active.otherSession){
     // A refreshed observer must prove its old reservation before sharing resumes.
-    if(this.d.observation&&this.active.role==='Learner'){
+    if(this.d.observation){
      if(!this.active.lostAt)this.active.lostAt=this.clock();
      this.changed();return;
     }
     this.active=null;this.note('Co-Baker restarted. The previous help session ended safely.');
    }
-   this.presence.delete(id);this.send(id,{kind:'presence',available:this.available,busy:this.isBusy()});if(this.active?.otherId===id){this.active.lostAt=0}this.changed()}
+   this.presence.delete(id);this.send(id,{kind:'presence',available:this.available,busy:this.isBusy()});if(this.active?.otherId===id&&!this.d.observation){this.active.lostAt=0}this.changed()}
   left(id){this.presence.delete(id);for(const [key,v]of this.incoming)if(v.ownerId===id)this.incoming.delete(key);
    if(this.accepting?.ownerId===id)this.accepting=null;
    if(this.active?.otherId===id&&!this.active.lostAt)this.active.lostAt=this.clock();
@@ -107,14 +111,14 @@
     this.active={sessionId:h.sessionId,requestId:h.requestId,otherId:id,otherSession:m.session,role:'Helper',lostAt:0};
     this.broadcastPresence();this.note(`Connected with ${m.player.name} #${m.player.number}!`);return;
    }
-   if(h.kind==='end'&&this.active?.otherId===id&&this.active.sessionId===h.sessionId){this.active=null;this.broadcastPresence();this.note('Your Co-Baker left the session.')}
+   if(h.kind==='end'&&this.active?.otherId===id&&this.active.sessionId===h.sessionId&&this.d.peers.get(id)?.session===m.session){this.active=null;this.broadcastPresence();this.note('Your Co-Baker left. You can keep practicing!')}
   }
   tick(){const now=this.clock();let changed=false;
    for(const [key,v]of this.incoming)if(v.expiresAt<=now){this.incoming.delete(key);changed=true}
    if(this.accepting?.expiresAt<=now){this.accepting=null;changed=true}
    if(this.outgoing&&(this.outgoing.expiresAt<=now||!this.activeWorksheet())){this.cancel();this.note('Help request ended.');changed=true}
    if(this.active){if(this.active.role==='Learner'&&!this.activeWorksheet()){this.end();changed=true}
-    else if(this.active.lostAt&&now-this.active.lostAt>=GRACE_MS){this.active=null;this.broadcastPresence();this.note('Co-Baker disconnected. You can keep playing.');changed=true}}
+    else if(this.expired()){this.end();this.note('Your Co-Baker left. You can keep practicing!');changed=true}}
    if(this.d.running&&this.d.transport&&now-this.lastAdvertise>=5000&&this.d.peers.size)this.broadcastPresence();
    if(changed)this.changed();
   }

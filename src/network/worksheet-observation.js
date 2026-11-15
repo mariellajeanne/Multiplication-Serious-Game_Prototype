@@ -1,7 +1,8 @@
-/* Phases 3A/3B: bounded observation and ephemeral guidance; no game commands. */
+/* Phases 3A-3C: bounded observation, recovery and ephemeral guidance; no game commands. */
 (function(root){
  'use strict';
  const ID=/^[a-f0-9]{32}$/;
+ const validId=v=>typeof v==='string'&&ID.test(v);
  const hints=Object.freeze({ones:'Check the ones column!',carry:"Don't forget the carry!",next:'Look at the next digit!',place:'Check where this number goes!',add:'Remember to add the rows!',retry:'Try that step again!'});
  const validTarget=t=>typeof t==='string'&&/^(?:(?:top|bottom|carry|sum):[0-6]|slot:[01]:[0-6]|calculator:(?:product|tray|ones|tens|carry)|control:(?:generate|undo|add|challenge))$/.test(t);
  function targetExists(t,data){
@@ -15,7 +16,7 @@
   return a==='undo'||a==='add'&&s.phase==='sum'||a==='generate'&&!!c?.generate||a==='challenge'&&!!c?.offered;
  }
  function validCue(h){
-  return keys(h,['kind','sessionId','streamId','recipientId','cueToken','sequence','target','hint'])&&
+  return keys(h,['kind','sessionId','streamId','recipientId','cueToken','sequence','stateVersion','target','hint'])&&Number.isSafeInteger(h.stateVersion)&&h.stateVersion>0&&
    ['sessionId','streamId','recipientId','cueToken'].every(k=>typeof h[k]==='string'&&ID.test(h[k]))&&Number.isSafeInteger(h.sequence)&&h.sequence>0&&
    (h.kind==='point'?!('hint'in h)&&validTarget(h.target):h.kind==='hint'&&!('target'in h)&&typeof h.hint==='string'&&Object.hasOwn(hints,h.hint));
  }
@@ -58,32 +59,55 @@
  }
  function validMessage(h){
   if(h?.kind==='point'||h?.kind==='hint')return validCue(h);
-  if(!ID.test(h?.sessionId)||!ID.test(h?.streamId))return false;
-  if(h.kind==='watch')return keys(h,['kind','sessionId','streamId','previousSession'])&&(!('previousSession'in h)||ID.test(h.previousSession));
-  return h.kind==='worksheet'&&keys(h,['kind','sessionId','streamId','version','snapshot','cueToken'])&&(!('cueToken'in h)||typeof h.cueToken==='string'&&ID.test(h.cueToken))&&Number.isSafeInteger(h.version)&&h.version>0&&validSnapshot(h.snapshot);
+  if(h?.kind==='resume')return keys(h,['kind','sessionId','previousSession'])&&validId(h.sessionId)&&validId(h.previousSession);
+  if(!validId(h?.sessionId)||!validId(h?.streamId))return false;
+  if(!Number.isSafeInteger(h.watchVersion)||h.watchVersion<1)return false;
+  if(h.kind==='watch')return keys(h,['kind','sessionId','streamId','watchVersion','previousSession'])&&(!('previousSession'in h)||validId(h.previousSession));
+  return h.kind==='worksheet'&&keys(h,['kind','sessionId','streamId','watchVersion','version','snapshot','cueToken'])&&(!('cueToken'in h)||typeof h.cueToken==='string'&&ID.test(h.cueToken))&&Number.isSafeInteger(h.version)&&h.version>0&&validSnapshot(h.snapshot);
  }
  class Observation{
-  constructor(discovery){
-   this.d=discovery;this.activeId=null;this.streamId=null;this.version=0;this.received=0;this.latest=null;this.signature='';this.listeners=new Set();this.lastRequest=0;this.cueToken=null;this.cueExpires=0;this.cueTokens=new Map();
+  constructor(discovery,options={}){
+   this.d=discovery;this.storage=options.storage;try{this.storage=this.storage||root.sessionStorage}catch(_){}
+   this.recoveryKey=options.recoveryKey||(()=>null);
+   this.activeId=null;this.streamId=null;this.version=0;this.received=0;this.watchVersion=0;this.latest=null;this.signature='';this.listeners=new Set();this.lastRequest=0;this.cueToken=null;this.cueExpires=0;this.cueTokens=new Map();this.suspended=false;this.connection=discovery.session;this.lastContact=0;
    discovery.observation=this;
-   // Tab-local, short-lived reservation only; never write the bakery save.
-   try{const saved=JSON.parse(root.sessionStorage?.getItem('panaderyaObserverV1')||'null');
-    if(saved?.expires>Date.now()&&saved.expires<=Date.now()+15000&&saved.owner===discovery.profile.id&&ID.test(saved.connection)&&saved.active?.role==='Helper'&&['sessionId','requestId','otherId','otherSession'].every(k=>ID.test(saved.active[k]))){discovery.help.active={...saved.active,lostAt:discovery.help.clock()};this.previousSession=saved.connection;}
+   // Tab-local reservation metadata only. A learner must still own the exact
+   // persisted worksheet attempt. Never restore remote math/actions or rewards.
+   try{const saved=JSON.parse(this.storage?.getItem('panaderyaObserverV1')||'null');
+    if(saved?.expires>this.now()&&saved.expires<=this.now()+15000&&saved.owner===discovery.profile.id&&ID.test(saved.connection)&&['Helper','Learner'].includes(saved.active?.role)&&['sessionId','requestId','otherId','otherSession'].every(k=>ID.test(saved.active[k]))&&['version','received','watchVersion'].every(k=>Number.isSafeInteger(saved[k])&&saved[k]>=0)&&(saved.active.role==='Helper'||saved.attempt&&saved.attempt===this.recoveryKey())){
+     discovery.help.active={...saved.active,lostAt:saved.expires-15000};this.previousSession=saved.connection;this.restored=saved;
+     discovery.peerSessions.set(saved.active.otherId,saved.active.otherSession);
+    }
    }catch(_){}
    discovery.help.observe(()=>this.refresh());
   }
+  now(){return this.d.help.clock()}
+  persist(){const a=this.d.help.active;try{if(a)this.storage?.setItem('panaderyaObserverV1',JSON.stringify({owner:this.d.profile.id,connection:this.previousSession||this.d.session,active:a,attempt:a.role==='Learner'?this.recoveryKey():null,version:this.version,received:this.received,watchVersion:this.watchVersion,expires:a.lostAt?a.lostAt+15000:this.now()+15000}));else this.storage?.removeItem('panaderyaObserverV1')}catch(_){}}
   observe(fn){this.listeners.add(fn);fn(this);return ()=>this.listeners.delete(fn)}
   changed(){for(const fn of this.listeners)fn(this)}
+  revoke(){this.cueToken=null;this.cueExpires=0;this.cueTokens.clear()}
   refresh(){
-   const a=this.d.help.active;
-   try{if(a?.role==='Helper')root.sessionStorage?.setItem('panaderyaObserverV1',JSON.stringify({owner:this.d.profile.id,connection:this.previousSession||this.d.session,active:a,expires:Date.now()+15000}));else root.sessionStorage?.removeItem('panaderyaObserverV1')}catch(_){}
+   const a=this.d.help.active,now=this.now();
    if(a?.sessionId!==this.activeId){this.activeId=a?.sessionId||null;this.streamId=null;this.latest=null;this.signature='';this.version=0;this.received=0;this.lastRequest=0;
-    this.cueToken=null;this.cueExpires=0;this.cueTokens.clear();
-    if(a?.role==='Helper')this.streamId=root.CoBakerCore.packet(this.d.profile,this.d.session,'hello').id;
+    this.watchVersion=0;this.lastContact=now;this.suspended=false;this.revoke();
+    if(this.restored){for(const k of ['version','received','watchVersion'])this[k]=this.restored[k];this.restored=null}
+    else this.previousSession=null;
    }
-   if(a?.lostAt){this.cueToken=null;this.cueExpires=0;this.cueTokens.clear();}
-   if(a?.role==='Helper'&&!a.lostAt&&this.d.peers.has(a.otherId)&&(!this.latest||Date.now()-this.lastRequest>3000)){
-    this.lastRequest=Date.now();this.d.help.send(a.otherId,{kind:'watch',sessionId:a.sessionId,streamId:this.streamId,...(this.previousSession?{previousSession:this.previousSession}:{})});
+   if(a&&this.connection!==this.d.session){this.previousSession=this.previousSession||this.connection;this.connection=this.d.session;this.d.help.reconnecting();return}
+   this.connection=this.d.session;
+   // Discovery alone is not proof that observation has synchronized. A new
+   // stream rejects buffered snapshots from before this interruption.
+   if(a?.lostAt&&!this.suspended){this.suspended=true;this.revoke();this.signature='';this.lastRequest=0;if(a.role==='Helper')this.streamId=null;}
+   this.persist();
+   if(!a||this.d.help.expired()){this.changed();return}
+   if(!a.lostAt&&now-this.lastContact>9000){this.d.help.reconnecting();return}
+   const online=this.d.running&&['connected','searching'].includes(this.d.status)&&this.d.peers.has(a.otherId);
+   if(online&&now-this.lastRequest>=3000){
+    if(a.role==='Helper'){
+     if(!this.streamId)this.streamId=root.CoBakerCore.packet(this.d.profile,this.d.session,'hello').id;
+     this.lastRequest=now;++this.watchVersion;this.persist();
+     this.d.help.send(a.otherId,{kind:'watch',sessionId:a.sessionId,streamId:this.streamId,watchVersion:this.watchVersion,...(this.previousSession?{previousSession:this.previousSession}:{})});
+    }else if(this.previousSession){this.lastRequest=now;this.d.help.send(a.otherId,{kind:'resume',sessionId:a.sessionId,previousSession:this.previousSession})}
    }
    this.changed();
   }
@@ -92,49 +116,57 @@
    if(!a||a.role!=='Learner'||a.lostAt||!this.streamId||!this.d.help.activeWorksheet()||this.d.peers.get(a.otherId)?.session!==a.otherSession)return false;
    const data=snapshot(session,this.presentation?.(session));if(!data)return false;
    const signature=JSON.stringify(data);if(signature===this.signature)return false;
-   const ok=this.d.help.send(a.otherId,{kind:'worksheet',sessionId:a.sessionId,streamId:this.streamId,version:++this.version,snapshot:data,...(this.cueToken?{cueToken:this.cueToken}:{})});
+   // Tokens identify a particular visual state, including calculator entry.
+   // A point for a reused digit/column must never land on a later step.
+   if(this.latest&&JSON.stringify(this.latest)!==signature)this.revoke();
+   if(!this.cueToken)this.lease();
+   ++this.version;this.persist();
+   const ok=this.d.help.send(a.otherId,{kind:'worksheet',sessionId:a.sessionId,streamId:this.streamId,watchVersion:this.watchVersion,version:this.version,snapshot:data,...(this.cueToken?{cueToken:this.cueToken}:{})});
    if(ok){this.signature=signature;this.latest=data}return ok;
+  }
+  lease(){this.cueToken=root.CoBakerCore.packet(this.d.profile,this.d.session,'hello').id;this.cueExpires=this.now()+6500;
+   for(const [token,lease]of this.cueTokens)if(lease.expires<=this.now())this.cueTokens.delete(token);
+   this.cueTokens.set(this.cueToken,{expires:this.cueExpires,firstVersion:this.version+1});while(this.cueTokens.size>3)this.cueTokens.delete(this.cueTokens.keys().next().value);
   }
   receive(m){
    const a=this.d.help.active,h=m.help;
-   if(validMessage(h)&&h.kind==='watch'&&(!a||a.sessionId!==h.sessionId)){
+   if(!validMessage(h))return;
+   if(['watch','resume'].includes(h.kind)&&(!a||a.sessionId!==h.sessionId)){
     this.d.help.send(m.player.id,{kind:'end',sessionId:h.sessionId});return;
    }
-   if(a?.role==='Learner'&&h.kind==='watch'&&validMessage(h)&&a.sessionId===h.sessionId&&a.otherId===m.player.id&&h.previousSession===a.otherSession&&this.d.peers.get(a.otherId)?.session===m.session&&a.lostAt&&this.d.help.clock()-a.lostAt<15000){
-    a.otherSession=m.session;a.lostAt=0;this.streamId=null;this.signature='';this.d.help.changed();
+   if(!a||a.sessionId!==h.sessionId||a.otherId!==m.player.id||this.d.peers.get(a.otherId)?.session!==m.session)return;
+   if(this.d.help.expired()){this.d.help.end();return}
+   if(h.kind==='resume'&&a.role==='Helper'){
+    if(m.session!==a.otherSession&&(!a.lostAt||h.previousSession!==a.otherSession))return;
+    a.otherSession=m.session;this.d.help.reconnecting();this.lastRequest=0;this.refresh();return;
    }
-   if(!a||!validMessage(h)||a.sessionId!==h.sessionId||a.otherId!==m.player.id||a.otherSession!==m.session||this.d.peers.get(a.otherId)?.session!==m.session||a.lostAt)return;
    if(h.kind==='watch'&&a.role==='Learner'&&this.d.help.activeWorksheet()){
-    // Each request is a fresh snapshot. Versions never decrease within a stream.
-    if(this.streamId!==h.streamId){if(this.streamId)return;this.streamId=h.streamId;}
-    this.cueToken=root.CoBakerCore.packet(this.d.profile,this.d.session,'hello').id;this.cueExpires=this.d.help.clock()+6500;
-    // Briefly overlapping leases let a cue already in flight survive a watch
-    // refresh. Never extend an older lease; disconnect revokes all of them.
-    for(const [token,expires]of this.cueTokens)if(expires<=this.d.help.clock())this.cueTokens.delete(token);
-    this.cueTokens.set(this.cueToken,this.cueExpires);while(this.cueTokens.size>3)this.cueTokens.delete(this.cueTokens.keys().next().value);
-    this.signature='';this.onSnapshot?.();return;
+    if(h.watchVersion<=this.watchVersion||m.session!==a.otherSession&&(!a.lostAt||h.previousSession!==a.otherSession))return;
+    a.otherSession=m.session;this.streamId=h.streamId;this.watchVersion=h.watchVersion;this.previousSession=null;this.lastContact=this.now();this.suspended=false;
+    this.d.help.reconnected();this.lease();this.signature='';this.onSnapshot?.();this.persist();return;
    }
-   if(h.kind==='worksheet'&&a.role==='Helper'&&h.streamId===this.streamId&&h.version>this.received){this.previousSession=null;this.received=h.version;this.latest=h.snapshot;this.cueToken=h.cueToken||null;this.changed()}
+   if(h.kind==='worksheet'&&a.role==='Helper'&&m.session===a.otherSession&&h.streamId===this.streamId&&h.watchVersion===this.watchVersion&&h.version>this.received){this.previousSession=null;this.received=h.version;this.latest=h.snapshot;this.cueToken=h.cueToken||null;this.lastContact=this.now();this.suspended=false;this.d.help.reconnected();this.persist();this.changed()}
   }
  }
  // Ephemeral presentation messages only. No worksheet command or save access.
  class Guidance{
-  constructor(d){this.d=d;d.guidance=this;this.listeners=new Set();this.key=null;this.sequence=0;this.received=0;this.sentAt={};this.acceptedAt={};d.help.observe(()=>this.refresh());}
+  constructor(d){this.d=d;d.guidance=this;this.listeners=new Set();this.key=null;this.sequence=0;this.received=0;this.sentAt={};this.acceptedAt={};d.help.observe(()=>this.refresh());d.observation?.observe(()=>this.refresh());}
   observe(fn){this.listeners.add(fn);return ()=>this.listeners.delete(fn)}
   emit(cue){for(const fn of this.listeners)fn(cue)}
-  refresh(){const a=this.d.help.active,key=a&&!a.lostAt?`${a.sessionId}:${a.otherSession}`:null;if(key!==this.key){this.key=key;this.sequence=0;this.received=0;this.sentAt={};this.acceptedAt={};this.emit(null)}}
+  refresh(){const a=this.d.help.active,key=a&&!a.lostAt?`${a.sessionId}:${a.otherSession}:${this.d.observation?.streamId}`:null;if(key!==this.key){this.key=key;this.sequence=0;this.received=0;this.sentAt={};this.acceptedAt={};this.emit(null)}}
   send(kind,value){
    const d=this.d,a=d.help.active,o=d.observation,now=d.help.clock();
    if(!a||a.role!=='Helper'||a.lostAt||!o?.cueToken||!o.latest||d.peers.get(a.otherId)?.session!==a.otherSession||!['point','hint'].includes(kind))return false;
    if(kind==='point'?!targetExists(value,o.latest):typeof value!=='string'||!Object.hasOwn(hints,value))return false;
    if(now-(this.sentAt[kind]??-Infinity)<(kind==='hint'?2500:600))return false;
-   const h={kind,sessionId:a.sessionId,streamId:o.streamId,recipientId:a.otherId,cueToken:o.cueToken,sequence:++this.sequence,...(kind==='point'?{target:value}:{hint:value})};
+   const h={kind,sessionId:a.sessionId,streamId:o.streamId,recipientId:a.otherId,cueToken:o.cueToken,stateVersion:o.received,sequence:++this.sequence,...(kind==='point'?{target:value}:{hint:value})};
    if(!d.help.send(a.otherId,h))return false;
    this.sentAt[kind]=now;this.emit({...h,own:true});return true;
   }
   receive(m){
    const d=this.d,a=d.help.active,o=d.observation,h=m.help,now=d.help.clock();
-   if(!validCue(h)||!a||a.role!=='Learner'||a.lostAt||!d.help.activeWorksheet()||a.sessionId!==h.sessionId||a.otherId!==m.player.id||h.recipientId!==d.profile.id||a.otherSession!==m.session||d.peers.get(a.otherId)?.session!==m.session||h.streamId!==o?.streamId||!(o.cueTokens.get(h.cueToken)>now)||h.sequence<=this.received)return false;
+   const lease=o?.cueTokens.get(h?.cueToken);
+   if(!validCue(h)||!a||a.role!=='Learner'||a.lostAt||!d.help.activeWorksheet()||a.sessionId!==h.sessionId||a.otherId!==m.player.id||h.recipientId!==d.profile.id||a.otherSession!==m.session||d.peers.get(a.otherId)?.session!==m.session||h.streamId!==o?.streamId||!(lease?.expires>now)||h.stateVersion<lease.firstVersion||h.stateVersion>o.version||h.sequence<=this.received)return false;
    // Consume the sequence even when rate limited; it cannot be replayed later.
    this.received=h.sequence;
    if(now-(this.acceptedAt[h.kind]??-Infinity)<(h.kind==='hint'?2500:600))return false;
