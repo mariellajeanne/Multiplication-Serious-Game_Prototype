@@ -1,7 +1,7 @@
 # Co-Baker remote browser testing (temporary, internet required)
 
 This is an **opt-in development tool**, not the final Android LAN solution.
-It connects a GitHub Pages game to a **separate, password-protected WebSocket relay** on your laptop through a Cloudflare Quick Tunnel. Testers may be on different Wi-Fi networks or in different cities. **No worksheet, bakery saves, mastery or rewards are transmitted.** Only existing Phase 1A/1B presence, test messages and coordinator metadata are supported. Call for Help is not implemented yet.
+It connects a GitHub Pages game to a **separate, password-protected WebSocket relay** on your laptop through a Cloudflare Quick Tunnel. Testers may be on different Wi-Fi networks or in different cities. **No worksheet, bakery saves, mastery or rewards are transmitted.** Phase 2 adds availability, Call for Help invitations, first-helper-wins reservations, and session-ending messages. Live worksheets, hints, and rewards are not transmitted or implemented yet.
 
 This mode requires a current GitHub Pages deployment containing the patch. Ordinary visitors without debug query parameters remain in solo mode. The remote relay publishes **no game files, repository paths or `/__co-baker/config` endpoint**. It listens on `127.0.0.1`, not on your LAN address. Keep its password private to your small trusted testing group.
 
@@ -21,7 +21,7 @@ npm.cmd run dev:cobaker:remote
 
 **Important:** Replace `YOUR-USERNAME` with the GitHub Pages site's **actual origin**, e.g. `https://mariellajeanne.github.io` if the page URL starts with that domain. Do **not** include the `/repository/` path. The relay refuses to start without an explicit origin and a password of at least 12 characters. To allow both a local test page and GitHub Pages, separate exact origins with commas. Never use `*`.
 
-The relay listens on `http://127.0.0.1:5512` by default. The only ordinary HTTP endpoint is `/health`; all other HTTP paths return 404. It routes only authenticated and schema-validated Co-Baker test messages, and separates peers by a chosen **test group**. Stop with Ctrl+C. Clear the password from the PowerShell session when finished: `Remove-Item Env:COBAKER_REMOTE_PASSPHRASE`.
+The relay listens on `http://127.0.0.1:5512` by default. The only ordinary HTTP endpoint is `/health`; all other HTTP paths return 404. It routes only authenticated and schema-validated Co-Baker test and invitation messages, and separates peers by a chosen **test group**. Stop with Ctrl+C. Clear the password from the PowerShell session when finished: `Remove-Item Env:COBAKER_REMOTE_PASSPHRASE`.
 
 ## 3. Create an outbound-only temporary tunnel
 
@@ -44,7 +44,7 @@ This prints a temporary URL like `https://random-words.trycloudflare.com`. Copy 
 5. Enter the shared testing password; click **Connect to test Bakers**.
 6. Repeat on Chrome, Edge, an Android tablet's browser or a distant groupmate's computer, each using a separate browser profile with its own Baker ID.
 
-The tunnel URL and group are remembered only for the current browser tab/session. The password is **not saved to browser storage or included in links**; re-enter it after a page refresh. You should see each other's names and four-digit numbers, send test messages, and elect one coordinator. Close the coordinator's tab: the others should elect a replacement while the relay stays online.
+The tunnel URL and group are remembered only for the current browser tab/session. The password is **not saved to browser storage or included in links**; re-enter it after a page refresh. You should see each other's names and four-digit numbers, send test messages, and elect one coordinator. During an active order, use **Call for Help** to send direct invitations or **Call All**. The recipient can accept or decline without interrupting their own worksheet; acceptance only reserves the session for now. Close the coordinator's tab: the others should elect a replacement while the relay stays online.
 
 If two users choose **different test groups**, their discovery/message traffic stays separated even though they use the same tunnel and password.
 

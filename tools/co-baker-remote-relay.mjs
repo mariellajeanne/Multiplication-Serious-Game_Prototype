@@ -57,7 +57,7 @@ export async function startRemoteRelay({port=5512,host='127.0.0.1',passphrase,al
    }
    if(active(ws.group,ws.player.id)!==ws)return;
    if(frame.kind!=='send'||Object.keys(frame).some(k=>!['kind','to','message'].includes(k))||
-      !['test','reply','coord'].includes(m.type)||JSON.stringify(m.player)!==JSON.stringify(ws.player)||m.session!==ws.session)throw Error('Invalid route');
+      !['test','reply','coord','help'].includes(m.type)||JSON.stringify(m.player)!==JSON.stringify(ws.player)||m.session!==ws.session)throw Error('Invalid route');
    const peer=active(ws.group,frame.to);if(peer)send(peer,{kind:'message',message:m});
   }catch(_){ws.close(1008,'Invalid development message')}});
   ws.on('close',()=>{

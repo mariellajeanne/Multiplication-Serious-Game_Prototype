@@ -63,7 +63,7 @@ public final class LanDiscovery {
     }
     @JavascriptInterface public void stop(){main.post(()->{enabled=false;shutdown();});}
     @JavascriptInterface public void send(String id,String json){
-        try{JSONObject m=parse(json);if(hello==null||!Arrays.asList("test","coord").contains(m.getString("type"))||!m.getJSONObject("player").getString("id").equals(hello.getJSONObject("player").getString("id"))||!m.getString("session").equals(hello.getString("session")))return;
+        try{JSONObject m=parse(json);if(hello==null||!Arrays.asList("test","coord","help").contains(m.getString("type"))||!m.getJSONObject("player").getString("id").equals(hello.getJSONObject("player").getString("id"))||!m.getString("session").equals(hello.getString("session")))return;
             Endpoint endpoint=peers.get(id);if(endpoint!=null)submit(()->exchange(id,endpoint,m));
         }catch(Exception e){status("searching","Test could not be sent");}
     }
@@ -169,17 +169,42 @@ public final class LanDiscovery {
         if(!c.has("leader"))throw new JSONException("Missing leader");
         if(!c.isNull("leader")){JSONObject leader=c.getJSONObject("leader");onlyKeys(leader,"id","session","term");id(leader,"id");id(leader,"session");long leaderTerm=term(leader,"term");if(leaderTerm==0||leaderTerm>epoch)throw new JSONException("Invalid leader term");}
     }
+    private static void validateHelp(JSONObject h)throws JSONException{
+        String kind=h.getString("kind");
+        switch(kind){
+            case "presence":
+                onlyKeys(h,"kind","available","busy");
+                if(!(h.opt("available") instanceof Boolean)||!(h.opt("busy") instanceof Boolean))throw new JSONException("Invalid availability");
+                return;
+            case "end":onlyKeys(h,"kind","sessionId");id(h,"sessionId");return;
+            case "invite":
+                onlyKeys(h,"kind","requestId","expiresAt");id(h,"requestId");
+                if(!(h.opt("expiresAt") instanceof Number)||h.getDouble("expiresAt")!=h.getLong("expiresAt")||h.getLong("expiresAt")<=0)throw new JSONException("Invalid invitation expiry");
+                return;
+            case "accept":case "decline":case "cancel":
+                onlyKeys(h,"kind","requestId");id(h,"requestId");return;
+            case "assigned":
+                onlyKeys(h,"kind","requestId","sessionId","helperId");id(h,"requestId");id(h,"sessionId");id(h,"helperId");return;
+            case "unavailable":
+                onlyKeys(h,"kind","requestId","reason");id(h,"requestId");
+                if(!Arrays.asList("taken","expired","canceled","busy","invalid").contains(h.getString("reason")))throw new JSONException("Invalid reason");
+                return;
+            default:throw new JSONException("Unknown help message");
+        }
+    }
     private static JSONObject parse(String text)throws JSONException{
         if(text==null||text.length()>2048)throw new JSONException("Message too large");JSONObject m=new JSONObject(text),p=m.getJSONObject("player");
-        Set<String> keys=new HashSet<>(Arrays.asList("v","id","session","player","type","replyTo","coord"));Iterator<String> it=m.keys();while(it.hasNext())if(!keys.contains(it.next()))throw new JSONException("Unknown field");
+        Set<String> keys=new HashSet<>(Arrays.asList("v","id","session","player","type","replyTo","coord","help"));Iterator<String> it=m.keys();while(it.hasNext())if(!keys.contains(it.next()))throw new JSONException("Unknown field");
         for(String key:Arrays.asList("id","session","type"))if(!(m.opt(key) instanceof String))throw new JSONException("Invalid field type");
         for(String key:Arrays.asList("id","name","number"))if(!(p.opt(key) instanceof String))throw new JSONException("Invalid profile type");
         if(!(m.opt("v") instanceof Number)||m.getDouble("v")!=1.0||m.has("replyTo")&&(!(m.opt("replyTo") instanceof String)||!m.getString("replyTo").matches("[a-f0-9]{32}")))throw new JSONException("Invalid version or reply");
         String name=p.getString("name");if(!java.text.Normalizer.isNormalized(name,java.text.Normalizer.Form.NFC)||!name.equals(name.trim())||name.matches("(?s).*[\\x00-\\x1f\\x7f-\\x9f\\u202a-\\u202e\\u2066-\\u2069].*"))throw new JSONException("Invalid name");
-        if(p.length()!=3||!p.has("id")||!p.has("name")||!p.has("number")||m.getInt("v")!=1||!m.getString("id").matches("[a-f0-9]{32}")||!m.getString("session").matches("[a-f0-9]{32}")||!p.getString("id").matches("[a-f0-9]{32}")||!p.getString("number").matches("[0-9]{4}")||p.getString("name").trim().isEmpty()||p.getString("name").length()>24||!Arrays.asList("hello","test","reply","coord").contains(m.getString("type"))||"reply".equals(m.getString("type"))&&!m.getString("replyTo").matches("[a-f0-9]{32}"))throw new JSONException("Invalid protocol");
+        if(p.length()!=3||!p.has("id")||!p.has("name")||!p.has("number")||m.getInt("v")!=1||!m.getString("id").matches("[a-f0-9]{32}")||!m.getString("session").matches("[a-f0-9]{32}")||!p.getString("id").matches("[a-f0-9]{32}")||!p.getString("number").matches("[0-9]{4}")||p.getString("name").trim().isEmpty()||p.getString("name").length()>24||!Arrays.asList("hello","test","reply","coord","help").contains(m.getString("type"))||"reply".equals(m.getString("type"))&&!m.getString("replyTo").matches("[a-f0-9]{32}"))throw new JSONException("Invalid protocol");
         if(m.has("replyTo")&&!"reply".equals(m.getString("type")))throw new JSONException("Unexpected reply");
         if("coord".equals(m.getString("type")))validateCoordinator(m.getJSONObject("coord"));
         else if(m.has("coord"))throw new JSONException("Unexpected coordinator data");
+        if("help".equals(m.getString("type")))validateHelp(m.getJSONObject("help"));
+        else if(m.has("help"))throw new JSONException("Unexpected help data");
         return m;
     }
 }

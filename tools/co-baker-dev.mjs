@@ -47,7 +47,7 @@ export async function startDevServer({port=5500,host='0.0.0.0'}={}){
     broadcast(presence(ws),m.player.id);return;
    }
    if(clients.get(ws.player.id)?.values().next().value!==ws)return;
-   if(frame.kind!=='send'||Object.keys(frame).some(k=>!['kind','to','message'].includes(k))||!['test','reply','coord'].includes(m.type)||JSON.stringify(m.player)!==JSON.stringify(ws.player)||m.session!==ws.session)throw Error('Invalid route');
+   if(frame.kind!=='send'||Object.keys(frame).some(k=>!['kind','to','message'].includes(k))||!['test','reply','coord','help'].includes(m.type)||JSON.stringify(m.player)!==JSON.stringify(ws.player)||m.session!==ws.session)throw Error('Invalid route');
    const peer=clients.get(frame.to)?.values().next().value;if(peer)send(peer,{kind:'message',message:m});
   }catch(_){ws.close(1008,'Invalid development message')}});
   ws.on('close',()=>{clearTimeout(deadline);if(!ws.player)return;const set=clients.get(ws.player.id);const wasActive=set?.values().next().value===ws;set?.delete(ws);if(!set?.size){clients.delete(ws.player.id);broadcast({kind:'left',playerId:ws.player.id},ws.player.id)}else if(wasActive){const next=[...set][0];send(next,{kind:'status',status:'searching'});for(const [id,peers]of clients)if(id!==next.player.id)send(next,presence([...peers][0]));broadcast(presence(next),next.player.id)}});
