@@ -75,3 +75,54 @@ test('shared observer components render supplied calculator values and strip exe
  assert.match(html,/>73<\/output>/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img| onclick=/);assert.match(html,/button disabled aria-disabled="true"/);
  const small=WorksheetComponents.layout({rows:2,cols:4,available:390,byWidth:90});assert.ok(small.cell>=44&&small.height<=390);
 });
+
+function guidedPair(){const p=pair();p.ag=new w.Guidance(p.a);p.bg=new w.Guidance(p.b);p.cg=new w.Guidance(p.c);p.ag.targetVisible=()=>true;p.cues=[];p.ag.observe(cue=>p.cues.push(cue));return p}
+test('semantic pointers and six preset hints are presentation-only and limited to the confirmed helper',()=>{
+ const {n,a,b,c,ao,bo,ag,bg,cg,cues}=guidedPair();const before=JSON.stringify(ao.latest);
+ assert.ok(bg.send('point','top:1'));n.flush();assert.equal(cues.at(-1).target,'top:1');
+ assert.ok(bg.send('hint','carry'));n.flush();assert.equal(cues.at(-1).hint,'carry');assert.equal(cues.at(-1).name,'Baker');
+ assert.equal(ag.send('point','top:0'),false);assert.equal(cg.send('hint','ones'),false);
+ assert.equal(JSON.stringify(ao.latest),before);assert.deepEqual(bo.latest.state,initial);
+ const h={kind:'point',sessionId:a.help.active.sessionId,streamId:ao.streamId,cueToken:ao.cueToken,recipientId:a.profile.id,sequence:30,target:'top:0'};
+ c.help.send(a.profile.id,h);n.flush();assert.equal(cues.length,2);
+ for(const patch of [{recipientId:b.profile.id},{sessionId:n.id(90)},{streamId:n.id(91)},{cueToken:n.id(92)},{target:'top:6'},{target:'slot:1:0'}]){b.help.send(a.profile.id,{...h,...patch});n.flush()}assert.equal(cues.length,2);
+ assert.equal(JSON.stringify(ao.latest),before);
+});
+test('guidance rejects malformed payloads, duplicate sequences, flood attempts and hidden targets',()=>{
+ const {n,a,b,ao,ag,bg,cues}=guidedPair();
+ const h={kind:'hint',sessionId:a.help.active.sessionId,streamId:ao.streamId,cueToken:ao.cueToken,recipientId:a.profile.id,sequence:1,hint:'ones'};
+ for(const patch of [{hint:['ones']},{hint:'The answer is 72'},{target:'top:0'},{sequence:0},{sequence:1.5},{recipientId:[]},{command:'undo'}])assert.equal(api.validHelp({...h,...patch}),false);
+ b.help.send(a.profile.id,h);n.flush();assert.equal(cues.length,1);
+ n.advance(2600);b.help.send(a.profile.id,h);n.flush();assert.equal(cues.length,1);
+ for(let sequence=2;sequence<20;sequence++){b.help.send(a.profile.id,{...h,sequence});n.flush()}assert.equal(cues.length,2);
+ n.advance(2600);b.help.send(a.profile.id,{...h,sequence:19});n.flush();assert.equal(cues.length,2);
+ ag.targetVisible=()=>false;assert.ok(bg.send('point','top:0'));n.flush();assert.equal(cues.length,2);
+ assert.equal(bg.send('point','top:1'),false);assert.equal(bg.send('hint','free text'),false);assert.equal(bg.send('hint',['ones']),false);
+});
+test('ending and disconnect revoke cues; reconnection never replays an old token',()=>{
+ const {n,a,b,ao,bo,ag,bg,cues}=guidedPair();
+ const old={kind:'point',sessionId:a.help.active.sessionId,streamId:ao.streamId,cueToken:ao.cueToken,recipientId:a.profile.id,sequence:99,target:'carry:1'};
+ assert.ok(bg.send('point','slot:0:0'));n.flush();assert.equal(cues.at(-1).target,'slot:0:0');
+ b.help.offline();a.help.left(b.profile.id);assert.equal(cues.at(-1),null);assert.equal(ao.cueToken,null);assert.equal(bg.send('hint','retry'),false);
+ b.help.online();b.help.peer(a.profile.id);a.help.peer(b.profile.id);bo.lastRequest=0;bo.refresh();n.flush();assert.notEqual(ao.cueToken,old.cueToken);
+ b.help.send(a.profile.id,old);n.flush();assert.equal(cues.at(-1),null);
+ assert.ok(bg.send('point','carry:1'));n.flush();assert.equal(cues.at(-1).target,'carry:1');
+ a.help.end();n.flush();assert.equal(cues.at(-1),null);b.help.send(a.profile.id,old);n.flush();assert.equal(cues.at(-1),null);
+});
+test('tokens expire on learner time and calculator/carry targets follow visible presentation',()=>{
+ const {n,a,b,ao,bg,cues}=guidedPair();assert.equal(bg.send('point','calculator:product'),false);
+ ao.presentation=()=>view;ao.publish({state:initial});n.flush();
+ for(const t of ['calculator:product','calculator:tray','calculator:ones','calculator:tens','carry:1','slot:0:3','control:undo'])assert.ok(w.targetExists(t,ao.latest),t);
+ for(const t of ['calculator:carry','control:generate','control:add','sum:0','slot:1:0'])assert.equal(w.targetExists(t,ao.latest),false,t);
+ n.advance(6501);assert.ok(bg.send('point','calculator:product'));n.flush();assert.equal(cues.length,0);
+});
+test('watch token rotation accepts an in-flight cue only within its original lease',()=>{
+ const {n,a,b,ao,bo,cues}=guidedPair();
+ const h={kind:'hint',sessionId:a.help.active.sessionId,streamId:ao.streamId,cueToken:ao.cueToken,recipientId:a.profile.id,sequence:1,hint:'next'};
+ n.advance(1000);bo.lastRequest=0;bo.refresh();n.flush();assert.notEqual(ao.cueToken,h.cueToken);
+ b.help.send(a.profile.id,h);n.flush();assert.equal(cues.at(-1).hint,'next');
+ n.advance(5600);bo.lastRequest=0;bo.refresh();n.flush();
+ b.help.send(a.profile.id,{...h,sequence:2});n.flush();assert.equal(cues.length,1);
+ b.help.send(a.profile.id,{...h,cueToken:ao.cueToken,sequence:3});n.flush();assert.equal(cues.length,2);
+ a.help.left(b.profile.id);assert.equal(ao.cueTokens.size,0);
+});

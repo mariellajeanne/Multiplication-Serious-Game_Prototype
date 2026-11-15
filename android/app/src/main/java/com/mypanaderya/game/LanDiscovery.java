@@ -224,10 +224,18 @@ public final class LanDiscovery {
     private static void validateHelp(JSONObject h)throws JSONException{
         String kind=h.getString("kind");
         switch(kind){
+            case "point":case "hint":
+                onlyKeys(h,"kind","sessionId","streamId","recipientId","cueToken","sequence","point".equals(kind)?"target":"hint");
+                for(String key:Arrays.asList("sessionId","streamId","recipientId","cueToken"))id(h,key);
+                if(!(h.opt("sequence") instanceof Number)||h.getDouble("sequence")!=h.getLong("sequence")||h.getLong("sequence")<1||h.getLong("sequence")>9007199254740991L)throw new JSONException("Invalid guidance sequence");
+                if("point".equals(kind)){
+                    if(!(h.opt("target") instanceof String)||!h.getString("target").matches("(?:(?:top|bottom|carry|sum):[0-6]|slot:[01]:[0-6]|calculator:(?:product|tray|ones|tens|carry)|control:(?:generate|undo|add|challenge))"))throw new JSONException("Invalid semantic target");
+                }else if(!(h.opt("hint") instanceof String)||!Arrays.asList("ones","carry","next","place","add","retry").contains(h.getString("hint")))throw new JSONException("Invalid procedural hint");
+                return;
             case "watch":
                 onlyKeys(h,"kind","sessionId","streamId","previousSession");id(h,"sessionId");id(h,"streamId");if(h.has("previousSession"))id(h,"previousSession");return;
             case "worksheet":
-                onlyKeys(h,"kind","sessionId","streamId","version","snapshot");id(h,"sessionId");id(h,"streamId");
+                onlyKeys(h,"kind","sessionId","streamId","version","snapshot","cueToken");id(h,"sessionId");id(h,"streamId");if(h.has("cueToken"))id(h,"cueToken");
                 if(!(h.opt("version") instanceof Number)||h.getDouble("version")!=h.getLong("version")||h.getLong("version")<1||h.getLong("version")>9007199254740991L)throw new JSONException("Invalid worksheet version");
                 JSONObject snapshot=h.getJSONObject("snapshot");onlyKeys(snapshot,"schema","state","presentation");
                 int schema=worksheetInt(snapshot,"schema",2);if(schema<1||schema==1&&snapshot.has("presentation"))throw new JSONException("Invalid worksheet schema");

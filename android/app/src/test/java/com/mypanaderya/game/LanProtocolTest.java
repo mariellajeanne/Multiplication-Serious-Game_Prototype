@@ -66,6 +66,18 @@ public class LanProtocolTest {
         state.put("coins",10);rejects(m);state.remove("coins");state.put("phase","<script>");rejects(m);
         state.put("phase","select");h.put("version",0);rejects(m);h.put("version","1");rejects(m);
     }
+    @Test public void guidanceIsBoundedAndNeverContainsCommandsOrFreeText() throws Exception {
+        JSONObject h=new JSONObject().put("kind","point").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32))
+            .put("recipientId","f".repeat(32)).put("cueToken","a".repeat(32)).put("sequence",1).put("target","carry:1");
+        JSONObject m=hello().put("type","help").put("help",h);parse(m.toString());
+        for(String target:new String[]{"slot:0:0","calculator:product","calculator:carry","control:undo"}){h.put("target",target);parse(m.toString());}
+        for(Object target:new Object[]{"slot:9:0","#math","top:7",new JSONArray().put("top:0")}){h.put("target",target);rejects(m);}
+        h.remove("target");h.put("kind","hint").put("hint","carry");parse(m.toString());
+        h.put("hint","The answer is 72");rejects(m);h.put("hint",new JSONArray().put("carry"));rejects(m);h.put("hint","carry");
+        h.put("sequence",0);rejects(m);h.put("sequence","1");rejects(m);h.put("sequence",1);
+        h.put("recipientId","invalid");rejects(m);h.put("recipientId","f".repeat(32));
+        h.put("command","undo");rejects(m);
+    }
     private String readFrame(byte[] bytes) throws Exception {
         try(ServerSocket server=new ServerSocket(0,1,InetAddress.getLoopbackAddress());
             Socket writer=new Socket(InetAddress.getLoopbackAddress(),server.getLocalPort());

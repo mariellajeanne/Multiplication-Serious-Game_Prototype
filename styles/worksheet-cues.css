@@ -1,0 +1,9 @@
+/* A single quiet bakery-ink outline; never captures learner input. */
+.cobaker-point-ring{position:fixed;z-index:100100;box-sizing:border-box;pointer-events:none!important;border:3px solid #367d73;border-radius:14px;box-shadow:0 0 0 3px #fff3d9;animation:cobaker-point-in .24s ease-out}
+@keyframes cobaker-point-in{from{opacity:.25;transform:scale(1.06)}to{opacity:1;transform:scale(1)}}
+@media(prefers-reduced-motion:reduce){.cobaker-point-ring{animation:none}}
+.cobaker-guidance-controls{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;width:100%;font-size:14px}
+.cobaker-guidance-controls label{font-weight:800}.cobaker-guidance-controls select{min-height:44px;max-width:270px;padding:7px;border:2px solid #ab805b;border-radius:10px;background:#fff8e9;color:#533820;font:inherit}
+.cobaker-guidance-controls button{min-width:88px}.cobaker-guidance-controls [role=status]{min-width:120px;font-size:13px}
+.cobaker-hint{position:fixed;z-index:100020;box-sizing:border-box;padding:4px 7px;border:2px solid #ab805b;border-radius:10px;background:#fff3d9;color:#533820;box-shadow:0 3px 8px #38221122;pointer-events:none;font-size:13px;line-height:15px;text-align:center}
+.cobaker-hint strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#326e64}.cobaker-hint[hidden]{display:none}

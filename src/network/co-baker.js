@@ -20,7 +20,7 @@
    (c.leader===null||keys(c.leader,['id','session','term'])&&typeof c.leader.id==='string'&&ID.test(c.leader.id)&&typeof c.leader.session==='string'&&ID.test(c.leader.session)&&validTerm(c.leader.term)&&c.leader.term>0&&c.leader.term<=c.term);
  }
  function validHelp(h){
-  if(h?.kind==='watch'||h?.kind==='worksheet')return !!root.CoBakerWorksheet?.validMessage(h);
+  if(['watch','worksheet','point','hint'].includes(h?.kind))return !!root.CoBakerWorksheet?.validMessage(h);
   if(!keys(h,['kind','available','busy','requestId','expiresAt','sessionId','helperId','reason']))return false;
   if(h.kind==='presence')return keys(h,['kind','available','busy'])&&typeof h.available==='boolean'&&typeof h.busy==='boolean';
   if(!['invite','accept','decline','cancel','assigned','unavailable','end'].includes(h.kind))return false;
@@ -51,7 +51,7 @@
    if(sessionChanged){this.retiredSessions.add(m.player.id+':'+previous.session);if(this.retiredSessions.size>512)this.retiredSessions.delete(this.retiredSessions.values().next().value);this.coordinator?.left(m.player.id);this.help?.left(m.player.id);for(const [key,id]of this.pending)if(id===m.player.id)this.pending.delete(key)}
    this.peers.set(m.player.id,{...m.player,session:m.session,lastSeen:this.now(),status:'Connected'});this.status='connected';this.error='';
    if(isNew||sessionChanged){this.coordinator?.peer(m.player.id);this.help?.peer(m.player.id)}
-   if(m.type==='coord')this.coordinator?.receive(m);if(m.type==='help'){if(m.help.kind==='watch'||m.help.kind==='worksheet')this.observation?.receive(m);else this.help?.receive(m);}
+   if(m.type==='coord')this.coordinator?.receive(m);if(m.type==='help'){if(m.help.kind==='point'||m.help.kind==='hint')this.guidance?.receive(m);else if(m.help.kind==='watch'||m.help.kind==='worksheet')this.observation?.receive(m);else this.help?.receive(m);}
    if(m.type==='test'||m.type==='reply'&&this.pending.get(m.replyTo)===m.player.id){this.messages.unshift({from:m.player.id,label:m.player.name+' #'+m.player.number,text:m.type==='test'?'Test received':'Response received'});this.messages.length=Math.min(30,this.messages.length);if(m.type==='reply')this.pending.delete(m.replyTo)}
    this.changed();
   }

@@ -8,7 +8,7 @@
  const report=()=>parent.postMessage({source:'pq-worksheet',type:'observer-ready'},location.origin);
  // No handler names used by production markup exist here. Block real/synthetic
  // inputs before insertion/listeners; disabled controls remain visually legible.
- for(const type of ['click','dblclick','pointerdown','pointerup','pointermove','touchstart','touchend','touchmove','keydown','keyup','input','change','submit','dragstart','drop'])window.addEventListener(type,event=>{if(type==='keydown'&&event.key==='Tab')return;event.preventDefault();event.stopImmediatePropagation()},{capture:true,passive:false});
+ for(const type of ['click','dblclick','pointerdown','pointerup','pointercancel','pointermove','touchstart','touchend','touchmove','keydown','keyup','input','change','submit','dragstart','drop'])window.addEventListener(type,event=>{WorksheetCues.capture(event,target=>parent.postMessage({source:'pq-worksheet',type:'observer-point',target},location.origin));if(type==='keydown'&&event.key==='Tab')return;event.preventDefault();event.stopImmediatePropagation()},{capture:true,passive:false});
  function layout(){
   if(!snapshot)return;
   stage.style.transform='translateX(-50%)';
@@ -36,9 +36,12 @@
  }
  window.addEventListener('message',event=>{
   const m=event.data;if(event.origin!==location.origin||!m)return;
+  if(event.source===frame.contentWindow&&m.source==='pq-worksheet'&&m.type==='observer-point'&&CoBakerWorksheet.targetExists(m.target,snapshot)){parent.postMessage({source:'pq-worksheet',type:'observer-point',target:m.target},location.origin);return}
   if(event.source===frame.contentWindow&&m.source==='pq-worksheet'&&m.type==='observer-ready'){ready=true;layout();return}
   if(event.source===frame.contentWindow&&m.source==='pq-worksheet'&&m.type==='observer-applied'&&m.renderVersion===renderVersion){appliedVersion=m.renderVersion;frame.style.visibility='visible';return}
   if(event.source!==parent||m.source!=='bc-shell')return;
+  if(m.type==='cue-clear')WorksheetCues.clear();
+  if(m.type==='cue-point'&&CoBakerWorksheet.targetExists(m.target,snapshot))WorksheetCues.show(m.target);
   if(m.type==='hello')report();
   if(m.type==='observe'&&CoBakerWorksheet.validSnapshot(m.snapshot)){snapshot=m.snapshot;renderVersion++;paint()}
  });
