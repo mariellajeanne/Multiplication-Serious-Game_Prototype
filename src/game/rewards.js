@@ -93,6 +93,7 @@ function creditCompletedOrder(r=g.run){
  g.mastery+=r.mode==='normal'||r.mode==='lookup'?1:2;g.permanentLuck=Math.max(old,Math.floor(g.mastery/4));
  g.board=g.board.filter(t=>t.id!==r.ticket.id);delete g.orderRuns[r.ticket.id];g.run=null;
  if(!save()){g=JSON.parse(backup);migrateFrame11(g);render();return false}
+ if(typeof panaderyaCoBaker!=='undefined'){panaderyaCoBaker.rewards?.tick()}
  return true;
 }
 function prizeItems(){

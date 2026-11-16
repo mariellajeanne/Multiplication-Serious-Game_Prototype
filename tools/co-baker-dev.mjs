@@ -7,6 +7,7 @@ import {networkInterfaces} from 'node:os';
 import {randomBytes} from 'node:crypto';
 import {WebSocketServer} from 'ws';
 import '../src/network/worksheet-observation.js';
+import '../src/network/helper-rewards.js';
 import '../src/network/co-baker.js';
 const core=globalThis.CoBakerCore;
 export async function startDevServer({port=5500,host='0.0.0.0'}={}){

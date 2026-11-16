@@ -137,7 +137,12 @@ Prefer visual highlights and procedural cues over long text; some players should
 
 ---
 
-## 5. Helper coin bonus (tentative balancing proposal)
+## 5. Helper coin bonus (original balancing proposal)
+
+Phase 4 now implements the narrower base-only 1% per verified assisted action,
+5% per-order cap and immediate per-action delivery (the follow-up overrides claim-time delivery). The current rules and manual checks are
+in [Helper rewards](CO_BAKER_HELPER_REWARDS.md); the proposal below is retained as
+design rationale, not the implemented payout formula.
 
 ### Goals
 

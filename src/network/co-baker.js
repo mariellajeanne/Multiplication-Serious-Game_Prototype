@@ -1,4 +1,6 @@
-/* Co-Baker identity, discovery and coordinator envelopes. Read-only worksheet payloads use the bounded observation schema; saves/economy never cross this boundary. */
+/* Co-Baker identity, discovery and coordinator envelopes. Only bounded read-only
+ * worksheet snapshots and helper receipts cross this boundary; never saves or
+ * remote worksheet/economy commands. */
 (function(root){
  'use strict';
  const KEY='panaderyaPlayerV1',ID=/^[a-f0-9]{32}$/;
@@ -20,6 +22,7 @@
    (c.leader===null||keys(c.leader,['id','session','term'])&&typeof c.leader.id==='string'&&ID.test(c.leader.id)&&typeof c.leader.session==='string'&&ID.test(c.leader.session)&&validTerm(c.leader.term)&&c.leader.term>0&&c.leader.term<=c.term);
  }
  function validHelp(h){
+  if(typeof h?.kind==='string'&&h.kind.startsWith('reward-'))return !!root.CoBakerRewards?.validMessage(h);
   if(['watch','worksheet','point','hint','resume'].includes(h?.kind))return !!root.CoBakerWorksheet?.validMessage(h);
   if(!keys(h,['kind','available','busy','requestId','expiresAt','sessionId','helperId','reason']))return false;
   if(h.kind==='presence')return keys(h,['kind','available','busy'])&&typeof h.available==='boolean'&&typeof h.busy==='boolean';
@@ -52,12 +55,12 @@
    this.peerSessions.set(m.player.id,m.session);while(this.peerSessions.size>128)this.peerSessions.delete(this.peerSessions.keys().next().value);
    this.peers.set(m.player.id,{...m.player,session:m.session,lastSeen:this.now(),status:'Connected'});this.status='connected';this.error='';
    if(isNew||sessionChanged){this.coordinator?.peer(m.player.id);this.help?.peer(m.player.id)}
-   if(m.type==='coord')this.coordinator?.receive(m);if(m.type==='help'){if(m.help.kind==='point'||m.help.kind==='hint')this.guidance?.receive(m);else if(['watch','worksheet','resume'].includes(m.help.kind))this.observation?.receive(m);else this.help?.receive(m);}
+   if(m.type==='coord')this.coordinator?.receive(m);if(m.type==='help'){if(m.help.kind.startsWith('reward-'))this.rewards?.receive(m);else if(m.help.kind==='point'||m.help.kind==='hint')this.guidance?.receive(m);else if(['watch','worksheet','resume'].includes(m.help.kind))this.observation?.receive(m);else this.help?.receive(m);}
    if(m.type==='test'||m.type==='reply'&&this.pending.get(m.replyTo)===m.player.id){this.messages.unshift({from:m.player.id,label:m.player.name+' #'+m.player.number,text:m.type==='test'?'Test received':'Response received'});this.messages.length=Math.min(30,this.messages.length);if(m.type==='reply')this.pending.delete(m.replyTo)}
    this.changed();
   }
   sendTest(id){if(!this.peers.has(id)||!this.transport)return;const m=packet(this.profile,this.session,'test');this.pending.set(m.id,id);while(this.pending.size>64)this.pending.delete(this.pending.keys().next().value);try{this.transport.send(id,m);this.messages.unshift({label:'You',text:'Test sent'});this.messages.length=Math.min(30,this.messages.length);this.changed()}catch(e){this.error=String(e.message||e);this.changed()}}
-  expire(){this.coordinator?.tick();this.help?.tick();for(const [id,p] of this.peers)if(this.now()-p.lastSeen>16000){this.peers.delete(id);this.coordinator?.left(id);this.help?.left(id)}if(this.status==='connected'&&!this.peers.size)this.status='searching';this.changed()}
+  expire(){this.coordinator?.tick();this.help?.tick();this.rewards?.tick();for(const [id,p] of this.peers)if(this.now()-p.lastSeen>16000){this.peers.delete(id);this.coordinator?.left(id);this.help?.left(id)}if(this.status==='connected'&&!this.peers.size)this.status='searching';this.changed()}
  }
  root.CoBakerCore={KEY,identity,cleanName,validPacket,validHelp,packet,Discovery};
 })(globalThis);

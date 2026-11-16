@@ -1,5 +1,5 @@
 """Phase 2 only: real Edge/WebKit sockets, UI and isolated worksheet/save state."""
-import sys, os, subprocess, socket, time, urllib.request
+import sys, os, subprocess, socket, time, urllib.request, json
 from pathlib import Path
 root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / '.test-tools'))
@@ -125,7 +125,13 @@ try:
         wait(learner, 'panaderyaCoBaker.help.active?.lostAt===0')
         assert learner.evaluate('panaderyaCoBaker.help.active.sessionId') == session
         end(winner, pages)
-        for p, saved in zip(pages, saves): assert p.evaluate('localStorage.panaderyaQuestV2') == saved
+        for p, saved in zip(pages, saves):
+            before=json.loads(saved);after=json.loads(p.evaluate('localStorage.panaderyaQuestV2'))
+            for data in (before,after):
+                data.pop('coBakerRewards',None);data.pop('orderClock',None)
+                for run in [data.get('run'),*data.get('orderRuns',{}).values()]:
+                    if run:run.pop('coBakerRewards',None)
+            assert after==before
         for p, saved in zip((learner, helper), worksheets):
             assert p.evaluate('JSON.stringify(document.querySelector("#worksheetFrame").contentWindow.getWorksheetSession())') == saved
         print('PASS Call All arbitration, same-session socket reconnect and unchanged independent saves/worksheet work', flush=True)

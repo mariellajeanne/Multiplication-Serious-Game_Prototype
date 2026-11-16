@@ -39,7 +39,7 @@ The relay validates origin, a per-run token, packet schema/identity, payload siz
 registration deadline and message rate. Five-second ping/presence checks remove
 stale connections and keep peer lists fresh. This is a trusted local test tool,
 not authentication or a production networking design. Only fixed hello/test/reply and validated coordinator metadata
-messages are routed; no game saves, worksheets or reward data are transmitted.
+messages are routed; no game saves are transmitted. Bounded read-only worksheet snapshots and Phase 4 helper receipts use the same validated help envelopes.
 
 The browser adapter requires BOTH query switches AND the explicit development
 server configuration endpoint. Regular static hosting stays unavailable. The APK

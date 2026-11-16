@@ -88,6 +88,23 @@ public class LanProtocolTest {
         h=new JSONObject().put("kind","hint").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32)).put("recipientId","f".repeat(32)).put("cueToken","a".repeat(32)).put("sequence",1).put("hint","carry").put("stateVersion",1);
         m.put("help",h);parse(m.toString());h.remove("stateVersion");rejects(m);h.put("stateVersion","1");rejects(m);
     }
+    @Test public void helperRewardsUseBoundedReceiptsWithoutRemoteCommands() throws Exception {
+        JSONObject credit=new JSONObject().put("step","0:0:connect").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32)).put("cueToken","f".repeat(32)).put("sequence",1);
+        JSONObject h=new JSONObject().put("kind","reward-credit").put("id","a".repeat(32)).put("credit",credit);
+        JSONObject m=hello().put("type","help").put("help",h);parse(m.toString());
+        credit.put("step","answer:72");rejects(m);credit.put("step","0:0:connect");credit.put("sequence","1");rejects(m);credit.put("sequence",1);
+        h.put("coins",999);rejects(m);h.remove("coins");
+        JSONObject context=new JSONObject().put("id","a".repeat(32)).put("sessionId","d".repeat(32)).put("orderId",41).put("a",79).put("b",18).put("tier",1).put("bases",new JSONArray().put(100).put(176).put(310)).put("legacy",false);
+        h=new JSONObject().put("kind","reward-context").put("context",context);m.put("help",h);parse(m.toString());
+        context.put("legacy","false");rejects(m);context.put("legacy",false);context.getJSONArray("bases").put(0,"100");rejects(m);context.getJSONArray("bases").put(0,100);
+        JSONObject state=new JSONObject("{\"a\":79,\"b\":18,\"A\":[9,7],\"B\":[8,1],\"cols\":4,\"row\":1,\"k\":2,\"first\":null,\"phase\":\"complete\",\"revealed\":false,\"raw\":0,\"mixed\":false,\"incoming\":0,\"onesPlaced\":false,\"tensPlaced\":false,\"tensLocation\":null,\"chosen\":null,\"carrySlots\":{},\"rows\":[{\"0\":2,\"1\":3,\"2\":6},{\"0\":0,\"1\":9,\"2\":7}],\"sum\":{\"0\":2,\"1\":2,\"2\":4,\"3\":1},\"sumCol\":4,\"sumCarry\":0,\"done\":4,\"boxes\":4,\"complete\":true,\"carryArmed\":false}");
+        h=new JSONObject().put("kind","reward-settle").put("id","a".repeat(32)).put("credits",new JSONArray().put(credit)).put("denominations",new JSONArray().put(176).put(100).put(310).put(176)).put("proof",new JSONObject().put("schema",1).put("state",state)).put("shares",new JSONArray().put(new JSONObject().put("helperId","f".repeat(32)).put("count",1)));m.put("help",h);parse(m.toString());
+        h.getJSONArray("credits").put(credit);rejects(m);h.put("credits",new JSONArray().put(credit));h.put("command","place");rejects(m);
+        m.put("help",new JSONObject().put("kind","reward-ack").put("id","a".repeat(32)));parse(m.toString());
+        h=new JSONObject().put("kind","reward-suggested").put("id","a".repeat(32)).put("credit",credit);m.put("help",h);parse(m.toString());
+        h=new JSONObject().put("kind","reward-earned").put("id","b".repeat(32)).put("contextId","a".repeat(32)).put("credit",credit).put("base",856).put("ordinal",1).put("proof",new JSONObject().put("schema",1).put("state",state));m.put("help",h);parse(m.toString());
+        h.put("proof",JSONObject.NULL);parse(m.toString());h.put("ordinal",6);rejects(m);h.put("ordinal",1);h.put("base","856");rejects(m);h.put("base",856);h.put("coins",99);rejects(m);
+    }
     private String readFrame(byte[] bytes) throws Exception {
         try(ServerSocket server=new ServerSocket(0,1,InetAddress.getLoopbackAddress());
             Socket writer=new Socket(InetAddress.getLoopbackAddress(),server.getLocalPort());

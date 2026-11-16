@@ -39,7 +39,7 @@ test('remote adapter registers only after configuration and sends no production 
  assert.equal(instances.length,1);
  const socket=instances[0];socket.onopen();
  assert.deepEqual(socket.sent[0],{kind:'register',message:hello,group:'bakers',passphrase:'test-password-123'});
- socket.onmessage({data:JSON.stringify({kind:'status',status:'searching',protocol:6})});
+ socket.onmessage({data:JSON.stringify({kind:'status',status:'searching',protocol:8})});
  assert.equal(received.at(-1).status,'searching');
  transport.stop();
  assert.equal(socket.readyState,3);
@@ -63,10 +63,10 @@ test('legacy relay registration fails explicitly before discovery can emit Phase
 test('duplicate tab waits without election or traffic, then activates on promotion',async()=>{
  const {transport,instances,received,timers}=setup();transport.configure(config);await transport.start(hello);
  const ws=instances[0];ws.onopen();
- deliver(ws,{kind:'status',status:'unavailable',code:'identity-in-use',protocol:6});
+ deliver(ws,{kind:'status',status:'unavailable',code:'identity-in-use',protocol:8});
  assert.equal(transport.phase,'waiting');assert.equal(transport.active,true);assert.equal(timers.size,0);
  assert.match(received.at(-1).error,/another tab/);assert.throws(()=>transport.send('x',{}));
- deliver(ws,{kind:'status',status:'searching',protocol:6});
+ deliver(ws,{kind:'status',status:'searching',protocol:8});
  assert.equal(transport.phase,'ready');assert.equal(received.at(-1).error,'');
  transport.send('c'.repeat(32),{});assert.equal(ws.sent.at(-1).kind,'send');transport.stop();
 });
@@ -75,26 +75,26 @@ test('authentication and post-registration protocol closes have distinct safe er
  for(const code of ['authentication-failed','invalid-route','invalid-packet','rate-limit']){
   const {transport,instances,received}=setup();transport.configure(config);await transport.start(hello);
   const ws=instances[0];ws.onopen();
-  deliver(ws,{kind:'status',status:'unavailable',protocol:6,code,error:config.passphrase});
+  deliver(ws,{kind:'status',status:'unavailable',protocol:8,code,error:config.passphrase});
   ws.onclose({code:1008});
   assert.equal(received.length,1);assert.equal(received[0].code,code);
   assert.ok(!received[0].error.includes(config.passphrase));
  }
  const {transport,instances,received}=setup();transport.configure(config);await transport.start(hello);
- const ws=instances[0];ws.onopen();deliver(ws,{kind:'status',status:'searching',protocol:6});ws.onclose({code:1008});
+ const ws=instances[0];ws.onopen();deliver(ws,{kind:'status',status:'searching',protocol:8});ws.onclose({code:1008});
  assert.match(received.at(-1).error,/registered connection/);assert.doesNotMatch(received.at(-1).error,/password/);
 });
 
 test('reconnect ignores old socket events, waits for registration and preserves the active session',async()=>{
  const {transport,instances,received,timers}=setup();transport.configure(config);await transport.start(hello);
- const old=instances[0];old.onopen();deliver(old,{kind:'status',status:'searching',protocol:6});
+ const old=instances[0];old.onopen();deliver(old,{kind:'status',status:'searching',protocol:8});
  old.onclose({code:1006});assert.equal(transport.phase,'disconnected');
  const retry=[...timers.values()].find(t=>t.ms===2000);retry.fn();
  const next=instances[1];next.onopen();assert.equal(next.sent[0].message.session,hello.session);
  const count=received.length;deliver(old,{kind:'status',status:'unavailable',code:'authentication-failed'});old.onclose({code:1008});
  assert.equal(received.length,count);assert.equal(transport.active,true);
- deliver(next,{kind:'status',status:'searching',protocol:6});assert.equal(received.at(-1).error,'');
- transport.stop();const stopped=received.length;deliver(next,{kind:'status',status:'searching',protocol:6});assert.equal(received.length,stopped);
+ deliver(next,{kind:'status',status:'searching',protocol:8});assert.equal(received.at(-1).error,'');
+ transport.stop();const stopped=received.length;deliver(next,{kind:'status',status:'searching',protocol:8});assert.equal(received.length,stopped);
 });
 
 test('stalled registration is bounded and restarting cancels old handshake deadlines',async()=>{

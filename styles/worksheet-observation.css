@@ -4,3 +4,4 @@
 .cobaker-observation #coBakerObserverProblem{display:none}
 .cobaker-observation #coBakerObserverStatus{font-size:13px}
 .cobaker-observation{gap:5px}
+.cobaker-reward-notice{position:fixed;right:20px;bottom:20px;z-index:100020;max-width:min(330px,calc(100vw - 40px));padding:12px 16px;border:2px solid #895834;border-radius:14px;background:#fff1d5;color:#533820;box-shadow:0 4px 16px #38221133;font-size:14px;pointer-events:none}

@@ -1,5 +1,9 @@
 # Co-Baker Phase 3C: observation and session recovery
 
+Phase 4 adds [helper reward receipts](CO_BAKER_HELPER_REWARDS.md) on top of this
+observation system. The Phase 3 sections below describe the earlier no-reward
+scope; current rewards remain separate from worksheet snapshots and recovery.
+
 After accepting a Call for Help, the helper opens a separate read-only worksheet
 overlay. Back to bakery hides it; Watch worksheet reopens it. End Helping ends
 the learner-owned reservation. The helper's personal iframe remains mounted.
@@ -224,7 +228,7 @@ player ID, group, allowed origin and one-hour expiry. Only the token, expiry and
 connection metadata enter `coBakerRemoteSessionV1` in sessionStorage. Nothing enters
 URLs, localStorage, bakery saves or repository credentials. Relay restart with the
 same password preserves valid tokens; changing the password invalidates them.
-The existing protocol 6 acknowledgement has additive reconnect metadata; restart
+The existing protocol 8 acknowledgement has additive reconnect metadata; restart
 the updated relay to enable it. Android networking is unchanged.
 
 This is a development-only convenience, not hardened account authentication.

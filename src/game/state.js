@@ -151,8 +151,9 @@ function save(){
  if(typeof migrateWorksheetPractice==='function'&&!g.mathPractice)migrateWorksheetPractice(g);
  if(typeof worksheetPracticeIsCurrent==='function'&&!worksheetPracticeIsCurrent())return false;
  // Refuse to overwrite newer rewards or inventory from another tab.
+ try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if((stored?.coBakerRewards?.revision||0)>(g.coBakerRewards?.revision||0)){toast('Co-Baker rewards changed in another tab. Reload to continue.');return false}}catch(_){}
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}if((stored?.packageRevision||0)>(g.packageRevision||0)){toast('Packages changed in another tab. Reload to continue.');return false}mergePackageAcknowledgements(g,stored)}catch(_){}
- reconcileAutoEquip();reconcileOrderFoods();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
+ reconcileAutoEquip();reconcileOrderFoods();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();const rewardRevision=g.coBakerRewards?.revision||0;if(g.coBakerRewards)g.coBakerRewards.revision=rewardRevision+1;try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(g.coBakerRewards)g.coBakerRewards.revision=rewardRevision;if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
 let toastTimer=null;
 function positionNotifications(){
  const dock=$('notificationDock');if(!dock||(!g.purchaseUndo&&!$('toasts')?.childElementCount))return;

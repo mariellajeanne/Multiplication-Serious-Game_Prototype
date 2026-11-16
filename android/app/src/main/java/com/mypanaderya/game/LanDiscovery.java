@@ -227,6 +227,31 @@ public final class LanDiscovery {
     private static void validateHelp(JSONObject h)throws JSONException{
         String kind=h.getString("kind");
         switch(kind){
+            case "reward-context":
+                onlyKeys(h,"kind","context");JSONObject context=h.getJSONObject("context");
+                onlyKeys(context,"id","sessionId","orderId","a","b","tier","bases","legacy","quote");
+                if(context.has("quote"))positiveVersion(context,"quote");
+                id(context,"id");id(context,"sessionId");positiveVersion(context,"orderId");
+                if(worksheetInt(context,"a",99999)<1||worksheetInt(context,"b",99)<1)throw new JSONException("Invalid reward operands");
+                worksheetInt(context,"tier",7);worksheetFlags(context,"legacy");rewardAmounts(context.getJSONArray("bases"),3,true);return;
+            case "reward-credit":case "reward-suggested":
+                onlyKeys(h,"kind","id","credit");id(h,"id");validateRewardCredit(h.getJSONObject("credit"));return;
+            case "reward-earned":
+                onlyKeys(h,"kind","id","contextId","credit","base","ordinal","proof");id(h,"id");id(h,"contextId");validateRewardCredit(h.getJSONObject("credit"));positiveVersion(h,"base");
+                if(worksheetInt(h,"ordinal",5)<1||!h.has("proof"))throw new JSONException("Invalid earned receipt");
+                if(!h.isNull("proof")){JSONObject earnedProof=h.getJSONObject("proof");onlyKeys(earnedProof,"schema","state","presentation");int earnedSchema=worksheetInt(earnedProof,"schema",2);if(earnedSchema<1||earnedSchema==1&&earnedProof.has("presentation"))throw new JSONException("Invalid earned proof schema");if(earnedSchema==2)validatePresentation(earnedProof.getJSONObject("presentation"));validateWorksheet(earnedProof.getJSONObject("state"));}return;
+            case "reward-ack":onlyKeys(h,"kind","id");id(h,"id");return;
+            case "reward-settle":
+                onlyKeys(h,"kind","id","credits","denominations","proof","shares");id(h,"id");
+                org.json.JSONArray credits=h.getJSONArray("credits");if(credits.length()<1||credits.length()>5)throw new JSONException("Invalid reward credits");
+                Set<String> credited=new HashSet<>();for(int i=0;i<credits.length();i++){JSONObject credit=credits.getJSONObject(i);validateRewardCredit(credit);if(!credited.add(credit.getString("step")))throw new JSONException("Duplicate reward credit");}
+                rewardAmounts(h.getJSONArray("denominations"),10,false);
+                org.json.JSONArray shares=h.getJSONArray("shares");if(shares.length()<1||shares.length()>5)throw new JSONException("Invalid reward shares");
+                int totalCredits=0;Set<String> helpers=new HashSet<>();for(int i=0;i<shares.length();i++){JSONObject share=shares.getJSONObject(i);onlyKeys(share,"helperId","count");id(share,"helperId");int count=worksheetInt(share,"count",5);if(count<1||!helpers.add(share.getString("helperId")))throw new JSONException("Invalid helper share");totalCredits+=count;}
+                if(totalCredits>5)throw new JSONException("Reward cap exceeded");
+                JSONObject proof=h.getJSONObject("proof");onlyKeys(proof,"schema","state","presentation");
+                int proofSchema=worksheetInt(proof,"schema",2);if(proofSchema<1||proofSchema==1&&proof.has("presentation"))throw new JSONException("Invalid proof schema");
+                if(proofSchema==2)validatePresentation(proof.getJSONObject("presentation"));validateWorksheet(proof.getJSONObject("state"));return;
             case "point":case "hint":
                 onlyKeys(h,"kind","sessionId","streamId","recipientId","cueToken","sequence","stateVersion","point".equals(kind)?"target":"hint");
                 for(String key:Arrays.asList("sessionId","streamId","recipientId","cueToken"))id(h,key);
@@ -266,6 +291,17 @@ public final class LanDiscovery {
                 return;
             default:throw new JSONException("Unknown help message");
         }
+    }
+    // Schema compatibility only; receipt verification and settlement remain in
+    // the existing JavaScript owners. No LAN discovery or routing changes.
+    private static void validateRewardCredit(JSONObject credit)throws JSONException{
+        onlyKeys(credit,"step","sessionId","streamId","cueToken","sequence");
+        for(String key:Arrays.asList("sessionId","streamId","cueToken"))id(credit,key);positiveVersion(credit,"sequence");
+        if(!(credit.opt("step") instanceof String)||!credit.getString("step").matches("(?:[01]:[0-4]:(?:connect|reveal|carry-down|carry-up|place-ones|place-tens)|complete)"))throw new JSONException("Invalid reward step");
+    }
+    private static void rewardAmounts(org.json.JSONArray values,int max,boolean positive)throws JSONException{
+        if(values.length()<1||values.length()>max)throw new JSONException("Invalid reward amounts");
+        for(int i=0;i<values.length();i++){Object v=values.opt(i);if(!(v instanceof Number))throw new JSONException("Invalid reward amount type");double n=values.getDouble(i);if(Double.isNaN(n)||Double.isInfinite(n)||n<0||positive&&n==0||n>9007199254740991d)throw new JSONException("Invalid reward amount");}
     }
     private static JSONObject parse(String text)throws JSONException{
         if(text==null||text.length()>8192)throw new JSONException("Message too large");JSONObject m=new JSONObject(text),p=m.getJSONObject("player");

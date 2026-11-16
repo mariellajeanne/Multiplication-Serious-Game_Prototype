@@ -58,6 +58,7 @@ function applyWorksheetActions(r,actions){
   if(action.kind==='combo'){
    r.bridgeDone=Math.max(r.bridgeDone||0,index+1);r.correct+=2;
   }
+  if(typeof panaderyaCoBaker!=='undefined'&&panaderyaCoBaker.rewards?.accepted(r,action)==='retry'){delete ledger.actions[id];return false}
   if(typeof usesStepCoins==='function'&&usesStepCoins(r)){
    if(action.kind==='combo'){
     const receipt=grantWorksheetStepCoin(r,step);
@@ -131,9 +132,10 @@ function handleWorksheetMessage(ev){
   if(m.ticket?.id!==r.ticket.id||m.top!==r.ticket.a||m.bottom!==r.ticket.b)return;
   if(!r.steps.every(step=>ledger.actions[worksheetActionId(ledger.attemptId,step.row,step.col,'combo')]))return;
   const id=`${ledger.attemptId}/complete`;
-  sendEngine('completion-ack',{attemptId:ledger.attemptId});
-  if(ledger.actions[id])return;
+  if(ledger.actions[id]){sendEngine('completion-ack',{attemptId:ledger.attemptId});return}
   ledger.actions[id]=true;
+  if(typeof panaderyaCoBaker!=='undefined'&&panaderyaCoBaker.rewards?.accepted(r,{id,kind:'complete'})==='retry'){delete ledger.actions[id];return}
+  sendEngine('completion-ack',{attemptId:ledger.attemptId});
   r.correct+=1;if(!(typeof usesStepCoins==='function'&&usesStepCoins(r)))earnCoin(.65);finishSum();return;
  }
  updateWorksheetPool();save();

@@ -34,6 +34,14 @@ def connect(p):
 def wait(p, expression):
     p.wait_for_function(expression, timeout=30000,polling=100)
 
+def personal_save(p):
+    data=json.loads(p.evaluate('localStorage.panaderyaQuestV2'))
+    # Phase 4 may persist guidance witnesses, never personal gameplay changes.
+    data.pop('coBakerRewards',None);data.pop('orderClock',None)
+    for run in [data.get('run'),*data.get('orderRuns',{}).values()]:
+        if run:run.pop('coBakerRewards',None)
+    return data
+
 def call(p, target=None):
     if target:
         wait(p, f'panaderyaCoBaker.help.eligible("{target}")')
@@ -78,15 +86,16 @@ def point(learner, helper, target, touch=False):
         if box:break
         helper.wait_for_timeout(50);box=doc.locator(selector).bounding_box()
     assert box,target
-    before=learner.evaluate('({save:localStorage.panaderyaQuestV2,state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})')
-    own=helper.evaluate('localStorage.panaderyaQuestV2')
+    before=learner.evaluate('({state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})');before_save=personal_save(learner)
+    own=personal_save(helper)
     x,y=box['x']+box['width']/2,box['y']+box['height']/2
     if touch:helper.touchscreen.tap(x,y)
     else:helper.mouse.click(x,y)
     ring(learner,target)
     wait(helper,'''target=>{const d=document.querySelector('#coBakerObservation iframe').contentWindow.WorksheetCues.resolve(target)?.ownerDocument;return !!d?.querySelector('.cobaker-point-ring')}'''.replace('target=>','()=>').replace('resolve(target)',f'resolve({json.dumps(target)})'))
-    assert learner.evaluate('({save:localStorage.panaderyaQuestV2,state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})')==before
-    assert helper.evaluate('localStorage.panaderyaQuestV2')==own
+    assert learner.evaluate('({state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})')==before
+    assert personal_save(learner)==before_save
+    assert personal_save(helper)==own
 
 def hint(learner,helper,key='ones'):
     wait(helper,'panaderyaCoBaker.help.clock()-(panaderyaCoBaker.guidance.sentAt.hint??0)>=2500')
@@ -283,7 +292,7 @@ try:
         assert learner.evaluate('g.run.paused && !!g.run.worksheetSession')
         if remote:
             learner.reload();wait(learner,'panaderyaCoBaker.status==="connected"');assert learner.evaluate('panaderyaCoBaker.help.active') is None
-        after=json.loads(helper.evaluate('localStorage.panaderyaQuestV2'));save_before.pop('orderClock',None);after.pop('orderClock',None);assert after==save_before
+        after=personal_save(helper);save_before.pop('orderClock',None);save_before.pop('coBakerRewards',None);after['coins']-=helper.evaluate('Object.values(g.coBakerRewards?.receivedRewards||{}).reduce((n,e)=>n+e.coins,0)');assert after==save_before
         assert helper.evaluate('JSON.stringify(g.run.worksheetSession.state)')==own
         assert other.evaluate('localStorage.panaderyaQuestV2')==other_before
         assert not errors,errors

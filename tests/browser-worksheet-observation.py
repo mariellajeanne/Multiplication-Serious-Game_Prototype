@@ -33,6 +33,13 @@ def connect(p):
 def wait(p, expression):
     p.wait_for_function(expression, timeout=30000,polling=100)
 
+def personal_save(p):
+    data=json.loads(p.evaluate('localStorage.panaderyaQuestV2'))
+    data.pop('coBakerRewards',None);data.pop('orderClock',None)
+    for run in [data.get('run'),*data.get('orderRuns',{}).values()]:
+        if run:run.pop('coBakerRewards',None)
+    return data
+
 def call(p, target=None):
     if target:
         wait(p, f'panaderyaCoBaker.help.eligible("{target}")')
@@ -75,15 +82,16 @@ def point(learner, helper, target, touch=False):
         if box:break
         helper.wait_for_timeout(50);box=doc.locator(selector).bounding_box()
     assert box,target
-    before=learner.evaluate('({save:localStorage.panaderyaQuestV2,state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})')
-    own=helper.evaluate('localStorage.panaderyaQuestV2')
+    before=learner.evaluate('({state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})');before_save=personal_save(learner)
+    own=personal_save(helper)
     x,y=box['x']+box['width']/2,box['y']+box['height']/2
     if touch:helper.touchscreen.tap(x,y)
     else:helper.mouse.click(x,y)
     ring(learner,target)
     wait(helper,'''target=>{const d=document.querySelector('#coBakerObservation iframe').contentWindow.WorksheetCues.resolve(target)?.ownerDocument;return !!d?.querySelector('.cobaker-point-ring')}'''.replace('target=>','()=>').replace('resolve(target)',f'resolve({json.dumps(target)})'))
-    assert learner.evaluate('({save:localStorage.panaderyaQuestV2,state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})')==before
-    assert helper.evaluate('localStorage.panaderyaQuestV2')==own
+    assert learner.evaluate('({state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})')==before
+    assert personal_save(learner)==before_save
+    assert personal_save(helper)==own
 
 def hint(learner,helper,key='ones'):
     wait(helper,'panaderyaCoBaker.help.clock()-(panaderyaCoBaker.guidance.sentAt.hint??0)>=2500')
@@ -140,8 +148,8 @@ try:
         assert inner.evaluate('selector=>heldPointTarget===document.querySelector(selector)','[data-top="1"]')
         helper.mouse.up();ring(learner,'top:1')
         # The learner can still use the highlighted operand directly.
-        before=learner.evaluate('localStorage.panaderyaQuestV2');hint(learner,helper,'carry')
-        assert learner.evaluate('localStorage.panaderyaQuestV2')==before
+        before=personal_save(learner);hint(learner,helper,'carry')
+        assert personal_save(learner)==before
         learner.screenshot(path=str(out/'learner-pointer-hint.png'));helper.screenshot(path=str(out/'helper-pointing-1024.png'))
         # Third Baker forges otherwise valid reservation data; it cannot guide.
         forged=helper.evaluate('({kind:"hint",sessionId:panaderyaCoBaker.help.active.sessionId,streamId:panaderyaCoBaker.observation.streamId,cueToken:panaderyaCoBaker.observation.cueToken,stateVersion:panaderyaCoBaker.observation.received,recipientId:panaderyaCoBaker.help.active.otherId,sequence:9000,hint:"retry"})')
@@ -152,7 +160,10 @@ try:
         other.evaluate('([id,h])=>panaderyaCoBaker.help.send(id,{...h,kind:"point",hint:undefined,target:"top:0"})',[learner_id,forged]);helper.wait_for_timeout(200)
         assert learner.evaluate('WorksheetCues.resolve("top:0").ownerDocument.querySelector(".cobaker-point-ring")?.dataset.cobakerTarget')!='top:0'
         # A rapid repeated send is limited locally; no notification stack.
-        helper.locator('[data-observer-hint]').click();assert helper.locator('#coBakerCueStatus').inner_text()=='Wait a moment…'
+        # Two sends in the same turn verify the limiter independently of browser
+        # scheduling and screenshot time between the preceding assertions.
+        helper.evaluate('panaderyaCoBaker.guidance.sentAt.hint=-Infinity;document.querySelector("[data-observer-hint]").click();document.querySelector("[data-observer-hint]").click()')
+        assert helper.locator('#coBakerCueStatus').inner_text()=='Wait a moment…'
         assert learner.locator('#coBakerProceduralHint').count()==1
         learner.wait_for_selector('#coBakerProceduralHint',state='detached',timeout=6000)
         wait(learner,'!WorksheetCues.resolve("top:0").ownerDocument.querySelector(".cobaker-point-ring")')
@@ -161,7 +172,7 @@ try:
         fr.locator('[data-top="0"]').click();fr.locator('[data-bottom="0"]').click()
         wait(learner,'g.run.worksheetSession.state.phase==="product"')
         # Deterministic offer fixture; production challenge acceptance/answer rules run unchanged.
-        learner.evaluate('const a=ensureFactAnswer(g.run,g.run.steps[0]);a.offered=true;a.multiplier=3;paintWorksheetExperience()')
+        learner.evaluate('const a=ensureFactAnswer(g.run,g.run.steps[0]);a.offered=true;a.multiplier=3;paintWorksheetExperience();save()')
         synced(learner,helper);helper.screenshot(path=str(out/'helper-golden-offer.png'))
         observer=helper.locator('#coBakerObservation iframe').element_handle().content_frame()
         assert observer.locator('#goldenChallenge').is_disabled()
@@ -188,14 +199,14 @@ try:
         for target in ('calculator:tray','calculator:tens','calculator:ones','slot:0:0'):point(learner,helper,target,touch=True)
         # Probe synthetic input and parent input commands against the observer.
         before=helper.evaluate('JSON.stringify(panaderyaCoBaker.observation.latest)')
-        learner_before=learner.evaluate('JSON.stringify(g.run)');helper_before=helper.evaluate('localStorage.panaderyaQuestV2')
+        learner_before=learner.evaluate('JSON.stringify(g.run)');helper_before=personal_save(helper)
         helper.evaluate('''()=>{const f=document.querySelector('#coBakerObservation iframe');f.contentWindow.document.querySelector('#generateAnswer')?.click();f.contentWindow.document.querySelector('#worksheetFrame').contentWindow.document.querySelector('[data-top]').click();f.contentWindow.postMessage({source:'bc-shell',type:'undo'},location.origin);f.contentWindow.postMessage({source:'bc-shell',type:'start',ticket:{a:1,b:1},attemptId:'intruder'},location.origin)}''')
         helper.evaluate('document.querySelector("#coBakerObservation").focus()');helper.keyboard.type('12')
         assert observer.evaluate('typeof generateWorksheetAnswer')=='undefined'
         assert observer.evaluate('typeof sendEngine')=='undefined'
         helper.wait_for_timeout(250);assert helper.evaluate('JSON.stringify(panaderyaCoBaker.observation.latest)')==before;synced(learner,helper)
         assert learner.evaluate('JSON.stringify(g.run)')==learner_before
-        assert helper.evaluate('localStorage.panaderyaQuestV2')==helper_before
+        assert personal_save(helper)==helper_before
         # Real provisional placement: write the ones and temporarily put tens in the row.
         tile=learner.locator('[data-answer-digit="ones"]').bounding_box();destination=fr.locator('[data-slot="0:0"]').bounding_box()
         learner.mouse.move(tile['x']+tile['width']/2,tile['y']+tile['height']/2);learner.mouse.down()
@@ -255,7 +266,8 @@ try:
         assert other.evaluate('panaderyaCoBaker.observation.latest') is None
         # Normal page reload refreshes the order-generation clock only.
         before_save=json.loads(helper_save);after_save=json.loads(helper.evaluate('localStorage.panaderyaQuestV2'))
-        before_save.pop('orderClock',None);after_save.pop('orderClock',None)
+        before_save.pop('orderClock',None);after_save.pop('orderClock',None);before_save.pop('coBakerRewards',None);after_save.pop('coBakerRewards',None)
+        after_save['coins']-=helper.evaluate('Object.values(g.coBakerRewards?.receivedRewards||{}).reduce((n,e)=>n+e.coins,0)')
         assert after_save==before_save
         assert other.evaluate('localStorage.panaderyaQuestV2')==other_save
         # Refresh restores personal session via its ordinary save; observation never writes to it.
