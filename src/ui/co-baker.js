@@ -8,7 +8,10 @@
  const webTest=!native&&!remoteTest&&debug&&params.get('webrelay')==='1';
  const transport=native?{label:'Android Native',start:m=>native.start(JSON.stringify(m)),stop:()=>native.stop(),send:(id,m)=>native.send(id,JSON.stringify(m))}:remoteTest?new RemoteTestTransport(event=>service?.receive(event)):webTest?new BrowserTestTransport(event=>service?.receive(event)):null;
  if(profile){service=new core.Discovery(profile,transport);window.panaderyaCoBaker=service;if(!remoteTest||transport.restore(profile.id))service.start()}
- window.addEventListener('co-baker-native',e=>{try{service?.receive(e.detail)}catch(_){}});
+ window.addEventListener('co-baker-native',e=>{
+  if(e.detail?.kind==='copy-details'){const status=document.getElementById('coBakerCopyStatus');if(status){status.textContent=e.detail.status==='copied'?'Copied!':'Could not copy. Try again.';setTimeout(()=>{if(status.isConnected)status.textContent=''},2500)}return;}
+  try{service?.receive(e.detail)}catch(_){}
+ });
  window.addEventListener('co-baker-resume',()=>service?.start());
  document.addEventListener('visibilitychange',()=>{if(webTest||remoteTest){if(!document.hidden)service?.coordinator?.resume();return;}if(document.hidden)service?.stop();else service?.start()});
  window.addEventListener('pagehide',()=>{if(webTest||remoteTest)service?.stop()});
@@ -34,10 +37,12 @@
   panel.innerHTML=`<h3>This Player</h3><p>${escape(profile?.name||'Unavailable')} #${profile?.number||'----'}</p><p role="status">${escape(service?.status||'unavailable')}${service?.status==='searching'&&!peers.length?' · No players found':''}</p><p>${escape(service?.error||'')}</p><h3>Nearby Bakers · ${peers.length}</h3><div class="co-baker-peers">${peers.map((p,i)=>`<div><span>${escape(p.name)} #${p.number}${peers.some(q=>q.id!==p.id&&q.name===p.name&&q.number===p.number)?` · nearby ${i+1}`:''}<small>${service?.help?.state(p.id).status||p.status}</small></span><button class="secondary" data-peer="${p.id}">Send test</button></div>`).join('')}</div><h3>Test messages</h3><ul>${(service?.messages||[]).map(m=>`<li>${escape(m.label)}: ${m.text}</li>`).join('')}</ul><details><summary>Debug identity</summary><code>${profile?.id||'Unavailable'}</code><p>Display identities are unverified. No game data is shared.</p></details>`;
   const c=service?.coordinator?.snapshot();
   if(c){const section=document.createElement('section');section.id='coBakerCoordinator';section.dataset.leader=c.leader?.id||'';section.dataset.role=c.role;section.dataset.status=c.status;section.dataset.term=String(c.term);
-   section.innerHTML=`<h3>Coordinator Status</h3><p>Coordinator: ${c.profile?escape(c.profile.name)+' #'+c.profile.number:'None'}</p><p>My Role: ${c.role} &middot; Connected participants: ${c.participants}</p><p>Status: ${c.status}</p><details><summary>Coordinator debug details</summary><p>Term: ${c.term} &middot; Heartbeat age: ${Math.floor(c.heartbeatAge/1000)}s</p><code>${c.leader?escape(c.leader.id+' / '+c.leader.session):'No current coordinator'}</code><p>Advisory presence only; no game actions are authorized.</p></details>`;
+   section.innerHTML=`<h3>Coordinator Status</h3><p>Coordinator: ${c.profile?escape(c.profile.name)+' #'+c.profile.number:'None'}</p><p>My Role: ${c.role} &middot; Connected participants: ${c.participants}</p><p>Local coordinator status: ${c.status}${!peers.length?" (no remote peers discovered)":""}</p><details><summary>Coordinator debug details</summary><p>Term: ${c.term} &middot; Heartbeat age: ${Math.floor(c.heartbeatAge/1000)}s</p><code>${c.leader?escape(c.leader.id+' / '+c.leader.session):'No current coordinator'}</code><p>Advisory presence only; no game actions are authorized.</p></details>`;
    panel.querySelectorAll('h3')[1].before(section);
   }
+  if(!peers.length){const note=document.createElement('p');note.textContent='No peers found: check router WLAN Partition / AP or client isolation and multicast filtering. Local coordinator health does not confirm discovery.';panel.appendChild(note)}
   const label=document.createElement('p');label.textContent='Transport: '+(transport?.label||'Unavailable');panel.prepend(label);
+  if(native){const diagnostics=document.createElement('section');diagnostics.innerHTML='<h3>Native LAN diagnostics</h3>';const helpStatus=document.createElement('p');helpStatus.textContent='Call for Help: '+(window.panaderyaCoBakerHelpDiagnostic||'UI not initialized');diagnostics.appendChild(helpStatus);try{const values=JSON.parse(native.diagnostics());for(const [key,value]of Object.entries(values)){const row=document.createElement('p');row.textContent=key+': '+value;diagnostics.appendChild(row)}}catch(_){diagnostics.append('Native diagnostics unavailable: bridge call failed')}panel.appendChild(diagnostics)}
   panel.querySelectorAll('details').forEach((d,i)=>d.open=!!expanded[i]);if(focused)panel.querySelector(`[data-peer="${focused}"]`)?.focus({preventScroll:true});
   panel.querySelectorAll('[data-peer]').forEach(button=>button.onclick=()=>service.sendTest(button.dataset.peer));
  }
@@ -68,6 +73,17 @@
      service?.stop();service?.start();paint();
     }catch(error){status.dataset.validationError='true';status.textContent=String(error.message||error)}
    });
+  }
+  if(native&&debug){
+   const tools=document.createElement('div'),copy=document.createElement('button'),status=document.createElement('span');
+   copy.type='button';copy.className='secondary';copy.textContent='Copy Details';copy.id='coBakerCopyDetails';status.id='coBakerCopyStatus';status.setAttribute('role','status');
+   tools.append(copy,status);document.getElementById('coBakerTest').before(tools);
+   copy.onclick=()=>{const c=service?.coordinator?.snapshot();try{native.copyDetails(JSON.stringify({Transport:transport.label,Status:service?.status||'unavailable','Nearby Bakers':service?.peers.size||0,'Connected participants':c?.participants||0,'Coordinator role':c?.role||'Unavailable','Coordinator status':c?.status||'Unavailable','Call for Help':window.panaderyaCoBakerHelpDiagnostic||'Not initialized','Transport error':native?service?.error||'':''}));}catch(_){status.textContent='Could not copy. Try again.'}};
+   const panel=document.getElementById('coBakerTest'),form=document.createElement('form');
+   form.id='coBakerDirectProbe';
+   form.innerHTML='<details><summary>Debug direct TCP probe (optional)</summary><p>Reachability check only. Use the other device�s displayed IPv4 and listener port. Students do not need this.</p><label for="coBakerProbeIp">Peer IPv4</label><input id="coBakerProbeIp" inputmode="decimal" required placeholder="192.168.88.2"><label for="coBakerProbePort">Peer listening port</label><input id="coBakerProbePort" type="number" min="1" max="65535" required><button type="submit" class="secondary">Probe TCP</button></details>';
+   panel.after(form);
+   form.addEventListener('submit',e=>{e.preventDefault();native.probe(form.querySelector('#coBakerProbeIp').value.trim(),Number(form.querySelector('#coBakerProbePort').value));});
   }
   paint();
  }
@@ -123,8 +139,20 @@
   if(holder.coBakerMarkup!==markup){holder.coBakerMarkup=markup;holder.innerHTML=markup}
   holder.hidden=!holder.childElementCount;
  }
- function open(){if(!get()||!sheetActive())return;
-  search='';lastList='';showModal('Call for Help','<div id="coBakerHelpBody" class="cobaker-help-body"></div>','cobaker-help-modal');renderHelp();
+ window.panaderyaCoBakerHelpDiagnostic='Handler ready; no tap yet';
+ document.addEventListener('pointerdown',e=>{if(e.target.closest?.('.cobaker-help-button'))window.panaderyaCoBakerHelpDiagnostic='Pointer reached button; awaiting click'},true);
+ function open(){
+  window.panaderyaCoBakerHelpDiagnostic='Click handler entered';
+  try{
+   const unavailable=!get()?'Co-Baker is unavailable. You can keep practicing. Try reopening the app.':!sheetActive()?'Open or resume an unfinished order to call a Co-Baker.':'';
+   search='';lastList='';
+   showModal('Call for Help',unavailable?`<p role="status">${unavailable}</p>`:'<div id="coBakerHelpBody" class="cobaker-help-body"></div>','cobaker-help-modal');
+   if(!unavailable)renderHelp();
+   window.panaderyaCoBakerHelpDiagnostic=unavailable?'Feedback opened: '+unavailable:'Help popup rendered';
+  }catch(error){
+   window.panaderyaCoBakerHelpDiagnostic='Handler error: '+String(error?.message||error).slice(0,200);
+   if(typeof toast==='function')toast('Could not open Co-Baker help. Please try again.');
+  }
  }
  function action(e){const target=e.target.closest?.('button,input');if(!target)return;
   const help=get();if(!help)return;

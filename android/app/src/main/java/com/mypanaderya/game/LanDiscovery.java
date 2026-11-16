@@ -1,6 +1,8 @@
 package com.mypanaderya.game;
 
 import android.content.Context;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.net.*;
 import android.net.nsd.*;
 import android.net.wifi.WifiManager;
@@ -19,6 +21,8 @@ import java.util.function.Consumer;
 /** Direct NSD/TCP presence, fixed test messages and advisory coordinator messages only; never accepts game commands. */
 public final class LanDiscovery {
     private static final String TYPE="_panaderya._tcp.";
+    private final ClipboardManager clipboard;
+    private final Set<Endpoint> maintenance=ConcurrentHashMap.newKeySet();
     private final NsdManager nsd;
     private final ConnectivityManager connectivity;
     private final WifiManager wifi;
@@ -28,6 +32,85 @@ public final class LanDiscovery {
     private final ScheduledExecutorService timer=Executors.newSingleThreadScheduledExecutor();
     private final Map<String,Endpoint> peers=new ConcurrentHashMap<>();
     private final Map<String,String> services=new ConcurrentHashMap<>();
+    private final Map<String,Endpoint> candidates=new ConcurrentHashMap<>();
+    private final Map<String,String> candidateDetails=Collections.synchronizedMap(new LinkedHashMap<>());
+    private volatile long nextRetryAt=System.currentTimeMillis()+5000;
+    private volatile boolean probing;
+    private volatile String registeredServiceName="";
+    private void candidate(String name,String value){
+        synchronized(candidateDetails){candidateDetails.remove(name);candidateDetails.put(name,value);while(candidateDetails.size()>8)candidateDetails.remove(candidateDetails.keySet().iterator().next());}
+    }
+    static String candidateDecision(InetAddress local,int localPort,InetAddress host,int port){
+        if(port<1||port>65535)return "REJECTED: invalid port";
+        if(!(host instanceof Inet4Address)||!(host.isSiteLocalAddress()||host.isLinkLocalAddress()))return "REJECTED: no usable local IPv4";
+        return host.equals(local)&&port==localPort?"SELF: local listener endpoint":"REMOTE: accepted IPv4 endpoint";
+    }
+    static InetAddress probeAddress(String address,int port)throws IOException{
+        if(port<1||port>65535||!address.matches("[0-9]{1,3}(\\.[0-9]{1,3}){3}"))throw new IOException("Enter a private IPv4 address and port 1-65535");
+        InetAddress host=InetAddress.getByName(address);
+        if(!(host instanceof Inet4Address)||!(host.isSiteLocalAddress()||host.isLinkLocalAddress()))throw new IOException("Probe requires a private/link-local IPv4 address");
+        return host;
+    }
+    @JavascriptInterface public void probe(String address,int port){
+        if(!BuildConfig.DEBUG)return;
+        main.post(()->{
+            if(probing){note("Direct probe","Already running");return;}
+            try{
+                InetAddress host=probeAddress(address,port);Network n=network;int gen=generation;
+                if(n==null||server==null)throw new IOException("LAN listener not running");
+                probing=true;note("Direct probe","Connecting to "+host.getHostAddress()+":"+port);
+                if(!submit(()->{
+                    Socket socket=new Socket();sockets.add(socket);
+                    try(Socket connection=socket){
+                        if(gen!=generation)throw new IOException("Network changed");
+                        n.bindSocket(connection);connection.connect(new InetSocketAddress(host,port),2500);
+                        note("Direct probe","TCP connected to "+host.getHostAddress()+":"+port+"; NSD and Co-Baker handshake not tested");
+                    }catch(Exception e){note("Direct probe",e.toString());}finally{sockets.remove(socket);probing=false;}
+                })){probing=false;note("Direct probe","Worker queue full; retry later");}
+            }catch(Exception e){note("Direct probe",e.toString());}
+        });
+    }
+    private final Map<String,String> diagnostics=new ConcurrentHashMap<>();
+    private final Map<String,java.util.concurrent.atomic.AtomicInteger> counts=new ConcurrentHashMap<>();
+    private void note(String key,String value){diagnostics.put(key,value);}
+    private void count(String key){counts.computeIfAbsent(key,k->new java.util.concurrent.atomic.AtomicInteger()).incrementAndGet();}
+    @JavascriptInterface public String diagnostics(){
+        if(!BuildConfig.DEBUG)return "{}";
+        JSONObject result=new JSONObject();
+        try{for(String key:Arrays.asList("Services found","Resolutions succeeded","Resolution failures","TCP attempts","TCP handshakes succeeded","TCP failures","Inbound failures"))result.put(key,0);result.put("Counter scope","Since app launch; services include self");result.put("Bridge","Initialized").put("Service / protocol",TYPE+" / v1");
+            result.put("App",BuildConfig.VERSION_NAME+" ("+BuildConfig.VERSION_CODE+") debug");
+            result.put("Diagnostic revision","classroom-audit-1");
+            result.put("Android",Build.VERSION.RELEASE+" / API "+Build.VERSION.SDK_INT);
+            result.put("Device",Build.MANUFACTURER+" "+Build.MODEL);
+            result.put("Target SDK",35);
+            result.put("Active / queued work",io instanceof ThreadPoolExecutor?((ThreadPoolExecutor)io).getActiveCount()+" / "+((ThreadPoolExecutor)io).getQueue().size():"unknown");
+            result.put("Maintenance pending",maintenance.size());result.put("Tracked sockets",sockets.size());result.put("Native peer endpoints",peers.size());
+            result.put("Valid remote candidates",candidates.size());
+            result.put("Retry state",candidates.isEmpty()?"Idle: no pending remote endpoints":"Pending; next scheduler tick in "+Math.max(0,(nextRetryAt-System.currentTimeMillis()+999)/1000)+"s");
+            synchronized(candidateDetails){for(Map.Entry<String,String> e:candidateDetails.entrySet())result.put("Candidate "+e.getKey(),e.getValue());}
+            for(Map.Entry<String,String> e:diagnostics.entrySet())result.put(e.getKey(),e.getValue());
+            for(Map.Entry<String,java.util.concurrent.atomic.AtomicInteger> e:counts.entrySet())result.put(e.getKey(),e.getValue().get());
+        }catch(JSONException ignored){}return result.toString();
+    }
+    static String diagnosticReport(String summary,String nativeDetails)throws JSONException{
+        JSONObject fields=new JSONObject(summary),details=new JSONObject(nativeDetails);
+        StringBuilder report=new StringBuilder("My Panaderya - debug network diagnostics\n");
+        for(String key:Arrays.asList("Transport","Status","Nearby Bakers","Connected participants","Coordinator role","Coordinator status","Call for Help","Transport error")){
+            if(fields.has(key))report.append(key).append(": ").append(fields.optString(key).substring(0,Math.min(240,fields.optString(key).length()))).append('\n');
+        }
+        List<String> names=new ArrayList<>();details.keys().forEachRemaining(names::add);Collections.sort(names);
+        for(String key:names)report.append(key).append(": ").append(details.get(key)).append('\n');
+        report.append("Network note: No peers does not prove an app fault. Check WLAN Partition / AP or client isolation and multicast filtering; keep local Wi-Fi enabled.\n");
+        return report.toString().replaceAll("(?i)\\b[a-f0-9]{32}\\b|\\b[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}\\b","[redacted ID]");
+    }
+    @JavascriptInterface public void copyDetails(String summary){
+        if(!BuildConfig.DEBUG)return;
+        if(summary==null||summary.length()>4096)return;
+        main.post(()->{
+            try{clipboard.setPrimaryClip(ClipData.newPlainText("My Panaderya diagnostics",diagnosticReport(summary,diagnostics())));event("copy-details",new JSONObject(),"copied",null);}
+            catch(Exception e){event("copy-details",new JSONObject(),"failed",null);}
+        });
+    }
     private volatile JSONObject hello;
     private volatile ServerSocket server;
     private volatile Network network;
@@ -52,14 +135,20 @@ public final class LanDiscovery {
         Endpoint(InetAddress h,int p,int g){host=h;port=p;generation=g;}
     }
     LanDiscovery(Context context,Consumer<String> emit){
-        this.emit=emit;nsd=context.getSystemService(NsdManager.class);connectivity=context.getSystemService(ConnectivityManager.class);wifi=(WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        this.emit=emit;clipboard=context.getSystemService(ClipboardManager.class);nsd=context.getSystemService(NsdManager.class);connectivity=context.getSystemService(ConnectivityManager.class);wifi=(WifiManager)context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         connectivity.registerNetworkCallback(new NetworkRequest.Builder().addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build(),networkCallback);
-        timer.scheduleWithFixedDelay(()->{for(Map.Entry<String,Endpoint> e:peers.entrySet())submit(()->exchange(e.getKey(),e.getValue(),fresh("hello",null)));},5,5,TimeUnit.SECONDS);
+        timer.scheduleWithFixedDelay(()->{nextRetryAt=System.currentTimeMillis()+5000;for(Map.Entry<String,Endpoint> e:candidates.entrySet())scheduleMaintenance(e.getValue(),()->connectCandidate(e.getKey(),e.getValue()));for(Map.Entry<String,Endpoint> e:peers.entrySet())scheduleMaintenance(e.getValue(),()->exchange(e.getKey(),e.getValue(),fresh("hello",null)));},5,5,TimeUnit.SECONDS);
     }
-    private boolean submit(Runnable task){try{io.execute(task);return true;}catch(RejectedExecutionException e){return false;}}
-    private void restartSoon(){main.removeCallbacks(restart);main.postDelayed(restart,600);}
+    static <T> boolean scheduleOnce(Executor executor,Set<T> pending,T key,Runnable task){
+        if(!pending.add(key))return false;
+        try{executor.execute(()->{try{task.run();}finally{pending.remove(key);}});return true;}
+        catch(RejectedExecutionException e){pending.remove(key);return false;}
+    }
+    private void scheduleMaintenance(Endpoint endpoint,Runnable task){scheduleOnce(io,maintenance,endpoint,task);}
+    private boolean submit(Runnable task){try{io.execute(task);return true;}catch(RejectedExecutionException e){note("Last error","Worker queue full; task not started");return false;}}
+    private void restartSoon(){note("Lifecycle","Wi-Fi callback: restart scheduled in 600ms");main.removeCallbacks(restart);main.postDelayed(restart,600);}
     @JavascriptInterface public void start(String json){
-        try{JSONObject m=parse(json);if(!"hello".equals(m.getString("type")))return;main.post(()->{hello=m;enabled=true;if(foreground)begin();});}catch(Exception e){status("unavailable","Invalid local profile");}
+        try{JSONObject m=parse(json);if(!"hello".equals(m.getString("type")))return;main.post(()->{hello=m;note("Startup","Profile accepted");enabled=true;if(foreground)begin();});}catch(Exception e){status("unavailable","Invalid local profile");}
     }
     @JavascriptInterface public void stop(){main.post(()->{enabled=false;shutdown();});}
     @JavascriptInterface public void send(String id,String json){
@@ -67,14 +156,14 @@ public final class LanDiscovery {
             Endpoint endpoint=peers.get(id);if(endpoint!=null)submit(()->exchange(id,endpoint,m));
         }catch(Exception e){status("searching","Test could not be sent");}
     }
-    void resume(){foreground=true;if(enabled&&hello!=null)begin();}
-    void pause(){foreground=false;shutdown();}
+    void resume(){note("Lifecycle","Activity resumed");foreground=true;if(enabled&&hello!=null)begin();}
+    void pause(){note("Lifecycle","Activity paused");foreground=false;shutdown();}
     void destroy(){pause();connectivity.unregisterNetworkCallback(networkCallback);io.shutdownNow();timer.shutdownNow();}
-    private void status(String state,String error){event("status",new JSONObject(),state,error);}
+    private void status(String state,String error){if(error!=null&&!error.isEmpty())note("Last error",error);event("status",new JSONObject(),state,error);}
     private void event(String kind,JSONObject message,String state,String error){try{JSONObject e=new JSONObject().put("kind",kind);if(message.length()>0)e.put("message",message);if(state!=null)e.put("status",state);if(error!=null)e.put("error",error);emit.accept(e.toString());}catch(JSONException ignored){}}
     private void left(String id){peers.remove(id);try{emit.accept(new JSONObject().put("kind","left").put("playerId",id).toString());}catch(JSONException ignored){}}
     private void begin(){
-        shutdown();if(hello==null)return;
+        shutdown();note("Network generation",String.valueOf(generation));if(hello==null)return;
         for(Network n:connectivity.getAllNetworks()){NetworkCapabilities cap=connectivity.getNetworkCapabilities(n);if(cap!=null&&cap.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)){network=n;break;}}
         if(network==null){status("unavailable","Connect to local Wi-Fi. Internet is not required.");return;}
         final int gen=generation;
@@ -82,45 +171,67 @@ public final class LanDiscovery {
             LinkProperties links=connectivity.getLinkProperties(network);InetAddress bind=null;
             if(links!=null)for(LinkAddress address:links.getLinkAddresses())if(address.getAddress() instanceof Inet4Address){bind=address.getAddress();break;}
             if(bind==null)throw new IOException("Wi-Fi has no IPv4 address yet");
-            server=new ServerSocket();server.bind(new InetSocketAddress(bind,0));final ServerSocket listening=server;
-            multicast=wifi.createMulticastLock("panaderya-discovery");multicast.setReferenceCounted(false);multicast.acquire();
-            submit(()->{while(gen==generation&&!listening.isClosed())try{Socket socket=listening.accept();if(!submit(()->handle(socket,gen)))socket.close();}catch(IOException e){break;}});
+            note("Local Wi-Fi IPv4",bind.getHostAddress());note("Wi-Fi interface",links.getInterfaceName());server=new ServerSocket();server.bind(new InetSocketAddress(bind,0));final ServerSocket listening=server;note("TCP listener","Listening on port "+server.getLocalPort());
+            multicast=wifi.createMulticastLock("panaderya-discovery");multicast.setReferenceCounted(false);multicast.acquire();note("Multicast","Lock held");note("Advertisement","Registering");note("Discovery","Starting");
+            submit(()->{while(gen==generation&&!listening.isClosed())try{Socket socket=listening.accept();sockets.add(socket);if(!submit(()->handle(socket,gen))){sockets.remove(socket);socket.close();}}catch(IOException e){break;}});
             registration=new NsdManager.RegistrationListener(){
-                public void onServiceRegistered(NsdServiceInfo i){}
+                public void onServiceRegistered(NsdServiceInfo i){if(gen==generation){registeredServiceName=i.getServiceName();note("Advertisement","Registered: "+i.getServiceName()+" / "+i.getServiceType()+" port "+i.getPort());}}
                 public void onServiceUnregistered(NsdServiceInfo i){}
                 public void onRegistrationFailed(NsdServiceInfo i,int code){if(gen==generation)status("unavailable","LAN advertisement failed: "+code);}
-                public void onUnregistrationFailed(NsdServiceInfo i,int code){}
+                public void onUnregistrationFailed(NsdServiceInfo i,int code){note("NSD cleanup","Unregister failed: "+code);}
             };
             NsdServiceInfo info=new NsdServiceInfo();info.setServiceName("panaderya-"+UUID.randomUUID().toString().substring(0,12));info.setServiceType(TYPE);info.setPort(server.getLocalPort());info.setAttribute("v","1");nsd.registerService(info,NsdManager.PROTOCOL_DNS_SD,registration);
             discovery=new NsdManager.DiscoveryListener(){
-                public void onDiscoveryStarted(String t){}
+                public void onDiscoveryStarted(String t){if(gen==generation)note("Discovery","Started");}
                 public void onDiscoveryStopped(String t){}
                 public void onStartDiscoveryFailed(String t,int code){if(gen==generation)status("unavailable","LAN search failed: "+code);}
-                public void onStopDiscoveryFailed(String t,int code){}
-                public void onServiceFound(NsdServiceInfo i){main.post(()->{if(gen==generation&&resolveQueue.size()<64){resolveQueue.add(i);resolveNext(gen);}});}
-                public void onServiceLost(NsdServiceInfo i){main.post(()->{if(gen==generation){String id=services.remove(i.getServiceName());if(id!=null)left(id);}});}
+                public void onStopDiscoveryFailed(String t,int code){note("NSD cleanup","Stop discovery failed: "+code);}
+                public void onServiceFound(NsdServiceInfo i){main.post(()->{if(gen==generation&&resolveQueue.size()<64){count("Services found");note("Last discovered service",i.getServiceName()+" / "+i.getServiceType());candidate(i.getServiceName(),(i.getServiceName().equals(registeredServiceName)?"SELF (registered instance name)":"UNCLASSIFIED until resolved")+": address/port await resolution");resolveQueue.add(i);resolveNext(gen);}});}
+                public void onServiceLost(NsdServiceInfo i){main.post(()->{if(gen==generation){candidate(i.getServiceName(),"LOST: endpoint removed");candidates.remove(i.getServiceName());resolveAttempts.remove(i.getServiceName());String id=services.remove(i.getServiceName());if(id!=null)left(id);}});}
             };
             nsd.discoverServices(TYPE,NsdManager.PROTOCOL_DNS_SD,discovery);status("searching","");
         }catch(Exception e){shutdown();status("unavailable","LAN unavailable: "+e.getMessage());}
     }
     @SuppressWarnings("deprecation") private void resolveNext(int gen){
         if(resolving||resolveQueue.isEmpty()||gen!=generation)return;resolving=true;NsdServiceInfo service=resolveQueue.remove();
-        nsd.resolveService(service,new NsdManager.ResolveListener(){
-            public void onResolveFailed(NsdServiceInfo i,int code){main.post(()->{if(gen==generation){resolving=false;int attempts=resolveAttempts.getOrDefault(service.getServiceName(),0)+1;resolveAttempts.put(service.getServiceName(),attempts);if(attempts<3)main.postDelayed(()->{if(gen==generation&&resolveQueue.size()<64){resolveQueue.add(service);resolveNext(gen);}},2000);resolveNext(gen);}});}
-            public void onServiceResolved(NsdServiceInfo i){main.post(()->{if(gen!=generation)return;resolving=false;InetAddress host=resolvedIpv4(i);if(host!=null&&i.getPort()>0&&peers.size()<128){Endpoint endpoint=new Endpoint(host,i.getPort(),gen);submit(()->{String id=exchange(null,endpoint,fresh("hello",null));if(id!=null&&gen==generation){services.put(i.getServiceName(),id);peers.put(id,endpoint);}});}resolveNext(gen);});}
-        });
+        note("Resolution","Resolving "+service.getServiceName());
+        try{nsd.resolveService(service,new NsdManager.ResolveListener(){
+            public void onResolveFailed(NsdServiceInfo i,int code){main.post(()->{if(gen==generation){resolving=false;note("Resolution","Failed "+service.getServiceName()+" code "+code);count("Resolution failures");note("Last error","NSD resolution failed: "+code);candidate(service.getServiceName(),"RESOLUTION FAILED: code "+code);int attempts=resolveAttempts.getOrDefault(service.getServiceName(),0)+1;if(resolveAttempts.size()<128||resolveAttempts.containsKey(service.getServiceName()))resolveAttempts.put(service.getServiceName(),attempts);else attempts=3;note("Resolution retry",attempts<3?"Attempt "+(attempts+1)+" scheduled in 2s for "+service.getServiceName():"Stopped after 3 failures for "+service.getServiceName());if(attempts<3)main.postDelayed(()->{if(gen==generation&&resolveQueue.size()<64){resolveQueue.add(service);resolveNext(gen);}},2000);resolveNext(gen);}});}
+            public void onServiceResolved(NsdServiceInfo i){main.post(()->{
+                if(gen!=generation){candidate(i.getServiceName(),"SKIPPED: stale network generation");return;}
+                resolving=false;resolveAttempts.remove(i.getServiceName());note("Resolution","Resolved "+i.getServiceName());count("Resolutions succeeded");
+                List<InetAddress> addresses=resolvedAddresses(i);InetAddress host=localIpv4(addresses);
+                String raw=addresses.toString()+":"+i.getPort();note("Last resolved service",i.getServiceName()+" "+raw);
+                ServerSocket listener=server;
+                String decision=i.getServiceName().equals(registeredServiceName)?"SELF: registered instance name":candidateDecision(listener==null?null:listener.getInetAddress(),listener==null?0:listener.getLocalPort(),host,i.getPort());
+                candidate(i.getServiceName(),raw+" -> "+decision);
+                if(decision.startsWith("REMOTE")){
+                    if(peers.size()>=128||candidates.size()>=128)candidate(i.getServiceName(),raw+" -> SKIPPED: endpoint limit");
+                    else{Endpoint endpoint=new Endpoint(host,i.getPort(),gen);candidates.put(i.getServiceName(),endpoint);scheduleMaintenance(endpoint,()->connectCandidate(i.getServiceName(),endpoint));}
+                }else if(decision.startsWith("REJECTED")){count("Resolution failures");note("Last error",decision);}
+                resolveNext(gen);
+            });}
+
+        });}catch(RuntimeException e){resolving=false;count("Resolution failures");candidate(service.getServiceName(),"REJECTED: resolve invocation "+e.toString());note("Last error",e.toString());resolveNext(gen);}
     }
-    @SuppressWarnings("deprecation") private static InetAddress resolvedIpv4(NsdServiceInfo service){
-        // The listening socket is IPv4. A dual-stack NSD result may list IPv6
-        // first; select a compatible address instead of silently failing TCP.
-        return localIpv4(Build.VERSION.SDK_INT>=34?service.getHostAddresses():Collections.singletonList(service.getHost()));
+    private void connectCandidate(String name,Endpoint endpoint){
+        ServerSocket listener=server;
+        if(endpoint.generation!=generation){candidate(name,"SKIPPED: stale network generation");return;}
+        if(listener!=null&&endpoint.port==listener.getLocalPort()&&endpoint.host.equals(listener.getInetAddress())){candidates.remove(name,endpoint);return;}
+        candidate(name,"REMOTE "+endpoint.host.getHostAddress()+":"+endpoint.port+" -> TCP attempt running");
+        String id=exchange(null,endpoint,fresh("hello",null));
+        if(id!=null&&endpoint.generation==generation){services.put(name,id);peers.put(id,endpoint);candidates.remove(name,endpoint);candidate(name,"REMOTE "+endpoint.host.getHostAddress()+":"+endpoint.port+" -> handshake accepted");}
+        else if(endpoint.generation==generation)candidate(name,"REMOTE "+endpoint.host.getHostAddress()+":"+endpoint.port+" -> failed; retry on next 5s scheduler tick");
+    }
+    @SuppressWarnings("deprecation") private static List<InetAddress> resolvedAddresses(NsdServiceInfo service){
+        return Build.VERSION.SDK_INT>=34?service.getHostAddresses():Collections.singletonList(service.getHost());
     }
     static InetAddress localIpv4(List<InetAddress> addresses){
         for(InetAddress host:addresses)if(host instanceof Inet4Address&&(host.isSiteLocalAddress()||host.isLinkLocalAddress()))return host;
         return null;
     }
     private void shutdown(){
-        generation++;main.removeCallbacks(restart);resolveQueue.clear();resolveAttempts.clear();resolving=false;network=null;
+        generation++;registeredServiceName="";candidates.clear();candidateDetails.clear();note("Local Wi-Fi IPv4","Not bound");note("TCP listener","Stopped");note("Advertisement","Stopped");note("Discovery","Stopped");note("Multicast","Released");main.removeCallbacks(restart);resolveQueue.clear();resolveAttempts.clear();resolving=false;network=null;
         try{if(server!=null)server.close();}catch(IOException ignored){}server=null;
         for(Socket socket:sockets)try{socket.close();}catch(IOException ignored){}sockets.clear();
         try{if(discovery!=null)nsd.stopServiceDiscovery(discovery);}catch(Exception ignored){}discovery=null;
@@ -132,21 +243,20 @@ public final class LanDiscovery {
         try{return new JSONObject().put("v",1).put("id",UUID.randomUUID().toString().replace("-","")).put("session",hello.getString("session")).put("player",hello.getJSONObject("player")).put("type",type).putOpt("replyTo",reply);}catch(Exception e){return null;}
     }
     private void handle(Socket socket,int gen){
-        sockets.add(socket);
         try(Socket s=socket){if(gen!=generation||hello==null)return;s.setSoTimeout(2500);JSONObject message=parse(read(s));if(gen!=generation||"reply".equals(message.getString("type")))return;
             String id=message.getJSONObject("player").getString("id");if(id.equals(hello.getJSONObject("player").getString("id")))return;
             main.post(()->{if(gen==generation)event("message",message,null,null);});write(s,fresh("test".equals(message.getString("type"))?"reply":"hello","test".equals(message.getString("type"))?message.getString("id"):null));
-        }catch(Exception ignored){/* Invalid traffic cannot affect solo play. */}finally{sockets.remove(socket);}
+        }catch(Exception e){if(gen==generation){count("Inbound failures");note("Last error","Inbound TCP: "+e.getClass().getSimpleName());}}finally{sockets.remove(socket);}
     }
     private String exchange(String expected,Endpoint endpoint,JSONObject message){
-        Network n=network;if(n==null||message==null||endpoint.generation!=generation)return null;
+        Network n=network;if(n==null||message==null||endpoint.generation!=generation){note("Last TCP skip","No active Wi-Fi/profile or stale generation");return null;}
         Socket connection=new Socket();sockets.add(connection);
         try(Socket socket=connection){
-            n.bindSocket(socket);socket.connect(new InetSocketAddress(endpoint.host,endpoint.port),2000);socket.setSoTimeout(2500);write(socket,message);JSONObject reply=parse(read(socket));
+            note("Last outgoing TCP",endpoint.host.getHostAddress()+":"+endpoint.port);count("TCP attempts");n.bindSocket(socket);socket.connect(new InetSocketAddress(endpoint.host,endpoint.port),2000);socket.setSoTimeout(2500);write(socket,message);JSONObject reply=parse(read(socket));
             String id=reply.getJSONObject("player").getString("id");if(endpoint.generation!=generation||id.equals(hello.getJSONObject("player").getString("id"))||expected!=null&&!expected.equals(id))return null;
             if("test".equals(message.getString("type"))? !"reply".equals(reply.getString("type"))||!message.getString("id").equals(reply.optString("replyTo")) : !"hello".equals(reply.getString("type")))return null;
-            main.post(()->{if(endpoint.generation==generation)event("message",reply,null,null);});return id;
-        }catch(Exception e){if(expected!=null&&endpoint.generation==generation)try{emit.accept(new JSONObject().put("kind","left").put("playerId",expected).toString());}catch(JSONException ignored){}return null;}finally{sockets.remove(connection);}
+            count("TCP handshakes succeeded");main.post(()->{if(endpoint.generation==generation)event("message",reply,null,null);});return id;
+        }catch(Exception e){if(endpoint.generation==generation){count("TCP failures");note("Last error","TCP connect/handshake: "+e.toString());}if(expected!=null&&endpoint.generation==generation)try{emit.accept(new JSONObject().put("kind","left").put("playerId",expected).toString());}catch(JSONException ignored){}return null;}finally{sockets.remove(connection);}
     }
     private static String read(Socket s)throws IOException{
         ByteArrayOutputStream bytes=new ByteArrayOutputStream();long deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(3);int b;while((b=s.getInputStream().read())!=-1&&b!='\n'){if(bytes.size()>=8192||System.nanoTime()>deadline)throw new IOException("Message limit");bytes.write(b);}if(b!='\n')throw new IOException("Incomplete message");return StandardCharsets.UTF_8.newDecoder().decode(java.nio.ByteBuffer.wrap(bytes.toByteArray())).toString();

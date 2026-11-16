@@ -127,4 +127,43 @@ public class LanProtocolTest {
         assertEquals(local,LanDiscovery.localIpv4(Arrays.asList(InetAddress.getByName("fe80::1"),local)));
         assertNull(LanDiscovery.localIpv4(Arrays.asList(InetAddress.getByName("::1"),InetAddress.getByName("8.8.8.8"))));
     }
+    @Test public void remoteSamePortIsNotSelfAndSelfNeedsBothAddressAndPort()throws Exception{
+        InetAddress tablet=InetAddress.getByName("192.168.88.4"),phone=InetAddress.getByName("192.168.88.2");
+        assertTrue(LanDiscovery.candidateDecision(tablet,43000,tablet,43000).startsWith("SELF"));
+        assertTrue(LanDiscovery.candidateDecision(tablet,43000,phone,43000).startsWith("REMOTE"));
+        assertTrue(LanDiscovery.candidateDecision(tablet,43000,tablet,43001).startsWith("REMOTE"));
+        assertTrue(LanDiscovery.candidateDecision(tablet,43000,null,43000).startsWith("REJECTED"));
+        assertTrue(LanDiscovery.candidateDecision(tablet,43000,phone,0).startsWith("REJECTED"));
+    }
+    @Test public void ipv6OnlyResolutionCannotBecomeAnIpv4Candidate()throws Exception{
+        assertNull(LanDiscovery.localIpv4(Arrays.asList(InetAddress.getByName("fe80::123"))));
+        assertEquals(InetAddress.getByName("192.168.88.2"),LanDiscovery.localIpv4(Arrays.asList(null,InetAddress.getByName("192.168.88.2"))));
+    }
+    @Test public void probeAcceptsOnlyExplicitPrivateIpv4AndValidPort()throws Exception{
+        assertEquals("192.168.88.2",LanDiscovery.probeAddress("192.168.88.2",43000).getHostAddress());
+        for(String host:new String[]{"example.com","127.0.0.1","8.8.8.8","::1","192.168.88.999"}){
+            try{LanDiscovery.probeAddress(host,43000);fail("Bad probe accepted");}catch(IOException expected){}
+        }
+        try{LanDiscovery.probeAddress("192.168.88.2",65536);fail("Bad port accepted");}catch(IOException expected){}
+    }
+    @Test public void diagnosticCopyIncludesHiddenDetailsButOmitsPrivateSummaryFields()throws Exception{
+        JSONObject summary=new JSONObject().put("Transport","Android Native").put("Status","searching").put("password","SECRET_PASSWORD").put("token","SECRET_TOKEN").put("id","a".repeat(32));
+        JSONObject details=new JSONObject().put("Last error","test failure").put("Offscreen candidate","192.168.88.2:43000").put("Diagnostic revision","classroom-audit-1").put("Call error","b".repeat(32));
+        String report=LanDiscovery.diagnosticReport(summary.toString(),details.toString());
+        assertTrue(report.contains("Offscreen candidate: 192.168.88.2:43000"));assertTrue(report.contains("test failure"));assertTrue(report.contains("WLAN Partition"));
+        assertFalse(report.contains("SECRET_PASSWORD"));assertFalse(report.contains("SECRET_TOKEN"));assertFalse(report.contains("a".repeat(32)));assertFalse(report.contains("b".repeat(32)));
+    }
+    @Test public void maintenanceDoesNotAccumulateDuplicateWorkAcrossSchedulerTicks(){
+        java.util.ArrayDeque<Runnable> queue=new java.util.ArrayDeque<>();java.util.Set<Integer> pending=new java.util.HashSet<>();
+        for(int tick=0;tick<20;tick++)for(int peer=0;peer<39;peer++)LanDiscovery.scheduleOnce(queue::add,pending,peer,()->{});
+        assertEquals(39,queue.size());assertEquals(39,pending.size());
+        while(!queue.isEmpty())queue.remove().run();assertTrue(pending.isEmpty());
+        assertTrue(LanDiscovery.scheduleOnce(queue::add,pending,0,()->{}));
+    }
+    @Test public void rejectedAndFailedMaintenanceAlwaysReleaseTheirGuard(){
+        java.util.Set<String> pending=new java.util.HashSet<>();
+        assertFalse(LanDiscovery.scheduleOnce(task->{throw new java.util.concurrent.RejectedExecutionException();},pending,"peer",()->{}));assertTrue(pending.isEmpty());
+        try{LanDiscovery.scheduleOnce(Runnable::run,pending,"peer",()->{throw new IllegalStateException("test");});fail("Expected task failure");}catch(IllegalStateException expected){}
+        assertTrue(pending.isEmpty());
+    }
 }

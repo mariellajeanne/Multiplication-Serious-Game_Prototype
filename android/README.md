@@ -88,3 +88,68 @@ backup/device-transfer exclusions prevent copying private bakery/profile data to
 a second installation. These changes do not alter solo gameplay.
 
 This build targets SDK 35. Handle target-37 LAN runtime permissions before raising targetSdk; Android 16 opt-in protections also require device validation. See [Android's LAN permissions](https://developer.android.com/privacy-and-security/local-network-permission).
+
+
+## Physical LAN diagnostic build
+
+Settings > Advanced > Co-Baker network test now includes Native LAN diagnostics,
+refreshed once per second while the panel is open. It shows bridge/profile startup,
+listener port, multicast lock, advertisement/discovery callbacks, resolution and TCP
+counters, and the last error. Counters are cumulative since process launch and
+service counts may include this device itself. No addresses or packet bodies are
+shown. Local coordinator health does not establish peer discovery.
+
+Resolved endpoints whose initial handshake fails are retained (maximum 128) and
+retried every five seconds until success, service loss or network/lifecycle restart.
+Previously these endpoints were discarded after one failed attempt. This fixes a
+recovery gap, but does not establish the cause of the reported two-device failure.
+
+For a failed retest, capture this panel on both devices after 30 seconds, Android
+versions, and whether repeating on a different non-guest router works. Registered
+advertisement plus started discovery with only self/no services points toward NSD
+visibility; resolutions followed by TCP failures points toward reachability or
+handshake problems. Neither alone proves router isolation. Keep original saves.
+
+
+### Follow-up: candidate and reachability diagnosis
+
+The debug Network Test now shows the bound Wi-Fi IPv4/interface, actual registered
+NSD instance name, last discovered/resolved instance and raw returned addresses /
+port, and up to eight candidate decisions (SELF, REMOTE, rejected, lost or stale).
+SELF matches the actual registered instance name or the local address AND listener
+port; a remote device using the same port is not self. Pending remote candidate
+count and next five-second scheduler tick are shown. TCP destination and full
+socket exception text are visible only through debug diagnostics. Resolution
+invocation exceptions now release the resolver queue instead of leaving it stuck.
+Android 11 uses the single getHost result; Android 14 uses getHostAddresses and
+selects a compatible IPv4. IPv6-only results remain rejected by the IPv4 listener.
+
+Optional debug direct TCP probe: enter the OTHER device's displayed private IPv4
+and current listener port. It makes one Wi-Fi-bound connect attempt with a 2.5s
+timeout, without saving settings, adding a candidate, or publishing a peer. It
+checks TCP reachability only, not protocol compatibility or NSD. Closing this
+connection without a game frame may increment the receiver's inbound-failure
+counter; this is expected. Probe both directions. A successful probe with absent
+remote NSD candidates narrows the issue to advertisement/discovery/resolution.
+A failed probe needs its exact error and the target's current listener details;
+it does not alone prove Wi-Fi isolation. Students never need this control.
+
+
+### Call for Help touch diagnosis
+
+Call for Help always opens its existing dialog or an explanation when the service
+or unfinished worksheet is unavailable. Previously these guards returned silently.
+Zero peers and local coordinator health do not gate dialog opening. The debug
+Network Test now shows the last Call for Help pointer/handler/result or exception.
+After a failed tap, inspect this field before relaunching. "Handler ready; no tap
+yet" means no recorded pointer reached the button; "Pointer reached button" with
+no handler result indicates no click reached its inline handler. A handler error
+includes its message. Desktop Edge/WebKit touch regressions cover 800x360,
+1280x800 and 2000x1200, modal replacement and empty-state/guard feedback; these do
+not verify Android 11 WebView behavior. Runner: python tests/browser-co-baker-help-empty.py.
+
+## Classroom audit and Copy Details
+
+See [classroom readiness audit](../docs/ANDROID_CLASSROOM_READINESS.md) for the
+confirmed WLAN Partition blocker, retained fixes, bounded cleanup, native debug
+Copy Details report, SM-T505 compatibility and unvalidated 40-device traffic risks.
