@@ -11,6 +11,7 @@ import java.io.ByteArrayInputStream;
 public final class MainActivity extends Activity {
     private WebView web;
     private LanDiscovery lan;
+    private NearbyDiscovery nearby;
     private boolean destroyed;
     static boolean isGameUrl(Uri url) {
         return "https".equals(url.getScheme()) && "appassets.androidplatform.net".equals(url.getHost())
@@ -41,10 +42,17 @@ public final class MainActivity extends Activity {
             web.evaluateJavascript("window.dispatchEvent(new CustomEvent('co-baker-native',{detail:JSON.parse(" + literal + ")}))", null);
         }));
         web.addJavascriptInterface(lan, "PanaderyaLan");
+        nearby = new NearbyDiscovery(this, json -> runOnUiThread(() -> {
+            if(destroyed)return;
+            String literal=JSONObject.quote(json).replace("\u2028","\\u2028").replace("\u2029","\\u2029");
+            web.evaluateJavascript("window.dispatchEvent(new CustomEvent('co-baker-nearby',{detail:JSON.parse("+literal+")}))",null);
+        }));
+        web.addJavascriptInterface(nearby,"PanaderyaNearby");
         setContentView(web);
         web.loadUrl("https://appassets.androidplatform.net/assets/game/index.html" + (BuildConfig.DEBUG ? "?cobaker=debug" : ""));
     }
-    @Override protected void onResume() { super.onResume(); if(lan != null)lan.resume(); }
-    @Override protected void onPause() { if(web != null)web.evaluateJavascript("window.dispatchEvent(new Event('pagehide'))",null); if(lan != null)lan.pause(); super.onPause(); }
-    @Override protected void onDestroy() { destroyed=true;lan.destroy();web.removeJavascriptInterface("PanaderyaLan");web.destroy();super.onDestroy(); }
+    @Override public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] results){super.onRequestPermissionsResult(requestCode,permissions,results);if(requestCode==NearbyDiscovery.PERMISSIONS)nearby.permissionsResult();}
+    @Override protected void onResume() { super.onResume(); if(lan != null)lan.resume(); if(nearby != null)nearby.resume(); if(web!=null)web.evaluateJavascript("window.dispatchEvent(new Event('co-baker-resume'))",null); }
+    @Override protected void onPause() { if(web != null)web.evaluateJavascript("window.dispatchEvent(new Event('pagehide'))",null); if(lan != null)lan.pause(); if(nearby != null)nearby.pause(); super.onPause(); }
+    @Override protected void onDestroy() { destroyed=true;lan.destroy();nearby.destroy();web.removeJavascriptInterface("PanaderyaLan");web.removeJavascriptInterface("PanaderyaNearby");web.destroy();super.onDestroy(); }
 }

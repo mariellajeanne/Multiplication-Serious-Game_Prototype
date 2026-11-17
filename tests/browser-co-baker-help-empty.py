@@ -28,7 +28,7 @@ try:
                 button.tap()
                 dialog=page.get_by_role('dialog');dialog.wait_for(state='visible')
                 assert 'No Bakers nearby yet!' in dialog.inner_text()
-                assert page.locator('[data-help-action="all"]').is_disabled()
+                assert page.locator('[data-help-action="find"]').is_disabled()
                 assert page.evaluate('panaderyaCoBakerHelpDiagnostic')=='Help popup rendered'
                 assert page.locator('#worksheetFrame').count()==1
                 page.screenshot(path=str(out/f'{engine}-{width}.png'))
@@ -46,7 +46,7 @@ try:
                 assert page.locator('#coBakerCopyStatus').inner_text()=='Copied!'
                 copied=page.evaluate('({summary:copiedSummary,native:copiedNative})')
                 assert copied['native']['Last error']=='OFFSCREEN_DIAGNOSTIC'
-                assert copied['summary']['Transport']=='Android Native'
+                assert copied['summary']['Transport']=='Android Native LAN'
                 assert 'DO_NOT_COPY' not in str(copied)
                 assert page.evaluate('panaderyaCoBaker.profile.id') not in str(copied)
                 page.screenshot(path=str(out/f'{engine}-{width}-copy.png'))

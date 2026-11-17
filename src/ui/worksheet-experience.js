@@ -108,7 +108,8 @@ document.addEventListener('keydown',event=>{
  event.preventDefault();worksheetCalcKey(event.key);
 });
 function openWorksheetSettings(){
- showModal('Worksheet settings',`<div class="worksheet-settings-options"><button id="arrowToggle" class="secondary" aria-pressed="${g.tutorialArrows}" onclick="toggleArrows()">${worksheetGuideLabel()}</button><button id="sfxToggle" class="secondary" aria-pressed="${g.sound}" onclick="toggleSfx()">${worksheetSoundLabel()}</button></div>`,'worksheet-settings-modal');
+ if(typeof cancelWorksheetDrag==='function')cancelWorksheetDrag();
+ captureActiveWorksheet();save();openSettings();
 }
 fitWorksheet=function(){
  const frame=$('worksheetFrame'),stage=document.querySelector('.worksheet-modern');

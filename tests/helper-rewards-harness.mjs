@@ -43,7 +43,7 @@ export function setup({legacy=false}={}){
   if(restore&&run('g.run.worksheetSession'))session=run('g.run.worksheetSession');d.start();return h;
  }
  const a=join(1),b=join(2),other=join(3);flush();
- function reserve(helper=b){assert.equal(a.d.help.request([helper.d.profile.id]).ok,true);flush();helper.d.help.accept([...helper.d.help.incoming.keys()][0]);flush();a.rewards.lastSend=-Infinity;a.rewards.tick();flush();assert.ok(helper.d.help.active);assert.ok(helper.json('g.coBakerRewards?.inbox'))}
+ function reserve(helper=b){const last=a.d.help.directTimes.get(helper.d.profile.id);if(last!==undefined)now=Math.max(now,last+30000);assert.equal(a.d.help.request([helper.d.profile.id]).ok,true);flush();helper.d.help.accept([...helper.d.help.incoming.keys()][0]);flush();a.rewards.lastSend=-Infinity;a.rewards.tick();flush();assert.ok(helper.d.help.active);assert.ok(helper.json('g.coBakerRewards?.inbox'))}
  reserve();
  function advance(ms=3100){now+=ms;for(const h of clients.values()){h.d.help.tick();h.o.lastContact=now;h.o.refresh();h.rewards.tick()}flush()}
  function cue(kind='hint',value='next',helper=b){advance();assert.ok(helper.guidance.send(kind,value));flush()}

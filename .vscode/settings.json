@@ -19,5 +19,6 @@
     "**/.test-tools/**": true,
     "**/output/**": true,
     "**/.playwright-cli/**": true
-  }
+  },
+  "java.configuration.updateBuildConfiguration": "interactive"
 }

@@ -41,9 +41,14 @@ def connect(p):
 
 def reserve(a,b):
     target=b.evaluate('panaderyaCoBaker.profile.id')
+    # Independent reward scenarios; spam timing is exercised by the protocol/UX suite.
+    a.evaluate('id=>panaderyaCoBaker.help.directTimes.delete(id)',target)
+    b.evaluate('id=>panaderyaCoBaker.help.callerTimes.delete(id)',a.evaluate('panaderyaCoBaker.profile.id'))
     wait(a,f'panaderyaCoBaker.help.eligible("{target}")')
     a.get_by_role('button',name='Call for Help',exact=True).click()
     a.locator(f'[data-help-to="{target}"]').click();b.locator('[data-help-accept]').click()
+    if b.locator('[data-help-accept].confirm-save').count():
+        b.wait_for_timeout(700);b.locator('[data-help-accept].confirm-save').click()
     wait(b,'panaderyaCoBaker.observation.latest?.state.a===79 && Object.values(g.coBakerRewards?.inbox||{}).some(e=>e.context.sessionId===panaderyaCoBaker.help.active?.sessionId)')
     a.locator('#modals .close').click()
 
@@ -108,13 +113,13 @@ try:
         for width,height in ((2000,1200),(1280,800)):
             third.set_viewport_size({'width':width,'height':height});third.screenshot(path=str(OUT/f'home-{width}.png'))
         b.locator('.hub-ticket').first.click();wait(b,'document.querySelector("#worksheetFrame")?.worksheetStarted');b.evaluate('captureActiveWorksheet();save()')
-        before=independent(b);coins=b.evaluate('g.coins')
+        coins=b.evaluate('g.coins')
         a.evaluate('g.board[0].a=79;g.board[0].b=18;startTicket(g.board[0].id)');wait(a,'document.querySelector("#worksheetFrame")?.worksheetStarted')
-        reserve(a,b);quote=a.evaluate('g.run.coBakerRewards.base')
+        reserve(a,b);before=independent(b);quote=a.evaluate('g.run.coBakerRewards.base')
         hint(a,b,'carry');assert receipt_count(b)==0
         fresh(a,b);b.evaluate('panaderyaCoBaker.guidance.send("point","top:0")');suggestion(a,'0:0:connect')
         # Reported regression: actual Edge helper refresh BEFORE Chrome follows.
-        b.reload();b.wait_for_selector('#worksheetFrame');join(b)
+        b.reload();b.wait_for_selector('.hub-food, #coBakerObservation');join(b)
         f=frame(a);f.locator('[data-top="0"]').click();f.locator('[data-bottom="0"]').click()
         earned_count(a,1);paid(b,1);assert b.evaluate('g.coins')==coins+a.evaluate('CoBakerRewards.reward('+str(quote)+',1)')
         assert not a.evaluate('g.run.procedureComplete');b.screenshot(path=str(OUT/'immediate-after-helper-refresh.png'))
@@ -132,7 +137,16 @@ try:
         assert b.evaluate('panaderyaCoBaker.help.active') is None;assert a.evaluate('g.run.paused');assert independent(b)==before
         print('PASS refresh-before-action, immediate coins, helper browser close, Save & Exit, both process restarts, ordinary-peer delivery and independent worksheet',flush=True)
         a.evaluate('startTicket(g.run.ticket.id)');wait(a,'document.querySelector("#worksheetFrame")?.worksheetStarted');reserve(a,b)
-        hint(a,b,'ones');suggestion(a,'0:0:place-ones');bc.close();wait(a,'!panaderyaCoBaker.help.active')
+        hint(a,b,'ones');suggestion(a,'0:0:place-ones')
+        saved=a.evaluate('captureActiveWorksheet();JSON.stringify(g.run.worksheetSession)')
+        a.evaluate('window.retainedFrame=document.querySelector("#worksheetFrame");document.querySelector("[data-learner-end]").click();document.querySelector("[data-learner-end]").click()')
+        assert a.evaluate('!!panaderyaCoBaker.help.active');assert a.locator('[data-learner-end]').inner_text()=='Remove helper?'
+        a.wait_for_timeout(700);a.locator('[data-learner-end]').click()
+        if a.evaluate('!!panaderyaCoBaker.help.active'):
+            print('REMOVAL',a.evaluate('({active:panaderyaCoBaker.help.active,label:document.querySelector("[data-learner-end]")?.textContent,log:panaderyaCoBaker.help.log,now:panaderyaCoBaker.help.clock()})'),flush=True)
+        wait(a,'!panaderyaCoBaker.help.active');wait(b,'!panaderyaCoBaker.help.active');wait(b,'panaderyaCoBaker.observation.latest===null')
+        assert a.evaluate('document.querySelector("#worksheetFrame")===retainedFrame');assert a.evaluate('JSON.stringify(g.run.worksheetSession)')==saved
+        bc.close();wait(a,'!panaderyaCoBaker.help.active')
         f=frame(a);a.locator('[data-answer-digit="ones"]').click();f.locator('[data-slot="0:0"]').click();f.wait_for_function('s.onesPlaced&&!busy');earned_count(a,3)
         # A new helper owns observation; old helper returns ONLY to collect.
         reserve(a,third);new_session=a.evaluate('panaderyaCoBaker.help.active.sessionId')

@@ -164,13 +164,13 @@ with tempfile.TemporaryDirectory(dir=out) as tmp:
                 returned = new(chrome, context=ctx); connect(returned, endpoint); pages[idx] = returned
                 assert agree(pages) == replacement
                 print('PASS coordinator disconnect, replacement and returning profile', flush=True)
-                # Actual worksheet Call All and invitation buttons; simultaneous accepts use
+                # Actual worksheet Find Helpers and invitation buttons; simultaneous accepts use
                 # microtask scheduling so both can race before either assignment arrives.
                 learner = pages[0]; learner.locator('#modals .close').click()
                 learner.locator('.hub-ticket').first.click()
                 learner.wait_for_function('document.querySelector("#worksheetFrame")?.worksheetStarted===true')
                 learner.get_by_role('button', name='Call for Help', exact=True).click()
-                learner.locator('[data-help-action="all"]').click()
+                learner.locator('[data-help-action="find"]').click()
                 for p in pages[1:]: p.wait_for_selector('[data-help-accept]')
                 # Both send accepts through their real remote sockets.
                 for p in pages[1:3]:
@@ -182,13 +182,15 @@ with tempfile.TemporaryDirectory(dir=out) as tmp:
                 assert len(helpers) == 1
                 assert learner.evaluate('panaderyaCoBaker.help.active.sessionId') == helpers[0].evaluate('panaderyaCoBaker.help.active.sessionId')
                 learner.screenshot(path=str(out/'call-for-help-connected.png'))
+                # Network Settings intentionally preserves help underneath it.
+                if helpers[0].locator('#modals .close').count(): helpers[0].locator('#modals .close').click()
                 helpers[0].locator('[data-observer-end]').click()
                 learner.wait_for_function('!panaderyaCoBaker.help.active')
                 learner.locator('#modals .close').click(); learner.locator('.worksheet-exit').click(); panel(learner)
                 agree(pages)
                 assert all(p.evaluate('g.coins') == 250 for p in pages)
                 assert all(password not in p.evaluate('JSON.stringify(localStorage)+JSON.stringify(sessionStorage)') for p in pages)
-                print('PASS Phase 2 Call All, first-helper-wins, session ending, unchanged coins, no stored password', flush=True)
+                print('PASS Phase 2 Find Helpers, first-helper-wins, session ending, unchanged coins, no stored password', flush=True)
             for ctx in contexts: ctx.close()
             chrome.close(); edge.close(); webkit.close()
             assert not errors, errors

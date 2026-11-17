@@ -47,7 +47,7 @@ def call(p, target=None):
         wait(p, f'panaderyaCoBaker.help.eligible("{target}")')
         p.locator(f'[data-help-to="{target}"]').click()
     else:
-        p.locator('[data-help-action="all"]').click()
+        p.locator('[data-help-action="find"]').click()
 
 def synced(learner, helper):
     expected=None
@@ -64,7 +64,7 @@ def synced(learner, helper):
         if expected and latest==expected and rendered==expected and local_panel==mirror_panel and prompts==mirrored_prompt:return expected
         helper.wait_for_timeout(100)
     helper.screenshot(path=str(out/'failure.png'));print('ERRORS',errors,flush=True)
-    print('FRAME',helper.evaluate('''()=>{const outer=document.querySelector('#coBakerObservation iframe')?.contentWindow,inner=outer?.document.querySelector('#worksheetFrame')?.contentWindow;return {status:panaderyaCoBaker.status,active:panaderyaCoBaker.help.active,frame:inner?.location.href,mode:inner?.eval('typeof worksheetReadOnly'),bridge:inner?.eval('typeof observerMounted'),mounted:inner?.eval('typeof observerMounted!=="undefined"&&observerMounted'),valid:inner?.CoBakerWorksheet?.validSnapshot(panaderyaCoBaker.observation.latest),scripts:[...inner.document.scripts].map(s=>s.src)}}'''),flush=True)
+    print('FRAME',helper.evaluate('''()=>{const outer=document.querySelector('#coBakerObservation iframe')?.contentWindow,inner=outer?.document.querySelector('#worksheetFrame')?.contentWindow;return {status:panaderyaCoBaker.status,active:panaderyaCoBaker.help.active,frame:inner?.location.href,mode:inner?.eval('typeof worksheetReadOnly'),bridge:inner?.eval('typeof observerMounted'),mounted:inner?.eval('typeof observerMounted!=="undefined"&&observerMounted'),valid:inner?.CoBakerWorksheet?.validSnapshot(panaderyaCoBaker.observation.latest),scripts:[...(inner?.document.scripts||[])].map(s=>s.src)}}'''),flush=True)
     raise AssertionError((expected,latest,rendered))
 
 def ring(p, target):
@@ -123,9 +123,15 @@ def live(a,b,session):
 
 def reserve(a,b):
     target=b.evaluate('panaderyaCoBaker.profile.id')
+    # Independent recovery scenarios; protocol tests enforce call cooldowns.
+    a.evaluate('id=>{panaderyaCoBaker.help.directTimes.delete(id);panaderyaCoBaker.help.interrupted.delete(id)}',target)
+    b.evaluate('id=>panaderyaCoBaker.help.callerTimes.delete(id)',a.evaluate('panaderyaCoBaker.profile.id'))
     wait(a,'panaderyaCoBaker.help.eligible('+json.dumps(target)+')')
     a.get_by_role('button',name='Call for Help',exact=True).click();call(a,target)
-    b.locator('[data-help-accept]').click();synced(a,b);a.locator('#modals .close').click()
+    b.locator('[data-help-accept]').click()
+    if b.locator('[data-help-accept].confirm-save').count():
+        b.wait_for_timeout(700);b.locator('[data-help-accept].confirm-save').click()
+    synced(a,b);a.locator('#modals .close').click()
     return a.evaluate('panaderyaCoBaker.help.active.sessionId')
 
 def stop_relay():
@@ -186,6 +192,7 @@ try:
         learner.evaluate('g.board[0].a=79;g.board[0].b=18;startTicket(g.board[0].id)')
         wait(learner,'document.querySelector("#worksheetFrame")?.worksheetStarted')
         session=reserve(learner,helper)
+        save_before=json.loads(helper.evaluate('localStorage.panaderyaQuestV2'))
         fr=learner.locator('#worksheetFrame').element_handle().content_frame()
         fr.locator('[data-top="0"]').click();fr.locator('[data-bottom="0"]').click();learner.locator('#generateAnswer:enabled').click();fr.wait_for_function('s.revealed && !busy')
         synced(learner,helper)

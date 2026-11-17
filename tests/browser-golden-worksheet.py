@@ -165,7 +165,7 @@ def run_zoom(pw):
     assert p.locator('.calculation-keypad button').evaluate_all('es=>es.every(e=>{const r=e.getBoundingClientRect();return r.width>=44&&r.height>=44&&e.scrollWidth<=e.clientWidth+1})')
     p.locator('[data-calc-key="Enter"]').scroll_into_view_if_needed();p.locator('#generateAnswer').scroll_into_view_if_needed()
     capture=cdp.send('Page.captureScreenshot',{'format':'png','captureBeyondViewport':False});(OUT/f'edge-zoom-{factor}-calculator.png').write_bytes(base64.b64decode(capture['data']))
-    p.locator('.worksheet-settings').scroll_into_view_if_needed();p.locator('.worksheet-settings').click();p.wait_for_selector('#arrowToggle');p.locator('.modal .close').click()
+    p.locator('.worksheet-settings').scroll_into_view_if_needed();p.locator('.worksheet-settings').click();p.wait_for_selector('button[aria-label="Guide"]');p.locator('.modal .close').click()
     assert p.evaluate('g.run.factAnswers["0:0"].attempts.length')==0
     print('PASS actual worksheet Edge browser zoom',factor,p.evaluate('[innerWidth,innerHeight,devicePixelRatio]'),flush=True)
   finally:c.close()

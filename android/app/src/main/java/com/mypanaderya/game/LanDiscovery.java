@@ -95,12 +95,12 @@ public final class LanDiscovery {
     static String diagnosticReport(String summary,String nativeDetails)throws JSONException{
         JSONObject fields=new JSONObject(summary),details=new JSONObject(nativeDetails);
         StringBuilder report=new StringBuilder("My Panaderya - debug network diagnostics\n");
-        for(String key:Arrays.asList("Transport","Status","Nearby Bakers","Connected participants","Coordinator role","Coordinator status","Call for Help","Transport error")){
+        for(String key:Arrays.asList("Transport","Status","Availability","Nearby Bakers","Connected participants","Coordinator role","Coordinator status","Help session","Protocol/build","Call for Help","Transport error")){
             if(fields.has(key))report.append(key).append(": ").append(fields.optString(key).substring(0,Math.min(240,fields.optString(key).length()))).append('\n');
         }
         List<String> names=new ArrayList<>();details.keys().forEachRemaining(names::add);Collections.sort(names);
         for(String key:names)report.append(key).append(": ").append(details.get(key)).append('\n');
-        report.append("Network note: No peers does not prove an app fault. Check WLAN Partition / AP or client isolation and multicast filtering; keep local Wi-Fi enabled.\n");
+        report.append("Network note: No peers does not prove an app fault. Native LAN needs non-isolated Wi-Fi and multicast. Nearby selects its wireless media; test with WLAN Partition enabled to verify connectivity.\n");
         return report.toString().replaceAll("(?i)\\b[a-f0-9]{32}\\b|\\b[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}\\b","[redacted ID]");
     }
     @JavascriptInterface public void copyDetails(String summary){
@@ -384,10 +384,10 @@ public final class LanDiscovery {
                 validateWorksheet(snapshot.getJSONObject("state"));return;
             case "presence":
                 onlyKeys(h,"kind","available","busy");
-                if(!(h.opt("available") instanceof Boolean)||!(h.opt("busy") instanceof Boolean))throw new JSONException("Invalid availability");
+                if(!(h.opt("available") instanceof Boolean)||h.has("busy")&&!(h.opt("busy") instanceof Boolean))throw new JSONException("Invalid availability");
                 return;
             case "end":onlyKeys(h,"kind","sessionId");id(h,"sessionId");return;
-            case "invite":
+            case "invite":case "delivered":
                 onlyKeys(h,"kind","requestId","expiresAt");id(h,"requestId");
                 if(!(h.opt("expiresAt") instanceof Number)||h.getDouble("expiresAt")!=h.getLong("expiresAt")||h.getLong("expiresAt")<=0)throw new JSONException("Invalid invitation expiry");
                 return;
@@ -413,7 +413,7 @@ public final class LanDiscovery {
         if(values.length()<1||values.length()>max)throw new JSONException("Invalid reward amounts");
         for(int i=0;i<values.length();i++){Object v=values.opt(i);if(!(v instanceof Number))throw new JSONException("Invalid reward amount type");double n=values.getDouble(i);if(Double.isNaN(n)||Double.isInfinite(n)||n<0||positive&&n==0||n>9007199254740991d)throw new JSONException("Invalid reward amount");}
     }
-    private static JSONObject parse(String text)throws JSONException{
+    static JSONObject parse(String text)throws JSONException{
         if(text==null||text.length()>8192)throw new JSONException("Message too large");JSONObject m=new JSONObject(text),p=m.getJSONObject("player");
         Set<String> keys=new HashSet<>(Arrays.asList("v","id","session","player","type","replyTo","coord","help"));Iterator<String> it=m.keys();while(it.hasNext())if(!keys.contains(it.next()))throw new JSONException("Unknown field");
         for(String key:Arrays.asList("id","session","type"))if(!(m.opt(key) instanceof String))throw new JSONException("Invalid field type");
