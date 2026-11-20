@@ -3,8 +3,7 @@ function bindIllustratedScrollbars(root){
  const cleanups=[],updates=[];
  for(const [containerId,railId,trackId,thumbId,defaultHorizontal=false] of [
   ['cabinet-scroll','cabinet-scrollbar','cabinet-track','cabinet-thumb'],
-  ['order-scroller','board-scroll-rail','board-scroll-track','board-scroll-thumb'],
-  ['package-carousel','package-scrollbar','package-track','package-thumb',true]
+  ['order-scroller','board-scroll-rail','board-scroll-track','board-scroll-thumb']
  ]){
   const sc=root.querySelector('#'+containerId),rail=root.querySelector('#'+railId),track=root.querySelector('#'+trackId),thumb=root.querySelector('#'+thumbId);
   if(!sc||!rail||!track||!thumb)continue;

@@ -5,7 +5,7 @@ const BAKERY_PAGES=Object.freeze(['packages','menu','orders']);
 // Dolly the complete world (room, floor, fixtures and their contact shadows).
 // Station coordinates and physical gaps are independent of this camera setting.
 const BAKERY_CAMERA_ZOOM=1.10;
-const BAKERY_PACKAGE_DISPLAY_ORDER=Object.freeze(PACKAGE_SHOP.map(t=>t.rank).reverse());
+const BAKERY_PACKAGE_DISPLAY_ORDER=Object.freeze(PACKAGE_SHOP.map(t=>t.rank));
 // Centers account for each PNG's visible silhouette, rather than equal page boxes.
 // Native visible widths 1592, 1612, 936, each scaled .92. Both floor gaps stay 220.
 // Keep these world coordinates independent of the viewport/camera scale.
@@ -13,7 +13,7 @@ const BAKERY_CENTERS=Object.freeze([1000,2693.84,4085.92]);
 const BAKERY_COMPACT_CENTERS=Object.freeze([1000,2693.84,4214.72]);
 function bakeryWorldCenters(){return matchMedia('(max-height:600px) and (orientation:landscape)').matches?BAKERY_COMPACT_CENTERS:BAKERY_CENTERS}
 function bakeryCameraX(camera=bakeryCamera){const centers=bakeryWorldCenters(),i=Math.min(1,Math.floor(camera));return centers[i]+(centers[i+1]-centers[i])*(camera-i)-1000}
-let bakeryPage='menu',bakeryCamera=1,bakeryJourney=null,bakeryFrame=0,bakeryTier=0,bakeryCarouselScroll=0;
+let bakeryPage='menu',bakeryCamera=1,bakeryJourney=null,bakeryFrame=0,bakeryTier=null,bakeryPackagesVisited=false;
 function worldImage(name,classes='',alt=''){
  const approved=['menu-frame','packages-frame','orders-frame'].includes(name);
  const src=typeof BAKERY_ASSETS!=='undefined'&&BAKERY_ASSETS[name]||`assets/${approved?'bakery-approved':'bakery-faithful'}/${name}.png`;
@@ -31,7 +31,7 @@ hubFoodArt=function(id,extra=''){
  return SCENE_ORIGINAL_FOODS.has(id)?worldImage('food-'+id,`food-art illustrated-food ${extra}`,F(id).name):scenePreservedFoodArt(id,extra);
 };
 function sceneScrollRail(kind){
- const map={food:['cabinet-scroll','cabinet-scrollbar','cabinet-track','cabinet-thumb'],order:['order-scroller','board-scroll-rail','board-scroll-track','board-scroll-thumb'],package:['package-carousel','package-scrollbar','package-track','package-thumb']};
+ const map={food:['cabinet-scroll','cabinet-scrollbar','cabinet-track','cabinet-thumb'],order:['order-scroller','board-scroll-rail','board-scroll-track','board-scroll-thumb']};
  const [sc,rail,track,thumb]=map[kind];
  return `<div id="${rail}" class="scene-scroll-rail ${kind}-rail"><span class="scroll-rail-art" aria-hidden="true"></span><button type="button" class="scene-scroll-end scroll-start" data-scene-scroll="${sc}" data-scroll-direction="-1" aria-label="Scroll ${kind}s backward"></button><div class="scene-scroll-track" id="${track}"><span id="${thumb}" class="scene-scroll-thumb" role="scrollbar" tabindex="0" aria-label="${kind} scroll position" aria-controls="${sc}" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="scroll-thumb-art" aria-hidden="true"></span></span></div><button type="button" class="scene-scroll-end scroll-finish" data-scene-scroll="${sc}" data-scroll-direction="1" aria-label="Scroll ${kind}s forward"></button></div>`;
 }
@@ -52,17 +52,65 @@ function renderWorldMenu(){
  <div class="collection-sign">${worldImage('collection-holder','collection-holder')}${worldButton('View All Foods','collection',{icon:'book-icon',classes:'view-all-foods'})}</div>
  </section>`;
 }
+// Selection stays independent of affordability and survives unrelated renders.
+function bakeryCarouselTiers(){
+ const next=nextPackageToUnlock();
+ return BAKERY_PACKAGE_DISPLAY_ORDER.filter(rank=>packageUnlocked(rank)||rank===next?.rank);
+}
+function ensureBakeryTier(){
+ if(bakeryTier===null||!bakeryCarouselTiers().includes(bakeryTier))bakeryTier=PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).at(-1).rank;
+ packageFeaturedRank=bakeryTier;
+}
+function bakeryMysteryArt(){
+ // A solid alpha mask of Gift hides every color/ornament of the unknown tier.
+ return `<span class="package-mystery" aria-hidden="true"><span class="package-mystery-shape" style="mask-image:url('${typeof BAKERY_ASSETS!=='undefined'?BAKERY_ASSETS['package-01']:'assets/bakery-faithful/package-01.png'}')"></span><b>?</b></span>`;
+}
+function bakeryTierLabel(){return packageUnlocked(bakeryTier)?`<span>${bakeryTier+1}\u2605</span><span>${hubEscape(PACKAGE_TYPES[bakeryTier])}</span>`:'Next Discovery'}
+function positionBakeryCarouselLabel(){
+ const carousel=$('package-carousel'),label=$('package-carousel-label');if(!carousel||!label)return;
+ const viewport=carousel.querySelector('.package-carousel-viewport'),button=carousel.querySelector('[aria-pressed="true"]');
+ const image=button?.querySelector('img')||carousel.querySelector('img');if(!image?.naturalWidth)return;
+ // Measure the contained illustration, not its letterboxed <img> rectangle.
+ const artHeight=Math.min(button.clientHeight,button.clientWidth*image.naturalHeight/image.naturalWidth);
+ label.style.top=Math.min(carousel.clientHeight-label.offsetHeight-22,viewport.offsetTop+viewport.clientHeight/2+artHeight/2+20)+'px';label.style.bottom='auto';
+}
+function bakeryCarouselItem(rank,index,selected){
+ const known=packageUnlocked(rank),offset=index-selected;
+ return `<div class="package-slide" data-carousel-slide="${rank}" style="--offset:${offset}" aria-hidden="${Math.abs(offset)>1}"><button type="button" class="package-preview${known?'':' is-mystery'}" data-world-tier="${rank}" aria-label="${known?`${PACKAGE_TYPES[rank]} Package`:'Next Discovery'}" aria-pressed="${rank===bakeryTier}" tabindex="${Math.abs(offset)>1?-1:0}">${known?worldPackageImage(rank,'carousel-package'):bakeryMysteryArt()}</button></div>`;
+}
+function bakeryDiscoveryMarkup(){
+ const next=nextPackageToUnlock();if(!next)return '';
+ const required=PACKAGE_DISCOVERY_COINS[next.rank],progress=Math.min(required,packageCoinCount(g.coinsEarnedSinceLastDiscovery));
+ return `<div class="package-discovery scene-meter discovery-meter" role="progressbar" aria-label="Coins earned toward next package discovery" aria-valuemin="0" aria-valuemax="${required}" aria-valuenow="${progress}" aria-valuetext="${fmt(progress)} of ${fmt(required)} coins earned"><i style="width:${progress/required*100}%"></i><strong>Next Discovery</strong><span>${worldImage('price-coin')}<b>${fmt(progress)} / ${fmt(required)}</b></span></div>`;
+}
+function bakeryPackageDetails(){
+ const rank=bakeryTier,unlocked=packageUnlocked(rank),odds=unlocked?packageProbabilities(rank):[];
+ return `<div class="package-heading-group${nextPackageToUnlock()?' has-discovery':''}"><div class="package-title"><b>${unlocked?`${rank+1}\u2605`:'?'}</b><h2>${unlocked?`${hubEscape(PACKAGE_TYPES[rank])} Package`:'Next Discovery'}</h2></div>
+ ${bakeryDiscoveryMarkup()}</div>
+ ${unlocked?`<div class="chance-panel" aria-label="Food rarity chances"><div class="chance-rows">${odds.map((p,i)=>({p,i})).filter(({p})=>p>0).reverse().map(({p,i})=>`<div class="chance-row world-odds-row chance-${i}" style="--chance-color:${['#dba255','#ee9a50','#0fbdec','#be52ed','#ffc53b','#fa7e91','#9e59ed','#f0b52d'][i]}"><span class="chance-star" aria-hidden="true">\u2727</span><strong>${RARITIES[i]}</strong><span class="scene-meter"><i style="width:${p*100}%"></i></span><b>${probabilityLabel(p).replace('<','&lt;')}</b></div>`).join('')}</div></div>
+ <div class="purchase-options">${[1,5,10].map(count=>`<button type="button" class="scene-buy" data-world-buy="${count}" ${packageBatchUnavailable(rank,count)?'disabled':''} aria-label="Open ${count} ${PACKAGE_TYPES[rank]} packages for ${amountLabel(packagePrice(rank)*count)} coins"><strong>Open \u00d7${count}</strong><span>${worldImage('price-coin')}<b>${amountLabel(packagePrice(rank)*count)}</b></span></button>`).join('')}</div>
+ <p class="world-purchase-notice package-notice" role="status">${!g.packages[rank]&&g.coins<packagePrice(rank)?'Complete orders to earn more coins.':''}${g.packages[rank]?` <button type="button" data-world-saved>Open saved \u00d7${savedPackageBatch(rank)}</button>`:''}</p>`:`<div class="package-locked-details"><span aria-hidden="true">?</span><strong>A new surprise awaits!</strong><p>Earn coins from playing to discover your next package.</p></div>`}`;
+}
 function renderWorldPackages(){
- const rank=bakeryTier,next=nextPackageToUnlock(),odds=packageProbabilities(rank),unlocked=packageUnlocked(rank);
- return `<section id="package-station" class="faithful-packages" aria-label="Packages counter"><div class="package-paper"></div>${worldImage('packages-frame','scene-frame')}
- <div class="package-showcase">${worldPackageImage(rank,'featured-package')}<strong>${rank+1}★ ${PACKAGE_TYPES[rank]}</strong></div>
- <div id="package-carousel" class="package-carousel world-package-selector" data-scroll-axis="vertical" tabindex="0" role="group" aria-label="Package tiers, highest to lowest; scroll vertically or use up and down arrow keys"><div class="package-tier-list">${BAKERY_PACKAGE_DISPLAY_ORDER.map(rank=>PACKAGE_SHOP[rank]).map(type=>`<button type="button" class="package-tier ${packageUnlocked(type.rank)?'':'is-locked'}" data-world-tier="${type.rank}" aria-pressed="${type.rank===rank}" aria-label="${type.name} Package${packageUnlocked(type.rank)?'':`, unlock at ${type.orders} orders`}">${worldPackageImage(type.rank)}<span><b>${type.rank+1}★</b> ${type.name}<small>${packageUnlocked(type.rank)?'Available':`${type.orders} orders`}</small></span></button>`).join('')}</div></div>${sceneScrollRail('package')}
- <div class="package-discovery"><strong>${worldImage('gift-icon')}Next Discovery</strong><span>${next?`${Math.min(g.completed,next.orders)} / ${next.orders} orders`:'All tiers unlocked'}</span><div class="scene-meter discovery-meter" role="progressbar" aria-label="Next package unlock" aria-valuemin="0" aria-valuemax="${next?.orders||1}" aria-valuenow="${next?Math.min(g.completed,next.orders):1}"><i style="width:${next?Math.min(100,g.completed/next.orders*100):100}%"></i></div></div>
- <div class="package-title"><b>${rank+1}★</b><h2>${hubEscape(PACKAGE_TYPES[rank])} Package</h2></div>
- <div class="chance-panel" aria-label="Food rarity chances"><div class="chance-rows">${odds.map((p,i)=>p?`<div class="chance-row world-odds-row chance-${i}" style="--chance-color:${['#dba255','#ee9a50','#0fbdec','#be52ed','#ffc53b','#fa7e91','#9e59ed','#f0b52d'][i]}"><span class="chance-star" aria-hidden="true">✧</span><strong>${RARITIES[i]}</strong><span class="scene-meter"><i style="width:${p*100}%"></i></span><b>${probabilityLabel(p).replace('<','&lt;')}</b></div>`:'').join('')}</div></div>
- <div class="purchase-options">${[1,5,10].map(count=>`<button type="button" class="scene-buy" data-world-buy="${count}" ${packageBatchUnavailable(rank,count)?'disabled':''} aria-label="Open ${count} ${PACKAGE_TYPES[rank]} packages for ${amountLabel(packagePrice(rank)*count)} coins"><strong>Open ×${count}</strong><span>${worldImage('price-coin')}<b>${amountLabel(packagePrice(rank)*count)}</b></span></button>`).join('')}</div>
- <p class="world-purchase-notice package-notice" role="status">${!unlocked?`Unlock after ${PACKAGE_SHOP[rank].orders} completed orders.`:g.coins<packagePrice(rank)?'Complete orders to earn more coins.':''}${g.packages[rank]?` <button type="button" data-world-saved>Open saved ×${savedPackageBatch(rank)}</button>`:''}</p>
- </section>`;
+ ensureBakeryTier();const tiers=bakeryCarouselTiers(),selected=tiers.indexOf(bakeryTier);
+ return `<section id="package-station" class="faithful-packages${nextPackageToUnlock()?'':' all-packages-discovered'}" aria-label="Packages counter">${worldImage('packages-frame','scene-frame')}
+ <div class="package-interior"><div class="package-showcase"><div id="package-carousel" class="package-carousel" tabindex="0" role="region" aria-roledescription="carousel" aria-label="Packages; select a neighbor, swipe, or use left and right arrow keys"><div class="package-carousel-viewport">${tiers.map((rank,index)=>bakeryCarouselItem(rank,index,selected)).join('')}</div><strong id="package-carousel-label" aria-live="polite" aria-atomic="true">${bakeryTierLabel()}</strong></div></div>
+ <div class="package-details">${bakeryPackageDetails()}</div></div></section>`;
+}
+// Staff and Co-Baker rewards can arrive while browsing. Preserve the carousel
+// node, focus and current gesture; replace only a newly discovered silhouette.
+function refreshBakeryDiscovery(){
+ const station=$('package-station'),carousel=$('package-carousel');if(!station||!carousel)return;
+ const tiers=bakeryCarouselTiers(),selected=tiers.indexOf(bakeryTier);
+ const slides=carousel.querySelectorAll('[data-carousel-slide]');
+ if(slides.length!==tiers.length||[...slides].some(slide=>slide.querySelector('.is-mystery')&&packageUnlocked(Number(slide.dataset.carouselSlide)))){
+  carousel.querySelector('.package-carousel-viewport').innerHTML=tiers.map((rank,index)=>bakeryCarouselItem(rank,index,selected)).join('');
+ }
+ station.classList.toggle('all-packages-discovered',!nextPackageToUnlock());
+ station.querySelector('.package-details').innerHTML=bakeryPackageDetails();
+ $('package-carousel-label').innerHTML=bakeryTierLabel();
+ positionBakeryCarouselLabel();
+ if(typeof schedulePackageUnlockCelebration==='function')schedulePackageUnlockCelebration();
 }
 function sceneRewardArt(rank){
  return hubCoinArt(rank,'scene-reward-image');
@@ -107,11 +155,36 @@ function renderBakeryWorld(){
 function fitBakeryWorld(){
  const compact=matchMedia('(max-height:600px) and (orientation:landscape)').matches;
  const scale=(compact?innerWidth/2000:Math.min(innerWidth/2000,innerHeight/1200))*BAKERY_CAMERA_ZOOM,stage=$('stage');
+ const viewport=document.querySelector('.scene-window');
+ if(viewport&&viewport.dataset.compact!==String(compact)){viewport.scrollTop=0;viewport.dataset.compact=String(compact)}
  document.body.style.setProperty('--bakery-scale',scale);document.body.style.setProperty('--scene-target',`${44/(scale*.92)}px`);
  document.body.style.setProperty('--scene-phone-scale',innerWidth/2000);
  if(stage)stage.style.transform=`scale(${scale})`;
- const carousel=$('package-carousel');if(carousel&&!carousel.dataset.restored){carousel.scrollTop=bakeryCarouselScroll;carousel.dataset.restored='true'}
- hubScrollControls?.update();paintBakeryCamera();syncBakeryPages();bindBakeryWorld();
+ fitPhoneBakeryKiosks(compact,scale);
+ hubScrollControls?.update();paintBakeryCamera();syncBakeryPages();bindBakeryWorld();positionBakeryCarouselLabel();
+}
+// Fit important content between the floating HUD and navigation. The remaining
+// illustrated base may extend behind navigation; each raster scales uniformly.
+function phoneBakeryKioskScale(kind,width,contentEnd,availableWidth,availableHeight,worldScale){
+ const vertical=kind==='menu'?Math.min((availableHeight-44)/contentEnd,availableHeight/(contentEnd+78)):availableHeight/contentEnd;
+ return Math.max(.1,Math.min(worldScale*.92,availableWidth/width,vertical));
+}
+function fitPhoneBakeryKiosks(compact,worldScale){
+ if(!compact)return;
+ const viewport=document.querySelector('.scene-window'),hud=document.querySelector('.scene-hud'),nav=document.querySelector('.scene-nav');
+ if(!viewport||viewport.closest('[hidden]')||!hud||!nav)return;
+ const paddingTop=parseFloat(getComputedStyle(viewport).paddingTop)||0,top=Math.max(paddingTop,hud.getBoundingClientRect().bottom+12),availableHeight=nav.getBoundingClientRect().top-top-6;
+ for(const section of document.querySelectorAll('.scene-page>section')){
+  const kind=section.closest('[data-world-page]').dataset.worldPage;
+  const end=kind==='packages'?section.querySelector('.package-interior').offsetTop+section.querySelector('.package-interior').offsetHeight:
+   kind==='menu'?section.querySelector('.collection-sign').offsetTop+section.querySelector('.view-all-foods').offsetTop:
+   section.offsetHeight-parseFloat(getComputedStyle(section.querySelector('.scene-order-scroll')).bottom);
+  const unit=phoneBakeryKioskScale(kind,section.offsetWidth,end,innerWidth-32,availableHeight,worldScale);
+  section.style.setProperty('--phone-kiosk-scale',unit/worldScale);
+  section.style.setProperty('--phone-kiosk-unit',unit);
+  section.style.setProperty('--phone-kiosk-top',`${(top-paddingTop)/worldScale}px`);
+  section.style.setProperty('--scene-target',`${44/unit}px`);
+ }
 }
 function paintBakeryCamera(){
  const track=document.querySelector('.world-track');
@@ -135,6 +208,7 @@ function bakeryCameraStep(time){
 }
 function navigateBakery(page){
  if(!BAKERY_PAGES.includes(page)||g.run&&!g.run.paused)return false;
+ if(page==='packages'&&!bakeryPackagesVisited){bakeryPackagesVisited=true;selectBakeryTier(PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).at(-1).rank)}
  if(page===bakeryPage)return true;
  if(hubCollection)closeHubCollection();
  const viewport=document.querySelector('.scene-window');if(viewport)viewport.scrollTop=0;
@@ -145,11 +219,16 @@ function navigateBakery(page){
  syncBakeryPages();if(oldFocus)document.querySelector(`[data-world-nav="${page}"]`)?.focus({preventScroll:true});return true;
 }
 function selectBakeryTier(rank){
- if(!Number.isInteger(rank)||!PACKAGE_SHOP[rank])return false;
- bakeryCarouselScroll=$('package-carousel')?.scrollTop||0;bakeryTier=rank;packageFeaturedRank=rank;render();
- const strip=$('package-carousel'),selected=strip?.querySelector(`[data-world-tier="${rank}"]`);
- if(selected){selected.focus({preventScroll:true});if(selected.offsetTop<strip.scrollTop)strip.scrollTop=selected.offsetTop;else if(selected.offsetTop+selected.offsetHeight>strip.scrollTop+strip.clientHeight)strip.scrollTop=selected.offsetTop+selected.offsetHeight-strip.clientHeight;bakeryCarouselScroll=strip.scrollTop;hubScrollControls?.update()}
- return true;
+ const tiers=bakeryCarouselTiers();if(!Number.isInteger(rank)||!tiers.includes(rank))return false;
+ bakeryTier=rank;packageFeaturedRank=rank;
+ const carousel=$('package-carousel');if(!carousel)return true;
+ const selected=tiers.indexOf(rank),hadFocus=carousel.contains(document.activeElement);
+ for(const slide of carousel.querySelectorAll('[data-carousel-slide]')){
+  const offset=tiers.indexOf(Number(slide.dataset.carouselSlide))-selected,button=slide.querySelector('button');
+  slide.style.setProperty('--offset',offset);slide.setAttribute('aria-hidden',String(Math.abs(offset)>1));
+  button.setAttribute('aria-pressed',String(Number(slide.dataset.carouselSlide)===rank));button.tabIndex=Math.abs(offset)>1?-1:0;
+ }
+ refreshBakeryDiscovery();if(hadFocus)carousel.focus({preventScroll:true});return true;
 }
 function buyBakeryPackage(count){
  if(packageBatchView||packageBatchUnavailable(bakeryTier,count))return false;
@@ -157,19 +236,46 @@ function buyBakeryPackage(count){
 }
 function bindBakeryWorld(){
  const home=$('hubHome');if(!home||home.dataset.sceneBound)return;home.dataset.sceneBound='true';
+ let gesture=null,suppressClickUntil=0;
+ home.addEventListener('load',event=>{if(event.target.closest?.('#package-carousel'))positionBakeryCarouselLabel()},true);
  home.addEventListener('click',event=>{
   const tier=event.target.closest('[data-world-tier]'),buy=event.target.closest('[data-world-buy]'),scroll=event.target.closest('[data-scene-scroll]');
-  if(tier)selectBakeryTier(Number(tier.dataset.worldTier));if(buy&&!buy.disabled)buyBakeryPackage(Number(buy.dataset.worldBuy));
+  if(tier){if(performance.now()<suppressClickUntil){event.preventDefault();return}selectBakeryTier(Number(tier.dataset.worldTier))}
+  if(buy&&!buy.disabled)buyBakeryPackage(Number(buy.dataset.worldBuy));
   if(event.target.closest('[data-world-saved]'))openSavedPackageBatch(bakeryTier);
   if(scroll){const sc=$(scroll.dataset.sceneScroll),direction=Number(scroll.dataset.scrollDirection);sc.scrollBy({top:direction*180,behavior:'smooth'})}
  });
- home.addEventListener('scroll',event=>{if(event.target.id==='package-carousel')bakeryCarouselScroll=event.target.scrollTop},true);
  home.addEventListener('keydown',event=>{
   if(!event.target.closest('#package-carousel'))return;
-  const index=BAKERY_PACKAGE_DISPLAY_ORDER.indexOf(bakeryTier);
-  const next=event.key==='Home'?7:event.key==='End'?0:['ArrowLeft','ArrowUp'].includes(event.key)?BAKERY_PACKAGE_DISPLAY_ORDER[Math.max(0,index-1)]:['ArrowRight','ArrowDown'].includes(event.key)?BAKERY_PACKAGE_DISPLAY_ORDER[Math.min(7,index+1)]:null;
+  const tiers=bakeryCarouselTiers(),index=tiers.indexOf(bakeryTier);
+  const next=event.key==='Home'?tiers[0]:event.key==='End'?tiers.at(-1):event.key==='ArrowLeft'?tiers[Math.max(0,index-1)]:event.key==='ArrowRight'?tiers[Math.min(tiers.length-1,index+1)]:null;
   if(next!==null){event.preventDefault();selectBakeryTier(next)}
  });
+ home.addEventListener('pointerdown',event=>{
+  const carousel=event.target.closest('#package-carousel');if(!carousel||!event.isPrimary||event.button!==0)return;
+  gesture={id:event.pointerId,x:event.clientX,y:event.clientY,carousel,dragged:false};
+ });
+ home.addEventListener('pointermove',event=>{
+  if(!gesture||event.pointerId!==gesture.id)return;
+  const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;
+  if(!gesture.dragged&&Math.abs(dx)>9&&Math.abs(dx)>Math.abs(dy)*1.2){gesture.dragged=true;gesture.carousel.setPointerCapture(event.pointerId);gesture.carousel.classList.add('is-dragging')}
+  if(gesture.dragged){
+   event.preventDefault();const scale=gesture.carousel.getBoundingClientRect().width/gesture.carousel.offsetWidth;
+   gesture.carousel.style.setProperty('--drag',`${Math.max(-180,Math.min(180,dx/scale))}px`);
+  }
+ });
+ const finish=(event,cancel=false)=>{
+  if(!gesture||event.pointerId!==gesture.id)return;
+  const {carousel,x,y,dragged}=gesture;gesture=null;
+  carousel.classList.remove('is-dragging');carousel.style.removeProperty('--drag');
+  if(carousel.hasPointerCapture(event.pointerId))carousel.releasePointerCapture(event.pointerId);
+  if(dragged){
+   suppressClickUntil=performance.now()+400;
+   const dx=event.clientX-x,dy=event.clientY-y,tiers=bakeryCarouselTiers(),index=tiers.indexOf(bakeryTier);
+   if(!cancel&&Math.abs(dx)>Math.max(28,carousel.getBoundingClientRect().width*.075)&&Math.abs(dx)>Math.abs(dy)*1.2)selectBakeryTier(tiers[Math.max(0,Math.min(tiers.length-1,index+(dx<0?1:-1)))]);
+  }
+ };
+ home.addEventListener('pointerup',event=>finish(event));home.addEventListener('pointercancel',event=>finish(event,true));home.addEventListener('lostpointercapture',event=>{if(event.target===gesture?.carousel)finish(event,true)});
 }
 const sceneOpenPackages=openPackages,sceneShowPackageCollection=showPackageCollection,sceneShowSelectedPackage=showSelectedPackage;
 openPackages=function(tab='buy',rank=null){
@@ -181,4 +287,4 @@ openPackages=function(tab='buy',rank=null){
 showPackageCollection=function(restore=false){if(!isBakeryHub())return sceneShowPackageCollection(restore);navigateBakery('packages')};
 showSelectedPackage=function(rank){if(!isBakeryHub())return sceneShowSelectedPackage(rank);navigateBakery('packages');return selectBakeryTier(rank)};
 const sceneText=window.render_game_to_text;
-window.render_game_to_text=()=>{const state=JSON.parse(sceneText());state.scene={page:bakeryPage,camera:bakeryCamera,cameraX:bakeryCameraX(),zoom:BAKERY_CAMERA_ZOOM,transitioning:!!bakeryJourney,order:BAKERY_PAGES,presentation:'approved-artwork-v3'};if(bakeryPage==='packages'&&!packageBatchView)state.packages.view='scene';state.packages.selected=bakeryTier;return JSON.stringify(state)};
+window.render_game_to_text=()=>{const state=JSON.parse(sceneText());state.scene={page:bakeryPage,camera:bakeryCamera,cameraX:bakeryCameraX(),zoom:BAKERY_CAMERA_ZOOM,transitioning:!!bakeryJourney,order:BAKERY_PAGES,presentation:'approved-artwork-v3'};if(bakeryPage==='packages'&&!packageBatchView)state.packages.view='scene';state.packages.selected=bakeryTier;state.packages.discovery={earned:g.coinsEarnedSinceLastDiscovery,required:PACKAGE_DISCOVERY_COINS[nextPackageToUnlock()?.rank]??null};state.packages.carousel=bakeryCarouselTiers().map(rank=>({rank:packageUnlocked(rank)?rank:null,label:packageUnlocked(rank)?PACKAGE_TYPES[rank]:'Next Discovery'}));return JSON.stringify(state)};

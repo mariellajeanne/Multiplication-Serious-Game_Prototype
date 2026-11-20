@@ -24,7 +24,7 @@ test('world preserves scene order and canonical state while rendering real raste
  assert.ok(html.indexOf('data-world-page="packages"')<html.indexOf('data-world-page="menu"'));
  assert.ok(html.indexOf('data-world-page="menu"')<html.indexOf('data-world-page="orders"'));
  assert.equal((html.match(/data-world-nav=/g)||[]).length,3);
- assert.equal((html.match(/data-world-tier=/g)||[]).length,8);
+ assert.equal((html.match(/data-world-tier=/g)||[]).length,2);
  assert.equal((html.match(/world-odds-row/g)||[]).length,3);
  assert.match(html,/assets\/bakery-approved\/menu-frame.png/);
  assert.match(html,/counter-register world-register/);assert.match(html,/world-counter-packages/);
@@ -52,9 +52,30 @@ test('camera retargeting is continuous and reduced motion lands immediately',()=
 });
 
 test('scene purchases use canonical batch transactions and reject locked or replayed requests',()=>{
- const h=worldHarness();h.run('g.coins=1e12;g.completed=300;bakeryTier=7;before=g.coins;receipt=buyBakeryPackage(5)');
+ const h=worldHarness();h.run('g.coins=1e12;g.completed=300;g.packageTierUnlocks=PACKAGE_SHOP.map(t=>t.rank);bakeryTier=7;before=g.coins;receipt=buyBakeryPackage(5)');
  assert.equal(h.run('receipt.count'),5);assert.equal(h.run('before-g.coins'),h.run('packagePrice(7)*5'));
  assert.equal(h.run('buyBakeryPackage(1)'),false);
  h.run('collectPackageBatch(receipt.id);g.completed=0;g.packageTierUnlocks=[0]');
  assert.equal(h.run('buyBakeryPackage(1)'),false);
+});
+
+test('first visit centers the highest discovered tier; later visits preserve an intentional selection',()=>{
+ const h=worldHarness();h.run('renderWorldPackages();g.packageTierUnlocks=[0,1,2,3];navigateBakery("packages")');
+ assert.equal(h.run('bakeryTier'),3);
+ h.run('selectBakeryTier(1);navigateBakery("menu");g.packageTierUnlocks.push(4);navigateBakery("packages")');
+ assert.equal(h.run('bakeryTier'),1);
+ assert.equal(h.run('selectBakeryTier(6)'),false);assert.equal(h.run('selectBakeryTier(5)'),true);
+});
+
+test('phone fitting preserves uniform art scales and leaves primary content clear of HUD/navigation on every kiosk',()=>{
+ const h=worldHarness();
+ for(const [width,height] of [[740,360],[800,360],[844,390],[932,430],[1024,600]]){
+  const available=height-142,worldScale=width/2000*1.1;
+  for(const [kind,nativeWidth,end] of [['packages',1670,813],['menu',1650,787],['orders',1188,794]]){
+   const scale=h.run(`phoneBakeryKioskScale('${kind}',${nativeWidth},${end},${width-32},${available},${worldScale})`);
+   assert.ok(scale>0&&scale<=worldScale*.92);
+   assert.ok(nativeWidth*scale<=width-32+.001);
+   assert.ok(end*scale+(kind==='menu'?44:0)<=available+.001);
+  }
+ }
 });

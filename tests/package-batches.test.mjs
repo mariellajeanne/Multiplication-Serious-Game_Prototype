@@ -2,14 +2,15 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {progressionHarness} from './progression-harness.mjs';
 
-test('collection shows earned tiers descending and the real next practice gate',()=>{
+test('collection exposes discovered tiers and one shared earnings gate independent of order count',()=>{
  const h=progressionHarness();assert.deepEqual(h.json('availablePackageTiers().map(t=>t.rank)'),[0]);
- assert.equal(h.run('nextPackageToUnlock().orders'),4);
- h.run('g.completed=24');assert.deepEqual(h.json('availablePackageTiers().map(t=>t.rank)'),[3,2,1,0]);
- assert.equal(h.run('nextPackageToUnlock().orders'),45);
- h.run('g.packageTierUnlocks=[7]');assert.deepEqual(h.json('availablePackageTiers().map(t=>t.rank)'),[7,3,2,1,0]);
- h.run('g.completed=260');assert.equal(h.run('nextPackageToUnlock()'),null);
+ assert.equal(h.run('PACKAGE_DISCOVERY_COINS[nextPackageToUnlock().rank]'),5000);
+ h.run('g.completed=300');assert.deepEqual(h.json('availablePackageTiers().map(t=>t.rank)'),[0]);
+ h.run('g.packageTierUnlocks=[0,1,2,3]');assert.deepEqual(h.json('availablePackageTiers().map(t=>t.rank)'),[3,2,1,0]);
+ assert.equal(h.run('nextPackageToUnlock().rank'),4);
+ h.run('g.packageTierUnlocks=PACKAGE_SHOP.map(t=>t.rank)');assert.equal(h.run('nextPackageToUnlock()'),null);
 });
+
 test('x1/x5/x10 each charge the real total once and persist exactly that many discoveries',()=>{
  for(const count of [1,5,10]){
   const h=progressionHarness();h.run(`g.coins=1e9;price=packagePrice(0);before=g.coins;quote=quotePackageBatch(0,${count});Math.random=()=>0;
@@ -27,7 +28,7 @@ test('x1/x5/x10 each charge the real total once and persist exactly that many di
  }
 });
 test('new discovery flags are frozen per result; duplicates retain existing Mastery behavior',()=>{
- const h=progressionHarness();h.run(`g.completed=260;g.coins=1e12;quote=quotePackageBatch(7,5);Math.random=()=>.999999999;commitPackageBatch(quote.id)`);
+ const h=progressionHarness();h.run(`g.completed=260;g.packageTierUnlocks=PACKAGE_SHOP.map(t=>t.rank);g.coins=1e12;quote=quotePackageBatch(7,5);Math.random=()=>.999999999;commitPackageBatch(quote.id)`);
  assert.deepEqual(h.json('g.packageBatchReceipt.rewards.map(r=>r.isNew)'),[true,false,false,false,false]);
  assert.equal(h.run('g.recipeCeilings["ube-ensaymada"]'),4);
  assert.equal(h.run('g.owned.filter(o=>o.id==="ube-ensaymada").length'),1);

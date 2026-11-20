@@ -47,9 +47,9 @@ function runEconomyTrials(config,model){
   const firstUnlocked=Array(PACKAGE_SHOP.length).fill(null),firstOpened=Array(PACKAGE_SHOP.length).fill(null),firstFood=Array(8).fill(null);firstUnlocked[0]=0;firstFood[0]=0;
   const timeline=[];
   for(let order=1;order<=Math.max(...config.checkpoints);order++){
-   const ticket=g.board.shift(),reward=Math.round(ticket.base*bakeryValue()),beforeBoost=bakeryValue();
+   const ticket=g.board.shift(),reward=config.stepCoinRewards?orderCoinQuote(ticket):Math.round(ticket.base*bakeryValue()),beforeBoost=bakeryValue();
    const canDouble=false,capacity=affordable(reward);
-   g.coins+=reward;g.completed++;g.mastery++;g.permanentLuck=Math.max(g.permanentLuck,Math.floor(g.mastery/4));
+   creditGameplayCoins(g,reward);g.completed++;g.mastery++;g.permanentLuck=Math.max(g.permanentLuck,Math.floor(g.mastery/4));
    const walletBefore=g.coins-reward;fund+=reward*share;let packages=0,packageSpent=0;
    for(let n=0;n<100;n++){
     const highest=PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).at(-1).rank;

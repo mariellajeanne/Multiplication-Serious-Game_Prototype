@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,economyVersion:ECONOMY_BALANCE.version,frame11Version:1,coinRewardsVersion:1,approvedPackagesVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),packageRevision:0,packageCelebrations:{version:1,acknowledged:[0]},rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({packageDiscoveryVersion:1,coinsEarnedSinceLastDiscovery:0,packageTierUnlocks:[0],progressionVersion:PROGRESSION_VERSION,economyVersion:ECONOMY_BALANCE.version,frame11Version:1,coinRewardsVersion:1,approvedPackagesVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),packageRevision:0,packageCelebrations:{version:1,acknowledged:[0]},rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
 if(!g.owned||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
@@ -97,6 +97,7 @@ function migrateCoinRewards(state){
 if(previousSave&&g.uniqueFoodsVersion!==1){try{if(!localStorage.getItem('panaderyaQuestV2BeforeUniqueFoods'))localStorage.setItem('panaderyaQuestV2BeforeUniqueFoods',previousSave)}catch(_){} }
 migrateFrame11(g);
 migrateBakeryHub(g);
+migratePackageDiscovery(g);
 migratePackageCelebrations(g);
 if(typeof migrateWorksheetPractice==='function')migrateWorksheetPractice(g);
 // One-time removal preserves assets and frozen order budgets, never recalculates rewards.

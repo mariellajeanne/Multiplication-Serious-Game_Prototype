@@ -27,7 +27,7 @@ test('stored historical stock uses its promised distribution while new purchases
  assert.equal(h.run('F(g.packageBatchReceipt.rewards[0].foodId).rarity'),0);
  h.run('collectPackageBatch(g.packageBatchReceipt.id);quote=quotePackageBatch(7,1,"stock");Math.random=()=>.999999999;commitPackageBatch(quote.id)');
  assert.equal(h.run('F(g.packageBatchReceipt.rewards[0].foodId).rarity'),7);
- h.run('collectPackageBatch(g.packageBatchReceipt.id);g.completed=180;g.coins=1e9;Math.random=()=>0;quote=quotePackageBatch(7,1);commitPackageBatch(quote.id)');
+ h.run('collectPackageBatch(g.packageBatchReceipt.id);g.completed=180;g.packageTierUnlocks=PACKAGE_SHOP.map(t=>t.rank);g.coins=1e9;Math.random=()=>0;quote=quotePackageBatch(7,1);commitPackageBatch(quote.id)');
  assert.equal(h.run('F(g.packageBatchReceipt.rewards[0].foodId).rarity'),5);
  assert.equal(h.run('g.packages.length'),8);
 });

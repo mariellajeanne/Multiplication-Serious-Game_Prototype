@@ -45,6 +45,6 @@ function collectPackageBatch(id){
  if(save())return true;
  g.packageBatchReceipt=receipt;g.packageRevision=revision;return false;
 }
-function nextPackageToUnlock(){return PACKAGE_SHOP.find(type=>!packageUnlocked(type.rank))||null}
+function nextPackageToUnlock(){return nextPackageDiscovery(g)}
 function availablePackageTiers(){return PACKAGE_SHOP.filter(type=>packageUnlocked(type.rank)).slice().reverse()}
 function savedPackageBatch(rank){const stock=g.packages[rank]||0;return stock>=10?10:stock>=5?5:stock?1:0}

@@ -231,8 +231,8 @@
    const coins=allocatedReward(h.denominations.reduce((a,b)=>a+b,0),h.shares,this.d.profile.id);
    // The helper's own save commits balance + receipt in one localStorage write.
    // Stale-tab protection in save() prevents overwriting another tab's receipt.
-   const state=this.a.state(),before=state.coins,oldCredits=e.credits;state.coins+=coins;e.received=true;e.coins=coins;e.credits=copy(h.credits);
-   if(!this.a.save()){state.coins=before;e.received=false;e.credits=oldCredits;delete e.coins;return false}
+   const state=this.a.state(),before=state.coins,oldCredits=e.credits,undo=this.a.creditCoins?.(coins);if(!undo)state.coins+=coins;e.received=true;e.coins=coins;e.credits=copy(h.credits);
+   if(!this.a.save()){if(undo)undo();else state.coins=before;e.received=false;e.credits=oldCredits;delete e.coins;return false}
    this.emit({kind:'settled',coins});this.d.help.send(m.player.id,{kind:'reward-ack',id:h.id});return true;
   }
   receiveEarned(m){
@@ -246,8 +246,8 @@
    if(e.received){this.d.help.send(m.player.id,{kind:'reward-ack',id:h.id});return true}
    if(Object.values(l.receivedRewards).some(x=>x.learnerId===m.player.id&&x.orderId===e.context.orderId&&(x.step===h.credit.step||x.ordinal===h.ordinal)))return false;
    const state=this.a.state(),before=state.coins,coins=actionReward(h.base,h.ordinal);
-   state.coins+=coins;l.receivedRewards[h.id]={learnerId:m.player.id,contextId:h.contextId,orderId:e.context.orderId,step:h.credit.step,ordinal:h.ordinal,base:h.base,coins};
-   if(!this.a.save()){state.coins=before;delete l.receivedRewards[h.id];return false}
+   const undo=this.a.creditCoins?.(coins);if(!undo)state.coins+=coins;l.receivedRewards[h.id]={learnerId:m.player.id,contextId:h.contextId,orderId:e.context.orderId,step:h.credit.step,ordinal:h.ordinal,base:h.base,coins};
+   if(!this.a.save()){if(undo)undo();else state.coins=before;delete l.receivedRewards[h.id];return false}
    this.emit({kind:'settled',coins});this.d.help.send(m.player.id,{kind:'reward-ack',id:h.id});return true;
   }
  }

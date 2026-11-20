@@ -20,18 +20,22 @@ Normal play uses the long-multiplication worksheet, including product reveal, fl
 
 ## Packages
 
-The production Packages station uses a vertical selector with exactly eight types. Each has exactly three food rarities in a non-scrolling odds panel. Purchasing retains the 50-per-type capacity; old excess stock can still be opened. Single/batch opening immediately credits food discovery or duplicate Mastery capacity, with replay protection.
+The production Packages station uses a horizontal carousel in the pink half of one shared rounded interior fitted to the wooden aperture with a single thick dark-brown outline and no drop shadow, initially centered on the highest discovered type. Its tier/name label stays below the illustration, with larger type on landscape phones. A vertical divider separates the cream details section. The title and discovery occupy one rounded header, whose entire lower section is the progress track. The three odds share one rounded group with row dividers, ordered from highest rarity to lowest; opening buttons remain in a separate row. On short landscape phones the scene extends behind transparent floating HUD/navigation containers. All three kiosks fit their important content between the HUD and navigation, keeping source artwork proportions while preserving readable text and 44px controls. Only the lower decorative bases may overlap navigation; food/order lists and additional saved-stock controls scroll within their panels when needed. Only the immediate next undiscovered type appears, as a Gift-shaped silhouette; names, artwork, odds and purchase actions stay hidden until discovery. Each discovered type has exactly three food rarities in a non-scrolling odds panel. Purchasing retains the 50-per-type capacity; old excess stock can still be opened. Single/batch opening immediately credits food discovery or duplicate Mastery capacity, with replay protection.
 
-| Type | Completed-order gate | Food rarities |
+| Type | Coins earned since previous discovery | Food rarities |
 | --- | ---: | --- |
 | Gift | 0 | Classic, Favorite, Special |
-| Surprise | 4 | Favorite, Special, Premium |
-| Mystery | 12 | Special, Premium, Deluxe |
-| Secret | 24 | Premium, Deluxe, Signature |
-| Enchanted | 45 | Deluxe, Signature, Masterpiece |
-| Mythical | 75 | Deluxe, Signature, Masterpiece |
-| Cosmic | 120 | Signature, Masterpiece, Crown Jewel |
-| Divine | 180 | Signature, Masterpiece, Crown Jewel |
+| Surprise | 5,000 | Favorite, Special, Premium |
+| Mystery | 50,000 | Special, Premium, Deluxe |
+| Secret | 300,000 | Premium, Deluxe, Signature |
+| Enchanted | 1,800,000 | Deluxe, Signature, Masterpiece |
+| Mythical | 8,000,000 | Deluxe, Signature, Masterpiece |
+| Cosmic | 30,000,000 | Signature, Masterpiece, Crown Jewel |
+| Divine | 120,000,000 | Signature, Masterpiece, Crown Jewel |
+
+`PACKAGE_DISCOVERY_COINS` in `src/game/progression.js` is the tuning source. Collected order rewards, staff production and validated Co-Baker bonuses count. Starting coins, saved balances, adjustments, Undo refunds and food resale do not. Spending never reduces progress. Each qualifying grant can discover only one type, resets `coinsEarnedSinceLastDiscovery` to zero, and discards excess discovery progress without removing wallet coins or lifetime statistics. Reward receipts, wallet and discovery save together. Migration preserves old order-gated/grandfathered unlocks and initializes the new counter once at zero.
+
+These thresholds are preliminary: the starter order quote is 367 coins at ×1.20 Boost. `node tests/simulate-package-discovery.mjs output/package-discovery-balance.json` exercises real prices, food growth and expected step payouts across 12 seeds, three purchase policies and four ticket-luck scenarios. Normal balanced play predicts median discoveries at orders 4, 7, 10, 16, 26, 40 and 64; unfavorable tickets extend Divine to 95. Exclusively starter-tier tickets can exceed 200 orders. Golden bonuses, staff and helper bonuses are omitted from the model; observed player pacing should guide further tuning. No reward rates or package prices changed.
 
 New package distributions normalize the previous binomial weights within the owner's three approved rarities. The price growth curve remains; the existing resale safeguard covers the new reward set without lowering the historical price floor. Displayed odds and actual draws share the same function.
 

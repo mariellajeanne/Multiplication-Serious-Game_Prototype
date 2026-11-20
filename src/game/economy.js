@@ -1,6 +1,17 @@
 /* Staff contracts and existing challenge-mode controls. */
 function hireStaff(){if(g.run){toast('Finish your current order before changing bakery upgrades.');return;}if(g.completed<6)return;if(g.staff.until>Date.now()){toast('Your helper is already working!');return}const rate=staffRate(),cost=Math.ceil(rate*36);if(g.coins<cost){toast('You need a few more coins to hire a helper.');return}g.coins-=cost;g.staff={until:Date.now()+120000,rate,lastTick:Date.now(),fraction:0};save();render();openStaff();toast('🧑‍🍳 Helper hired for a 2-minute demo shift!')}
-function tickStaff(){const s=g.staff;if(!s||!s.until||s.until<=0)return;const now=Date.now(),end=Math.min(now,s.until),start=s.lastTick||now,passed=Math.max(0,(end-start)/1000);if(passed>0){const amount=passed*s.rate+(s.fraction||0);g.coins+=Math.floor(amount);s.fraction=amount-Math.floor(amount);s.lastTick=end}if(now>=s.until){s.until=0;s.lastTick=now;toast('Your temporary helper finished their shift!')}save();const coinEl=$('walletCoins');if(coinEl)coinEl.textContent=amountLabel(g.coins);const staffEl=$('staffTimer');if(staffEl)staffEl.textContent=s.until?Math.ceil((s.until-now)/1000)+'s remaining':'Not working'}
+function tickStaff(){
+ const s=g.staff;if(!s||!s.until||s.until<=0)return;
+ const before={...s},now=Date.now(),end=Math.min(now,s.until),start=s.lastTick||now,passed=Math.max(0,(end-start)/1000);
+ let undo=()=>{};
+ if(passed>0){const amount=passed*s.rate+(s.fraction||0);undo=creditGameplayCoins(g,Math.floor(amount));s.fraction=amount-Math.floor(amount);s.lastTick=end}
+ const finished=now>=s.until;if(finished){s.until=0;s.lastTick=now}
+ if(!save()){undo();g.staff=before;return}
+ if(finished)toast('Your temporary helper finished their shift!');
+ const coinEl=$('walletCoins');if(coinEl)coinEl.textContent=amountLabel(g.coins);
+ const staffEl=$('staffTimer');if(staffEl)staffEl.textContent=s.until?Math.ceil((s.until-now)/1000)+'s remaining':'Not working';
+ if(typeof refreshBakeryDiscovery==='function')refreshBakeryDiscovery();
+}
 function chooseMode(id){const m=MODE.find(x=>x.id===id);if(!m||g.completed<m.unlock)return;if(g.run){toast('Finish the current ticket before switching modes.');return}g.mode=id;save();render();openModes();toast(`${m.name} mode selected`)}
 function chooseLives(n){if(g.run)return;g.lives=n;save();render()}
 function retryRun(){const r=g.run;if(!r||r.phase!=='failed')return;if(r.retriesLeft<=0){toast('No challenge retries left. Switch to Normal to continue.');return}r.retriesLeft=r.retriesLeft===Infinity?Infinity:r.retriesLeft-1;r.index=0;r.phase='engine';r.pool=typeof usesStepCoins==='function'&&usesStepCoins(r)?stepCoinTotals(r).total:0;r.procedureComplete=false;r.settlement=null;r.earnedActive=0;r.mistakes=0;r.correct=0;r.bridgeDone=0;r.bridgeSig='';r.bridgePrev={};r.worksheetSession=null;ensureWorksheetRewards(r,true);save();render();toast(typeof usesStepCoins==='function'&&usesStepCoins(r)?'Try again! Your earned containers are safe.':'Try again! Your pending rewards reset.')}

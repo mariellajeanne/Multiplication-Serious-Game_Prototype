@@ -6,8 +6,8 @@ function packagePortrait(rank,extra=''){return `<div class="package-portrait p${
 function packageNextMarkup(){
  const next=nextPackageToUnlock();
  if(!next)return `<section class="packages-next packages-all-unlocked"><span class="packages-milestone-star" aria-hidden="true">✦</span><div><h3>Every package is yours to discover!</h3><p>All package tiers unlocked.</p></div></section>`;
- const progress=Math.min(g.completed,next.orders);
- return `<section class="packages-next">${packagePortrait(next.rank)}<div class="packages-next-copy"><span class="packages-eyebrow">NEXT TO UNLOCK</span><h3>${next.name} Package</h3><p>Keep practicing to unlock!</p></div><div class="packages-practice"><label for="packagePracticeProgress">${progress} / ${next.orders} orders</label><progress id="packagePracticeProgress" max="${next.orders}" value="${progress}">${progress} / ${next.orders}</progress></div></section>`;
+ const required=PACKAGE_DISCOVERY_COINS[next.rank],progress=Math.min(g.coinsEarnedSinceLastDiscovery,required);
+ return `<section class="packages-next"><span class="packages-milestone-star" aria-hidden="true">?</span><div class="packages-next-copy"><span class="packages-eyebrow">NEXT TO UNLOCK</span><h3>Next Discovery</h3><p>Keep practicing to unlock!</p></div><div class="packages-practice"><label for="packagePracticeProgress">${fmt(progress)} / ${fmt(required)} coins</label><progress id="packagePracticeProgress" max="${required}" value="${progress}">${fmt(progress)} / ${fmt(required)}</progress></div></section>`;
 }
 function packageCollectionMarkup(){
  const stock=g.packages.reduce((sum,n)=>sum+n,0),types=availablePackageTiers();
@@ -76,44 +76,70 @@ function openSavedPackageBatch(rank=null){
  const count=savedPackageBatch(rank);if(!count)return false;
  return purchasePackageBatch(quotePackageBatch(rank,count,'stock').id);
 }
+const PACKAGE_REVEAL_TIMING=Object.freeze({opening:980,stagger:150,panel:320});
+function packageRewardMastery(reward){
+ const available=Number(reward.masteryUnlocked)||0;
+ return available>0?`+${available} Mastery available`:'';
+}
 function packageRewardCard(reward,index,rank){
- const food=F(reward.foodId);
- return `<article class="batch-reward r${food.rarity}" data-reward-index="${index}" aria-label="Package ${index+1}, not yet revealed"><div class="batch-reward-visual"><div class="batch-package p${rank}" aria-hidden="true">${packageArt()}</div><div class="batch-food" aria-hidden="true">${foodArt(food.id)}</div><span class="batch-reward-flash" aria-hidden="true">✦</span></div><div class="batch-reward-copy" aria-hidden="true"><strong>${food.name}</strong><span>${food.rarity+1}★ ${RARITIES[food.rarity]}</span>${reward.isNew?'<b class="batch-new">NEW!</b>':'<small>+1 Mastery available</small>'}</div></article>`;
+ const food=F(reward.foodId),mastery=packageRewardMastery(reward);
+ // The carousel owns the approved tier mapping; no generic box or new art.
+ return `<article class="batch-reward r${food.rarity}" data-reward-index="${index}" data-phase="waiting" style="--batch-delay:${index*PACKAGE_REVEAL_TIMING.stagger}ms" aria-label="Package ${index+1}, not yet revealed"><div class="batch-reward-visual"><div class="batch-package" aria-hidden="true">${worldPackageImage(rank,'batch-package-art')}</div><div class="batch-food" aria-hidden="true">${foodArt(food.id)}</div></div><div class="batch-reward-copy${mastery?'':' has-no-mastery'}" aria-hidden="true"><strong>${hubEscape(food.name)}</strong><span><b aria-hidden="true">${food.rarity+1}★</b> ${RARITIES[food.rarity]}</span><small${mastery?'':' hidden'}>${mastery}</small></div></article>`;
 }
 function presentPackageBatch(resumed=false){
  const receipt=g.packageBatchReceipt;
  if(!receipt||packageBatchView||g.run&&!g.run.paused||document.hidden)return;
+ // Startup owns the roots' inert flags until its loading screen dismisses.
+ // Recover afterward so Collect restores the playable background state.
+ if($('bakeryLoading')&&!$('bakeryLoading').hidden)return;
  const root=document.createElement('section');root.id='packageBatch';root.className='package-batch-overlay';root.dataset.count=receipt.count;
- root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-labelledby','packageBatchTitle');root.setAttribute('aria-describedby','packageBatchProgress');
+ root.setAttribute('role','dialog');root.setAttribute('aria-modal','true');root.setAttribute('aria-label','Package rewards');
+ root.style.setProperty('--batch-opening-duration',`${PACKAGE_REVEAL_TIMING.opening}ms`);root.style.setProperty('--batch-panel-duration',`${PACKAGE_REVEAL_TIMING.panel}ms`);
  const background=['app','modals','notificationDock'].map(id=>$(id)).filter(Boolean).map(node=>({node,inert:node.inert,hidden:node.hidden}));
  packageBatchView={root,receipt,timers:new Set(),background,focus:captureFocus(document.activeElement),complete:false,collecting:false};
  background.forEach(({node})=>{node.inert=true;if(node.id==='modals')node.hidden=true});document.body.classList.add('package-batch-open');
- root.innerHTML=`<header class="batch-heading"><span>${PACKAGE_TYPES[receipt.rank]} Package · ×${receipt.count}</span><h1 id="packageBatchTitle">What’s inside?</h1></header><div class="batch-stage"><div class="batch-grid batch-count-${receipt.count}" style="--batch-rows:${receipt.count===10?2:1}">${receipt.rewards.map((reward,i)=>packageRewardCard(reward,i,receipt.rank)).join('')}</div></div><footer class="batch-footer"><p id="packageBatchProgress" role="status">Ready for a surprise?</p><small class="batch-swipe-hint">Swipe to see all your finds</small><button class="batch-action" id="packageRevealAll" onclick="revealAllPackageRewards()">Reveal All</button><button class="batch-action" id="packageBatchCollect" onclick="finishPackageBatch()" hidden>Collect</button><p id="packageBatchError" role="alert" hidden></p></footer>`;
+ root.innerHTML=`<div class="batch-stage"><div class="batch-grid batch-count-${receipt.count}" style="--batch-rows:${receipt.count===10?2:1}">${receipt.rewards.map((reward,i)=>packageRewardCard(reward,i,receipt.rank)).join('')}</div></div><footer class="batch-footer"><button type="button" class="batch-action batch-action-secondary" id="packageRevealAll" onclick="revealAllPackageRewards()">Reveal All</button><button type="button" class="batch-action batch-action-primary" id="packageBatchCollect" onclick="finishPackageBatch()" hidden>${receipt.count===1?'Collect':'Collect All'}</button><p id="packageBatchError" role="alert" hidden></p></footer>`;
+ const view=packageBatchView;
+ // Each artwork runs its whole CSS timeline with a staggered START. DOM events
+ // synchronize food visibility with the actual pop, even under delayed frames.
+ root.addEventListener('animationstart',event=>{
+  if(packageBatchView!==view||view.complete||event.animationName!=='batch-package-open')return;
+  const card=event.target.closest('.batch-reward');if(!card||card.classList.contains('is-revealed'))return;
+  card.dataset.phase='opening';card.classList.add('is-opening');
+ });
+ root.addEventListener('animationend',event=>{
+  if(packageBatchView!==view||view.complete||root.classList.contains('reveal-instant'))return;
+  const card=event.target.closest('.batch-reward');if(!card)return;
+  if(event.animationName==='batch-package-open')revealPackageReward(Number(card.dataset.rewardIndex));
+  if(event.animationName==='batch-panel-emerge'){
+   card.dataset.phase='settled';
+   if([...root.querySelectorAll('.batch-reward')].every(item=>item.dataset.phase==='settled'))completePackageReveal();
+  }
+ });
  document.body.appendChild(root);$('packageRevealAll').focus({preventScroll:true});
  if(resumed||window.matchMedia('(prefers-reduced-motion: reduce)').matches){revealAllPackageRewards();return}
- const view=packageBatchView;
- const later=(callback,delay)=>{const timer=setTimeout(()=>{view.timers.delete(timer);if(packageBatchView===view)callback()},delay);view.timers.add(timer)};
- receipt.rewards.forEach((reward,index)=>{
-  later(()=>root.querySelector(`[data-reward-index="${index}"]`).classList.add('is-opening'),180+index*140);
-  later(()=>{revealPackageReward(index);if(index===receipt.count-1)completePackageReveal()},540+index*140);
- });
+ // Recovery only: disabled CSS, a lost animation event or changed motion
+ // preferences must never strand a paid receipt. It cannot reroll rewards.
+ const timer=setTimeout(()=>{view.timers.delete(timer);if(packageBatchView===view&&!view.complete)revealAllPackageRewards()},PACKAGE_REVEAL_TIMING.opening+(receipt.count-1)*PACKAGE_REVEAL_TIMING.stagger+PACKAGE_REVEAL_TIMING.panel+1200);
+ view.timers.add(timer);
 }
 function revealPackageReward(index){
  const view=packageBatchView;if(!view)return;
- const reward=view.receipt.rewards[index],food=F(reward.foodId),card=view.root.querySelector(`[data-reward-index="${index}"]`);
- card.classList.add('is-revealed');card.setAttribute('aria-label',`${food.name}, ${RARITIES[food.rarity]}, ${reward.isNew?'new food':'Mastery capacity +1'}`);card.querySelector('.batch-reward-copy').setAttribute('aria-hidden','false');
- $('packageBatchProgress').textContent=`${view.root.querySelectorAll('.is-revealed').length} of ${view.receipt.count} revealed`;
+ const reward=view.receipt.rewards[index];if(!reward)return;
+ const food=F(reward.foodId),card=view.root.querySelector(`[data-reward-index="${index}"]`);if(!card||card.classList.contains('is-revealed'))return;
+ card.classList.remove('is-opening');card.classList.add('is-revealed');card.dataset.phase='revealed';
+ card.setAttribute('aria-label',`${food.name}, ${food.rarity+1} stars ${RARITIES[food.rarity]}${packageRewardMastery(reward)?`, ${packageRewardMastery(reward)}`:''}`);card.querySelector('.batch-reward-copy').setAttribute('aria-hidden','false');
 }
 function completePackageReveal(){
  const view=packageBatchView;if(!view||view.complete)return;
- view.complete=true;view.root.classList.add('is-complete');$('packageBatchTitle').textContent='Your fresh finds!';
+ view.complete=true;view.timers.forEach(clearTimeout);view.timers.clear();view.root.classList.add('is-complete');
  const hadFocus=document.activeElement===$('packageRevealAll');$('packageRevealAll').hidden=true;$('packageBatchCollect').hidden=false;
  if(hadFocus)$('packageBatchCollect').focus({preventScroll:true});
 }
 function revealAllPackageRewards(){
  const view=packageBatchView;if(!view)return;
  view.timers.forEach(clearTimeout);view.timers.clear();view.root.classList.add('reveal-instant');
- view.receipt.rewards.forEach((_,index)=>revealPackageReward(index));completePackageReveal();
+ view.receipt.rewards.forEach((_,index)=>{revealPackageReward(index);view.root.querySelector(`[data-reward-index="${index}"]`).dataset.phase='settled'});completePackageReveal();
 }
 function finishPackageBatch(){
  const view=packageBatchView;if(!view||!view.complete||view.collecting)return false;
@@ -150,9 +176,12 @@ document.addEventListener('focusin',event=>{
 document.addEventListener('visibilitychange',()=>{
  if(document.hidden&&packageBatchView)revealAllPackageRewards();else schedulePackageBatchRecovery();
 });
+window.matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change',event=>{
+ if(event.matches&&packageBatchView)revealAllPackageRewards();
+});
 const packageExperienceText=window.render_game_to_text;
 window.render_game_to_text=()=>{
  const state=JSON.parse(packageExperienceText());
- state.packages={view:packageBatchView?'rewards':modal?.variant?.startsWith('packages-')?modal.variant:'closed',selected:packageFeaturedRank,available:availablePackageTiers().map(t=>t.rank),next:nextPackageToUnlock()?.rank??null,batch:packageBatchView?{count:packageBatchView.receipt.count,complete:packageBatchView.complete,revealed:packageBatchView.root.querySelectorAll('.is-revealed').length}:null};
+ state.packages={view:packageBatchView?'rewards':modal?.variant?.startsWith('packages-')?modal.variant:'closed',selected:packageFeaturedRank,available:availablePackageTiers().map(t=>t.rank),next:nextPackageToUnlock()?.rank??null,batch:packageBatchView?{count:packageBatchView.receipt.count,complete:packageBatchView.complete,revealed:packageBatchView.root.querySelectorAll('.is-revealed').length,phases:[...packageBatchView.root.querySelectorAll('.batch-reward')].map(card=>card.dataset.phase)}:null};
  return JSON.stringify(state);
 };

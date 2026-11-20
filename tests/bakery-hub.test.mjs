@@ -16,7 +16,7 @@ test('approved packages have exactly eight normalized three-rarity distributions
 });
 
 test('eighth package uses the same purchase, immediate discovery and replay protection',()=>{
- const h=progressionHarness();h.run(`g.coins=1e9;g.completed=260;openPackages('buy',7);setPackageQuantity(2);
+ const h=progressionHarness();h.run(`g.coins=1e9;g.completed=260;g.packageTierUnlocks=PACKAGE_SHOP.map(t=>t.rank);openPackages('buy',7);setPackageQuantity(2);
   before=g.coins;cost=packagePrice(7)*2;id=packageQuote.id;ok=requestPackagePurchase(id);again=requestPackagePurchase(id);
   Math.random=()=>.999999999;token=packageSession.slots[7][0].id;opened=openPackageSlot(7,token);replayed=openPackageSlot(7,token)`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('before-g.coins'),h.run('cost'));

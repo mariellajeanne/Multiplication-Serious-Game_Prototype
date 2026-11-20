@@ -88,7 +88,7 @@ function creditCompletedOrder(r=g.run){
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(stored?.claimedOrders?.[r.ticket.id]){toast('This order has already been collected.');return false}}catch(_){}
  commitPurchaseUndo('Rewards collected');
  const backup=JSON.stringify(g),coins=r.pool,old=g.permanentLuck;
- g.claimedOrders[r.ticket.id]=r.worksheetRewards?.attemptId||true;g.coins+=coins;g.completed++;
+ g.claimedOrders[r.ticket.id]=r.worksheetRewards?.attemptId||true;creditGameplayCoins(g,coins);g.completed++;
  graduateGuideAfterOrder();g.learning.correct+=r.correct;
  g.mastery+=r.mode==='normal'||r.mode==='lookup'?1:2;g.permanentLuck=Math.max(old,Math.floor(g.mastery/4));
  g.board=g.board.filter(t=>t.id!==r.ticket.id);delete g.orderRuns[r.ticket.id];g.run=null;

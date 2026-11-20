@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {progressionHarness} from './progression-harness.mjs';
 
-test('all eight types select both panels; completed orders gate buying, without hiding types or old stock',()=>{
+test('all eight types select both panels; discovered tiers gate buying, without hiding types or old stock',()=>{
  const h=progressionHarness();
  for(let rank=0;rank<8;rank++){
   h.run(`g.packages[${rank}]=2;openPackages('buy',${rank});html=popup.html`);
@@ -13,9 +13,9 @@ test('all eight types select both panels; completed orders gate buying, without 
   assert.equal(h.run('packageQuantityMaximum()>0'),rank===0);
   h.run(`g.completed=PACKAGE_SHOP[${rank}].orders-1`);
   if(rank)assert.equal(h.run('packageUnlocked(packageType)'),false);
-  h.run(`g.completed=PACKAGE_SHOP[${rank}].orders;g.coins=packagePrice(packageType)*50;openPackages('buy',${rank})`);
+  h.run(`g.packageTierUnlocks.push(${rank});g.coins=packagePrice(packageType)*50;openPackages('buy',${rank})`);
   assert.equal(h.run('packageQuantityMaximum()'),48);
-  h.run('g.completed=0;g.coins=250');
+  h.run('g.completed=0;g.coins=250;g.packageTierUnlocks=[0]');
  }
 });
 

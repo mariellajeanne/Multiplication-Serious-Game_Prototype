@@ -4,7 +4,7 @@
  'use strict';
  const d=window.panaderyaCoBaker;if(!d?.guidance)return;
  const rewards=new CoBakerRewards.Rewards(d,{
-  state:()=>g,run:()=>g.run,save:()=>save(),
+  state:()=>g,run:()=>g.run,save:()=>save(),creditCoins:coins=>creditGameplayCoins(g,coins),
   session:()=>{try{return document.getElementById('worksheetFrame')?.contentWindow?.getWorksheetSession?.()}catch(_){return null}},
   context:(r,id,sessionId)=>({id,sessionId,orderId:r.ticket.id,a:r.ticket.a,b:r.ticket.b,tier:ticketCoinTier(r.ticket),
    bases:usesStepCoins(r)?r.stepCoins.options.map(o=>o.base):[r.baseCoins??r.ticket.base],legacy:!usesStepCoins(r)}),
@@ -21,6 +21,7 @@
   // Update the existing bakery balance only; preserve every live interaction.
   const balance=document.getElementById('walletCoins');if(balance)balance.textContent=amountLabel(g.coins);
   const wallet=document.getElementById('wallet-button');if(wallet)wallet.setAttribute('aria-label',`View ${amountLabel(g.coins)} coins`);
+  if(typeof refreshBakeryDiscovery==='function')refreshBakeryDiscovery();
  });
  const prior=window.render_game_to_text;
  if(typeof prior==='function')window.render_game_to_text=()=>{const data=JSON.parse(prior());data.coBakerRewards={received:Object.values(g.coBakerRewards?.receivedRewards||{}).map(e=>e.coins),pending:Object.values(g.coBakerRewards?.outbox||{}).filter(e=>!e.acknowledged).length};return JSON.stringify(data)};

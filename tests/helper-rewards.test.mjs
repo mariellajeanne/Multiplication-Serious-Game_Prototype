@@ -14,6 +14,18 @@ test('matching verified action earns and delivers immediately before completion 
  for(const key of ['mastery','permanentLuck','completed','mathPractice','owned','packages','run'])assert.deepEqual(h.b.json('g.'+key),before[key]);
 });
 
+test('validated helper earnings discover once; failed writes and replay preserve discovery and the helper worksheet',()=>{
+ const h=setup();h.b.run('g.coinsEarnedSinceLastDiscovery=4999;save()');
+ const worksheet=h.b.json('g.run');h.cue();h.b.fail(true);h.a.action(0,0,'connect');h.flush();
+ assert.equal(h.b.run('g.coinsEarnedSinceLastDiscovery'),4999);
+ assert.deepEqual(h.b.json('g.packageTierUnlocks'),[0]);assert.equal(balance(h),250);
+ h.b.fail(false);h.advance();
+ assert.deepEqual(h.b.json('g.packageTierUnlocks'),[0,1]);
+ assert.equal(h.b.run('g.coinsEarnedSinceLastDiscovery'),0);
+ const coins=balance(h);h.advance();h.advance();assert.equal(balance(h),coins);
+ assert.equal(h.b.run('g.coinsEarnedSinceLastDiscovery'),0);assert.deepEqual(h.b.json('g.run'),worksheet);
+});
+
 test('delivered suggestion survives helper refresh before the learner action',()=>{
  const h=setup();h.cue();h.b.d.stop();h.flush();const helper=h.join(2,true);h.flush();h.a.action(0,0,'connect');h.flush();
  assert.equal(earned(h).length,1);assert.ok(helper.run('g.coins')>250);assert.equal(helper.run('Object.keys(g.coBakerRewards.receivedRewards).length'),1);

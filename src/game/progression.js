@@ -8,7 +8,37 @@ const ORDER_LIMIT=5, ORDER_REFRESH_MS=180000;
 const PACKAGE_TYPES=['Gift','Surprise','Mystery','Secret','Enchanted','Mythical','Cosmic','Divine'];
 const PACKAGE_FOOD_RARITIES=Object.freeze([[0,1,2],[1,2,3],[2,3,4],[3,4,5],[4,5,6],[4,5,6],[5,6,7],[5,6,7]].map(Object.freeze));
 const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:ECONOMY_BALANCE.unlocks[rank],orders:[0,4,12,24,45,75,120,180][rank],priceOrders:ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank)}));
-function packageTierAvailable(state,rank){return !!PACKAGE_SHOP[rank]&&(state.completed>=PACKAGE_SHOP[rank].orders||state.packageTierUnlocks?.includes(rank)===true)}
+// Per-discovery earnings, never wallet balance. Order gates above are retained
+// only to preserve availability when importing a pre-discovery save.
+const PACKAGE_DISCOVERY_COINS=Object.freeze([0,5000,50000,300000,1800000,8000000,30000000,120000000]);
+function packageCoinCount(value){return Number.isFinite(value)?Math.max(0,Math.min(Number.MAX_SAFE_INTEGER,Math.floor(value))):0}
+function migratePackageDiscovery(state){
+ if(state.packageDiscoveryVersion!==1){
+  state.packageTierUnlocks=PACKAGE_SHOP.filter(t=>t.rank===0||state.completed>=t.orders||state.packageTierUnlocks?.includes(t.rank)).map(t=>t.rank);
+  state.coinsEarnedSinceLastDiscovery=0;state.packageDiscoveryVersion=1;
+ }
+ state.packageTierUnlocks=packageAcknowledgements(state.packageTierUnlocks);
+ state.coinsEarnedSinceLastDiscovery=packageCoinCount(state.coinsEarnedSinceLastDiscovery);
+ return state;
+}
+function packageTierAvailable(state,rank){return !!PACKAGE_SHOP[rank]&&(rank===0||state.packageTierUnlocks?.includes(rank)===true)}
+function nextPackageDiscovery(state){return PACKAGE_SHOP.find(t=>!packageTierAvailable(state,t.rank))||null}
+// Called only after a source validates its durable reward receipt. The caller
+// saves the receipt, wallet and discovery together; rollback supports failed saves.
+function creditGameplayCoins(state,amount){
+ if(!Number.isFinite(amount)||amount<=0)return ()=>{};
+ const before={coins:state.coins,progress:state.coinsEarnedSinceLastDiscovery,unlocks:[...state.packageTierUnlocks]};
+ state.coins+=amount;
+ const next=nextPackageDiscovery(state);
+ if(next){
+  state.coinsEarnedSinceLastDiscovery=Math.min(Number.MAX_SAFE_INTEGER,packageCoinCount(state.coinsEarnedSinceLastDiscovery)+packageCoinCount(amount));
+  if(state.coinsEarnedSinceLastDiscovery>=PACKAGE_DISCOVERY_COINS[next.rank]){
+   state.packageTierUnlocks=packageAcknowledgements([...state.packageTierUnlocks,next.rank]);
+   state.coinsEarnedSinceLastDiscovery=0;
+  }
+ }
+ return ()=>{state.coins=before.coins;state.coinsEarnedSinceLastDiscovery=before.progress;state.packageTierUnlocks=before.unlocks};
+}
 function packageAcknowledgements(ranks){return [...new Set([0,...(Array.isArray(ranks)?ranks:[])].filter(rank=>Number.isInteger(rank)&&!!PACKAGE_SHOP[rank]))].sort((a,b)=>a-b)}
 function migratePackageCelebrations(state){
  // Established saves start from their existing availability. New saves carry an

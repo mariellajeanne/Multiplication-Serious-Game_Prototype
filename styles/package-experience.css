@@ -60,61 +60,94 @@ body[data-view="hub"] .bakery-popup .packages-odds{margin:0;padding:0;border:0;f
 body[data-view="hub"] .bakery-popup .packages-odds summary{padding:8px 12px;min-height:44px;text-align:center;color:#816047}
 .packages-odds .package-food-odds{height:auto;gap:7px;padding:8px 2px;font-size:15px}
 
-/* Full-screen opening keeps every reward in its original 1 / 5 / 5x2 slot. */
-body.package-batch-open{overflow:hidden}
-body.package-batch-open>#app{filter:blur(4px)}
-.package-batch-overlay{--batch-gap:clamp(8px,1.25vw,20px);position:fixed;inset:0;z-index:180;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:var(--popup-space-md);padding:clamp(16px,2.5vw,36px);overflow:auto;overscroll-behavior:contain;background:#2c1b2ded;color:#fff2d6;isolation:isolate;font-family:var(--game-font)}
-.batch-heading{text-align:center;display:grid;gap:4px}
-.batch-heading>span{font-size:clamp(15px,1.5vw,21px);font-weight:800;color:#ead6af}
-.batch-heading h1{font-family:var(--game-font);font-size:clamp(27px,3.3vw,46px);line-height:1.1;font-weight:900;color:#ffedbb;text-shadow:0 3px #653d30}
-.batch-stage{display:grid;place-items:center;min-height:0;min-width:0;overflow:visible}
-.batch-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--batch-gap);width:min(1400px,100%);min-width:0;align-items:stretch;align-content:center}
-.batch-grid.batch-count-1{grid-template-columns:minmax(0,1fr);width:min(420px,68vmin)}
-.batch-reward{position:relative;isolation:isolate;display:grid;grid-template-rows:minmax(0,1fr) auto;width:100%;aspect-ratio:1/1.13;max-height:calc((100dvh - 215px - var(--batch-gap))/var(--batch-rows));min-width:0;padding:clamp(8px,1.4vw,20px);border:2px solid #b98e5f;border-radius:clamp(16px,2vw,28px);background:#fff1d7;color:#633d2a;box-shadow:0 5px 0 #7d543b;animation:batch-card-in 300ms ease-out both}
-.batch-reward-visual{position:relative;isolation:isolate;display:grid;place-items:center;min-height:0;min-width:0;width:100%}
-.batch-package,.batch-food{grid-area:1/1;display:grid;place-items:center;width:100%;height:100%;min-height:0;min-width:0}
-.batch-package>.package-art{display:block;width:90%;height:90%;object-fit:contain;transform-origin:center;transform-box:fill-box}
-.batch-package .package-art>path:nth-child(2),.batch-package .package-art>path:nth-child(4){transform-box:fill-box;transform-origin:50% 100%}
-.batch-food{visibility:hidden;opacity:0;transform:scale(.7)}
-.batch-food>.food-art{display:block;width:100%;height:100%;min-width:0;min-height:0;max-height:none;max-width:none;object-fit:contain;margin:0}
-.batch-reward-copy{display:grid;justify-items:center;gap:4px;visibility:hidden;text-align:center;line-height:1.15;min-width:0}
-.batch-reward-copy strong{font-size:clamp(15px,1.8vw,25px);line-height:1.15;overflow-wrap:anywhere}
-.batch-reward-copy>span{font-size:clamp(12px,1.15vw,17px);font-weight:800;color:#7c583e}
-.batch-reward-copy>small{font-size:clamp(10px,1vw,14px);color:#57744b;font-weight:900}
-.batch-new{color:#518454;font-size:clamp(12px,1.25vw,18px);font-weight:900;letter-spacing:.5px}
-.batch-reward-flash{position:absolute;left:50%;top:50%;translate:-50% -50%;font-size:110px;color:#ffe5a0;opacity:0;pointer-events:none;z-index:2}
-.batch-reward.is-opening .package-art{animation:batch-anticipate 360ms ease-in-out both}
-.batch-reward.is-opening .package-art>path:nth-child(2),.batch-reward.is-opening .package-art>path:nth-child(4){animation:batch-lid 200ms 160ms ease-out both}
-.batch-reward.is-revealed{background:var(--rank-fill,#fff1d7);border-color:var(--rank-edge,#b98e5f)}
-.batch-reward.is-revealed .batch-package{visibility:hidden}
-.batch-reward.is-revealed .batch-food{visibility:visible;opacity:1;transform:none;animation:batch-food-in 360ms cubic-bezier(.2,.85,.25,1.2) both}
-.batch-reward.is-revealed .batch-reward-copy{visibility:visible;animation:batch-copy-in 180ms ease-out both}
-.batch-reward.is-revealed .batch-reward-flash{animation:batch-flash 380ms ease-out both}
-.batch-reward.is-revealed:is(.r4,.r5,.r6,.r7){box-shadow:0 5px 0 var(--rank-edge,#ae8755)}
-.batch-reward.is-revealed:is(.r6,.r7)::after{content:'✦';position:absolute;right:8%;top:7%;color:#fff4bb;font-size:30px;text-shadow:0 0 8px #a15bcc;pointer-events:none;animation:batch-copy-in 300ms ease-out both}
-.batch-footer{display:grid;justify-items:center;gap:var(--popup-space-xs);min-width:0}
-.batch-footer>p{margin:0;font-size:16px;line-height:1.3;color:#ead6bb;text-align:center}
-.batch-swipe-hint{display:none;font-size:12px;color:#ead6bb}
-.batch-action{position:relative;isolation:isolate;width:min(300px,90%);min-height:70px;padding:14px 32px 20px;border:0;background:none;color:#fff8df;font-size:clamp(24px,2.5vw,30px);font-weight:900;line-height:1.1;text-shadow:0 1px #387851;touch-action:manipulation}
-.batch-action::before{content:'';position:absolute;inset:0;border:26px solid transparent;border-image:url('../assets/bakery-ui/button-teal.svg') 84 90 fill stretch;z-index:-1;pointer-events:none}
-.batch-action:active{transform:translateY(2px)}
-.batch-action[hidden]{display:none}
-.package-batch-overlay.is-leaving{animation:batch-exit 160ms ease-in both}
-.reveal-instant :is(.batch-food,.batch-reward-copy,.batch-reward-flash){animation:none!important}
-.reveal-instant .batch-reward-flash{opacity:0}
-@keyframes batch-card-in{from{opacity:0;transform:scale(.9) translateY(12px)}to{opacity:1;transform:none}}
-@keyframes batch-anticipate{0%,100%{transform:none}35%{transform:scale(.94) rotate(-4deg)}65%{transform:scale(1.06) rotate(3deg)}}
-@keyframes batch-lid{to{transform:translateY(-28%) rotate(-16deg);opacity:0}}
-@keyframes batch-food-in{from{opacity:0;transform:scale(.6)}70%{opacity:1;transform:scale(1.05)}to{opacity:1;transform:none}}
-@keyframes batch-copy-in{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
-@keyframes batch-flash{0%{opacity:0;transform:scale(.4)}35%{opacity:.9}100%{opacity:0;transform:scale(1.6)}}
-@keyframes batch-exit{to{opacity:0;transform:scale(.985)}}
 @container(max-width:700px){.packages-next{grid-template-columns:80px minmax(0,1fr)}.packages-practice{grid-column:2}.packages-next>.package-portrait{grid-row:1/3}}
 @media(max-width:900px){.packages-next{grid-template-columns:80px minmax(0,1fr)}.packages-practice{grid-column:2}.packages-next>.package-portrait{grid-row:1/3}.packages-selected{gap:var(--popup-space-md)}body[data-view="hub"] .bakery-popup .package-buy-option{padding-inline:22px;min-height:82px;font-size:24px}.package-buy-option .package-coin-value>span{width:24px;height:26px}}
-@media(max-width:600px){:root{--popup-outer:14px;--popup-frame:16px}.packages-browser{gap:var(--popup-space-md)}.packages-next{grid-template-columns:64px minmax(0,1fr);gap:8px 12px;padding:12px}.packages-practice{font-size:13px;gap:4px}.packages-wallet{font-size:15px}.packages-wallet .package-coin-value{gap:4px}.packages-wallet .package-coin-value>span{width:24px;height:26px}body[data-view="hub"] .bakery-popup:is(.packages-collection-modal,.packages-selected-modal) .popup-head{gap:8px}body[data-view="hub"] .bakery-popup:is(.packages-collection-modal,.packages-selected-modal) .popup-head h2{font-size:22px}body[data-view="hub"] .bakery-popup .packages-back{width:44px;min-width:44px}.packages-selected{grid-template-columns:1fr}.packages-featured .package-featured-art{width:160px}.packages-tier{font-size:15px}body[data-view="hub"] .bakery-popup .package-buy-option{min-height:70px;padding:16px 24px 20px;font-size:24px}.packages-saved{flex-wrap:wrap}.batch-reward{padding:7px;min-height:150px;max-height:none;aspect-ratio:auto}.batch-reward-copy strong{font-size:12px}.batch-reward-copy>span{font-size:10px}.batch-reward-copy>small{font-size:9px}.batch-new{font-size:11px}.batch-grid.batch-count-1 .batch-reward{min-height:260px}.package-batch-overlay{grid-template-rows:auto minmax(320px,1fr) auto}.batch-heading h1{font-size:28px}}
-@media(max-height:580px){.package-batch-overlay{grid-template-rows:auto minmax(320px,1fr) auto}.batch-reward{max-height:none;min-height:150px}.batch-reward-copy strong{font-size:15px}.batch-reward-copy>span{font-size:11px}.batch-grid.batch-count-1 .batch-reward{max-height:340px}.batch-heading h1{font-size:28px}}
-/* At narrow browser zoom, retain five readable columns in a native swipe area.
- * The stage grows with its contents so the Collect button never covers rewards. */
-@media(max-width:600px){.package-batch-overlay{grid-template-rows:auto auto auto;align-content:space-between}.batch-stage{display:block;min-height:0;overflow-x:auto;overscroll-behavior-x:contain;padding:6px 0 12px;scrollbar-width:thin;touch-action:pan-x}.batch-grid{width:660px;min-width:660px;align-content:start}.batch-grid.batch-count-1{width:min(420px,100%);min-width:0;margin-inline:auto}.batch-reward{min-height:180px;aspect-ratio:auto}.batch-reward-copy strong{font-size:15px;overflow-wrap:normal}.batch-reward-copy>span{font-size:12px}.batch-reward-copy>small{font-size:11px}.batch-swipe-hint{display:block}.package-batch-overlay[data-count="1"] .batch-swipe-hint{display:none}}
-@media(max-width:600px) and (max-height:580px){.package-batch-overlay{display:block}.batch-stage{margin-block:var(--popup-space-md)}.batch-footer{margin-top:var(--popup-space-md)}}
-@media(prefers-reduced-motion:reduce){.package-batch-overlay,.package-batch-overlay *,.package-batch-overlay *::after{animation:none!important;transition:none!important}.batch-action:active{transform:none}}
+@media(max-width:600px){:root{--popup-outer:14px;--popup-frame:16px}.packages-browser{gap:var(--popup-space-md)}.packages-next{grid-template-columns:64px minmax(0,1fr);gap:8px 12px;padding:12px}.packages-practice{font-size:13px;gap:4px}.packages-wallet{font-size:15px}.packages-wallet .package-coin-value{gap:4px}.packages-wallet .package-coin-value>span{width:24px;height:26px}body[data-view="hub"] .bakery-popup:is(.packages-collection-modal,.packages-selected-modal) .popup-head{gap:8px}body[data-view="hub"] .bakery-popup:is(.packages-collection-modal,.packages-selected-modal) .popup-head h2{font-size:22px}body[data-view="hub"] .bakery-popup .packages-back{width:44px;min-width:44px}.packages-selected{grid-template-columns:1fr}.packages-featured .package-featured-art{width:160px}.packages-tier{font-size:15px}body[data-view="hub"] .bakery-popup .package-buy-option{min-height:70px;padding:16px 24px 20px;font-size:24px}.packages-saved{flex-wrap:wrap}}
+
+/* Opening is a presentation of the saved receipt, in fixed 1 / 5 / 5x2 slots.
+ * Only the package and information panel move; food and slot geometry never do. */
+body.package-batch-open{overflow:hidden}
+.package-batch-overlay{--batch-gap:clamp(12px,2vw,32px);--batch-ink:#704025;--batch-outline:#784026;--batch-cream:#fff5dc;--batch-gold:#f5c85e;position:fixed;inset:0;z-index:180;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:16px;padding:max(24px,env(safe-area-inset-top)) max(28px,env(safe-area-inset-right)) max(24px,env(safe-area-inset-bottom)) max(28px,env(safe-area-inset-left));overflow:auto;overscroll-behavior:contain;background:rgb(40 23 31 / .76);color:var(--batch-ink);isolation:isolate;font-family:'Bakery UI',var(--game-font);}
+.batch-stage{display:grid;place-items:center;min-height:0;min-width:0;overflow:visible}
+.batch-grid{--batch-art-size:min(250px,15vw,calc((100dvh - 180px)/var(--batch-rows) - 132px));--batch-info-size:120px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:var(--batch-gap);width:min(1600px,100%);min-width:0;align-content:center}
+.batch-grid.batch-count-1{--batch-art-size:min(420px,44dvh,65vw);--batch-info-size:166px;grid-template-columns:minmax(0,1fr);width:min(440px,80vw)}
+.batch-reward{position:relative;isolation:isolate;display:grid;grid-template-rows:var(--batch-art-size) var(--batch-info-size);gap:12px;min-width:0;width:100%;border:0;background:none;box-shadow:none}
+.batch-reward-visual{position:relative;display:grid;place-items:center;min-height:0;min-width:0;width:100%;z-index:2;pointer-events:none}
+.batch-package,.batch-food{grid-area:1/1;display:grid;place-items:center;width:100%;height:100%;min-height:0;min-width:0}
+.batch-package-art{display:block;width:76%;height:76%;object-fit:contain;transform-origin:50% 50%;will-change:transform,opacity;animation:batch-package-open var(--batch-opening-duration) var(--batch-delay) both;animation-timing-function:ease-in-out}
+.batch-food{visibility:hidden}
+.batch-food>.food-art{display:block;width:100%;height:100%;min-width:0;min-height:0;max-height:none;max-width:none;object-fit:contain;margin:0;animation:none;transition:none;transform:none;opacity:1}
+.batch-reward-copy{position:relative;z-index:1;display:grid;grid-template-rows:minmax(0,1.8fr) minmax(0,1fr) minmax(0,1fr);visibility:hidden;opacity:0;min-width:0;overflow:hidden;border:3px solid var(--batch-outline);border-radius:20px;background:var(--batch-cream);box-shadow:inset 0 2px #fffdf1,0 4px #38201f40;text-align:center;line-height:1.15;--batch-panel-rise:calc(-1 * var(--batch-art-size) / 2 - var(--batch-info-size) / 2)}
+.batch-reward-copy>*{display:flex;align-items:center;justify-content:center;min-width:0;margin:0;padding:5px 8px}
+.batch-reward-copy>*+*{border-top:1px solid #bc906b66}
+.batch-reward-copy>strong{font-size:clamp(16px,1.3vw,22px);font-weight:900;text-wrap:balance;overflow-wrap:anywhere}
+.batch-reward-copy>span{gap:.35em;font-size:clamp(13px,1.15vw,18px);font-weight:800;color:var(--rank-ink,var(--batch-ink));background:var(--rank-fill,#f4dfb75c)}
+.batch-reward-copy>span>b{white-space:nowrap}
+.batch-reward-copy>small{font-size:clamp(12px,1vw,16px);font-weight:800;color:#566338;padding-inline:2px}
+.batch-reward-copy.has-no-mastery{grid-template-rows:minmax(0,1.25fr) minmax(0,1fr)}
+.batch-reward-copy>[hidden]{display:none}
+.batch-count-1 .batch-reward-copy>strong{font-size:clamp(23px,2.5vw,34px)}
+.batch-count-1 .batch-reward-copy>span{font-size:clamp(18px,1.6vw,23px)}
+.batch-count-1 .batch-reward-copy>small{font-size:clamp(15px,1.3vw,19px)}
+.batch-reward.is-revealed .batch-package{visibility:hidden}
+.batch-reward.is-revealed .batch-package-art{animation:none;opacity:0;will-change:auto}
+.batch-reward.is-revealed .batch-food{visibility:visible}
+.batch-reward.is-revealed .batch-reward-copy{visibility:visible;opacity:1;will-change:transform,opacity;animation:batch-panel-emerge var(--batch-panel-duration) cubic-bezier(.16,.8,.26,1) both}
+.batch-reward[data-phase="settled"] .batch-reward-copy{will-change:auto}
+.batch-footer{display:grid;justify-items:center;gap:8px;min-width:0;padding-bottom:4px}
+.batch-footer>p{margin:0;color:#fff1d4;text-align:center;font-size:16px;line-height:1.3}
+/* Match the existing scene controls: warm outlined caps, inset highlight and
+ * a short pressed shadow. Reveal All is the lighter secondary treatment. */
+.batch-action{position:relative;isolation:isolate;width:min(300px,90%);min-height:64px;padding:12px 28px;border:3px solid #ac6c35;border-radius:20px;background:var(--batch-gold);box-shadow:inset 0 3px #ffe7a8,0 4px #b47845;color:var(--batch-ink);font-family:inherit;font-size:clamp(22px,2vw,30px);font-weight:900;line-height:1.15;text-shadow:none;touch-action:manipulation;cursor:pointer;transition:background-color .12s,box-shadow .12s}
+.batch-action-secondary{background:var(--batch-cream);box-shadow:inset 0 3px #fffdf1,0 4px #b47845}
+.batch-action:focus-visible{outline:3px solid #ffe8ac;outline-offset:5px}
+.batch-action:active{box-shadow:inset 0 2px #bc90452b,0 1px #bd9768;background:#edcd84}
+.batch-action[hidden]{display:none}
+@media(hover:hover){.batch-action:hover{background:#ffdc83}.batch-action-secondary:hover{background:#ffedc1}}
+.package-batch-overlay.is-leaving{animation:batch-exit 160ms ease-in both}
+.reveal-instant .batch-package-art,.reveal-instant .batch-reward-copy{animation:none!important}
+/* 80 ms recognition, 560 ms escalating rock, 120 ms to .70, 220 ms burst.
+ * Successive swings get closer together, with a centered compression at rest. */
+@keyframes batch-package-open{
+ 0%,8%{transform:none;opacity:1}
+ 17%{transform:translate(-2%,.5%) rotate(-2deg)}
+ 26%{transform:translate(2%,-.5%) rotate(2.5deg)}
+ 34%{transform:translate(-3%,1%) rotate(-4deg)}
+ 42%{transform:translate(3%,-1%) rotate(4.5deg)}
+ 49%{transform:translate(-4%,1%) rotate(-6deg)}
+ 55%{transform:translate(4%,-1.5%) rotate(6deg)}
+ 60%{transform:translate(-5%,1.5%) rotate(-8deg)}
+ 65%{transform:translate(5%,-1.5%) rotate(8deg)}
+ 68%{transform:none}
+ 77.55%{transform:scale(.7);opacity:1;animation-timing-function:cubic-bezier(.12,.8,.2,1)}
+ 100%{transform:scale(1.35);opacity:0}
+}
+@keyframes batch-panel-emerge{from{opacity:0;transform:translateY(var(--batch-panel-rise))}to{opacity:1;transform:translateY(0)}}
+@keyframes batch-exit{to{opacity:0}}
+@media(max-width:1000px){.batch-reward-copy>strong{font-size:15px}.batch-reward-copy>span{font-size:12px}.batch-reward-copy>small{font-size:12px}.batch-reward-copy{border-width:2px;border-radius:14px}}
+@media(max-height:600px){
+ .package-batch-overlay{--batch-gap:12px;gap:8px;padding:max(12px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
+ .batch-grid{--batch-art-size:min(180px,14vw,calc((100dvh - 88px)/var(--batch-rows) - 88px));--batch-info-size:80px}
+ .batch-grid.batch-count-1{--batch-art-size:min(190px,38dvh);--batch-info-size:96px;width:min(330px,65vw)}
+ .batch-reward{gap:6px}
+ .batch-reward-copy>*{padding:3px 5px}
+ .batch-reward-copy>strong{font-size:13px}
+ .batch-reward-copy>span{font-size:12px}
+ .batch-reward-copy>small{font-size:11px;padding-inline:2px}
+ .batch-count-1 .batch-reward-copy>strong{font-size:23px}
+ .batch-count-1 .batch-reward-copy>span{font-size:17px}
+ .batch-count-1 .batch-reward-copy>small{font-size:14px}
+ .batch-action{min-height:44px;padding:7px 24px;border-radius:14px;font-size:21px}
+}
+/* Very narrow/zoomed viewports keep five readable slots in a native scroll
+ * area. Landscape phones fit all five without scaling the complete screen. */
+@media(max-width:760px) and (max-height:600px){.batch-grid:not(.batch-count-1) .batch-reward-copy>small{font-size:10px}}
+@media(max-width:600px){
+ .batch-stage{overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:thin;touch-action:pan-x;padding:16px 0}
+ .batch-grid{--batch-art-size:120px;--batch-info-size:100px;width:700px;min-width:700px;justify-self:start}
+ .batch-grid.batch-count-1{min-width:0;justify-self:center}
+ .batch-reward-copy>small{font-size:11px}
+ .package-batch-overlay:not([data-count="1"]){grid-template-rows:minmax(280px,1fr) auto}
+ .package-batch-overlay[data-count="10"]{grid-template-rows:minmax(510px,1fr) auto}
+}
+@media(prefers-reduced-motion:reduce){.package-batch-overlay,.package-batch-overlay *{animation:none!important;transition:none!important}}
