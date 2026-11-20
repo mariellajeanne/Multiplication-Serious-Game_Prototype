@@ -5,8 +5,9 @@ const TICKET_DIMS=[[2,1],[2,2],[2,2],[3,2],[3,2],[4,2],[4,2],[4,2]];
 const ORDER_LIMIT=5, ORDER_REFRESH_MS=180000;
 // Frame 11: tune progression and shop economy here, independently of presentation.
 // Saved Bakery Power is archived during hub migration; it no longer progresses.
-const PACKAGE_TYPES=['Standard','Lucky','Fortunate','Charmed','Blessed','Miraculous','Divine','Fate','Sovereign'];
-const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:ECONOMY_BALANCE.unlocks[rank],orders:[0,4,12,24,45,75,120,180,260][rank],priceOrders:ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank)}));
+const PACKAGE_TYPES=['Gift','Surprise','Mystery','Secret','Enchanted','Mythical','Cosmic','Divine'];
+const PACKAGE_FOOD_RARITIES=Object.freeze([[0,1,2],[1,2,3],[2,3,4],[3,4,5],[4,5,6],[4,5,6],[5,6,7],[5,6,7]].map(Object.freeze));
+const PACKAGE_SHOP=PACKAGE_TYPES.map((name,rank)=>({name,rank,unlock:ECONOMY_BALANCE.unlocks[rank],orders:[0,4,12,24,45,75,120,180][rank],priceOrders:ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank)}));
 function packageTierAvailable(state,rank){return !!PACKAGE_SHOP[rank]&&(state.completed>=PACKAGE_SHOP[rank].orders||state.packageTierUnlocks?.includes(rank)===true)}
 function packageAcknowledgements(ranks){return [...new Set([0,...(Array.isArray(ranks)?ranks:[])].filter(rank=>Number.isInteger(rank)&&!!PACKAGE_SHOP[rank]))].sort((a,b)=>a-b)}
 function migratePackageCelebrations(state){
@@ -62,7 +63,13 @@ function binomialRanks(p){
 }
 // Increasing p couples seven Bernoulli draws: every upper tail is nondecreasing.
 function ticketProbabilities(mastery){return binomialRanks(.04+.68*(1-Math.exp(-Math.max(0,mastery||0)/80)))}
-function packageProbabilities(packageRank){return binomialRanks(packageRank>=8?.97:.08+.84*clamp(packageRank,0,7)/7)}
+function legacyPackageProbabilities(rank){return binomialRanks(rank>=8?.97:.08+.84*clamp(rank,0,7)/7)}
+function packageProbabilities(packageRank){
+ const allowed=PACKAGE_FOOD_RARITIES[packageRank];if(!allowed)return Array(8).fill(0);
+ // Retain the previous relative weights within the owner's approved three tiers.
+ const weights=legacyPackageProbabilities(packageRank),total=allowed.reduce((sum,i)=>sum+weights[i],0);
+ return weights.map((p,i)=>allowed.includes(i)?p/total:0);
+}
 function drawRank(probabilities,random=Math.random()){
  let cumulative=0;for(let i=0;i<probabilities.length;i++){cumulative+=probabilities[i];if(random<cumulative)return i}return probabilities.length-1;
 }

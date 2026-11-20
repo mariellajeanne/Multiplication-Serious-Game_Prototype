@@ -50,6 +50,7 @@ function coinTierArt(rank){
 }
 function bakeryIcon(name){
  const drawings={
+  help:'<path d="M23 22c0-14 23-16 23-2 0 9-14 9-14 20" stroke="#fff5ce" stroke-width="8" fill="none"/><circle cx="32" cy="51" r="4" fill="#fff5ce" stroke="none"/>',
   bakery:'<path d="M10 27h44v29H10z" fill="#efc68e"/><path d="M7 26 13 9h38l6 17Z" fill="#fff1ce"/><path d="m15 9-4 17m17-17-1 17M40 9l1 17M51 9l4 17" stroke="#cf8a71" stroke-width="8"/><path d="M7 26q6 7 12 0 7 7 13 0 7 7 13 0 6 7 12 0" fill="#fff1ce"/><rect x="17" y="35" width="18" height="14" rx="3" fill="#fff4d8"/><path d="M40 35h9v21h-9z" fill="#b9875a"/><path d="M20 43q6-11 12 0" fill="#e4ae58"/><path d="M8 57h49" stroke="#a16e46" stroke-width="4"/>',
   decor:'<path d="M20 39h25l-4 18H24Z" fill="#d99876"/><path d="M17 38h30v6H17Z" fill="#f1b58f"/><path d="M32 38V18M32 30Q15 34 15 20q13-3 17 10M32 24q1-16 15-15 4 13-15 15" fill="#a6bb81" stroke="#819664"/><circle cx="31" cy="12" r="7" fill="#edc791"/>',
   helper:'<path d="M13 27q-7-14 6-18 9-11 19-1 15-2 15 12-1 9-12 9" fill="#fff7e5"/><path d="M17 24h30v9H17Z" fill="#f3dfba"/><path d="M20 34v10q12 15 24 0V34" fill="#efc593"/><path d="M14 59q1-13 18-13t18 13" fill="#d7b39e"/><path d="M27 50v9m10-9v9" stroke="#fff3d8" stroke-width="4"/>',

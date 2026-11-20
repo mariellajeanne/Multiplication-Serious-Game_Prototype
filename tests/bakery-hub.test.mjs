@@ -4,25 +4,25 @@ import {readFileSync} from 'node:fs';
 import vm from 'node:vm';
 import {progressionHarness} from './progression-harness.mjs';
 
-test('all nine distributions normalize; first eight keep exact odds; ninth improves upper tails',()=>{
- const h=progressionHarness();assert.equal(h.run('PACKAGE_SHOP.length'),9);assert.equal(h.run('COIN_TIERS.length'),8);
- for(let rank=0;rank<9;rank++){
+test('approved packages have exactly eight normalized three-rarity distributions',()=>{
+ const h=progressionHarness();assert.equal(h.run('PACKAGE_SHOP.length'),8);assert.equal(h.run('COIN_TIERS.length'),8);
+ const expected=[[0,1,2],[1,2,3],[2,3,4],[3,4,5],[4,5,6],[4,5,6],[5,6,7],[5,6,7]];
+ for(let rank=0;rank<8;rank++){
   const p=h.json(`packageProbabilities(${rank})`);assert.ok(Math.abs(p.reduce((a,b)=>a+b)-1)<1e-12);
-  if(rank<8)assert.deepEqual(p,h.json(`binomialRanks(.08+.84*${rank}/7)`));
-  if(rank)for(let i=1;i<8;i++)assert.ok(p.slice(i).reduce((a,b)=>a+b)>=h.json(`packageProbabilities(${rank-1})`).slice(i).reduce((a,b)=>a+b));
+  assert.deepEqual(p.flatMap((v,i)=>v>0?[i]:[]),expected[rank]);
   assert.ok(h.run(`packagePrice(${rank})>=expectedPackageResale(${rank})*1.2`));
  }
- assert.ok(Math.abs(h.run('packageProbabilities(8)[7]')-.97**7)<1e-12);
+ assert.deepEqual(h.json('PACKAGE_TYPES'),['Gift','Surprise','Mystery','Secret','Enchanted','Mythical','Cosmic','Divine']);
 });
 
-test('ninth package uses the same purchase, immediate discovery and replay protection',()=>{
- const h=progressionHarness();h.run(`g.coins=1e9;g.completed=260;openPackages('buy',8);setPackageQuantity(2);
-  before=g.coins;cost=packagePrice(8)*2;id=packageQuote.id;ok=requestPackagePurchase(id);again=requestPackagePurchase(id);
-  Math.random=()=>.999999999;token=packageSession.slots[8][0].id;opened=openPackageSlot(8,token);replayed=openPackageSlot(8,token)`);
+test('eighth package uses the same purchase, immediate discovery and replay protection',()=>{
+ const h=progressionHarness();h.run(`g.coins=1e9;g.completed=260;openPackages('buy',7);setPackageQuantity(2);
+  before=g.coins;cost=packagePrice(7)*2;id=packageQuote.id;ok=requestPackagePurchase(id);again=requestPackagePurchase(id);
+  Math.random=()=>.999999999;token=packageSession.slots[7][0].id;opened=openPackageSlot(7,token);replayed=openPackageSlot(7,token)`);
  assert.equal(h.run('ok'),true);assert.equal(h.run('again'),false);assert.equal(h.run('before-g.coins'),h.run('cost'));
- assert.equal(h.run('opened'),true);assert.equal(h.run('replayed'),false);assert.equal(h.run('g.packages[8]'),1);
+ assert.equal(h.run('opened'),true);assert.equal(h.run('replayed'),false);assert.equal(h.run('g.packages[7]'),1);
  assert.equal(h.run('g.owned.at(-1).id'),'ube-ensaymada');
- assert.equal(progressionHarness(h.json('g')).run('g.packages[8]'),1);
+ assert.equal(progressionHarness(h.json('g')).run('g.packages[7]'),1);
 });
 
 test('hub reads equipped recipes without empty boxes or demo state and exposes real actions',()=>{

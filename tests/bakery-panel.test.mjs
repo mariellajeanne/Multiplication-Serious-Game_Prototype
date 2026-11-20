@@ -22,7 +22,7 @@ test('legacy sidebar has only packages; Boost explains equipped foods with no Po
  const h=progressionHarness();h.run('g.packages=[1,2,3,4,5,6,7,8,9];before=JSON.stringify(g);html=renderLeft();showBoostInfo()');
  assert.equal(h.run('JSON.stringify(g)'),h.run('before'));
  assert.match(h.run('html'),/id="unopenedPackages"[^>]*>45<\/strong>/);
- assert.match(h.run('html'),/9? SOVEREIGN/);
+ assert.match(h.run('html'),/8? DIVINE/);
  assert.doesNotMatch(h.run('html'),/bakery-power|upgradeDecor/);
  assert.match(h.run('popup.html'),/Equipped-food Menu Boost/);
  assert.doesNotMatch(h.run('popup.html'),/Bakery Power/);

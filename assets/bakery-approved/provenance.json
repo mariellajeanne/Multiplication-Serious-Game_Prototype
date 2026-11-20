@@ -1,0 +1,91 @@
+{
+  "approvedDate": "2026-11-20",
+  "tool": "built-in image_gen",
+  "prompt": "Remove ONLY baked checkerboard/white background as true alpha. Preserve original artwork pixels, brown outlines, colors, proportions, decorations and text. Do not redesign or crop. Keep Menu/Orders interior opaque; Packages opening transparent.",
+  "negativeReferences": "The three 05_15 screenshots were used only to diagnose defects; none is a design asset.",
+  "assets": [
+    {
+      "file": "menu-frame.png",
+      "source": "Cozy Bakery Menu Kiosk-3.png",
+      "sourceSha256": "b048118542f47921f75de30e04816d145252383c96ed506f7f425fa2f69b6a0f",
+      "sha256": "24768cd6c271f0a887f97730f26ea83b3770e601c602c6951d2bb93852a08ed8",
+      "dimensions": [
+        1620,
+        971
+      ],
+      "mode": "RGBA",
+      "processing": "Built-in image_gen background extraction only; artwork and source dimensions retained",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBoundsAt50PercentAlpha": [
+        19,
+        5,
+        1602,
+        959
+      ]
+    },
+    {
+      "file": "orders-frame.png",
+      "source": "Bakery Orders Signboard UI Frame-2.png",
+      "sourceSha256": "ba7107fa01c56ec9af56c792d8b1d58cda5e0dfcf41fb37b051dfffc60f84dec",
+      "sha256": "c812878560c0f0c096eec0271c7d5d0e102ad1cc737d725f05821aa72ac5d971",
+      "dimensions": [
+        1367,
+        1150
+      ],
+      "mode": "RGBA",
+      "processing": "Built-in image_gen background extraction only; artwork and source dimensions retained",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBoundsAt50PercentAlpha": [
+        144,
+        7,
+        1221,
+        1138
+      ]
+    },
+    {
+      "file": "packages-frame.png",
+      "source": "Warm Packages Bakery Frame-1.png",
+      "sourceSha256": "2434b9f36c9eb0d42658845aa3b0eb7eb56d7d3a62dc55af1a8cfcb8e64ee9ee",
+      "sha256": "94892ebd562cd059ae1a6dc0b39e43f1f8d4ad83148d2b773eceb5bca01ee3c0",
+      "dimensions": [
+        1670,
+        941
+      ],
+      "mode": "RGBA",
+      "processing": "Built-in image_gen background extraction only; artwork and source dimensions retained",
+      "alphaRange": [
+        0,
+        255
+      ],
+      "visibleBoundsAt50PercentAlpha": [
+        38,
+        3,
+        1632,
+        931
+      ]
+    },
+    {
+      "file": "background.png",
+      "source": "Pastel Bakery Caf\u00e9 Interior (1).png",
+      "sourceSha256": "b5084e11f8c25aa6e52f0bdd16e05a60c5baa5966e9acf4285da5325d5842c72",
+      "sha256": "42ef8cabbf9f37a46064de3fd2c2ac259844c32542fb6b5d7d2f987520c7c063",
+      "dimensions": [
+        2172,
+        724
+      ],
+      "mode": "RGB",
+      "processing": "Original unmodified background"
+    }
+  ],
+  "prompts": {
+    "menu": "Use case: background-extraction. Edit target: the attached approved menu bakery UI frame. Remove ONLY the baked white/light gray checkerboard or white background, making it true alpha transparency. Keep the brown menu interior opaque. Preserve EXACTLY all original illustration pixels as closely as possible, warm brown outlines, colors, lighting, proportions, shape, decorative features and legible original lettering. Do not redesign, redraw, add objects, alter text, or crop any artwork. Full original frame fully visible with a narrow transparent margin. This is a faithful production cutout, not a design variant.",
+    "orders": "Use case: background-extraction. Edit target: the attached approved orders bakery UI frame. Remove ONLY the baked white/light gray checkerboard or white background, making it true alpha transparency. Keep the purple kiosk interior and its built-in scrollbar track opaque. Preserve EXACTLY all original illustration pixels as closely as possible, warm brown outlines, colors, lighting, proportions, shape, decorative features and legible original lettering. Do not redesign, redraw, add objects, alter text, or crop any artwork. Full original frame fully visible with a narrow transparent margin. This is a faithful production cutout, not a design variant.",
+    "packages": "Use case: background-extraction. Edit target: the attached approved packages bakery UI frame. Remove ONLY the baked white/light gray checkerboard or white background, making it true alpha transparency. Both the exterior background and large empty rectangular central opening must be truly transparent. Preserve EXACTLY all original illustration pixels as closely as possible, warm brown outlines, colors, lighting, proportions, shape, decorative features and legible original lettering. Do not redesign, redraw, add objects, alter text, or crop any artwork. Full original frame fully visible with a narrow transparent margin. This is a faithful production cutout, not a design variant."
+  }
+}

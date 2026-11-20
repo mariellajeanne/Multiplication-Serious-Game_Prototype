@@ -20,21 +20,22 @@ Normal play uses the long-multiplication worksheet, including product reveal, fl
 
 ## Packages
 
-The original three-column shop contains nine types. Purchasing has a 50-per-type capacity; old excess stock is retained and can still be opened. Single opening and selected-type Open All immediately credit food/discovery or duplicate Mastery capacity, with replay protection.
+The production Packages station uses a vertical selector with exactly eight types. Each has exactly three food rarities in a non-scrolling odds panel. Purchasing retains the 50-per-type capacity; old excess stock can still be opened. Single/batch opening immediately credits food discovery or duplicate Mastery capacity, with replay protection.
 
-| Type | Completed-order gate |
-| --- | ---: |
-| Standard | 0 |
-| Lucky | 4 |
-| Fortunate | 12 |
-| Charmed | 24 |
-| Blessed | 45 |
-| Miraculous | 75 |
-| Divine | 120 |
-| Fate | 180 |
-| Sovereign | 260 |
+| Type | Completed-order gate | Food rarities |
+| --- | ---: | --- |
+| Gift | 0 | Classic, Favorite, Special |
+| Surprise | 4 | Favorite, Special, Premium |
+| Mystery | 12 | Special, Premium, Deluxe |
+| Secret | 24 | Premium, Deluxe, Signature |
+| Enchanted | 45 | Deluxe, Signature, Masterpiece |
+| Mythical | 75 | Deluxe, Signature, Masterpiece |
+| Cosmic | 120 | Signature, Masterpiece, Crown Jewel |
+| Divine | 180 | Signature, Masterpiece, Crown Jewel |
 
-Previously unlocked types remain unlocked after migration. The first eight distributions retain seven-trial binomial ranks with `p = .08 + .84 * rank / 7`; Sovereign uses `p = .97`. Prices, stock and displayed odds come from the existing production formulas. Sovereign adds no new food rarity or coin tier.
+New package distributions normalize the previous binomial weights within the owner's three approved rarities. The price growth curve remains; the existing resale safeguard covers the new reward set without lowering the historical price floor. Displayed odds and actual draws share the same function.
+
+Previously unlocked types remain unlocked. Migration preserves old stock distributions and guaranteed rarities without rolling rewards. Former ninth-tier stock joins Divine while retaining its historical distribution; pre-rolled receipts retain every reward. No ninth type is displayed or sold. Existing worksheet payouts, foods and paid Mastery are preserved.
 
 ## Design limits
 

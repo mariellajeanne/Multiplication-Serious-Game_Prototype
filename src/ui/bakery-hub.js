@@ -49,6 +49,7 @@ function renderHubTickets(){
  }).join('');
 }
 function renderHubHome(){
+ if(typeof renderBakeryWorld==='function')return renderBakeryWorld();
  const foods=g.activeMenu.map(uid=>g.owned.find(o=>o.uid===uid)).filter(Boolean),count=foods.length;
  return `<main id="stage" class="bakery-ui" data-rendered="true" aria-label="My Panaderya bakery">
  ${hubImage('bakery-room.png','stage-background bakery-room-art')}${hubImage('cash-register-facing.png','register-art')}${hubImage('title-sign-refined.png','','My Panaderya').replace('<img ','<img id="title-sign" ')}
@@ -85,13 +86,15 @@ function playHubOrder(){const ticket=g.run?.ticket||g.board.find(t=>g.orderRuns[
 function openHubHelp(){showModal('How to Play',`<div class="hub-help"><ol class="help-steps"><li>${bakeryIcon('ticket')}<span><b>Choose an order</b><small>Tap a ticket to start or resume.</small></span></li><li>${bakeryIcon('guide')}<span><b>Multiply, one pair at a time</b><small>Connect digits. Place products and carries.</small></span></li><li>${hubCoinArt(0)}<span><b>Collect your coins</b><small>Finish the worksheet, then collect.</small></span></li><li>${bakeryIcon('inventory')}<span><b>Open packages. Equip foods.</b><small>Grow your Baker's Boost.</small></span></li></ol><details class="worksheet-tips"><summary>Worksheet tips</summary><ul><li>Tap or drag between the digits.</li><li>Tap the × bubble to reveal product tiles.</li><li>Swipe down to add the partial rows.</li><li>Save & Exit keeps your work.</li></ul></details><div class="btnrow"><button class="primary" onclick="closeModal()">Got it!</button><button class="secondary" onclick="openSettings()">Guide & Sound</button></div></div>`)}
 function fitHubInterface(){
  if(!isBakeryHub())return;
+ if(typeof fitBakeryWorld==='function')return fitBakeryWorld();
  const scale=Math.min(innerWidth/2000,innerHeight/1200),stage=$('stage');
  document.body.style.setProperty('--bakery-scale',scale);if(stage)stage.style.transform=`scale(${scale})`;
  hubScrollControls?.update();
 }
 function syncHubNavigation(){
  if(!isBakeryHub())return;
- for(const [selector,active] of [['.nav-packages',!!modal?.variant?.includes('package-shop-modal')],['.nav-collection',hubCollection],['.nav-play',!!g.run],['#help-button',modal?.title==='How to Play'],['#settings-button',modal?.title==='Settings'],['#boost-status',modal?.title==="Baker's Boost"]])document.querySelector(selector)?.setAttribute('aria-pressed',String(active));
+ if(typeof syncBakeryPages==='function')syncBakeryPages();
+ for(const [selector,active] of [['.nav-collection',hubCollection],['.nav-play',!!g.run],['#help-button',modal?.title==='How to Play'],['#settings-button',modal?.title==='Settings'],['#boost-status',modal?.title==="Baker's Boost"]])document.querySelector(selector)?.setAttribute('aria-pressed',String(active));
 }
 function renderBakeryHub(){
  reconcileAutoEquip();refillBoard();reconcileOrderFoods();
@@ -170,7 +173,7 @@ coinRewardMarkup=function(r){
  return `<section class="coin-order-reward"><div class="hub-wallet-detail">${hubCoinArt(ticketCoinTier(r.ticket))}<div><span>Coins collected</span><strong class="coin-reward-total">+${amountLabel(r.pool)}</strong></div></div><div class="reward-formula"><span>Base coins<b>${amountLabel(base)}</b></span><b>×</b><span>Baker's Boost<b>×${multiplierLabel(boost)}</b></span><b>=</b><span>Total coins<b>${amountLabel(r.pool)}</b></span></div><div class="btnrow"><button class="primary" onclick="closeModal()">Back to Bakery</button></div></section>`;
 };
 function dispatchHubAction(action){
- const actions={packages:()=>openPackages(),collection:openHubCollection,play:playHubOrder,boost:showBoostInfo,wallet:showCoinsInfo,help:openHubHelp,settings:openSettings,odds:openProbabilities,refresh:()=>refreshRemaining()>0?requestRefreshSkip():refreshOrders()};
+ const actions={packages:()=>openPackages(),home:()=>navigateBakery('menu'),center:()=>bakeryPage==='menu'?openHubCollection():navigateBakery('menu'),orders:()=>navigateBakery('orders'),slot:buyMenuSlot,collection:openHubCollection,play:playHubOrder,boost:showBoostInfo,wallet:showCoinsInfo,help:openHubHelp,settings:openSettings,odds:openProbabilities,refresh:()=>refreshRemaining()>0?requestRefreshSkip():refreshOrders()};
  if(actions[action])return actions[action]();
  const match=/^(food|order)-(up|down)$/.exec(action);
  if(match)$(match[1]==='food'?'cabinet-scroll':'order-scroller')?.scrollBy({top:(match[2]==='up'?-1:1)*180,behavior:'smooth'});

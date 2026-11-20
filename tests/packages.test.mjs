@@ -2,14 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {progressionHarness} from './progression-harness.mjs';
 
-test('all nine types select both panels; completed orders gate buying, without hiding types or old stock',()=>{
+test('all eight types select both panels; completed orders gate buying, without hiding types or old stock',()=>{
  const h=progressionHarness();
- for(let rank=0;rank<9;rank++){
+ for(let rank=0;rank<8;rank++){
   h.run(`g.packages[${rank}]=2;openPackages('buy',${rank});html=popup.html`);
   assert.equal(h.run('packageType'),rank);
   assert.match(h.run('html'),new RegExp(`id="packageSelectedHeading">${rank+1}★ ${h.run(`PACKAGE_TYPES[${rank}].toUpperCase()`)} PACKAGE`));
   assert.match(h.run('html'),new RegExp(`id="packageOpeningHeading">OPEN ${rank+1}★ PACKAGES`));
-  assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,9);
+  assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,8);
   assert.equal(h.run('packageQuantityMaximum()>0'),rank===0);
   h.run(`g.completed=PACKAGE_SHOP[${rank}].orders-1`);
   if(rank)assert.equal(h.run('packageUnlocked(packageType)'),false);
@@ -23,7 +23,7 @@ test('odds and prices retain production probabilities and are independent of Coi
  const h=progressionHarness();
  h.run(`before=JSON.stringify(PACKAGE_TYPES.map((_,i)=>packageProbabilities(i)));price=packagePrice(0);
   g.permanentLuck=500;for(let i=0;i<8;i++){odds=packageProbabilities(i);markup=foodOddsMarkup(i);
-   if(!odds.every(p=>markup.includes('width:'+p*100+'%')))throw Error('Odds bars differ from production')}`);
+   if(!odds.filter(p=>p>0).every(p=>markup.includes('width:'+p*100+'%')))throw Error('Odds bars differ from production')}`);
  assert.equal(h.run('JSON.stringify(PACKAGE_TYPES.map((_,i)=>packageProbabilities(i)))'),h.run('before'));
 });
 

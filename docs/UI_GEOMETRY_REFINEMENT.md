@@ -1,5 +1,7 @@
 # Precise UI geometry and composition — 2026-11-10
 
+> The November 20 three-page scene request supersedes this single-screen home geometry. See [current scene assembly, asset inventory and QA](SECOND_ROUND_ASSETS_AND_QA.md). Shared popup and worksheet preservation rules still apply.
+
 This owner-requested pass supersedes the smaller register, fixed-width Boost and separate list-column scrollbar in [UI layout polish](history/UI_LAYOUT_POLISH.md). It changes the actual root game, preserving the room, cabinet, title, ticket artwork, production data/actions and original worksheet/Packages interfaces.
 
 ## Current structure (Orders revision, 2026-11-10)

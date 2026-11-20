@@ -51,7 +51,11 @@ function expectedPackageResale(rank){
 function balancedPackagePrice(rank,menuPeak,bakeryLevel,completed=0){
  const cost=balancedPriceUnit(menuPeak,1,completed)*ECONOMY_BALANCE.packageOrders*Math.pow(ECONOMY_BALANCE.packageGrowth,rank);
  // Protect resale economics while letting milestone packages become affordable during continued growth.
- return Math.max(1,Math.ceil(expectedPackageResale(rank)*ECONOMY_BALANCE.resaleMargin),Math.round(cost));
+ const previousFloor=legacyPackageProbabilities(rank).reduce((sum,p,rarity)=>{
+  const foods=FOOD.filter(food=>food.rarity===rarity);
+  return sum+p*foods.reduce((n,food)=>n+Math.round(food.base*45),0)/foods.length;
+ },0)*ECONOMY_BALANCE.resaleMargin;
+ return Math.max(1,Math.ceil(previousFloor),Math.ceil(expectedPackageResale(rank)*ECONOMY_BALANCE.resaleMargin),Math.round(cost));
 }
 
 function balancedFusionFee(recipeBase,bakeryLevel,tier,completed=0){

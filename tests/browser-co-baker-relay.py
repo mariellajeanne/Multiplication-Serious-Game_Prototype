@@ -31,7 +31,7 @@ with sync_playwright() as pw:
  q.locator('#modals .close').click();q.locator('#settings-button').click();q.locator('#bakerName').fill('Maria');q.get_by_role('button',name='Save name',exact=True).click();p.wait_for_function('document.querySelector(".co-baker-peers").textContent.includes("Maria")');panel_after=False
  # Browser-level offline/reconnect uses real WebSocket reconnect, without reloading game.
  relay.terminate();relay.wait();p.wait_for_function('!document.querySelector("[data-peer]")&&document.querySelector("#coBakerTest").textContent.includes("disconnected")',timeout=20000)
- p.locator('#modals .close').click();p.locator('.hub-ticket').first.click();p.wait_for_selector('#worksheetFrame');assert p.locator('.worksheet-modern').is_visible();p.locator('.worksheet-exit').click();panel(p)
+ p.locator('#modals .close').click();p.locator('[data-world-nav="orders"]').click();p.wait_for_function('!bakeryJourney');p.locator('.hub-ticket').first.click();p.wait_for_selector('#worksheetFrame');assert p.locator('.worksheet-modern').is_visible();p.locator('.worksheet-exit').click();panel(p)
  relay=launch();p.wait_for_selector('[data-peer]',timeout=20000)
  assert q.evaluate('JSON.parse(localStorage.panaderyaPlayerV1).id')==idb['id'];assert q.evaluate('g.coins')==250
  q.close();p.wait_for_selector('[data-peer]',state='detached');q=cb.new_page();q.goto(url);q.wait_for_load_state('networkidle');p.wait_for_selector('[data-peer]');assert q.evaluate('JSON.parse(localStorage.panaderyaPlayerV1).id')==idb['id']

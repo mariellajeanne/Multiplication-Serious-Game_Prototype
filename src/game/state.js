@@ -2,7 +2,7 @@
  * Modularized from the original playable prototype.
  * Loaded as classic scripts in index.html, in dependency order.
  */
-const fresh=()=>({progressionVersion:PROGRESSION_VERSION,economyVersion:ECONOMY_BALANCE.version,frame11Version:1,coinRewardsVersion:1,legacyPackageFoods:Array.from({length:9},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(9).fill(0),packageRevision:0,packageCelebrations:{version:1,acknowledged:[0]},rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
+const fresh=()=>({progressionVersion:PROGRESSION_VERSION,economyVersion:ECONOMY_BALANCE.version,frame11Version:1,coinRewardsVersion:1,approvedPackagesVersion:1,legacyPackageFoods:Array.from({length:8},()=>[]),uniqueFoodsVersion:1,recipeCeilings:{pandesal:0},orderRuns:{},claimedOrders:{},packages:Array(8).fill(0),packageRevision:0,packageCelebrations:{version:1,acknowledged:[0]},rarityCount:8,bakeryLevel:1,bakerySpent:0,autoEquip:'off',foodLevelCredits:{},orderClock:0,orderRefreshAt:0,coins:250,completed:0,mastery:0,permanentLuck:0,owned:[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}],discovered:['pandesal'],uidNext:2,ingredients:{},decor:0,staff:{until:0,rate:0},mode:'normal',lives:3,board:[],ticketSeq:0,sound:true,musicOn:false,tutorialArrows:true,guideGraduated:false,menuSlots:1,activeMenu:[1],helpSeen:false,seenUnlocks:[],tutorialIndex:0,learning:{correct:0,mistakes:0},run:null});
 let g,previousSave;try{previousSave=localStorage.getItem('panaderyaQuestV2');g=JSON.parse(previousSave)||fresh()}catch(_){g=fresh()}
 if(!g.owned||!('completed' in g)){g=fresh()}
 if(g.progressionVersion!==PROGRESSION_VERSION){
@@ -45,7 +45,25 @@ function migrateFrame11(state){
  consolidateOwnedFoods(state);
  const seen=new Set();state.activeMenu=state.activeMenu.filter(uid=>{const o=state.owned.find(x=>x.uid===uid);if(!o||seen.has(o.id))return false;seen.add(o.id);return true}).slice(0,state.menuSlots);
  migrateCoinRewards(state);
+ migrateApprovedPackages(state);
  reconcileOrderFoods(state);
+ return state;
+}
+// Preserve existing stock promises without exposing or selling a ninth tier.
+// No RNG runs during migration, and already rolled receipts keep every reward.
+function migrateApprovedPackages(state){
+ if(state.approvedPackagesVersion===1){state.packages=state.packages.slice(0,8);state.legacyPackageFoods=state.legacyPackageFoods.slice(0,8);return state}
+ for(let rank=0;rank<9;rank++){
+  const promises=state.legacyPackageFoods[rank];
+  while(promises.length<state.packages[rank])promises.push({packageRank:rank});
+ }
+ state.packages[7]+=state.packages[8];
+ state.legacyPackageFoods[7].push(...state.legacyPackageFoods[8]);
+ state.packages=state.packages.slice(0,8);state.legacyPackageFoods=state.legacyPackageFoods.slice(0,8);
+ if(state.packageBatchReceipt?.rank===8)state.packageBatchReceipt.rank=7;
+ state.packageTierUnlocks=(state.packageTierUnlocks||[]).map(rank=>Math.min(7,rank));
+ if(state.packageCelebrations?.acknowledged)state.packageCelebrations.acknowledged=[...new Set(state.packageCelebrations.acknowledged.map(rank=>Math.min(7,rank)))];
+ state.packageRevision++;state.approvedPackagesVersion=1;
  return state;
 }
 // Convert already-earned package promises to counter stock once. No reward RNG

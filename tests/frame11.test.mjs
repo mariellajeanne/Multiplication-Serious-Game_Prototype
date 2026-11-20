@@ -92,10 +92,10 @@ test('retired Power has no transaction or configurable purchase runway',()=>{
  h.run('g.bakeryLevel=5001');assert.equal(h.run('bakeryValue()'),1.2);
 });
 
-test('package types are distinct from food rarities; displayed ticket odds match generation; Fate is not guaranteed Crown Jewel',()=>{
- const h=progressionHarness();assert.equal(h.run('PACKAGE_TYPES[7]'),'Fate');assert.equal(h.run('RARITIES[7]'),'Crown Jewel');
+test('package types are distinct from food rarities; displayed ticket odds match generation; Divine is not guaranteed Crown Jewel',()=>{
+ const h=progressionHarness();assert.equal(h.run('PACKAGE_TYPES[7]'),'Divine');assert.equal(h.run('RARITIES[7]'),'Crown Jewel');
  h.run('Math.random=()=>0;low=drawFood(7);Math.random=()=>.999999999;high=drawFood(7);g.mastery=80;html=renderTicketOdds()');
- assert.equal(h.run('low.rarity'),0);assert.equal(h.run('high.rarity'),7);
+ assert.equal(h.run('low.rarity'),5);assert.equal(h.run('high.rarity'),7);
  const probabilities=h.json('ticketProbabilities(80)');assert.ok(Math.abs(probabilities.reduce((a,b)=>a+b)-1)<1e-12);
  assert.match(h.run('html'),/Coin Reward Tier Odds/);assert.match(h.run('html'),/Divine Treasury/);assert.doesNotMatch(h.run('html'),/Crown Jewel/);
 });
@@ -104,7 +104,7 @@ test('coin package purchases save stock, charge exactly once, reject stale prici
  const h=progressionHarness();h.run(`g.coins=1e8;openPackages('buy',0);html=popup.html;setPackageQuantity(3);before=g.coins;price=packagePrice(0);requestPackagePurchase();
  if(packagePurchaseReview)confirmPackagePurchase();again=confirmPackagePurchase()`);
  assert.equal(h.run('g.coins'),h.run('before-price*3'));assert.equal(h.run('g.packages[0]'),3);assert.equal(h.run('again'),false);
- assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,9);assert.match(h.run('html'),/UNLOCK AT/);
+ assert.equal((h.run('html').match(/data-package-type=/g)||[]).length,8);assert.match(h.run('html'),/UNLOCK AT/);
  h.run(`g.packages[0]=0;packagePurchaseReview={rank:0,count:1,total:packagePrice(0),price:packagePrice(0)};g.bakeryLevel++;before=g.coins;ok=confirmPackagePurchase()`);
  assert.equal(h.run('ok'),false);assert.equal(h.run('g.coins'),h.run('before'));
 });

@@ -11,7 +11,7 @@ test('independent starter quotes use the selected growth curves and keep a meani
  assert.equal(h.run('slotCost()'),61);
  assert.equal(h.run('foodLevelPrice(g.owned[0])'),29);
  assert.equal(h.run('packagePrice(0)'),118);
- assert.deepEqual(h.json('PACKAGE_SHOP.map(t=>t.orders)'),[0,4,12,24,45,75,120,180,260]);
+ assert.deepEqual(h.json('PACKAGE_SHOP.map(t=>t.orders)'),[0,4,12,24,45,75,120,180]);
 });
 
 test('mathematical practice and menu growth improve purchasing power independently of coin-tier luck',()=>{
@@ -24,7 +24,7 @@ test('mathematical practice and menu growth improve purchasing power independent
 
 test('every package type has negative expected buy/open/sell return, including at the cheapest possible quote',()=>{
  const h=progressionHarness();
- for(let rank=0;rank<9;rank++){
+ for(let rank=0;rank<8;rank++){
   h.run(`g.completed=1000000;g.bakeryLevel=1;rank=${rank};value=packageProbabilities(rank).reduce((sum,p,i)=>{
    const foods=FOOD.filter(f=>f.rarity===i);return sum+p*foods.reduce((n,f)=>n+baseResale({id:f.id}),0)/foods.length},0)`);
   assert.ok(h.run(`packagePrice(${rank})`)>h.run('value'));
@@ -46,7 +46,7 @@ test('repricing rebases obsolete projected Menu costs once and retains already u
  old.bakeryLevel=41;old.economyPeakBase=1e12;
  const h=progressionHarness(old);
  assert.equal(h.run('g.economyPeakBase'),1.2);
- assert.deepEqual(h.json('PACKAGE_SHOP.map(t=>packageUnlocked(t.rank))'),[true,true,true,true,true,false,false,false,false]);
+ assert.deepEqual(h.json('PACKAGE_SHOP.map(t=>packageUnlocked(t.rank))'),[true,true,true,true,true,false,false,false]);
  h.run('g.economyPeakBase=123;save()');
  const reload=progressionHarness(h.json('g'));
  assert.equal(reload.run('g.economyPeakBase'),123);

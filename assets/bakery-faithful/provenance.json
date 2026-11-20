@@ -1,0 +1,887 @@
+[
+  {
+    "file": "menu-frame.png",
+    "source": "Cute Bakery Kiosk Menu Frame.png",
+    "crop": null,
+    "adaptation": "connected exterior checkerboard removed, original silhouette retained",
+    "size": [
+      1672,
+      941
+    ],
+    "source_sha256": "f62600d493c9c43bad30a421e8f251bfebcb9da3a546bb56549f1559e005aa8d"
+  },
+  {
+    "file": "orders-frame.png",
+    "source": "Glossy Bakery Orders Board.png",
+    "crop": null,
+    "adaptation": "",
+    "size": [
+      1367,
+      1151
+    ],
+    "source_sha256": "256c56f66bf156c50386cab6562edf84d60195882023bf347c4b4209100826b6"
+  },
+  {
+    "file": "packages-frame.png",
+    "source": "Glossy Packages Game UI Frame.png",
+    "crop": null,
+    "adaptation": "",
+    "size": [
+      1671,
+      941
+    ],
+    "source_sha256": "198cd2186d678d67b4a562079e44fbb3db7076bf94b2907f3430fe73949e9598"
+  },
+  {
+    "file": "orders-top.png",
+    "source": "Glossy Bakery Orders Board.png",
+    "crop": null,
+    "adaptation": "independent original top cap",
+    "size": [
+      1367,
+      320
+    ],
+    "source_sha256": "256c56f66bf156c50386cab6562edf84d60195882023bf347c4b4209100826b6"
+  },
+  {
+    "file": "orders-bottom.png",
+    "source": "Glossy Bakery Orders Board.png",
+    "crop": null,
+    "adaptation": "independent original bottom cap",
+    "size": [
+      1367,
+      211
+    ],
+    "source_sha256": "256c56f66bf156c50386cab6562edf84d60195882023bf347c4b4209100826b6"
+  },
+  {
+    "file": "orders-middle.png",
+    "source": "Glossy Bakery Orders Board.png",
+    "crop": null,
+    "adaptation": "straight posts extend vertically; old thumb track removed for independent capped rail",
+    "size": [
+      1367,
+      620
+    ],
+    "source_sha256": "256c56f66bf156c50386cab6562edf84d60195882023bf347c4b4209100826b6"
+  },
+  {
+    "file": "scroll-rail.png",
+    "source": "Glossy Bakery Orders Board.png",
+    "crop": null,
+    "adaptation": "independent rail, exterior brown removed, 28px caps retained",
+    "size": [
+      57,
+      541
+    ],
+    "source_sha256": "256c56f66bf156c50386cab6562edf84d60195882023bf347c4b4209100826b6"
+  },
+  {
+    "file": "gold.png",
+    "source": "panaderya_golden_buttons_equal_pressed.png",
+    "crop": [
+      0,
+      0,
+      1024,
+      341
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      970,
+      307
+    ],
+    "source_sha256": "176a6dd6e5db439d2c107c9a6d510dec0d330ac25eef82d75e9ceee9888c9408"
+  },
+  {
+    "file": "gold-hover.png",
+    "source": "panaderya_golden_buttons_equal_pressed.png",
+    "crop": [
+      1024,
+      0,
+      2048,
+      341
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      972,
+      307
+    ],
+    "source_sha256": "176a6dd6e5db439d2c107c9a6d510dec0d330ac25eef82d75e9ceee9888c9408"
+  },
+  {
+    "file": "gold-pressed.png",
+    "source": "panaderya_golden_buttons_equal_pressed.png",
+    "crop": [
+      0,
+      341,
+      1024,
+      682
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      971,
+      307
+    ],
+    "source_sha256": "176a6dd6e5db439d2c107c9a6d510dec0d330ac25eef82d75e9ceee9888c9408"
+  },
+  {
+    "file": "gold-selected.png",
+    "source": "panaderya_golden_buttons_equal_pressed.png",
+    "crop": [
+      1024,
+      341,
+      2048,
+      682
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      957,
+      298
+    ],
+    "source_sha256": "176a6dd6e5db439d2c107c9a6d510dec0d330ac25eef82d75e9ceee9888c9408"
+  },
+  {
+    "file": "coins.png",
+    "source": "panaderya_coins_boost_equal_pressed.png",
+    "crop": [
+      0,
+      0,
+      682,
+      341
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      644,
+      236
+    ],
+    "source_sha256": "8aa5c307bab6a28c94ccabbc687f3c54f90b18baa8a2db064f36b728751bfe86"
+  },
+  {
+    "file": "coins-hover.png",
+    "source": "panaderya_coins_boost_equal_pressed.png",
+    "crop": [
+      682,
+      0,
+      1364,
+      341
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      650,
+      236
+    ],
+    "source_sha256": "8aa5c307bab6a28c94ccabbc687f3c54f90b18baa8a2db064f36b728751bfe86"
+  },
+  {
+    "file": "coins-pressed.png",
+    "source": "panaderya_coins_boost_equal_pressed.png",
+    "crop": [
+      1364,
+      0,
+      2046,
+      341
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      644,
+      236
+    ],
+    "source_sha256": "8aa5c307bab6a28c94ccabbc687f3c54f90b18baa8a2db064f36b728751bfe86"
+  },
+  {
+    "file": "boost.png",
+    "source": "panaderya_coins_boost_equal_pressed.png",
+    "crop": [
+      0,
+      341,
+      682,
+      682
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      645,
+      238
+    ],
+    "source_sha256": "8aa5c307bab6a28c94ccabbc687f3c54f90b18baa8a2db064f36b728751bfe86"
+  },
+  {
+    "file": "boost-hover.png",
+    "source": "panaderya_coins_boost_equal_pressed.png",
+    "crop": [
+      682,
+      341,
+      1364,
+      682
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      651,
+      238
+    ],
+    "source_sha256": "8aa5c307bab6a28c94ccabbc687f3c54f90b18baa8a2db064f36b728751bfe86"
+  },
+  {
+    "file": "boost-pressed.png",
+    "source": "panaderya_coins_boost_equal_pressed.png",
+    "crop": [
+      1364,
+      341,
+      2046,
+      682
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      646,
+      239
+    ],
+    "source_sha256": "8aa5c307bab6a28c94ccabbc687f3c54f90b18baa8a2db064f36b728751bfe86"
+  },
+  {
+    "file": "help.png",
+    "source": "panaderya_help_settings_equal_pressed.png",
+    "crop": [
+      0,
+      0,
+      482,
+      543
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      418,
+      424
+    ],
+    "source_sha256": "2ce93b5fff6089c1b39fd9a51fa839b1bacdb99b6b3ee8b11e734ffb5170805c"
+  },
+  {
+    "file": "help-hover.png",
+    "source": "panaderya_help_settings_equal_pressed.png",
+    "crop": [
+      482,
+      0,
+      964,
+      543
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      423,
+      424
+    ],
+    "source_sha256": "2ce93b5fff6089c1b39fd9a51fa839b1bacdb99b6b3ee8b11e734ffb5170805c"
+  },
+  {
+    "file": "help-pressed.png",
+    "source": "panaderya_help_settings_equal_pressed.png",
+    "crop": [
+      964,
+      0,
+      1446,
+      543
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      418,
+      424
+    ],
+    "source_sha256": "2ce93b5fff6089c1b39fd9a51fa839b1bacdb99b6b3ee8b11e734ffb5170805c"
+  },
+  {
+    "file": "settings.png",
+    "source": "panaderya_help_settings_equal_pressed.png",
+    "crop": [
+      0,
+      543,
+      482,
+      1086
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      422,
+      432
+    ],
+    "source_sha256": "2ce93b5fff6089c1b39fd9a51fa839b1bacdb99b6b3ee8b11e734ffb5170805c"
+  },
+  {
+    "file": "settings-hover.png",
+    "source": "panaderya_help_settings_equal_pressed.png",
+    "crop": [
+      482,
+      543,
+      964,
+      1086
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      423,
+      432
+    ],
+    "source_sha256": "2ce93b5fff6089c1b39fd9a51fa839b1bacdb99b6b3ee8b11e734ffb5170805c"
+  },
+  {
+    "file": "settings-pressed.png",
+    "source": "panaderya_help_settings_equal_pressed.png",
+    "crop": [
+      964,
+      543,
+      1446,
+      1086
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      422,
+      432
+    ],
+    "source_sha256": "2ce93b5fff6089c1b39fd9a51fa839b1bacdb99b6b3ee8b11e734ffb5170805c"
+  },
+  {
+    "file": "gift-icon.png",
+    "source": "Candy-Style Gift, Chef Hat, and Clipboard Icons.png",
+    "crop": [
+      0,
+      0,
+      724,
+      724
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      611,
+      625
+    ],
+    "source_sha256": "fee535a6713749ff1bcc9821b07dcbeef80990219b0dafa30c8c4ccd258851a9"
+  },
+  {
+    "file": "hat-icon.png",
+    "source": "Candy-Style Gift, Chef Hat, and Clipboard Icons.png",
+    "crop": [
+      724,
+      0,
+      1448,
+      724
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      665,
+      561
+    ],
+    "source_sha256": "fee535a6713749ff1bcc9821b07dcbeef80990219b0dafa30c8c4ccd258851a9"
+  },
+  {
+    "file": "orders-icon.png",
+    "source": "Candy-Style Gift, Chef Hat, and Clipboard Icons.png",
+    "crop": [
+      1448,
+      0,
+      2172,
+      724
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      577,
+      640
+    ],
+    "source_sha256": "fee535a6713749ff1bcc9821b07dcbeef80990219b0dafa30c8c4ccd258851a9"
+  },
+  {
+    "file": "utility.png",
+    "source": "My_Panaderya_Orders_Button_Assets_Final_Spaced.png",
+    "crop": [
+      70,
+      70,
+      990,
+      350
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      878,
+      242
+    ],
+    "source_sha256": "19cc0197d8fdc5e13591bec632d9cd5fac1a956f86bb47d55a6fe45dd73e541b"
+  },
+  {
+    "file": "refresh-icon.png",
+    "source": "My_Panaderya_Orders_Button_Assets_Final_Spaced.png",
+    "crop": [
+      1060,
+      420,
+      1430,
+      800
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      292,
+      313
+    ],
+    "source_sha256": "19cc0197d8fdc5e13591bec632d9cd5fac1a956f86bb47d55a6fe45dd73e541b"
+  },
+  {
+    "file": "utility-gift.png",
+    "source": "My_Panaderya_Orders_Button_Assets_Final_Spaced.png",
+    "crop": [
+      1570,
+      420,
+      1990,
+      820
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      344,
+      343
+    ],
+    "source_sha256": "19cc0197d8fdc5e13591bec632d9cd5fac1a956f86bb47d55a6fe45dd73e541b"
+  },
+  {
+    "file": "package-01.png",
+    "source": "packages.png",
+    "crop": [
+      15,
+      145,
+      350,
+      504
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      311,
+      329
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "package-02.png",
+    "source": "packages.png",
+    "crop": [
+      353,
+      125,
+      703,
+      512
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      333,
+      369
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "package-03.png",
+    "source": "packages.png",
+    "crop": [
+      697,
+      65,
+      1048,
+      514
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      329,
+      412
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "package-04.png",
+    "source": "packages.png",
+    "crop": [
+      1048,
+      135,
+      1440,
+      520
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      385,
+      362
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "package-05.png",
+    "source": "packages.png",
+    "crop": [
+      0,
+      565,
+      350,
+      985
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      325,
+      354
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "package-06.png",
+    "source": "packages.png",
+    "crop": [
+      345,
+      570,
+      699,
+      985
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      346,
+      380
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "package-07.png",
+    "source": "packages.png",
+    "crop": [
+      676,
+      548,
+      1063,
+      985
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      388,
+      385
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "package-08.png",
+    "source": "packages.png",
+    "crop": [
+      1049,
+      530,
+      1448,
+      985
+    ],
+    "adaptation": "individual non-grid crop, neighboring components at crop boundary removed",
+    "size": [
+      386,
+      403
+    ],
+    "source_sha256": "ac881fd37b2ddca83f91527f58847498ce85339fd3392255a33d9f6f52ec23b3"
+  },
+  {
+    "file": "background.webp",
+    "source": "Charming Bakery Caf\u00e9 Interior.png",
+    "crop": null,
+    "adaptation": "42% warm cream blend; .88 saturation; 1.25px source blur; runtime filters configurable",
+    "size": [
+      2570,
+      612
+    ],
+    "source_sha256": "ec893c9caa3f8dd9f1155600c2760b4b62b08df0c47ff2e8e5498726c2d32022"
+  },
+  {
+    "file": "food-card.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      260,
+      369,
+      535,
+      537
+    ],
+    "adaptation": "original 22px decorated corners/edges; blank center for live food",
+    "size": [
+      275,
+      168
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "food-ube-ensaymada.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      329,
+      374,
+      474,
+      489
+    ],
+    "adaptation": "original recipe illustration, exterior cabinet removed; no sample multiplier pixels",
+    "size": [
+      147,
+      122
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "food-brazo.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      600,
+      372,
+      767,
+      488
+    ],
+    "adaptation": "original recipe illustration, exterior cabinet removed; no sample multiplier pixels",
+    "size": [
+      147,
+      121
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "food-buko-pie.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      881,
+      375,
+      1044,
+      488
+    ],
+    "adaptation": "original recipe illustration, exterior cabinet removed; no sample multiplier pixels",
+    "size": [
+      155,
+      120
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "food-pianono.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      1173,
+      374,
+      1336,
+      487
+    ],
+    "adaptation": "original recipe illustration, exterior cabinet removed; no sample multiplier pixels",
+    "size": [
+      154,
+      120
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "food-ensaymada.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      332,
+      554,
+      490,
+      665
+    ],
+    "adaptation": "original recipe illustration, exterior cabinet removed; no sample multiplier pixels",
+    "size": [
+      150,
+      119
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "food-ube-pandesal.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      607,
+      559,
+      777,
+      673
+    ],
+    "adaptation": "original recipe illustration, exterior cabinet removed; no sample multiplier pixels",
+    "size": [
+      173,
+      116
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "tray.png",
+    "source": "concept art/Bakery Orders Kiosk UI.png",
+    "crop": [
+      805,
+      367,
+      889,
+      408
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      92,
+      49
+    ],
+    "source_sha256": "a00c12a4c48c792827eaccbd008bdd57e332e9b9ccc5d70a3c4ff149f47e1009"
+  },
+  {
+    "file": "price-coin.png",
+    "source": "concept art/Mystery Packages Bakery UI.png",
+    "crop": [
+      739,
+      707,
+      790,
+      760
+    ],
+    "adaptation": "isolated original pixels",
+    "size": [
+      59,
+      61
+    ],
+    "source_sha256": "4d496865488a72ffefb152199f1a6c11b4e8c2cd638c39dde68559ce93f6c4dc"
+  },
+  {
+    "file": "scroll-thumb.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      1400,
+      415,
+      1436,
+      527
+    ],
+    "adaptation": "original illustrated yellow thumb; 12px endcaps",
+    "size": [
+      44,
+      120
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  },
+  {
+    "file": "reward-cart.png",
+    "source": "concept art/Bakery Orders Kiosk UI.png",
+    "crop": [
+      471,
+      354,
+      568,
+      425
+    ],
+    "adaptation": "exterior paper and disconnected neighboring label edges removed",
+    "size": [
+      97,
+      74
+    ],
+    "source_sha256": "a00c12a4c48c792827eaccbd008bdd57e332e9b9ccc5d70a3c4ff149f47e1009"
+  },
+  {
+    "file": "reward-chest.png",
+    "source": "concept art/Bakery Orders Kiosk UI.png",
+    "crop": [
+      468,
+      494,
+      574,
+      566
+    ],
+    "adaptation": "exterior paper and disconnected neighboring label edges removed",
+    "size": [
+      104,
+      70
+    ],
+    "source_sha256": "a00c12a4c48c792827eaccbd008bdd57e332e9b9ccc5d70a3c4ff149f47e1009"
+  },
+  {
+    "file": "reward-bucket.png",
+    "source": "concept art/Bakery Orders Kiosk UI.png",
+    "crop": [
+      472,
+      634,
+      574,
+      701
+    ],
+    "adaptation": "exterior paper and disconnected neighboring label edges removed",
+    "size": [
+      94,
+      75
+    ],
+    "source_sha256": "a00c12a4c48c792827eaccbd008bdd57e332e9b9ccc5d70a3c4ff149f47e1009"
+  },
+  {
+    "file": "reward-crown.png",
+    "source": "concept art/Bakery Orders Kiosk UI.png",
+    "crop": [
+      470,
+      775,
+      575,
+      845
+    ],
+    "adaptation": "exterior paper and disconnected neighboring label edges removed",
+    "size": [
+      107,
+      68
+    ],
+    "source_sha256": "a00c12a4c48c792827eaccbd008bdd57e332e9b9ccc5d70a3c4ff149f47e1009"
+  },
+  {
+    "file": "register.png",
+    "source": "image_gen/exec-b2aba3a3-e1c2-4d96-b4e3-a5566d2359e5.png",
+    "crop": null,
+    "adaptation": "reference-guided transparent reconstruction; trim/downsample only",
+    "size": [
+      1168,
+      1073
+    ],
+    "source_sha256": null
+  },
+  {
+    "file": "counter-gifts.png",
+    "source": "image_gen/exec-247195ba-8123-4245-989d-993ec801651b.png",
+    "crop": null,
+    "adaptation": "reference-guided transparent reconstruction; trim/downsample only",
+    "size": [
+      1067,
+      1094
+    ],
+    "source_sha256": null
+  },
+  {
+    "file": "ticket-gold.png",
+    "source": "image_gen/exec-4989bab9-58a0-45ac-b5ec-37cfaa6fc3d5.png",
+    "crop": null,
+    "adaptation": "reference-guided transparent reconstruction; trim/downsample only",
+    "size": [
+      1800,
+      426
+    ],
+    "source_sha256": null
+  },
+  {
+    "file": "ticket-pink.png",
+    "source": "image_gen/exec-a85c46c9-53bb-49f7-9efc-766d5483341f.png",
+    "crop": null,
+    "adaptation": "reference-guided transparent reconstruction; trim/downsample only",
+    "size": [
+      1800,
+      433
+    ],
+    "source_sha256": null
+  },
+  {
+    "file": "ticket-purple.png",
+    "source": "image_gen/exec-e188007d-d582-47a8-999a-75d72f20a23a.png",
+    "crop": null,
+    "adaptation": "reference-guided transparent reconstruction; trim/downsample only",
+    "size": [
+      1800,
+      435
+    ],
+    "source_sha256": null
+  },
+  {
+    "file": "ticket-rainbow.png",
+    "source": "image_gen/exec-a11ef60a-9b4b-4db3-908f-a3821981ac7d.png",
+    "crop": null,
+    "adaptation": "reference-guided transparent reconstruction; trim/downsample only",
+    "size": [
+      1800,
+      434
+    ],
+    "source_sha256": null
+  },
+  {
+    "file": "purchase.png",
+    "source": "image_gen/exec-44eb6096-51bf-4fa9-afc7-738858b64397.png",
+    "crop": null,
+    "adaptation": "reference-guided transparent reconstruction; trim/downsample only",
+    "size": [
+      1634,
+      931
+    ],
+    "source_sha256": null
+  },
+  {
+    "file": "book-icon.png",
+    "source": "concept art/Integrated Bakery Menu Display (1).png",
+    "crop": [
+      610,
+      807,
+      698,
+      868
+    ],
+    "adaptation": "original collection book; gold background removed",
+    "size": [
+      96,
+      64
+    ],
+    "source_sha256": "2d798a81c003b485ab6299612491cebe71fca31f63eba55b680c360ece478d4f"
+  }
+]

@@ -1,0 +1,319 @@
+[
+  {
+    "file": "bakery-panorama.webp",
+    "source": "images/Charming Bakery Caf\u00e9 Interior.png",
+    "source_sha256": "ec893c9caa3f8dd9f1155600c2760b4b62b08df0c47ff2e8e5498726c2d32022",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      2570,
+      612
+    ]
+  },
+  {
+    "file": "bakery-ambient.webp",
+    "source": "images/Charming Bakery Caf\u00e9 Interior.png",
+    "source_sha256": "ec893c9caa3f8dd9f1155600c2760b4b62b08df0c47ff2e8e5498726c2d32022",
+    "adaptation": "64% cream blend, 64% saturation, 4px source-space blur",
+    "size": [
+      2570,
+      612
+    ]
+  },
+  {
+    "file": "orders-frame.png",
+    "source": "images/Glossy Bakery Orders Board.png",
+    "source_sha256": "256c56f66bf156c50386cab6562edf84d60195882023bf347c4b4209100826b6",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      1367,
+      1151
+    ]
+  },
+  {
+    "file": "packages-frame.png",
+    "source": "images/Glossy Packages Game UI Frame.png",
+    "source_sha256": "198cd2186d678d67b4a562079e44fbb3db7076bf94b2907f3430fe73949e9598",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      1671,
+      941
+    ]
+  },
+  {
+    "file": "menu-frame.png",
+    "source": "production_assets/menu_frame.png",
+    "source_sha256": "e6d61f54a037c1d8237f75f43e4b7718909a243d41e4545ccae662b4baec5b6b",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      1672,
+      941
+    ]
+  },
+  {
+    "file": "button-gold.png",
+    "source": "production_assets/gold_normal.png",
+    "source_sha256": "7a6ccf12089061d0db66bb6d11d3fbe52e4dd16a93fe53d0e785bc372b42fe01",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      982,
+      318
+    ]
+  },
+  {
+    "file": "button-gold-hover.png",
+    "source": "production_assets/gold_hover.png",
+    "source_sha256": "bb349f15d3b97aa0cdb01cfa824ed0f6737df4e7b47219337c54acac37b51a94",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      985,
+      317
+    ]
+  },
+  {
+    "file": "button-gold-pressed.png",
+    "source": "production_assets/gold_pressed.png",
+    "source_sha256": "9d5e6673f2977856bb76f3f76e7130a71b874f5fe8a9a9d418f44cd6135fea6a",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      979,
+      317
+    ]
+  },
+  {
+    "file": "button-cream.png",
+    "source": "production_assets/gold_selected.png",
+    "source_sha256": "39f959f25ef58a379a0cc3e0910aa37bf277cd92289b462ac6eb45e71c39d117",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      968,
+      307
+    ]
+  },
+  {
+    "file": "hud-coins.png",
+    "source": "production_assets/coin_normal.png",
+    "source_sha256": "99837099981d6486e8415acddd4f548e291c8b77bc1e3120a9bcbaad76ff569b",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      657,
+      273
+    ]
+  },
+  {
+    "file": "hud-boost.png",
+    "source": "production_assets/boost_normal.png",
+    "source_sha256": "212ff41cf952c40e8391941e84b204effebf8f1517c91420099036fc4e1bf90d",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      657,
+      272
+    ]
+  },
+  {
+    "file": "help.png",
+    "source": "production_assets/help_normal.png",
+    "source_sha256": "40fb51fa1ab3a9bee6066cfaa2ea6146f10f5fbd374d909099c819e1fa4d8d2a",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      482,
+      543
+    ]
+  },
+  {
+    "file": "settings.png",
+    "source": "production_assets/settings_normal.png",
+    "source_sha256": "ee9184b30c270a6055f793ec9d9344ad9244b2e13897db752e505038e1748dea",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      482,
+      543
+    ]
+  },
+  {
+    "file": "icon-packages.png",
+    "source": "production_assets/icon_gift.png",
+    "source_sha256": "758b9f8827001f02870a778f1da448db513fcd5d6e51ce8786a0adec29bb66ec",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      724,
+      640
+    ]
+  },
+  {
+    "file": "icon-menu.png",
+    "source": "production_assets/icon_hat.png",
+    "source_sha256": "e92c0514689ed265e4ca1ec7a8d3680da7671b69181bc8676c62c568aa906492",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      716,
+      679
+    ]
+  },
+  {
+    "file": "icon-orders.png",
+    "source": "production_assets/icon_clipboard.png",
+    "source_sha256": "bf3194f3768f4471de70a27730b1d381ba7664be96327932274c3dfdcf7c8f34",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      708,
+      650
+    ]
+  },
+  {
+    "file": "utility-hover.png",
+    "source": "production_assets/order_button_hover.png",
+    "source_sha256": "39473244b60d503e415d6cd0d6eca80ab0dfec18c3e799642d16475f5cf4f55a",
+    "crop": [
+      0,
+      0,
+      882,
+      246
+    ],
+    "isolated_component": true,
+    "size": [
+      882,
+      246
+    ]
+  },
+  {
+    "file": "utility-cream.png",
+    "source": "production_assets/order_button_normal.png",
+    "source_sha256": "17f51ab033b50c78f6666343229519773bbe6946a6f5a67d48ef6ddda5df49db",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      882,
+      246
+    ]
+  },
+  {
+    "file": "utility-pressed.png",
+    "source": "production_assets/order_button_pressed.png",
+    "source_sha256": "9d209f737263f9a55cd38fc4f6eed6d11f8748dd2c7cc7ec7f2bf32d5cd29a50",
+    "crop": null,
+    "isolated_component": true,
+    "size": [
+      882,
+      246
+    ]
+  },
+  {
+    "file": "package-01.png",
+    "source": "production_assets/package_gift.png",
+    "source_sha256": "e9ec087ac511b51834b75f33c71c437ae55bd2409370ef65e5052f766b8d8a59",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      348,
+      439
+    ]
+  },
+  {
+    "file": "package-02.png",
+    "source": "production_assets/package_surprise.png",
+    "source_sha256": "c130f9bdf4f06a984bf7f6d2db0226663b41d86d9878f7a0f108174f3642fd1f",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      354,
+      443
+    ]
+  },
+  {
+    "file": "package-03.png",
+    "source": "production_assets/package_mystery.png",
+    "source_sha256": "f4d3753424bdf83276978e3c45dbfa6bf4f3b051176a0ab87931784c042404e3",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      383,
+      463
+    ]
+  },
+  {
+    "file": "package-04.png",
+    "source": "production_assets/package_secret.png",
+    "source_sha256": "9d8768960a6358bbd9c051800703bd09bc57a7763f8671fb481c4627719ca6f6",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      396,
+      434
+    ]
+  },
+  {
+    "file": "package-05.png",
+    "source": "production_assets/package_enchanted.png",
+    "source_sha256": "d757d3158d20cc68d3264b980421d68d468832e289619451ce491c7550761235",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      355,
+      460
+    ]
+  },
+  {
+    "file": "package-06.png",
+    "source": "production_assets/package_mythical.png",
+    "source_sha256": "c9629d0e8507d51dee5737b4c50c791c57df0e19a92e4d277f006aa5f82b57ed",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      352,
+      459
+    ]
+  },
+  {
+    "file": "package-07.png",
+    "source": "production_assets/package_celestial.png",
+    "source_sha256": "4ee8986680d5ee90b8b7648db297af7aa9b828d9fc7ab8d7448130faf4534f5e",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      372,
+      481
+    ]
+  },
+  {
+    "file": "package-08.png",
+    "source": "production_assets/package_divine.png",
+    "source_sha256": "a3c32cd95d37c0476814ae8e0af52bc3c2903d8146fb05b6e347e4ce11ce0382",
+    "crop": null,
+    "isolated_component": false,
+    "size": [
+      422,
+      473
+    ]
+  },
+  {
+    "file": "icon-refresh.png",
+    "source": "images/My_Panaderya_Orders_Button_Assets_Final_Spaced.png",
+    "source_sha256": "19cc0197d8fdc5e13591bec632d9cd5fac1a956f86bb47d55a6fe45dd73e541b",
+    "crop": [
+      1020,
+      420,
+      1410,
+      810
+    ],
+    "isolated_component": true,
+    "size": [
+      390,
+      390
+    ]
+  }
+]

@@ -107,7 +107,7 @@ function ensurePackageSession(){
 }
 function packageRoom(rank=packageType){return Math.max(0,PACKAGE_CAPACITY-g.packages[rank])}
 function packageQuantityMaximum(){return packageUnlocked(packageType)?Math.min(packageRoom(),Math.floor(g.coins/packagePrice(packageType))):0}
-function foodOddsMarkup(rank){return `<div class="package-food-odds">${packageProbabilities(rank).map((p,i)=>`<div class="package-odds-row r${i}"><span>${i+1}\u2605 ${RARITIES[i]}</span><span class="package-food-bar" aria-hidden="true"><i style="width:${p*100}%"></i></span><b>${probabilityLabel(p).replace('<','&lt;')}</b></div>`).join('')}</div>`}
+function foodOddsMarkup(rank){return `<div class="package-food-odds">${packageProbabilities(rank).map((p,i)=>p?`<div class="package-odds-row r${i}"><span>${i+1}\u2605 ${RARITIES[i]}</span><span class="package-food-bar" aria-hidden="true"><i style="width:${p*100}%"></i></span><b>${probabilityLabel(p).replace('<','&lt;')}</b></div>`:'').join('')}</div>`}
 function packageBuyLabel(){return `BUY ${packageQuantity} ${PACKAGE_TYPES[packageType].toUpperCase()} PACKAGES`}
 function quotePackagePurchase(){
  const session=ensurePackageSession();
@@ -184,8 +184,10 @@ function unboxAllPackages(viewId=null){
 }
 function discoverPackageFood(rank,fromStock=true){
  const legacy=fromStock?g.legacyPackageFoods?.[rank]?.shift():null;
- return discoverFood(Number.isInteger(legacy)?pick(FOOD.filter(food=>food.rarity===legacy)):drawFood(rank));
+ const promised=Number.isInteger(legacy)?legacy:Number.isInteger(legacy?.packageRank)?drawLegacyPackageRarity(legacy.packageRank):null;
+ return discoverFood(promised===null?drawFood(rank):pick(FOOD.filter(food=>food.rarity===promised)));
 }
+function drawLegacyPackageRarity(rank){return drawRank(legacyPackageProbabilities(rank))}
 function commitPackageOpening(rank,slots,focus='packageOpenAll'){
  const session=packageSession;
  if(!session||session.busy||!slots.length||slots.length>g.packages[rank]||slots.some(slot=>slot.reward||!session.slots[rank].includes(slot))||!packageStockIsCurrent())return false;
