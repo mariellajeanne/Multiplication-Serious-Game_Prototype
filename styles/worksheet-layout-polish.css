@@ -182,3 +182,149 @@ body[data-view='hub'] .worksheet-modern .worksheet-complete-bar>#worksheetSaveEx
 @media(prefers-reduced-motion:reduce){
   .worksheet-modern .worksheet-complete-bar button.illustrated-worksheet-button{transition:none}
 }
+
+/* V3: the three panels run to the bottom; controls live on the writing panel.
+   Keep the order/header, iframe, and footer as separate DOM siblings so the
+   existing game / helper action hooks continue to find their original IDs. */
+.worksheet-stage.worksheet-modern,
+.hub-order-workspace .worksheet-stage.worksheet-modern {
+  grid-template-areas:
+    "rewards order calculator"
+    "rewards sheet calculator"
+    "rewards footer calculator";
+  grid-template-rows:52px minmax(0,1fr) clamp(72px,7.4vh,106px);
+  column-gap:clamp(8px,1vw,20px);
+  row-gap:0;
+}
+.worksheet-modern .worksheet-order-header {
+  margin:0;
+  border-radius:16px 16px 0 0;
+}
+.worksheet-modern .worksheet-left {
+  background:#fff5df;
+  border-radius:0;
+  margin:0;
+  box-shadow:none;
+  min-height:0;
+}
+.worksheet-modern .worksheet-complete-bar {
+  grid-area:footer;
+  background:#fff5df;
+  border:0;
+  border-top:1px solid #dfc59c;
+  border-radius:0 0 16px 16px;
+  margin:0;
+  padding:8px clamp(8px,.85vw,17px) 13px;
+  min-height:0;
+  overflow:hidden;
+  grid-template-columns:auto minmax(0,1fr) auto;
+  gap:clamp(4px,.7vw,12px);
+}
+.worksheet-modern .worksheet-complete-bar>.worksheet-header-actions{
+  min-width:0;
+  max-width:100%;
+  justify-self:center;
+  justify-content:center;
+  overflow-x:auto;
+  overflow-y:hidden;
+  scrollbar-width:thin;
+  white-space:nowrap;
+}
+.worksheet-modern .worksheet-complete-bar .worksheet-header-actions .cobaker-help-button{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:clamp(4px,.5vw,10px);
+}
+.worksheet-modern .worksheet-help-symbols{
+  display:inline-flex;
+  align-items:center;
+  gap:2px;
+  flex:none;
+}
+.worksheet-modern .worksheet-help-symbols svg{
+  width:clamp(17px,1.55vw,25px);
+  height:clamp(17px,1.55vw,25px);
+  fill:none;
+  stroke:currentColor;
+  stroke-width:2.2;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+.worksheet-modern .worksheet-complete-bar>#worksheetSaveExit,
+.worksheet-modern .worksheet-complete-bar>#collectRewards{
+  width:auto;
+  min-width:clamp(135px,11vw,230px);
+  max-width:100%;
+  justify-self:end;
+}
+.worksheet-modern .worksheet-reward-row{
+  margin:0;
+  min-height:0;
+  grid-template-rows:52px repeat(3,minmax(0,1fr));
+  gap:clamp(5px,.6vh,14px);
+}
+.worksheet-modern .worksheet-coin-display{gap:clamp(4px,.6vh,11px)}
+.worksheet-modern .reward-info{
+  width:clamp(94px,11.5vw,225px);
+  height:clamp(90px,18vh,220px);
+  max-width:calc(100% - 12px);
+}
+.worksheet-modern .reward-count{
+  min-width:clamp(29px,2.2vw,42px);
+  height:clamp(29px,2.2vw,42px);
+  font-size:clamp(16px,1.6vw,26px);
+}
+.worksheet-modern .reward-probability{
+  font-size:clamp(17px,1.7vw,29px);
+}
+@media(max-height:600px),(max-width:1000px){
+  .worksheet-stage.worksheet-modern,
+  .hub-order-workspace .worksheet-stage.worksheet-modern{
+    grid-template-rows:44px minmax(0,1fr) 62px;
+    column-gap:6px;
+    row-gap:0;
+  }
+  .worksheet-modern .worksheet-order-header{margin:0;border-radius:11px 11px 0 0}
+  .worksheet-modern .worksheet-complete-bar{
+    padding:4px 5px 8px;
+    border-radius:0 0 11px 11px;
+    grid-template-columns:auto minmax(0,1fr) auto;
+    gap:3px;
+  }
+  .worksheet-modern .worksheet-complete-bar>.worksheet-header-actions{gap:3px}
+  .worksheet-modern .worksheet-complete-bar button.illustrated-worksheet-button,
+  .worksheet-modern .worksheet-complete-bar .worksheet-header-actions .worksheet-settings{
+    min-height:44px;
+    padding:5px 6px!important;
+    font-size:clamp(11px,1.4vw,15px)!important;
+  }
+  .worksheet-modern .worksheet-complete-bar .worksheet-header-actions .worksheet-settings{
+    width:44px;height:44px;
+    font-size:clamp(24px,2.8vw,30px)!important;
+  }
+  .worksheet-modern .worksheet-complete-bar>#worksheetSaveExit,
+  .worksheet-modern .worksheet-complete-bar>#collectRewards{
+    min-width:0;
+    max-width:100%;
+    width:auto;
+    font-size:clamp(11px,1.4vw,15px)!important;
+  }
+  .worksheet-modern .worksheet-reward-row{
+    grid-template-rows:44px repeat(3,minmax(0,1fr));
+    gap:3px;
+  }
+  .worksheet-modern .reward-info{
+    width:clamp(67px,10vw,118px);
+    height:clamp(58px,17vh,93px);
+    max-width:calc(100% - 6px);
+    padding:2px;
+  }
+  .worksheet-modern .reward-count{min-width:25px;height:25px;font-size:15px}
+  .worksheet-modern .reward-probability{font-size:clamp(13px,1.8vw,20px);padding:2px 9px}
+  .worksheet-modern .worksheet-help-symbols svg{width:16px;height:16px}
+}
+@media(max-height:430px){
+  .worksheet-modern .worksheet-complete-bar .worksheet-help-caption{font-size:clamp(11px,1.3vw,14px)}
+  .worksheet-modern .worksheet-complete-bar .worksheet-header-actions .cobaker-help-button{gap:4px}
+}

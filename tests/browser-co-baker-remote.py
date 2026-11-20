@@ -169,7 +169,7 @@ with tempfile.TemporaryDirectory(dir=out) as tmp:
                 learner = pages[0]; learner.locator('#modals .close').click()
                 learner.locator('.hub-ticket').first.click()
                 learner.wait_for_function('document.querySelector("#worksheetFrame")?.worksheetStarted===true')
-                learner.get_by_role('button', name='Call for Help', exact=True).click()
+                learner.get_by_role('button', name='Find a Helper', exact=True).click()
                 learner.locator('[data-help-action="find"]').click()
                 for p in pages[1:]: p.wait_for_selector('[data-help-accept]')
                 # Both send accepts through their real remote sockets.

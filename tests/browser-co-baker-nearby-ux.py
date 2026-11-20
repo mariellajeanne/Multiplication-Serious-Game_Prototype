@@ -54,7 +54,7 @@ try:
             c.evaluate('openCoBakerHelp(true)');assert c.locator('.cobaker-heart[aria-pressed=true]').count()==1;c.locator('#modals .close').click()
             assert c.evaluate('JSON.stringify(g.run.worksheetSession)')==own
             # Caller cancel is one tap from the existing worksheet control.
-            call(a,c);assert a.get_by_role('button',name='Call for Help',exact=True).count()==1
+            call(a,c);assert a.get_by_role('button',name='Find a Helper',exact=True).count()==1
             for width,height in [(1280,800),(2000,1200)]:
                 c.set_viewport_size({'width':width,'height':height})
                 box=c.locator('[data-invitation]').bounding_box();grid=c.locator('#worksheetFrame').bounding_box();assert box['x']>=grid['x']+grid['width']

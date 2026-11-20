@@ -22,6 +22,7 @@ with s.sync_playwright() as pw:
    for w,h in [(2000,1200),(1280,800),(844,390),(932,430)]:
     p.set_viewport_size({'width':w,'height':h});p.evaluate('fitWorksheet()');p.wait_for_timeout(350)
     assert p.locator('.worksheet-modern').evaluate('e=>{const r=e.getBoundingClientRect();return r.top>=0&&r.bottom<=innerHeight+1&&r.left>=0&&r.right<=innerWidth&&e.scrollWidth<=e.clientWidth+1}'),(engine,a,b,w)
+    assert p.locator('.worksheet-modern').evaluate('''e=>{const reward=e.querySelector('.worksheet-reward-row').getBoundingClientRect(),calc=e.querySelector('.worksheet-calculator').getBoundingClientRect(),sheet=e.querySelector('.worksheet-left').getBoundingClientRect(),footer=e.querySelector('.worksheet-complete-bar').getBoundingClientRect();return Math.abs(reward.bottom-footer.bottom)<2&&Math.abs(calc.bottom-footer.bottom)<2&&Math.abs(sheet.left-footer.left)<2&&Math.abs(sheet.right-footer.right)<2}'''),(engine,a,b,w,'panels/controls not aligned')
     assert p.locator('.worksheet-complete-bar').evaluate('e=>[...e.querySelectorAll("button")].every(b=>{const r=b.getBoundingClientRect();return r.left>=0&&r.right<=innerWidth&&r.bottom<=innerHeight&&r.height>=44})')
     assert frame.locator('[data-top]').first.evaluate('e=>{const r=e.getBoundingClientRect();return r.width>=44&&r.left>=0&&r.right<=innerWidth}'),(a,b,w)
     frame.wait_for_function('document.getElementById("scroller").scrollWidth<=document.getElementById("scroller").clientWidth+1')

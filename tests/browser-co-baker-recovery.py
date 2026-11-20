@@ -127,7 +127,7 @@ def reserve(a,b):
     a.evaluate('id=>{panaderyaCoBaker.help.directTimes.delete(id);panaderyaCoBaker.help.interrupted.delete(id)}',target)
     b.evaluate('id=>panaderyaCoBaker.help.callerTimes.delete(id)',a.evaluate('panaderyaCoBaker.profile.id'))
     wait(a,'panaderyaCoBaker.help.eligible('+json.dumps(target)+')')
-    a.get_by_role('button',name='Call for Help',exact=True).click();call(a,target)
+    a.get_by_role('button',name='Find a Helper',exact=True).click();call(a,target)
     b.locator('[data-help-accept]').click()
     if b.locator('[data-help-accept].confirm-save').count():
         b.wait_for_timeout(700);b.locator('[data-help-accept].confirm-save').click()

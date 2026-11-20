@@ -4,6 +4,7 @@
  'use strict';
  const get=()=>window.panaderyaCoBaker?.help,d=()=>window.panaderyaCoBaker;
  const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const worksheetHelperButtonContent='<span class="worksheet-help-symbols" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><path d="M3 19v-2a6 6 0 0 1 12 0v2M16 6a3 3 0 0 1 3 3"/></svg><svg viewBox="0 0 24 24"><path d="M2 9a15 15 0 0 1 20 0M5.5 12.5a10 10 0 0 1 13 0M9 16a5 5 0 0 1 6 0"/><circle cx="12" cy="20" r="1" fill="currentColor" stroke="none"/></svg></span><span class="worksheet-help-caption">Find a Helper</span>';
  const heartIcon='<svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22" stroke="currentColor" stroke-width="1.8"><path d="M12 21 3.5 12.5C-2 7 6 0 12 6c6-6 14 1 8.5 6.5Z"/></svg>';
  const callIcon=random=>`<svg viewBox="0 0 24 24" aria-hidden="true" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2">${random?'<path d="m3 5 4 0 10 14h4m-4-4 4 4-4 4M3 19h4l4-6m3-5 3-3h4m-4-4 4 4-4 4"/>':'<path d="M5 3h4l2 5-3 2a16 16 0 0 0 6 6l2-3 5 2v4c-1 6-20-7-16-16Z"/>'}</svg>`;
  let search='',lastList='',browse=false,expanded=false,gesture=null,endConfirm=null;
@@ -44,7 +45,7 @@
   if(header){let status=document.getElementById('coBakerConnectionStatus');if(!status){status=document.createElement('small');status.id='coBakerConnectionStatus';status.setAttribute('role','status');header.appendChild(status)}
    const note=help.log[0],recent=note&&help.clock()-note.at<4000?note.message:'';
    status.textContent=active?.role==='Learner'?(active.lostAt?'Your Co-Baker is reconnecting...':'Co-Baker connected'):/Your Co-Baker left/.test(recent)?recent:'';
-   const call=header.querySelector('.cobaker-help-button');if(call){call.textContent='\u260e Call for Help';call.dataset.pending=String(!!help.outgoing)}
+   const call=header.querySelector('.cobaker-help-button');if(call){if(call.dataset.networkIcon!=='1'){call.innerHTML=worksheetHelperButtonContent;call.dataset.networkIcon='1'}call.dataset.pending=String(!!help.outgoing)}
   }
   if(header){let remove=document.getElementById('coBakerRemoveHelper');if(active?.role==='Learner'){
    if(!remove){header.insertAdjacentHTML('beforeend',endButton(help,'id="coBakerRemoveHelper" data-learner-end="true"'));remove=document.getElementById('coBakerRemoveHelper')}
@@ -111,9 +112,9 @@
  document.addEventListener('pointercancel',()=>gesture=null);
  window.addEventListener('resize',notices);
  window.openCoBakerHelp=open;
- const prior=renderWorksheet;renderWorksheet=function(...args){let html=prior.apply(this,args);if(html.includes('worksheet-modern'))html=html.replace('<div class="worksheet-header-actions">','<div class="worksheet-header-actions"><button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#129309; Call for Help</button>');return html;};
+ const prior=renderWorksheet;renderWorksheet=function(...args){let html=prior.apply(this,args);if(html.includes('worksheet-modern'))html=html.replace('<div class="worksheet-header-actions">','<div class="worksheet-header-actions"><button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Find a Helper" title="Find a helper over the network" data-network-icon="1" onclick="openCoBakerHelp()">'+worksheetHelperButtonContent+'</button>');return html;};
  const initialHeader=document.querySelector('.worksheet-modern .worksheet-header-actions');
- if(initialHeader&&!initialHeader.querySelector('.cobaker-help-button'))initialHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#129309; Call for Help</button>');
+ if(initialHeader&&!initialHeader.querySelector('.cobaker-help-button'))initialHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Find a Helper" title="Find a helper over the network" data-network-icon="1" onclick="openCoBakerHelp()">'+worksheetHelperButtonContent+'</button>');
  const current=d();if(current?.help){current.help.worksheet=()=>sheetActive()||!!(current.help.active?.role==='Learner'&&!current.help.active.lostAt&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
  // Modal closure only stops scanning/refilling. Delivered calls and the live
  // worksheet reservation remain owned by Help until their own terminal state.

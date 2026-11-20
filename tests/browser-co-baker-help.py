@@ -42,7 +42,7 @@ def end(p, pages):
     if p.locator('#coBakerObservation').count(): p.locator('[data-observer-end]').click()
     elif p.locator('#coBakerInvitations [data-help-end]').count(): p.locator('#coBakerInvitations [data-help-end]').click()
     else:
-        if not p.locator('[data-help-action="end"]').count(): p.get_by_role('button',name='Call for Help',exact=True).click()
+        if not p.locator('[data-help-action="end"]').count(): p.get_by_role('button',name='Find a Helper',exact=True).click()
         p.locator('[data-help-action="end"]').click()
     idle(pages)
 
@@ -74,7 +74,7 @@ try:
         wait(learner, 'document.querySelector("#worksheetFrame").contentWindow.eval("s.revealed")')
         worksheets = [p.evaluate('JSON.stringify(document.querySelector("#worksheetFrame").contentWindow.getWorksheetSession())') for p in (learner, helper)]
         saves = [p.evaluate('localStorage.panaderyaQuestV2') for p in pages]
-        learner.get_by_role('button', name='Call for Help', exact=True).click()
+        learner.get_by_role('button', name='Find a Helper', exact=True).click()
         # Availability through the actual settings checkbox.
         other.locator('#settings-button').click(); other.locator('#coBakerAvailable').uncheck()
         wait(learner, 'panaderyaCoBaker.help.state("00000000000000000000000000000004").status==="Do Not Disturb"')

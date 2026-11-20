@@ -24,7 +24,7 @@ try:
                 page=ctx.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
                 page.goto(url);page.locator('.hub-ticket').first.tap()
                 page.wait_for_function('document.querySelector("#worksheetFrame")?.worksheetStarted===true')
-                button=page.get_by_role('button',name='Call for Help',exact=True)
+                button=page.get_by_role('button',name='Find a Helper',exact=True)
                 button.tap()
                 dialog=page.get_by_role('dialog');dialog.wait_for(state='visible')
                 assert 'No Bakers nearby yet!' in dialog.inner_text()

@@ -125,7 +125,7 @@ try:
         helper.evaluate('captureActiveWorksheet();save()');helper_save=helper.evaluate('localStorage.panaderyaQuestV2');other_save=other.evaluate('localStorage.panaderyaQuestV2')
         own=helper.evaluate('JSON.stringify(document.querySelector("#worksheetFrame").contentWindow.getWorksheetSession())')
         helper_id=helper.evaluate('panaderyaCoBaker.profile.id')
-        learner.get_by_role('button',name='Call for Help',exact=True).click();call(learner,helper_id)
+        learner.get_by_role('button',name='Find a Helper',exact=True).click();call(learner,helper_id)
         helper.locator('[data-help-accept]').click();helper.wait_for_timeout(800);
         if helper.locator('.confirm-save').count():helper.locator('.confirm-save').click()
         helper.wait_for_selector('#coBakerObservation iframe')
@@ -242,7 +242,7 @@ try:
         assert learner.evaluate('WorksheetCues.resolve("top:1").ownerDocument.querySelector(".cobaker-point-ring")') is None
         helper.evaluate('([id,h])=>panaderyaCoBaker.help.send(id,h)',[learner_id,forged]);helper.wait_for_timeout(100)
         assert learner.locator('#coBakerProceduralHint').count()==0
-        learner.get_by_role('button',name='Call for Help',exact=True).click();call(learner,helper_id);helper.locator('[data-help-accept]').click();synced(learner,helper);learner.locator('#modals .close').click()
+        learner.get_by_role('button',name='Find a Helper',exact=True).click();call(learner,helper_id);helper.locator('[data-help-accept]').click();synced(learner,helper);learner.locator('#modals .close').click()
         # Complete the production procedure using its accepted domain actions.
         carry_pointed=False
         for _ in range(100):
