@@ -2,23 +2,19 @@
  * the existing iframe; all fact evidence and coin receipts belong to the shell. */
 const previousWorksheetRenderer=renderWorksheet,previousWorksheetFit=fitWorksheet,previousWorksheetClose=closeModal;
 let calculationNotice='',calculationIdentity='',worksheetSummaryView=null,worksheetSummaryTimer=null;
-const WORKSHEET_COIN_CROPS=[[82,175,292,237,444,444],[90,53,258,359,443,444],[39,44,333,368,443,444],[37,13,359,399,444,444],[23,63,400,357,444,443],[19,44,367,375,443,443],[0,38,405,377,443,443],[0,0,444,418,444,443]];
-function worksheetCoinArt(rank){
- if(typeof hubAsset!=='function')return coinTierArt(rank);
- const [x,y,w,h,width,height]=WORKSHEET_COIN_CROPS[rank];
- return `<svg class="coin-tier-art illustrated-coin" viewBox="${x} ${y} ${w} ${h}" role="img" aria-label="${worksheetCoinName(rank)}"><image href="${hubAsset(`coin-${String(rank+1).padStart(2,'0')}.png`)}" width="${width}" height="${height}"/></svg>`;
-}
+function worksheetCoinArt(rank){return WorksheetComponents.coinArt(rank,typeof hubAsset==='function'?hubAsset(`coin-${String(rank+1).padStart(2,'0')}.png`):'assets/bakery-ui/')}
 function worksheetFoodArt(id){return typeof hubFoodArt==='function'?hubFoodArt(id):foodArt(id)}
 function worksheetCoinName(rank){return typeof hubCoinTierName==='function'?hubCoinTierName(rank):COIN_TIERS[rank]}
 function worksheetRewardDisplays(r){
  if(!usesStepCoins(r))return `<div class="worksheet-saved-reward">${worksheetCoinArt(ticketCoinTier(r.ticket))}<span>Saved order reward <b>${fmt(r.budget)} coins</b></span></div>`;
- return `<div class="worksheet-reward-row" aria-label="Possible step rewards">${r.stepCoins.options.map(option=>`<section class="worksheet-coin-display coin-tier-${option.rank}" data-coin-rank="${option.rank}" aria-label="${worksheetCoinName(option.rank)}, ${Math.round(option.chance*100)} percent chance"><strong class="reward-name">${worksheetCoinName(option.rank)}</strong><div class="worksheet-coin-art">${worksheetCoinArt(option.rank)}</div><div class="reward-counters"><span aria-label="Probability">${Math.round(option.chance*100)}%</span><b aria-label="Lifetime containers">&times;<span data-lifetime-count="${option.rank}">${fmt(g.mathPractice.lifetimeCoins[option.rank])}</span></b></div><small class="reward-detail">Base: ${fmt(option.base)} &middot; Order: <b data-ticket-count="${option.rank}">${fmt(r.stepCoins.counts[option.rank])}</b></small></section>`).join('')}</div>`;
+ return WorksheetComponents.rewards(r.stepCoins.options.map(option=>({rank:option.rank,name:worksheetCoinName(option.rank),chance:option.chance,base:option.base,count:r.stepCoins.counts[option.rank],art:worksheetCoinArt(option.rank)})));
 }
 renderWorksheet=function(){
  const r=g.run;if(!r||r.phase==='failed'||!usesStepCoins(r)&&r.phase==='claim')return previousWorksheetRenderer();
  const food=orderFood(r.ticket);
- return `<main class="worksheet-stage worksheet-modern"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div><div class="worksheet-header-actions"><button class="worksheet-settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">${hubImage('control-settings.svg')}</button><button class="worksheet-exit illustrated-worksheet-button" onclick="abandonTicket()">Save &amp; Exit</button></div></header>${worksheetRewardDisplays(r)}${WorksheetComponents.workspace({done:r.bridgeDone||0,total:r.steps.length,complete:r.procedureComplete,pool:fmt(r.pool)})}</main>`;
+ return `<main class="worksheet-stage worksheet-modern"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div></header>${worksheetRewardDisplays(r)}${WorksheetComponents.workspace({done:r.bridgeDone||0,total:r.steps.length,complete:r.procedureComplete,pool:fmt(r.pool),actions:worksheetBottomActions()})}</main>`;
 };
+function worksheetBottomActions(){return '<div class="worksheet-header-actions"><button class="worksheet-settings illustrated-worksheet-button" title="Worksheet settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">&#9881;</button><button class="worksheet-exit illustrated-worksheet-button" aria-label="Save &amp; Exit" onclick="abandonTicket()">&#8677; Save &amp; Exit</button></div>'}
 function currentWorksheetCalculation(){
  const r=g.run,state=r?.worksheetSession?.state;
  if(!r||r.phase!=='engine'||r.paused||!state)return null;
@@ -117,15 +113,9 @@ fitWorksheet=function(){
  if(!g.run||g.run.paused)return;
  syncRewardPresentation();if(typeof cancelWorksheetDrag==='function')cancelWorksheetDrag();
  const rows=String(g.run.ticket.b).length,cols=String(g.run.ticket.a*g.run.ticket.b).length,gap=6;
- const style=getComputedStyle(stage),spacing=parseFloat(style.rowGap)||12;
- const edges=2*(parseFloat(style.borderTopWidth)+parseFloat(style.paddingTop));
- const rewardSize=innerHeight>=1000?156:150;stage.style.setProperty('--reward-size',rewardSize+'px');
- const header=stage.querySelector('.worksheet-order-header').getBoundingClientRect().height;
- const footer=stage.querySelector('.worksheet-complete-bar').getBoundingClientRect().height;
- const available=Math.max(300,innerHeight-stage.getBoundingClientRect().top-edges-header-footer-rewardSize-spacing*3-20);
- const calculator=innerWidth<=1100?260:280,byWidth=Math.floor((innerWidth-calculator-edges-spacing-114-gap*(cols-1))/cols);
- const {cell,area}=WorksheetComponents.layout({rows,cols,available,byWidth,gap});
- stage.style.setProperty('--worksheet-area',area+'px');
+ const surface=stage.querySelector('.worksheet-left'),rect=surface.getBoundingClientRect();
+ const available=Math.max(200,rect.height),byWidth=Math.floor((rect.width-100-gap*(cols-1))/cols);
+ const {cell}=WorksheetComponents.layout({rows,cols,available,byWidth,gap,minArea:0});
  sendEngine('layout',{cell,gap,rows});paintWorksheetExperience();
 };
 function worksheetSummaryMarkup(r){

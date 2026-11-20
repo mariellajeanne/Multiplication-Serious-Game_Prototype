@@ -40,7 +40,9 @@
  const text=(s,max=240)=>typeof s==='string'&&s.length<=max&&!/[\u0000-\u001f]/.test(s);
  const target=t=>t===null||keys(t,['kind','r','c'])&&['slot','carry'].includes(t.kind)&&int(t.c,6)&&(t.kind==='carry'?!('r'in t):int(t.r,1));
  function validPresentation(p){
-  if(!keys(p,['calculator','phase','tutorial','guideLevel','entry'])||!['connect','calculate','carry','place','add','complete'].includes(p.phase)||typeof p.tutorial!=='boolean'||!int(p.guideLevel,2))return false;
+  if(!keys(p,['calculator','phase','tutorial','guideLevel','entry','rewards','order'])||!['connect','calculate','carry','place','add','complete'].includes(p.phase)||typeof p.tutorial!=='boolean'||!int(p.guideLevel,2))return false;
+  if(p.order!==undefined&&(!keys(p.order,['foodId','sprite'])||!int(p.order.sprite,17)||p.order.sprite<1||!text(p.order.foodId,60)||!(/^[a-z0-9-]+$/).test(p.order.foodId)))return false;
+  if(p.rewards!==undefined&&(!Array.isArray(p.rewards)||p.rewards.length>3||!p.rewards.every(o=>keys(o,['rank','name','chance','base','count'])&&int(o.rank,7)&&text(o.name,80)&&typeof o.chance==='number'&&o.chance>=0&&o.chance<=1&&int(o.base,1000000000)&&int(o.count,100))))return false;
   const e=p.entry;
   if(!keys(e,['selected','value','feedback','level','hintTargets'])||!target(e.selected)||!/^\d?$/.test(e.value)||!text(e.feedback)||!int(e.level,3)||!Array.isArray(e.hintTargets)||e.hintTargets.length>2||!e.hintTargets.every(t=>t!==null&&target(t)))return false;
   const c=p.calculator;

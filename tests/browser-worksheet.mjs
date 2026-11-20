@@ -67,7 +67,7 @@ try{
   await waitFor(`typeof startTicket==='function'`);
   await waitFor(`document.getElementById('bakeryLoading')?.hidden===true`);
   await evaluate('document.fonts.ready');
-  await evaluate(`g.helpSeen=true;closeModal();g.board=[{id:9001,a:79,b:18,rarity:1,base:304}];render();document.querySelector('.ticket').click();`);
+  await evaluate(`g.helpSeen=true;closeModal();g.board=[{id:9001,a:79,b:18,rarity:1,base:304}];render();startTicket(9001);`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9001`);
   await evaluate(`window.auditFrame=$('worksheetFrame');window.auditChild=auditFrame.contentWindow;
     auditChild.eval("operand('bottom',0)")`);

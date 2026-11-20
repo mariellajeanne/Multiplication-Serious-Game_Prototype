@@ -44,7 +44,7 @@
   if(header){let status=document.getElementById('coBakerConnectionStatus');if(!status){status=document.createElement('small');status.id='coBakerConnectionStatus';status.setAttribute('role','status');header.appendChild(status)}
    const note=help.log[0],recent=note&&help.clock()-note.at<4000?note.message:'';
    status.textContent=active?.role==='Learner'?(active.lostAt?'Your Co-Baker is reconnecting...':'Co-Baker connected'):/Your Co-Baker left/.test(recent)?recent:'';
-   const call=header.querySelector('.cobaker-help-button');if(call){call.textContent='Call for Help';call.dataset.pending=String(!!help.outgoing)}
+   const call=header.querySelector('.cobaker-help-button');if(call){call.textContent='\u260e Call for Help';call.dataset.pending=String(!!help.outgoing)}
   }
   if(header){let remove=document.getElementById('coBakerRemoveHelper');if(active?.role==='Learner'){
    if(!remove){header.insertAdjacentHTML('beforeend',endButton(help,'id="coBakerRemoveHelper" data-learner-end="true"'));remove=document.getElementById('coBakerRemoveHelper')}
@@ -111,9 +111,9 @@
  document.addEventListener('pointercancel',()=>gesture=null);
  window.addEventListener('resize',notices);
  window.openCoBakerHelp=open;
- const prior=renderWorksheet;renderWorksheet=function(...args){let html=prior.apply(this,args);if(html.includes('worksheet-modern'))html=html.replace('<div class="worksheet-header-actions">','<div class="worksheet-header-actions"><button type="button" class="illustrated-worksheet-button cobaker-help-button" onclick="openCoBakerHelp()">Call for Help</button>');return html;};
+ const prior=renderWorksheet;renderWorksheet=function(...args){let html=prior.apply(this,args);if(html.includes('worksheet-modern'))html=html.replace('<div class="worksheet-header-actions">','<div class="worksheet-header-actions"><button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#9742; Call for Help</button>');return html;};
  const initialHeader=document.querySelector('.worksheet-modern .worksheet-header-actions');
- if(initialHeader&&!initialHeader.querySelector('.cobaker-help-button'))initialHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" onclick="openCoBakerHelp()">Call for Help</button>');
+ if(initialHeader&&!initialHeader.querySelector('.cobaker-help-button'))initialHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#9742; Call for Help</button>');
  const current=d();if(current?.help){current.help.worksheet=()=>sheetActive()||!!(current.help.active?.role==='Learner'&&!current.help.active.lostAt&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
  // Modal closure only stops scanning/refilling. Delivered calls and the live
  // worksheet reservation remain owned by Help until their own terminal state.

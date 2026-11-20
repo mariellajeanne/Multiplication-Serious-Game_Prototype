@@ -60,7 +60,8 @@ function worksheetSurface(){
 function applyWorksheetLayout(layout){
  const cell=Math.max(44,Math.min(148,Math.round(Number(layout.cell)||72)));
  const gap=Math.max(4,Math.min(8,Number(layout.gap)||8));
- const carry=Math.max(44,Math.round(cell*.65)),floating=Math.max(44,Math.round(cell*.62)),operandGap=worksheetExternalCalculator?Math.max(40,Math.round(cell*.55)):Math.max(56,Math.round(cell*.95));
+ document.body.classList.toggle('compact-workspace',cell<=52);
+ const carry=Math.max(44,Math.round(cell*.65)),floating=Math.max(44,Math.round(cell*.62)),operandGap=worksheetExternalCalculator?Math.max(16,Math.round(cell*(cell<=52?.3:.55))):Math.max(56,Math.round(cell*.95));
  const style=document.documentElement.style;
  style.setProperty('--cell',cell+'px');style.setProperty('--gap',gap+'px');
  style.setProperty('--carry-cell',carry+'px');style.setProperty('--float-cell',floating+'px');style.setProperty('--operand-gap',operandGap+'px');

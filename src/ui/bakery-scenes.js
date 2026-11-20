@@ -12,8 +12,8 @@ const BAKERY_PACKAGE_DISPLAY_ORDER=Object.freeze(PACKAGE_SHOP.map(t=>t.rank));
 const BAKERY_CENTERS=Object.freeze([1000,2693.84,4085.92]);
 const BAKERY_COMPACT_CENTERS=Object.freeze([1000,2693.84,4214.72]);
 function bakeryWorldCenters(){return matchMedia('(max-height:600px) and (orientation:landscape)').matches?BAKERY_COMPACT_CENTERS:BAKERY_CENTERS}
-function bakeryCameraX(camera=bakeryCamera){const centers=bakeryWorldCenters(),i=Math.min(1,Math.floor(camera));return centers[i]+(centers[i+1]-centers[i])*(camera-i)-1000}
-let bakeryPage='menu',bakeryCamera=1,bakeryJourney=null,bakeryFrame=0,bakeryTier=null,bakeryPackagesVisited=false;
+function bakeryCameraX(camera=bakeryCamera){const centers=bakeryWorldCenters(),i=Math.max(0,Math.min(1,Math.floor(camera)));return centers[i]+(centers[i+1]-centers[i])*(camera-i)-1000}
+let bakeryPage='menu',bakeryCamera=1,bakeryJourney=null,bakeryFrame=0,bakeryTier=null,bakeryHighestDiscovered=null;
 function worldImage(name,classes='',alt=''){
  const approved=['menu-frame','packages-frame','orders-frame'].includes(name);
  const src=typeof BAKERY_ASSETS!=='undefined'&&BAKERY_ASSETS[name]||`assets/${approved?'bakery-approved':'bakery-faithful'}/${name}.png`;
@@ -58,7 +58,9 @@ function bakeryCarouselTiers(){
  return BAKERY_PACKAGE_DISPLAY_ORDER.filter(rank=>packageUnlocked(rank)||rank===next?.rank);
 }
 function ensureBakeryTier(){
- if(bakeryTier===null||!bakeryCarouselTiers().includes(bakeryTier))bakeryTier=PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).at(-1).rank;
+ const highest=PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).at(-1).rank;
+ if(bakeryHighestDiscovered===null||highest>bakeryHighestDiscovered||bakeryTier===null||!bakeryCarouselTiers().includes(bakeryTier))bakeryTier=highest;
+ bakeryHighestDiscovered=highest;
  packageFeaturedRank=bakeryTier;
 }
 function bakeryMysteryArt(){
@@ -100,7 +102,9 @@ function renderWorldPackages(){
 // Staff and Co-Baker rewards can arrive while browsing. Preserve the carousel
 // node, focus and current gesture; replace only a newly discovered silhouette.
 function refreshBakeryDiscovery(){
+ const previous=bakeryTier;ensureBakeryTier();
  const station=$('package-station'),carousel=$('package-carousel');if(!station||!carousel)return;
+ if(previous!==bakeryTier){selectBakeryTier(bakeryTier);return}
  const tiers=bakeryCarouselTiers(),selected=tiers.indexOf(bakeryTier);
  const slides=carousel.querySelectorAll('[data-carousel-slide]');
  if(slides.length!==tiers.length||[...slides].some(slide=>slide.querySelector('.is-mystery')&&packageUnlocked(Number(slide.dataset.carouselSlide)))){
@@ -203,12 +207,13 @@ function syncBakeryPages(){
 function bakeryCameraStep(time){
  if(!bakeryJourney)return;
  const t=Math.max(0,Math.min(1,(time-bakeryJourney.started)/bakeryJourney.duration));
- bakeryCamera=bakeryJourney.from+(bakeryJourney.to-bakeryJourney.from)*t*t*(3-2*t);paintBakeryCamera();
+ const ease=bakeryJourney.spring?1+2.2*(t-1)**3+1.2*(t-1)**2:t*t*(3-2*t);
+ bakeryCamera=bakeryJourney.from+(bakeryJourney.to-bakeryJourney.from)*ease;paintBakeryCamera();
  if(t<1)bakeryFrame=requestAnimationFrame(bakeryCameraStep);else{bakeryJourney=null;bakeryFrame=0}
 }
 function navigateBakery(page){
  if(!BAKERY_PAGES.includes(page)||g.run&&!g.run.paused)return false;
- if(page==='packages'&&!bakeryPackagesVisited){bakeryPackagesVisited=true;selectBakeryTier(PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).at(-1).rank)}
+ if(page==='packages'){ensureBakeryTier();selectBakeryTier(PACKAGE_SHOP.filter(t=>packageUnlocked(t.rank)).at(-1).rank)}
  if(page===bakeryPage)return true;
  if(hubCollection)closeHubCollection();
  const viewport=document.querySelector('.scene-window');if(viewport)viewport.scrollTop=0;
@@ -234,8 +239,67 @@ function buyBakeryPackage(count){
  if(packageBatchView||packageBatchUnavailable(bakeryTier,count))return false;
  packageFeaturedRank=bakeryTier;return purchasePackageBatch(quotePackageBatch(bakeryTier,count).id);
 }
+// Touch-only page gestures. Nested controls and native scroll surfaces own their
+// entire gesture, even when their scroll/carousel happens to be at an endpoint.
+function bindBakeryPageSwipe(home){
+ let swipe=null,frame=0,clickUntil=0;
+ const blocked='button,a,input,select,textarea,iframe,[contenteditable],[draggable="true"],[role="slider"],[role="scrollbar"],#package-carousel,.scene-scroll-rail,.scene-hud,.scene-nav';
+ const unavailable=()=>modal||hubCollection||packageBatchView||g.run&&!g.run.paused||$('app')?.inert;
+ const draw=()=>{frame=0;if(swipe){bakeryCamera=swipe.camera;paintBakeryCamera()}};
+ const finish=(cancel=false)=>{
+  if(!swipe)return;
+  const s=swipe;cancelAnimationFrame(frame);frame=0;swipe=null;
+  if(!s.dragging)return;
+  bakeryCamera=s.camera;paintBakeryCamera();clickUntil=performance.now()+400;
+  const dx=s.lastX-s.x,elapsed=performance.now()-s.time;
+  const fast=elapsed<300&&Math.abs(dx)>=28&&Math.abs(dx)/Math.max(1,elapsed)>.5;
+  const next=s.index+(dx<0?1:-1);
+  if(!cancel&&!unavailable()&&bakeryPage===s.page&&next>=0&&next<BAKERY_PAGES.length&&(Math.abs(dx)>=Math.min(100,Math.max(55,s.width*.09))||fast)){
+   navigateBakery(BAKERY_PAGES[next]);return;
+  }
+  // Ease out with a small overshoot, returning to the exact original camera.
+  const target=BAKERY_PAGES.indexOf(bakeryPage);
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches){bakeryCamera=target;paintBakeryCamera();return}
+  bakeryJourney={from:bakeryCamera,to:target,started:performance.now(),duration:320,spring:true};
+  bakeryFrame=requestAnimationFrame(bakeryCameraStep);
+ };
+ home.addEventListener('touchstart',event=>{
+  if(swipe){finish(true);return}
+  if(event.touches.length!==1||unavailable()||bakeryJourney||!event.target.closest('.scene-window')||event.target.closest(blocked))return;
+  for(let node=event.target;node&&node!==home;node=node.parentElement){
+   const style=getComputedStyle(node);
+   if(/auto|scroll/.test(style.overflowX+' '+style.overflowY)&&!node.matches('.scene-window'))return;
+  }
+  const t=event.touches[0],stage=$('stage'),index=BAKERY_PAGES.indexOf(bakeryPage);
+  swipe={id:t.identifier,x:t.clientX,y:t.clientY,lastX:t.clientX,time:performance.now(),index,page:bakeryPage,camera:index,scale:stage.getBoundingClientRect().width/2000,width:innerWidth,dragging:false};
+ },{passive:true});
+ home.addEventListener('touchmove',event=>{
+  if(!swipe)return;
+  if(event.touches.length!==1||unavailable()||bakeryPage!==swipe.page){finish(true);return}
+  const t=[...event.touches].find(t=>t.identifier===swipe.id);if(!t)return;
+  const dx=t.clientX-swipe.x,dy=t.clientY-swipe.y;
+  if(!swipe.dragging){
+   if(Math.abs(dy)>10&&Math.abs(dy)>=Math.abs(dx)){swipe=null;return}
+   if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.4)return;
+   swipe.dragging=true;
+  }
+  if(!event.cancelable){finish(true);return}event.preventDefault();
+  swipe.lastX=t.clientX;
+  const boundary=swipe.index===0&&dx>0||swipe.index===2&&dx<0;
+  const offset=boundary?Math.sign(dx)*36*(1-Math.exp(-Math.abs(dx)/110)):Math.max(-160,Math.min(160,dx*.65));
+  const centers=bakeryWorldCenters(),segment=dx>0?Math.max(0,swipe.index-1):Math.min(1,swipe.index);
+  swipe.camera=swipe.index-offset/(swipe.scale*(centers[segment+1]-centers[segment]));
+  if(!frame)frame=requestAnimationFrame(draw);
+ },{passive:false});
+ home.addEventListener('touchend',()=>finish());
+ home.addEventListener('touchcancel',()=>finish(true));
+ window.addEventListener('blur',()=>finish(true));
+ window.addEventListener('resize',()=>finish(true));
+ home.addEventListener('click',event=>{if(performance.now()<clickUntil){event.preventDefault();event.stopImmediatePropagation()}},true);
+}
 function bindBakeryWorld(){
  const home=$('hubHome');if(!home||home.dataset.sceneBound)return;home.dataset.sceneBound='true';
+ bindBakeryPageSwipe(home);
  let gesture=null,suppressClickUntil=0;
  home.addEventListener('load',event=>{if(event.target.closest?.('#package-carousel'))positionBakeryCarouselLabel()},true);
  home.addEventListener('click',event=>{

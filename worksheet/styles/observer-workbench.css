@@ -1,10 +1,14 @@
 html,body{margin:0;background:transparent;min-height:100%;overflow:hidden}
 body{position:fixed;inset:0;padding:6px;box-sizing:border-box}
-#observedWorkbench{position:absolute;left:50%;top:6px;transform:translateX(-50%);transform-origin:top center;grid-template-areas:"order order" "sheet calculator" "footer footer";width:max-content;max-width:calc(100% - 12px);min-width:0}
+/* Shared panels, with collaboration actions supplied by the helper's outer shell. */
+#observedWorkbench{width:100%;max-width:none;min-width:0;height:calc(100dvh - 12px);grid-template-rows:64px minmax(0,1fr);grid-template-areas:"rewards order calculator" "rewards sheet calculator"}
 #observedWorkbench .worksheet-frame{height:400px}
 #observedWorkbench button:disabled{opacity:1;filter:none;cursor:default}
-#observedWorkbench button[aria-disabled="true"]{cursor:default}
-#observedWorkbench .worksheet-header-actions{font-size:12px;white-space:nowrap}
 #observedWorkbench .worksheet-left{opacity:1}
 #observedWorkbench button[data-inactive]{opacity:.42;filter:saturate(.45)}
-@media(max-width:800px){#observedWorkbench{grid-template-columns:minmax(300px,1fr) 240px;--bench-gap:12px}#observedWorkbench .worksheet-complete-bar>#collectRewards{width:180px}}
+/* Keep Undo pointable without presenting learner actions as helper permissions. */
+#observedWorkbench .worksheet-calculator{padding-bottom:74px;scroll-padding-bottom:74px}
+#observedWorkbench .worksheet-complete-bar{grid-area:calculator;align-self:end;z-index:2;margin:0 14px 12px;display:flex;background:#fff0d2}
+#observedWorkbench .worksheet-complete-bar [data-worksheet-control='undo']{width:100%;min-height:48px;font-size:16px}
+#observedWorkbench .worksheet-complete-bar :is(#collectRewards,#worksheetStepProgress){display:none}
+@media(max-height:600px),(max-width:1000px){#observedWorkbench{grid-template-rows:44px minmax(0,1fr)}#observedWorkbench .worksheet-complete-bar{margin:0 8px 6px}#observedWorkbench .reward-info{height:46px}#observedWorkbench .reward-probability{font-size:15px;padding:1px 10px}}

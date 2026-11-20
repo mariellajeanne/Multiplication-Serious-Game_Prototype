@@ -200,3 +200,13 @@ test('a delayed point for a reused semantic cell is rejected after state changes
  set({...initial,first:{kind:'top',c:1}});b.help.send(a.profile.id,old);n.flush();assert.equal(cues.length,0);
  assert.ok(bg.send('point','top:1'));n.flush();assert.equal(cues.at(-1).target,'top:1');
 });
+
+test('shared reward presentation accepts bounded current-order counts and rejects unsafe payloads',()=>{
+ const p=structuredClone(view);p.order={foodId:'pandesal',sprite:1};p.rewards=[{rank:1,name:'Coin Jar',chance:.7,base:320,count:4}];
+ assert.equal(w.validPresentation(p),true);
+ const html=WorksheetComponents.rewards(p.rewards);
+ assert.match(html,/data-ticket-count="1"[^>]*>4</);assert.match(html,/>70%</);assert.doesNotMatch(html,/Lifetime|multiplier|onclick/);
+ for(const change of [v=>v.order.sprite=99,v=>v.order.foodId='../x',v=>v.rewards[0].count=-1,v=>v.rewards[0].chance=NaN,v=>v.rewards[0].command='claim',v=>v.rewards[0].base=Infinity]){const bad=structuredClone(p);change(bad);assert.equal(w.validPresentation(bad),false)}
+ const {set,bo,ao,n}=pair();ao.presentation=()=>p;ao.publish({state:initial});n.flush();assert.deepEqual(bo.latest.presentation.rewards,p.rewards);
+ p.rewards[0].count++;ao.publish({state:initial});n.flush();assert.equal(bo.latest.presentation.rewards[0].count,5);
+});

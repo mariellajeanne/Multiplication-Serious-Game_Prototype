@@ -32,3 +32,8 @@
 .carry-combination{position:absolute;z-index:45;padding:8px 12px;background:#fff0c8;border:2px solid #795034;border-radius:12px;box-shadow:0 3px 0 #79503422;font-size:19px;font-weight:900;pointer-events:none;animation:carry-combine-note 1s ease-out both}
 @keyframes carry-combine-note{0%{opacity:0;translate:0 6px}20%,80%{opacity:1;translate:0 0}100%{opacity:0;translate:0 -5px}}
 @media(prefers-reduced-motion:reduce){.carry-combination{animation:none}}
+.external-calculator.compact-workspace .guide-prompt{height:20px!important;min-height:20px!important;font-size:11px!important;padding:0!important}
+.external-calculator.compact-workspace .line{margin-bottom:3px}
+.external-calculator.compact-workspace .line.topline{margin-bottom:var(--operand-gap)}
+.external-calculator.compact-workspace .line.bottomline{padding-bottom:5px;margin-bottom:5px}
+.worksheet-observer.compact-workspace .guide-prompt{display:none!important}

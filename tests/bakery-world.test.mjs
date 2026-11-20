@@ -59,12 +59,14 @@ test('scene purchases use canonical batch transactions and reject locked or repl
  assert.equal(h.run('buyBakeryPackage(1)'),false);
 });
 
-test('first visit centers the highest discovered tier; later visits preserve an intentional selection',()=>{
+test('each visit centers the highest discovered tier; manual browsing remains available',()=>{
  const h=worldHarness();h.run('renderWorldPackages();g.packageTierUnlocks=[0,1,2,3];navigateBakery("packages")');
  assert.equal(h.run('bakeryTier'),3);
  h.run('selectBakeryTier(1);navigateBakery("menu");g.packageTierUnlocks.push(4);navigateBakery("packages")');
- assert.equal(h.run('bakeryTier'),1);
- assert.equal(h.run('selectBakeryTier(6)'),false);assert.equal(h.run('selectBakeryTier(5)'),true);
+ assert.equal(h.run('bakeryTier'),4);
+ h.run('selectBakeryTier(1);ensureBakeryTier()');assert.equal(h.run('bakeryTier'),1);
+ h.run('g.packageTierUnlocks.push(5);ensureBakeryTier()');assert.equal(h.run('bakeryTier'),5);
+ assert.equal(h.run('selectBakeryTier(7)'),false);assert.equal(h.run('selectBakeryTier(6)'),true);
 });
 
 test('phone fitting preserves uniform art scales and leaves primary content clear of HUD/navigation on every kiosk',()=>{

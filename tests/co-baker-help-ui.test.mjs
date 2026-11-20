@@ -24,7 +24,7 @@ function browser(){
 test('worksheet header gains one Call for Help action without replacing engine or layout',()=>{
  const b=browser(),html=b.vmc.renderWorksheet();
  assert.match(html,/cobaker-help-button/);assert.match(html,/Save & Exit/);
- assert.equal((html.match(/Call for Help/g)||[]).length,1);
+ assert.equal((html.match(/class="illustrated-worksheet-button cobaker-help-button"/g)||[]).length,1);
  assert.equal(typeof b.vmc.openCoBakerHelp,'function');
  assert.equal(b.vmc.panaderyaCoBaker.help.worksheet(),true);
 });

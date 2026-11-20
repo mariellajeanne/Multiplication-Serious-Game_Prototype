@@ -119,19 +119,23 @@ try:
             p.goto(base+'/index.html?cobaker=debug&'+query);p.wait_for_selector('.hub-food');connect(p)
             if i==2:wait(p,'panaderyaCoBaker.coordinator.leader?.id===panaderyaCoBaker.profile.id')
         learner,helper,other=pages
-        helper.locator('.hub-ticket').first.click();wait(helper,'document.querySelector("#worksheetFrame")?.worksheetStarted===true')
+        helper.evaluate('startTicket(g.board[0].id)');wait(helper,'document.querySelector("#worksheetFrame")?.worksheetStarted===true')
         learner.evaluate('g.board[0].a=79;g.board[0].b=18;startTicket(g.board[0].id)')
         wait(learner,'document.querySelector("#worksheetFrame")?.worksheetStarted===true')
         helper.evaluate('captureActiveWorksheet();save()');helper_save=helper.evaluate('localStorage.panaderyaQuestV2');other_save=other.evaluate('localStorage.panaderyaQuestV2')
         own=helper.evaluate('JSON.stringify(document.querySelector("#worksheetFrame").contentWindow.getWorksheetSession())')
         helper_id=helper.evaluate('panaderyaCoBaker.profile.id')
         learner.get_by_role('button',name='Call for Help',exact=True).click();call(learner,helper_id)
-        helper.locator('[data-help-accept]').click();helper.wait_for_selector('#coBakerObservation iframe')
+        helper.locator('[data-help-accept]').click();helper.wait_for_timeout(800);
+        if helper.locator('.confirm-save').count():helper.locator('.confirm-save').click()
+        helper.wait_for_selector('#coBakerObservation iframe')
         synced(learner,helper)
-        learner.locator('[data-help-action="end"]').click();wait(helper,'!panaderyaCoBaker.help.active')
+        learner.locator('[data-help-action="end"]').click();learner.wait_for_timeout(800);learner.locator('[data-help-action="end"]').click();wait(helper,'!panaderyaCoBaker.help.active')
         assert helper.evaluate('panaderyaCoBaker.observation.latest') is None
         assert helper.locator('#coBakerObservation').count()==0
-        call(learner,helper_id);helper.locator('[data-help-accept]').click();helper.wait_for_selector('#coBakerObservation iframe')
+        call(learner,helper_id);helper.locator('[data-help-accept]').click();helper.wait_for_timeout(800);
+        if helper.locator('.confirm-save').count():helper.locator('.confirm-save').click()
+        helper.wait_for_selector('#coBakerObservation iframe')
         synced(learner,helper);learner.locator('#modals .close').click()
         helper.set_viewport_size({'width':1024,'height':768})
         for i,target in enumerate(('top:1','bottom:1','carry:1','slot:0:3','control:undo')):point(learner,helper,target,touch=i%2==0)
@@ -182,9 +186,11 @@ try:
         for key in ('7','0','Enter'):
             learner.locator(f'[data-calc-key="{key}"]').click();synced(learner,helper)
         helper.screenshot(path=str(out/'helper-golden-wrong.png'))
-        for width,height in [(1024,768),(1280,800),(2000,1200)]:
-            helper.set_viewport_size({'width':width,'height':height});helper.wait_for_timeout(180)
+        for width,height in [(1024,768),(1280,800),(2000,1200),(844,390),(932,430)]:
+            helper.set_viewport_size({'width':width,'height':height});helper.wait_for_timeout(650)
+            assert helper.locator('#coBakerObservation').evaluate("e=>{const frame=e.querySelector('iframe').getBoundingClientRect(),header=e.querySelector('header').getBoundingClientRect();return frame.top>=0&&frame.bottom<=header.top+1&&header.bottom<=innerHeight}"),width
             bounds=observer.evaluate("""()=>{const r=document.querySelector('#observedWorkbench').getBoundingClientRect();return {right:r.right,bottom:r.bottom,width:innerWidth,height:innerHeight,scroll:document.documentElement.scrollHeight}}""")
+            assert observer.evaluate('scrollY===0'),bounds
             assert bounds['right']<=bounds['width']+2 and bounds['bottom']<=bounds['height']+2,bounds
             assert bounds['scroll']<=bounds['height']+2,bounds
             assert observer.locator('[data-calc-key]:enabled').count()==0
@@ -267,7 +273,13 @@ try:
         # Normal page reload refreshes the order-generation clock only.
         before_save=json.loads(helper_save);after_save=json.loads(helper.evaluate('localStorage.panaderyaQuestV2'))
         before_save.pop('orderClock',None);after_save.pop('orderClock',None);before_save.pop('coBakerRewards',None);after_save.pop('coBakerRewards',None)
-        after_save['coins']-=helper.evaluate('Object.values(g.coBakerRewards?.receivedRewards||{}).reduce((n,e)=>n+e.coins,0)')
+        earned=helper.evaluate('Object.values(g.coBakerRewards?.receivedRewards||{}).reduce((n,e)=>n+e.coins,0)')
+        after_save['coins']-=earned
+        # Existing helper earnings also advance discovery; switching explicitly pauses the personal order.
+        assert after_save['coinsEarnedSinceLastDiscovery']==before_save['coinsEarnedSinceLastDiscovery']+earned
+        after_save['coinsEarnedSinceLastDiscovery']-=earned
+        for run in [before_save.get('run'),*before_save.get('orderRuns',{}).values()]:
+            if run:run['paused']=True
         assert after_save==before_save
         assert other.evaluate('localStorage.panaderyaQuestV2')==other_save
         # Refresh restores personal session via its ordinary save; observation never writes to it.
