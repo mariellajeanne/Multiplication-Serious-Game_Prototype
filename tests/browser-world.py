@@ -40,7 +40,7 @@ def check_geometry(page,compact=False):
  # Derive visible bounds from actual PNG alpha, including transparent source margins.
  visible=[]
  for name,selector in [('packages','.faithful-packages'),('menu','.faithful-menu'),('orders','.faithful-orders')]:
-  im=Image.open(ROOT/f'assets/bakery-approved/{name}-frame.png')
+  im=Image.open(ROOT/f'assets/bakery-runtime/{name}-frame.webp')
   assert im.mode=='RGBA' and im.getchannel('A').getextrema()==(0,255)
   bounds=im.getchannel('A').point(lambda a:255 if a>127 else 0).getbbox()
   frame=page.locator(selector+' > .scene-frame')
@@ -55,7 +55,11 @@ def check_geometry(page,compact=False):
  current=page.evaluate('BAKERY_PAGES.indexOf(bakeryPage)')
  assert abs((visible[current]['left']+visible[current]['right'])/2-page.viewport_size['width']/2)<2
  if not compact:
-  assert visible[current]['bottom']<page.locator('.scene-nav').bounding_box()['y']-5,'navigation overlaps artwork'
+  # Closer framing allows decorative bases behind the fixed navigation.
+  nav_top=page.locator('.scene-nav').bounding_box()['y']
+  content={'menu':'.view-all-foods','packages':'.purchase-options','orders':'.scene-order-scroll'}
+  safe=page.locator(content[page.evaluate('bakeryPage')]).bounding_box()
+  assert safe['y']+safe['height']<nav_top-8,'navigation obscures content'
  assert page.locator('.scene-ticket-progress').evaluate_all('es=>es.every(e=>{const r=e.getBoundingClientRect();return [...e.querySelectorAll("span,b")].every(c=>{const a=c.getBoundingClientRect();return a.left>=r.left&&a.right<=r.right&&a.top>=r.top&&a.bottom<=r.bottom})})'),'progress label outside bar'
  for selector in ['.scene-utility']:
   assert page.locator(selector).evaluate_all('es=>es.every(e=>{const r=e.getBoundingClientRect(),h=parseFloat(getComputedStyle(e,"::after").height)||0;return Math.max(r.height,h*r.width/e.offsetWidth)>=43.8})'),'small utility touch target'
@@ -142,7 +146,8 @@ def check(pw,engine):
   assert page.locator('.hub-food').count()==17
   assert page.evaluate('''()=>{const r=document.querySelector('#cabinet-scroll').getBoundingClientRect();return [...document.querySelectorAll('.hub-food')].every(e=>{const a=e.getBoundingClientRect(),b=e.querySelector('.food-multiplier').getBoundingClientRect();return a.left>=r.left-1&&a.right<=r.right+1&&b.left>=a.left-1&&b.right<=a.right+1})}''')
   # Collection and all four fixed controls invoke production dialogs.
-  page.locator('[data-world-nav="menu"]').tap();assert page.locator('.collection-card').count()==17
+  page.locator('[data-world-nav="menu"]').tap();assert not page.locator('#hubCollection').is_visible()
+  page.locator('.view-all-foods').tap();assert page.locator('.collection-card').count()==17
   page.locator('.hub-collection-back').tap()
   for selector,title in [('#wallet-button','Bakery Coins'),('#boost-status',"Baker's Boost"),('#help-button','How to Play'),('#settings-button','Settings')]:
    page.locator(selector).tap();assert page.locator('#modalTitle').inner_text()==title
@@ -153,8 +158,10 @@ def check(pw,engine):
   page.locator('#refreshOrders').tap();assert page.locator('#modals .modal').is_visible();page.locator('#modals .close').tap()
   navigate(page,'packages')
   check_scroll(page,'#package-carousel','#package-thumb','#package-track',engine)
-  page.locator('[data-world-tier="0"]').focus();page.keyboard.press('End');assert page.locator('[data-world-tier="7"]').get_attribute('aria-pressed')=='true'
-  page.keyboard.press('Home');assert page.locator('[data-world-tier="0"]').get_attribute('aria-pressed')=='true'
+  assert page.locator('[data-world-tier]').evaluate_all('es=>es.map(e=>+e.dataset.worldTier)')==list(range(7,-1,-1))
+  page.locator('[data-world-tier="0"]').focus();page.keyboard.press('Home');assert page.locator('[data-world-tier="7"]').get_attribute('aria-pressed')=='true'
+  page.keyboard.press('ArrowDown');assert page.locator('[data-world-tier="6"]').get_attribute('aria-pressed')=='true'
+  page.keyboard.press('End');assert page.locator('[data-world-tier="0"]').get_attribute('aria-pressed')=='true'
   for rank in [0,4,7]:
    page.evaluate('selectBakeryTier',rank)
    assert page.locator('.package-title h2').inner_text()==page.evaluate('r=>PACKAGE_TYPES[r]+" Package"',rank)

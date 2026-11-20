@@ -1,0 +1,12 @@
+{
+  "tool": "built-in image_gen",
+  "intent": "Faithful linework restoration of the approved background; no composition redesign",
+  "source": "assets/bakery-approved/background-floor-extended.png",
+  "restoredSource": "assets/bakery-approved/background-floor-restored.png",
+  "runtime": "assets/bakery-runtime/background-floor-restored.webp",
+  "sourceSize": [2172, 724],
+  "outputSize": [2172, 724],
+  "encoding": "lossless WebP",
+  "limitation": "The tool returned the original dimensions despite the requested upscale. This asset restores linework; it does not add source resolution.",
+  "prompt": "Edit target: supplied bakery panorama. Faithful high-resolution restoration/upscale ONLY, no redesign. Output a very high resolution 3:1 panorama, ideally 6528 x 2176 pixels, retaining the EXACT composition, shapes, architecture, floor perspective, location and size of every arch, column, window, curtain, shelf, jar, plant, pastry case, cafe table/chair and all the empty center floor/wall space. Maintain warm light pastel yellow and cream colors, orange wood outlines and simple cel-shaded hand-drawn game environment. Clean up blurry outlines, interpolation artifacts and malformed tiny detail. Smooth precise traceable curves, clean color fills, preserve proportions and peaceful subtle backdrop character. Do not add objects, stations, lettering or interface. Do not change lighting or introduce textures or photorealism. This is the same approved game background restored for sharp display behind higher-detail foreground stations."
+}

@@ -13,7 +13,7 @@ const server=createServer(async(req,res)=>{
   try{
     const file=resolve(root,'.'+decodeURIComponent(new URL(req.url,'http://localhost').pathname));
     if(!file.startsWith(root+sep))throw Error('outside root');
-    res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf':'font/ttf'})[extname(file)]||'text/plain');
+    res.setHeader('Content-Type',({'.html':'text/html','.js':'text/javascript','.css':'text/css','.ttf':'font/ttf','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp'})[extname(file)]||'text/plain');
     res.end(await readFile(file));
   }catch{res.writeHead(404);res.end();}
 });
@@ -65,6 +65,7 @@ try{
   await cdp('Emulation.setDeviceMetricsOverride',{width:1280,height:800,deviceScaleFactor:1,mobile:false});
   await cdp('Page.navigate',{url:`http://127.0.0.1:${server.address().port}/index.html${hubMode?'':'?view=legacy'}`});
   await waitFor(`typeof startTicket==='function'`);
+  await waitFor(`document.getElementById('bakeryLoading')?.hidden===true`);
   await evaluate('document.fonts.ready');
   await evaluate(`g.helpSeen=true;closeModal();g.board=[{id:9001,a:79,b:18,rarity:1,base:304}];render();document.querySelector('.ticket').click();`);
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9001`);

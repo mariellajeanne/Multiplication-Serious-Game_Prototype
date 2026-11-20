@@ -4,6 +4,7 @@ function isBakeryHub(){return typeof document!=='undefined'&&document.body?.data
 function hubEscape(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function hubAsset(name){
  if(name==='bakers-sparkle.png')return 'assets/bakery-ui/boost-prism.svg';
+ if(typeof BAKERY_ASSETS!=='undefined'&&BAKERY_ASSETS[name.replace(/\.png$/,'')])return BAKERY_ASSETS[name.replace(/\.png$/,'')];
  const art={'bakery-room.png':'room','cash-register-facing.png':'register','cabinet-wood.png':'cabinet','title-sign-refined.png':'title','nav-packages.png':'nav-packages','nav-play.png':'nav-play','nav-collection.png':'nav-collection','packages-entry-button.png':'packages-entry','menu-heading.png':'menu-heading','hud-coin-shell.png':'wallet','bakers-sparkle.png':'boost','tray-icon.png':'cloche','scroll-thumb-clean.png':'thumb'};
  const sprite=/^(food|coin)-\d\d\.png$/.test(name)?name.replace('.png',''):art[name];
  return 'assets/bakery-ui/'+(sprite?'illustrated/'+sprite+'.png':name);
@@ -80,7 +81,7 @@ function hubToggleEquip(uid){
  const ok=selectionEquip(!g.activeMenu.includes(uid));selectedFoods=selection;paintFoodPanel();return ok;
 }
 function openHubCollection(){hubCollectionFocus=captureFocus(document.activeElement);hubCollection=true;render();const grid=$('hubCollection').querySelector('.menu-grid');if(grid)grid.scrollTop=0;document.querySelector('.hub-collection-back')?.focus({preventScroll:true})}
-function closeHubCollection(){selectedFoods.clear();multiSelect=false;hubCollection=false;render();restoreFocus(hubCollectionFocus);if(!document.activeElement?.getClientRects().length||document.activeElement===document.body)document.querySelector('.nav-collection')?.focus({preventScroll:true})}
+function closeHubCollection(){selectedFoods.clear();multiSelect=false;hubCollection=false;render();restoreFocus(hubCollectionFocus);if(!document.activeElement?.getClientRects().length||document.activeElement===document.body)document.querySelector('.view-all-foods,.nav-collection')?.focus({preventScroll:true})}
 function openHubFood(uid){hubCollectionFocus=captureFocus(document.activeElement);hubCollection=true;selectedFoods=new Set([uid]);multiSelect=false;render();document.querySelector('.food-panel-close')?.focus({preventScroll:true})}
 function playHubOrder(){const ticket=g.run?.ticket||g.board.find(t=>g.orderRuns[t.id])||g.board[0];if(ticket){hubCollection=false;startTicket(ticket.id)}}
 function openHubHelp(){showModal('How to Play',`<div class="hub-help"><ol class="help-steps"><li>${bakeryIcon('ticket')}<span><b>Choose an order</b><small>Tap a ticket to start or resume.</small></span></li><li>${bakeryIcon('guide')}<span><b>Multiply, one pair at a time</b><small>Connect digits. Place products and carries.</small></span></li><li>${hubCoinArt(0)}<span><b>Collect your coins</b><small>Finish the worksheet, then collect.</small></span></li><li>${bakeryIcon('inventory')}<span><b>Open packages. Equip foods.</b><small>Grow your Baker's Boost.</small></span></li></ol><details class="worksheet-tips"><summary>Worksheet tips</summary><ul><li>Tap or drag between the digits.</li><li>Tap the × bubble to reveal product tiles.</li><li>Swipe down to add the partial rows.</li><li>Save & Exit keeps your work.</li></ul></details><div class="btnrow"><button class="primary" onclick="closeModal()">Got it!</button><button class="secondary" onclick="openSettings()">Guide & Sound</button></div></div>`)}
@@ -173,7 +174,7 @@ coinRewardMarkup=function(r){
  return `<section class="coin-order-reward"><div class="hub-wallet-detail">${hubCoinArt(ticketCoinTier(r.ticket))}<div><span>Coins collected</span><strong class="coin-reward-total">+${amountLabel(r.pool)}</strong></div></div><div class="reward-formula"><span>Base coins<b>${amountLabel(base)}</b></span><b>×</b><span>Baker's Boost<b>×${multiplierLabel(boost)}</b></span><b>=</b><span>Total coins<b>${amountLabel(r.pool)}</b></span></div><div class="btnrow"><button class="primary" onclick="closeModal()">Back to Bakery</button></div></section>`;
 };
 function dispatchHubAction(action){
- const actions={packages:()=>openPackages(),home:()=>navigateBakery('menu'),center:()=>bakeryPage==='menu'?openHubCollection():navigateBakery('menu'),orders:()=>navigateBakery('orders'),slot:buyMenuSlot,collection:openHubCollection,play:playHubOrder,boost:showBoostInfo,wallet:showCoinsInfo,help:openHubHelp,settings:openSettings,odds:openProbabilities,refresh:()=>refreshRemaining()>0?requestRefreshSkip():refreshOrders()};
+ const actions={packages:()=>openPackages(),home:()=>navigateBakery('menu'),center:()=>navigateBakery('menu'),orders:()=>navigateBakery('orders'),slot:buyMenuSlot,collection:openHubCollection,play:playHubOrder,boost:showBoostInfo,wallet:showCoinsInfo,help:openHubHelp,settings:openSettings,odds:openProbabilities,refresh:()=>refreshRemaining()>0?requestRefreshSkip():refreshOrders()};
  if(actions[action])return actions[action]();
  const match=/^(food|order)-(up|down)$/.exec(action);
  if(match)$(match[1]==='food'?'cabinet-scroll':'order-scroller')?.scrollBy({top:(match[2]==='up'?-1:1)*180,behavior:'smooth'});

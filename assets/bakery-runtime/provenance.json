@@ -1,0 +1,929 @@
+{
+  "packagePatch": [
+    620,
+    820,
+    1050,
+    941
+  ],
+  "editTool": "built-in image_gen",
+  "editPrompt": "Remove only the lower bow and tails; restore the wooden base. Preserve the original canvas, transparency, top ribbon, text, supports and all other pixels.",
+  "backgroundPrompt": "Extend the supplied bakery horizontally into a seamless 3:1 panorama, continuing pastel arches, swags, windows and floor perspective at the same proportions. No UI or foreground stations.",
+  "originalPackageSHA256": "94892ebd562cd059ae1a6dc0b39e43f1f8d4ad83148d2b773eceb5bca01ee3c0",
+  "assets": [
+    {
+      "name": "background-floor",
+      "source": "assets\\bakery-approved\\background-floor-extended.png",
+      "sourceBytes": 1761608,
+      "runtimeBytes": 289828,
+      "sourceSize": [
+        2172,
+        724
+      ],
+      "runtimeSize": [
+        2172,
+        724
+      ],
+      "encoding": "WebP quality 96"
+    },
+    {
+      "name": "menu-frame",
+      "source": "assets\\bakery-approved\\menu-frame.png",
+      "sourceBytes": 1692412,
+      "runtimeBytes": 968010,
+      "sourceSize": [
+        1620,
+        971
+      ],
+      "runtimeSize": [
+        1620,
+        971
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "orders-frame",
+      "source": "assets\\bakery-approved\\orders-frame.png",
+      "sourceBytes": 1313949,
+      "runtimeBytes": 739200,
+      "sourceSize": [
+        1367,
+        1150
+      ],
+      "runtimeSize": [
+        1367,
+        1150
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "packages-frame",
+      "source": "assets\\bakery-approved\\packages-frame-no-ribbon.png",
+      "sourceBytes": 653552,
+      "runtimeBytes": 457754,
+      "sourceSize": [
+        1670,
+        941
+      ],
+      "runtimeSize": [
+        1670,
+        941
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "register",
+      "source": "assets\\bakery-faithful\\register.png",
+      "sourceBytes": 971562,
+      "runtimeBytes": 221928,
+      "sourceSize": [
+        1168,
+        1073
+      ],
+      "runtimeSize": [
+        600,
+        551
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "counter-gifts",
+      "source": "assets\\bakery-faithful\\counter-gifts.png",
+      "sourceBytes": 1109655,
+      "runtimeBytes": 274814,
+      "sourceSize": [
+        1067,
+        1094
+      ],
+      "runtimeSize": [
+        585,
+        600
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "gift-icon",
+      "source": "assets\\bakery-faithful\\gift-icon.png",
+      "sourceBytes": 391279,
+      "runtimeBytes": 29508,
+      "sourceSize": [
+        611,
+        625
+      ],
+      "runtimeSize": [
+        156,
+        160
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "hat-icon",
+      "source": "assets\\bakery-faithful\\hat-icon.png",
+      "sourceBytes": 308300,
+      "runtimeBytes": 20098,
+      "sourceSize": [
+        665,
+        561
+      ],
+      "runtimeSize": [
+        160,
+        135
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "orders-icon",
+      "source": "assets\\bakery-faithful\\orders-icon.png",
+      "sourceBytes": 368670,
+      "runtimeBytes": 26726,
+      "sourceSize": [
+        577,
+        640
+      ],
+      "runtimeSize": [
+        144,
+        160
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "book-icon",
+      "source": "assets\\bakery-faithful\\book-icon.png",
+      "sourceBytes": 8963,
+      "runtimeBytes": 6660,
+      "sourceSize": [
+        96,
+        64
+      ],
+      "runtimeSize": [
+        96,
+        64
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "price-coin",
+      "source": "assets\\bakery-faithful\\price-coin.png",
+      "sourceBytes": 6699,
+      "runtimeBytes": 5196,
+      "sourceSize": [
+        59,
+        61
+      ],
+      "runtimeSize": [
+        59,
+        61
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "tray",
+      "source": "assets\\bakery-faithful\\tray.png",
+      "sourceBytes": 6705,
+      "runtimeBytes": 4688,
+      "sourceSize": [
+        92,
+        49
+      ],
+      "runtimeSize": [
+        92,
+        49
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "refresh-icon",
+      "source": "assets\\bakery-faithful\\refresh-icon.png",
+      "sourceBytes": 104482,
+      "runtimeBytes": 26852,
+      "sourceSize": [
+        292,
+        313
+      ],
+      "runtimeSize": [
+        149,
+        160
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "utility-gift",
+      "source": "assets\\bakery-faithful\\utility-gift.png",
+      "sourceBytes": 146153,
+      "runtimeBytes": 31038,
+      "sourceSize": [
+        344,
+        343
+      ],
+      "runtimeSize": [
+        160,
+        160
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-01",
+      "source": "assets\\bakery-faithful\\package-01.png",
+      "sourceBytes": 131974,
+      "runtimeBytes": 90818,
+      "sourceSize": [
+        311,
+        329
+      ],
+      "runtimeSize": [
+        311,
+        329
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-02",
+      "source": "assets\\bakery-faithful\\package-02.png",
+      "sourceBytes": 185805,
+      "runtimeBytes": 132850,
+      "sourceSize": [
+        333,
+        369
+      ],
+      "runtimeSize": [
+        333,
+        369
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-03",
+      "source": "assets\\bakery-faithful\\package-03.png",
+      "sourceBytes": 194651,
+      "runtimeBytes": 132154,
+      "sourceSize": [
+        329,
+        412
+      ],
+      "runtimeSize": [
+        329,
+        412
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-04",
+      "source": "assets\\bakery-faithful\\package-04.png",
+      "sourceBytes": 186749,
+      "runtimeBytes": 134518,
+      "sourceSize": [
+        385,
+        362
+      ],
+      "runtimeSize": [
+        385,
+        362
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-05",
+      "source": "assets\\bakery-faithful\\package-05.png",
+      "sourceBytes": 190943,
+      "runtimeBytes": 134312,
+      "sourceSize": [
+        325,
+        354
+      ],
+      "runtimeSize": [
+        325,
+        354
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-06",
+      "source": "assets\\bakery-faithful\\package-06.png",
+      "sourceBytes": 221878,
+      "runtimeBytes": 158320,
+      "sourceSize": [
+        346,
+        380
+      ],
+      "runtimeSize": [
+        346,
+        380
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-07",
+      "source": "assets\\bakery-faithful\\package-07.png",
+      "sourceBytes": 253408,
+      "runtimeBytes": 185070,
+      "sourceSize": [
+        388,
+        385
+      ],
+      "runtimeSize": [
+        388,
+        385
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "package-08",
+      "source": "assets\\bakery-faithful\\package-08.png",
+      "sourceBytes": 273421,
+      "runtimeBytes": 196650,
+      "sourceSize": [
+        386,
+        403
+      ],
+      "runtimeSize": [
+        386,
+        403
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "ticket-gold",
+      "source": "assets\\bakery-faithful\\ticket-gold.png",
+      "sourceBytes": 768245,
+      "runtimeBytes": 335360,
+      "sourceSize": [
+        1800,
+        426
+      ],
+      "runtimeSize": [
+        1400,
+        331
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "ticket-pink",
+      "source": "assets\\bakery-faithful\\ticket-pink.png",
+      "sourceBytes": 773213,
+      "runtimeBytes": 336902,
+      "sourceSize": [
+        1800,
+        433
+      ],
+      "runtimeSize": [
+        1400,
+        337
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "ticket-purple",
+      "source": "assets\\bakery-faithful\\ticket-purple.png",
+      "sourceBytes": 777546,
+      "runtimeBytes": 344638,
+      "sourceSize": [
+        1800,
+        435
+      ],
+      "runtimeSize": [
+        1400,
+        338
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "ticket-rainbow",
+      "source": "assets\\bakery-faithful\\ticket-rainbow.png",
+      "sourceBytes": 811494,
+      "runtimeBytes": 356990,
+      "sourceSize": [
+        1800,
+        434
+      ],
+      "runtimeSize": [
+        1400,
+        338
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "reward-bucket",
+      "source": "assets\\bakery-faithful\\reward-bucket.png",
+      "sourceBytes": 13714,
+      "runtimeBytes": 10630,
+      "sourceSize": [
+        94,
+        75
+      ],
+      "runtimeSize": [
+        94,
+        75
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "reward-cart",
+      "source": "assets\\bakery-faithful\\reward-cart.png",
+      "sourceBytes": 14397,
+      "runtimeBytes": 11384,
+      "sourceSize": [
+        97,
+        74
+      ],
+      "runtimeSize": [
+        97,
+        74
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "reward-chest",
+      "source": "assets\\bakery-faithful\\reward-chest.png",
+      "sourceBytes": 15802,
+      "runtimeBytes": 12602,
+      "sourceSize": [
+        104,
+        70
+      ],
+      "runtimeSize": [
+        104,
+        70
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "reward-crown",
+      "source": "assets\\bakery-faithful\\reward-crown.png",
+      "sourceBytes": 14986,
+      "runtimeBytes": 12250,
+      "sourceSize": [
+        107,
+        68
+      ],
+      "runtimeSize": [
+        107,
+        68
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-ube-ensaymada",
+      "source": "assets\\bakery-faithful\\food-ube-ensaymada.png",
+      "sourceBytes": 32076,
+      "runtimeBytes": 22882,
+      "sourceSize": [
+        147,
+        122
+      ],
+      "runtimeSize": [
+        147,
+        122
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-brazo",
+      "source": "assets\\bakery-faithful\\food-brazo.png",
+      "sourceBytes": 27624,
+      "runtimeBytes": 18668,
+      "sourceSize": [
+        147,
+        121
+      ],
+      "runtimeSize": [
+        147,
+        121
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-buko-pie",
+      "source": "assets\\bakery-faithful\\food-buko-pie.png",
+      "sourceBytes": 32284,
+      "runtimeBytes": 21328,
+      "sourceSize": [
+        155,
+        120
+      ],
+      "runtimeSize": [
+        155,
+        120
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-pianono",
+      "source": "assets\\bakery-faithful\\food-pianono.png",
+      "sourceBytes": 27007,
+      "runtimeBytes": 18012,
+      "sourceSize": [
+        154,
+        120
+      ],
+      "runtimeSize": [
+        154,
+        120
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-ensaymada",
+      "source": "assets\\bakery-faithful\\food-ensaymada.png",
+      "sourceBytes": 29028,
+      "runtimeBytes": 19686,
+      "sourceSize": [
+        150,
+        119
+      ],
+      "runtimeSize": [
+        150,
+        119
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-ube-pandesal",
+      "source": "assets\\bakery-faithful\\food-ube-pandesal.png",
+      "sourceBytes": 27555,
+      "runtimeBytes": 19046,
+      "sourceSize": [
+        173,
+        116
+      ],
+      "runtimeSize": [
+        173,
+        116
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-01",
+      "source": "assets\\bakery-ui\\illustrated\\food-01.png",
+      "sourceBytes": 54549,
+      "runtimeBytes": 39198,
+      "sourceSize": [
+        280,
+        280
+      ],
+      "runtimeSize": [
+        280,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-02",
+      "source": "assets\\bakery-ui\\illustrated\\food-02.png",
+      "sourceBytes": 55167,
+      "runtimeBytes": 39734,
+      "sourceSize": [
+        281,
+        280
+      ],
+      "runtimeSize": [
+        281,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-03",
+      "source": "assets\\bakery-ui\\illustrated\\food-03.png",
+      "sourceBytes": 58719,
+      "runtimeBytes": 43142,
+      "sourceSize": [
+        281,
+        280
+      ],
+      "runtimeSize": [
+        281,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-04",
+      "source": "assets\\bakery-ui\\illustrated\\food-04.png",
+      "sourceBytes": 51011,
+      "runtimeBytes": 37450,
+      "sourceSize": [
+        280,
+        280
+      ],
+      "runtimeSize": [
+        280,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-05",
+      "source": "assets\\bakery-ui\\illustrated\\food-05.png",
+      "sourceBytes": 67362,
+      "runtimeBytes": 47620,
+      "sourceSize": [
+        280,
+        281
+      ],
+      "runtimeSize": [
+        280,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-06",
+      "source": "assets\\bakery-ui\\illustrated\\food-06.png",
+      "sourceBytes": 70758,
+      "runtimeBytes": 50840,
+      "sourceSize": [
+        281,
+        281
+      ],
+      "runtimeSize": [
+        281,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-07",
+      "source": "assets\\bakery-ui\\illustrated\\food-07.png",
+      "sourceBytes": 60284,
+      "runtimeBytes": 45480,
+      "sourceSize": [
+        281,
+        281
+      ],
+      "runtimeSize": [
+        281,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-08",
+      "source": "assets\\bakery-ui\\illustrated\\food-08.png",
+      "sourceBytes": 81701,
+      "runtimeBytes": 58714,
+      "sourceSize": [
+        280,
+        281
+      ],
+      "runtimeSize": [
+        280,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-09",
+      "source": "assets\\bakery-ui\\illustrated\\food-09.png",
+      "sourceBytes": 59030,
+      "runtimeBytes": 41704,
+      "sourceSize": [
+        280,
+        280
+      ],
+      "runtimeSize": [
+        280,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-10",
+      "source": "assets\\bakery-ui\\illustrated\\food-10.png",
+      "sourceBytes": 67889,
+      "runtimeBytes": 49386,
+      "sourceSize": [
+        281,
+        280
+      ],
+      "runtimeSize": [
+        281,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-11",
+      "source": "assets\\bakery-ui\\illustrated\\food-11.png",
+      "sourceBytes": 77934,
+      "runtimeBytes": 57024,
+      "sourceSize": [
+        281,
+        280
+      ],
+      "runtimeSize": [
+        281,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-12",
+      "source": "assets\\bakery-ui\\illustrated\\food-12.png",
+      "sourceBytes": 57301,
+      "runtimeBytes": 40724,
+      "sourceSize": [
+        280,
+        280
+      ],
+      "runtimeSize": [
+        280,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-13",
+      "source": "assets\\bakery-ui\\illustrated\\food-13.png",
+      "sourceBytes": 97061,
+      "runtimeBytes": 69714,
+      "sourceSize": [
+        280,
+        281
+      ],
+      "runtimeSize": [
+        280,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-14",
+      "source": "assets\\bakery-ui\\illustrated\\food-14.png",
+      "sourceBytes": 81926,
+      "runtimeBytes": 58498,
+      "sourceSize": [
+        281,
+        281
+      ],
+      "runtimeSize": [
+        281,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-15",
+      "source": "assets\\bakery-ui\\illustrated\\food-15.png",
+      "sourceBytes": 74277,
+      "runtimeBytes": 53924,
+      "sourceSize": [
+        281,
+        281
+      ],
+      "runtimeSize": [
+        281,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-16",
+      "source": "assets\\bakery-ui\\illustrated\\food-16.png",
+      "sourceBytes": 90613,
+      "runtimeBytes": 64808,
+      "sourceSize": [
+        280,
+        281
+      ],
+      "runtimeSize": [
+        280,
+        281
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "food-17",
+      "source": "assets\\bakery-ui\\illustrated\\food-17.png",
+      "sourceBytes": 86948,
+      "runtimeBytes": 62972,
+      "sourceSize": [
+        280,
+        280
+      ],
+      "runtimeSize": [
+        280,
+        280
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-01",
+      "source": "assets\\bakery-ui\\illustrated\\coin-01.png",
+      "sourceBytes": 83690,
+      "runtimeBytes": 33950,
+      "sourceSize": [
+        444,
+        444
+      ],
+      "runtimeSize": [
+        300,
+        300
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-02",
+      "source": "assets\\bakery-ui\\illustrated\\coin-02.png",
+      "sourceBytes": 126244,
+      "runtimeBytes": 48358,
+      "sourceSize": [
+        443,
+        444
+      ],
+      "runtimeSize": [
+        299,
+        300
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-03",
+      "source": "assets\\bakery-ui\\illustrated\\coin-03.png",
+      "sourceBytes": 150049,
+      "runtimeBytes": 56584,
+      "sourceSize": [
+        443,
+        444
+      ],
+      "runtimeSize": [
+        299,
+        300
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-04",
+      "source": "assets\\bakery-ui\\illustrated\\coin-04.png",
+      "sourceBytes": 178886,
+      "runtimeBytes": 67528,
+      "sourceSize": [
+        444,
+        444
+      ],
+      "runtimeSize": [
+        300,
+        300
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-05",
+      "source": "assets\\bakery-ui\\illustrated\\coin-05.png",
+      "sourceBytes": 192083,
+      "runtimeBytes": 74484,
+      "sourceSize": [
+        444,
+        443
+      ],
+      "runtimeSize": [
+        300,
+        299
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-06",
+      "source": "assets\\bakery-ui\\illustrated\\coin-06.png",
+      "sourceBytes": 197224,
+      "runtimeBytes": 79042,
+      "sourceSize": [
+        443,
+        443
+      ],
+      "runtimeSize": [
+        300,
+        300
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-07",
+      "source": "assets\\bakery-ui\\illustrated\\coin-07.png",
+      "sourceBytes": 226938,
+      "runtimeBytes": 88712,
+      "sourceSize": [
+        443,
+        443
+      ],
+      "runtimeSize": [
+        300,
+        300
+      ],
+      "encoding": "lossless WebP"
+    },
+    {
+      "name": "coin-08",
+      "source": "assets\\bakery-ui\\illustrated\\coin-08.png",
+      "sourceBytes": 253741,
+      "runtimeBytes": 102634,
+      "sourceSize": [
+        444,
+        443
+      ],
+      "runtimeSize": [
+        300,
+        299
+      ],
+      "encoding": "lossless WebP"
+    }
+  ]
+}

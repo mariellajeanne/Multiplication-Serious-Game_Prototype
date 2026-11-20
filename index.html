@@ -3,6 +3,7 @@
 
 <link rel="preload" href="assets/fonts/Nunito-Bold.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="icon" href="assets/bakery-ui/boost-prism.svg" type="image/svg+xml">
+<link rel="stylesheet" href="styles/loading.css">
 <link rel="stylesheet" href="styles/base.css">
 <link rel="stylesheet" href="styles/menu.css">
 <link rel="stylesheet" href="styles/tickets.css">
@@ -26,6 +27,10 @@
 <link rel="stylesheet" href="styles/worksheet-cues.css">
 <link rel="stylesheet" href="styles/bakery-scenes.css">
 </head><body data-view="loading">
+<div id="bakeryLoading" class="bakery-loading" role="region" aria-label="Loading the bakery" aria-busy="true">
+ <div class="loading-center"><h1 id="loadingLabel">Loading…</h1><progress id="loadingProgress" value="0" max="1" aria-label="Bakery resource readiness"></progress><p id="loadingStatus" class="loading-status" role="status">Preparing your bakery</p></div>
+ <button id="loadingSkip" class="loading-skip" type="button" disabled>Skip</button>
+</div>
 <main id="bakeryEnvironment" class="bakery-environment" aria-label="My Panaderya bakery interior" hidden></main>
 <template id="environmentSceneTemplate">
  <div class="environment-architecture" aria-hidden="true"><picture><source media="(max-aspect-ratio: 3/2)" srcset="assets/environment/bakery-wall-tablet.webp"><img src="assets/environment/bakery-wall.webp" alt="" fetchpriority="high" decoding="async" draggable="false"></picture></div>
@@ -35,6 +40,15 @@
 <div id="app" hidden inert></div><div id="modals" hidden inert></div><div id="notificationDock" class="notification-dock" hidden inert><div id="purchaseUndo" class="purchase-undo" role="status" hidden></div><div id="toasts" class="toaststack" aria-live="polite"></div></div>
 <!-- Preserve classic-script dependency order in both playable views.
      ?view=environment keeps these inert and never touches game state. -->
+<script>
+// A missing bootstrap file must also offer recovery, before its loader can run.
+window.addEventListener('error',event=>{
+ if(!['src/bakery-assets.js','src/environment-entry.js'].includes(event.target?.getAttribute?.('src')))return;
+ document.getElementById('loadingLabel').textContent='Let’s try again';
+ document.getElementById('loadingStatus').textContent='The bakery could not load. Check your connection, then retry.';
+ const retry=document.getElementById('loadingSkip');retry.textContent='Retry';retry.disabled=false;retry.onclick=()=>location.reload();
+},true);
+</script>
 <script src="src/data/catalog.js" type="application/x-panaderya-game" data-gameplay></script>
 <script src="src/game/economy-balance.js" type="application/x-panaderya-game" data-gameplay></script>
 <script src="src/game/progression.js" type="application/x-panaderya-game" data-gameplay></script>
@@ -74,5 +88,6 @@
 <script src="src/ui/worksheet-cues.js" type="application/x-panaderya-game" data-gameplay></script>
 <script src="src/ui/worksheet-observation.js" type="application/x-panaderya-game" data-gameplay></script>
 <script src="src/ui/helper-rewards.js" type="application/x-panaderya-game" data-gameplay></script>
+<script src="src/bakery-assets.js" defer></script>
 <script src="src/environment-entry.js" defer></script>
 </body></html>

@@ -1,6 +1,8 @@
 # Production architecture
 
-My Panaderya is a static site. Root `index.html` declares the stylesheet and classic-script order; `src/environment-entry.js` loads those scripts sequentially. Default is the illustrated hub. `?view=legacy` uses the preserved interface with the same game/save; `?view=environment` mounts only scenery and never loads game state, migrations or timers.
+My Panaderya is a static site. Root `index.html` declares the stylesheet and classic-script order; `src/environment-entry.js` downloads those scripts together and executes them in declaration order with `async=false`. Default is the illustrated hub. `?view=legacy` uses the preserved interface with the same game/save; `?view=environment` mounts only scenery and never loads game state, migrations or timers.
+
+The startup overlay keeps gameplay inert until required scripts, fonts, decoded artwork and initial rendering finish. The progress bar counts completed resource/readiness tasks, not elapsed time. Skip becomes available only during optional decoration preloading; required failures keep gameplay blocked and offer a full-page Retry. Missing bootstrap files have an HTML-level recovery handler. `window.bakeryLoading` and the `bakery-required-ready` / `bakery-playable` performance marks expose actual readiness for QA.
 
 ## Source and data flow
 
@@ -12,13 +14,17 @@ My Panaderya is a static site. Root `index.html` declares the stylesheet and cla
 | Transactions, Mastery, packages, slots, Undo | `src/game/progression-economy.js`, `economy.js` |
 | Order runs, quotes, budgets and one-time claims | `src/game/rewards.js` |
 | Production illustrated home, collection and shared popups | `src/ui/bakery-hub.js` |
+| Three approved stations, world positions, finite camera and fixed controls | `src/ui/bakery-scenes.js`, `styles/bakery-scenes.css` |
+| Runtime asset paths and startup readiness | `src/bakery-assets.js`, `src/environment-entry.js`, `styles/loading.css` |
 | Native scrolling with illustrated rails | `src/ui/illustrated-controls.js` |
 | Shared/preserved menus, package shop, dialogs and art | Other files in `src/ui/` |
 | Main render, lifecycle and timers | `src/main.js` |
 | Parent worksheet mount and protocol | `src/game/worksheet-bridge.js` |
 | Child math engine | `worksheet/worksheet-engine.html`, `worksheet/src/` |
 
-The hub reads `g.activeMenu` and `g.owned`, derives food contributions/Boost, and renders `g.board` with `g.orderRuns` progress. It invokes existing production controllers rather than maintaining another catalog/economy. Main Packages props are decorative; the station, plaque and navigation button open the original nine-tier shop.
+The hub reads `g.activeMenu` and `g.owned`, derives food contributions/Boost, and renders `g.board` with `g.orderRuns` progress. It invokes existing production controllers rather than maintaining another catalog/economy. The Packages station and its vertical selector use the existing eight-tier batch-purchase controllers and three-rarity distributions.
+
+The current world keeps equal 220-unit visible gaps between Packages, Menu and Orders, with station scale .92 and independent viewport fitting. The floor-rich interior has a proportional 3:1 horizontal extension. Only scenery receives `--bakery-background-blur` (default `0px`). Source-approved frames remain backed up; only the lower-center Packages ribbon patch changes. Runtime WebP exports and exact edit briefs are recorded in `assets/bakery-runtime/provenance.json` and reproduced by `scripts/prepare-refinement-art.py`. Menu/Orders runtime RGBA pixels match their original PNGs exactly. HUD/navigation are siblings of the moving world, and the pink View All Foods action belongs to the Menu frame.
 
 The hub adapter routes the original Packages shop and worksheet shell through preserved renderers/art. Their styles live in `styles/bakery-preserved-interfaces.css`; current home/popups use `bakery-hub.css` and `bakery-interface.css`. All stylesheets referenced by the root and worksheet entries are active, including shared/legacy layers. Current visuals and structural anchors are in [UI geometry](UI_GEOMETRY_REFINEMENT.md).
 

@@ -2,16 +2,22 @@
  * transactions and worksheet/Co-Baker sessions. The camera and all scenery share
  * one world; only the screen and the intended inner lists clip their contents. */
 const BAKERY_PAGES=Object.freeze(['packages','menu','orders']);
+// Dolly the complete world (room, floor, fixtures and their contact shadows).
+// Station coordinates and physical gaps are independent of this camera setting.
+const BAKERY_CAMERA_ZOOM=1.10;
+const BAKERY_PACKAGE_DISPLAY_ORDER=Object.freeze(PACKAGE_SHOP.map(t=>t.rank).reverse());
 // Centers account for each PNG's visible silhouette, rather than equal page boxes.
-// Frame widths: Packages 1592, Menu 1612, Orders 936; both visible gaps are 220.
-const BAKERY_CENTERS=Object.freeze([1000,2822,4316]);
-const BAKERY_COMPACT_CENTERS=Object.freeze([1000,2822,4456]);
+// Native visible widths 1592, 1612, 936, each scaled .92. Both floor gaps stay 220.
+// Keep these world coordinates independent of the viewport/camera scale.
+const BAKERY_CENTERS=Object.freeze([1000,2693.84,4085.92]);
+const BAKERY_COMPACT_CENTERS=Object.freeze([1000,2693.84,4214.72]);
 function bakeryWorldCenters(){return matchMedia('(max-height:600px) and (orientation:landscape)').matches?BAKERY_COMPACT_CENTERS:BAKERY_CENTERS}
 function bakeryCameraX(camera=bakeryCamera){const centers=bakeryWorldCenters(),i=Math.min(1,Math.floor(camera));return centers[i]+(centers[i+1]-centers[i])*(camera-i)-1000}
 let bakeryPage='menu',bakeryCamera=1,bakeryJourney=null,bakeryFrame=0,bakeryTier=0,bakeryCarouselScroll=0;
 function worldImage(name,classes='',alt=''){
  const approved=['menu-frame','packages-frame','orders-frame'].includes(name);
- return `<img src="assets/${approved?'bakery-approved':'bakery-faithful'}/${name}.png" class="${classes}" alt="${hubEscape(alt)}" draggable="false">`;
+ const src=typeof BAKERY_ASSETS!=='undefined'&&BAKERY_ASSETS[name]||`assets/${approved?'bakery-approved':'bakery-faithful'}/${name}.png`;
+ return `<img src="${src}" class="${classes}" alt="${hubEscape(alt)}" decoding="async" draggable="false">`;
 }
 function worldButton(label,action,{icon='',classes='',extra=''}={}){
  return `<button type="button" class="scene-button ${classes}" ${action?`data-hub-action="${action}"`:''} ${extra}>${icon?worldImage(icon,'button-icon'):''}<span>${label}</span></button>`;
@@ -43,13 +49,14 @@ function renderWorldMenu(){
  <div class="scene-menu-opening"><div id="cabinet-scroll" class="scene-food-scroll showcase-scroll" tabindex="0" aria-label="Your real bakery foods, scroll to browse"><div id="cabinet-grid" class="scene-food-grid">${renderSceneFoods()}</div></div>${sceneScrollRail('food')}</div>
  <button type="button" class="counter-packages world-counter-packages hub-package" data-hub-action="packages" aria-label="Visit Packages">${worldImage('counter-gifts')}</button>
  ${worldImage('register','counter-register world-register')}
+ ${worldButton('View All Foods','collection',{icon:'book-icon',classes:'view-all-foods'})}
  </section>`;
 }
 function renderWorldPackages(){
  const rank=bakeryTier,next=nextPackageToUnlock(),odds=packageProbabilities(rank),unlocked=packageUnlocked(rank);
  return `<section id="package-station" class="faithful-packages" aria-label="Packages counter"><div class="package-paper"></div>${worldImage('packages-frame','scene-frame')}
  <div class="package-showcase">${worldPackageImage(rank,'featured-package')}<strong>${rank+1}★ ${PACKAGE_TYPES[rank]}</strong></div>
- <div id="package-carousel" class="package-carousel world-package-selector" data-scroll-axis="vertical" tabindex="0" role="group" aria-label="Package tiers, scroll vertically or use up and down arrow keys"><div class="package-tier-list">${PACKAGE_SHOP.map(type=>`<button type="button" class="package-tier ${packageUnlocked(type.rank)?'':'is-locked'}" data-world-tier="${type.rank}" aria-pressed="${type.rank===rank}" aria-label="${type.name} Package${packageUnlocked(type.rank)?'':`, unlock at ${type.orders} orders`}">${worldPackageImage(type.rank)}<span><b>${type.rank+1}★</b> ${type.name}<small>${packageUnlocked(type.rank)?'Available':`${type.orders} orders`}</small></span></button>`).join('')}</div></div>${sceneScrollRail('package')}
+ <div id="package-carousel" class="package-carousel world-package-selector" data-scroll-axis="vertical" tabindex="0" role="group" aria-label="Package tiers, highest to lowest; scroll vertically or use up and down arrow keys"><div class="package-tier-list">${BAKERY_PACKAGE_DISPLAY_ORDER.map(rank=>PACKAGE_SHOP[rank]).map(type=>`<button type="button" class="package-tier ${packageUnlocked(type.rank)?'':'is-locked'}" data-world-tier="${type.rank}" aria-pressed="${type.rank===rank}" aria-label="${type.name} Package${packageUnlocked(type.rank)?'':`, unlock at ${type.orders} orders`}">${worldPackageImage(type.rank)}<span><b>${type.rank+1}★</b> ${type.name}<small>${packageUnlocked(type.rank)?'Available':`${type.orders} orders`}</small></span></button>`).join('')}</div></div>${sceneScrollRail('package')}
  <div class="package-discovery"><strong>${worldImage('gift-icon')}Next Discovery</strong><span>${next?`${Math.min(g.completed,next.orders)} / ${next.orders} orders`:'All tiers unlocked'}</span><div class="scene-meter discovery-meter" role="progressbar" aria-label="Next package unlock" aria-valuemin="0" aria-valuemax="${next?.orders||1}" aria-valuenow="${next?Math.min(g.completed,next.orders):1}"><i style="width:${next?Math.min(100,g.completed/next.orders*100):100}%"></i></div></div>
  <div class="package-title"><b>${rank+1}★</b><h2>${hubEscape(PACKAGE_TYPES[rank])} Package</h2></div>
  <div class="chance-panel" aria-label="Food rarity chances"><div class="chance-rows">${odds.map((p,i)=>p?`<div class="chance-row world-odds-row chance-${i}" style="--chance-color:${['#dba255','#ee9a50','#0fbdec','#be52ed','#ffc53b','#fa7e91','#9e59ed','#f0b52d'][i]}"><span class="chance-star" aria-hidden="true">✧</span><strong>${RARITIES[i]}</strong><span class="scene-meter"><i style="width:${p*100}%"></i></span><b>${probabilityLabel(p).replace('<','&lt;')}</b></div>`:'').join('')}</div></div>
@@ -61,12 +68,31 @@ function sceneRewardArt(rank){
  const name={3:'bucket',4:'cart',5:'chest',7:'crown'}[rank];
  return name?worldImage('reward-'+name,'scene-reward-image',hubCoinTierName(rank)):hubCoinArt(rank,'scene-reward-image');
 }
+// Alpha bounds measured from the existing artwork. Crop only its transparent
+// margins in the equation viewport; the original food images remain untouched.
+const SCENE_FOOD_BOUNDS=Object.freeze([
+ [280,280,19,72,276,280],[281,280,18,58,266,278],[281,280,13,49,254,280],
+ [280,280,2,68,253,280],[280,281,13,48,280,268],[281,281,14,53,267,263],
+ [281,281,0,57,263,253],[280,281,0,39,268,266],[280,280,13,49,279,253],
+ [281,280,8,27,272,254],[281,280,0,27,269,259],[280,280,0,48,263,261],
+ [280,281,9,24,280,256],[281,281,4,11,276,248],[281,281,0,20,260,248],
+ [280,281,0,12,272,250],[280,280,10,21,280,255]
+]);
+const SCENE_ORIGINAL_FOOD_BOUNDS=Object.freeze({
+ 'ube-ensaymada':[147,122,4,4,143,118],brazo:[147,121,4,4,143,117],
+ 'buko-pie':[155,120,4,4,151,116],pianono:[154,120,4,4,150,116],
+ ensaymada:[150,119,4,4,146,115],'ube-pandesal':[173,116,4,4,162,104]
+});
+function sceneEquationFood(id){
+ const [iw,ih,x,y,r,b]=SCENE_ORIGINAL_FOOD_BOUNDS[id]||SCENE_FOOD_BOUNDS[(HUB_FOOD_SPRITES[id]||1)-1],w=r-x,h=b-y;
+ return `<span class="equation-food" style="--food-ratio:${w/h};--food-width:${100*iw/w}%;--food-height:${100*ih/h}%;--food-left:${-100*x/w}%;--food-top:${-100*y/h}%">${hubFoodArt(id,'scene-order-food')}</span>`;
+}
 function renderSceneTickets(){
  return g.board.map(ticket=>{const rank=ticketCoinTier(ticket),food=orderFood(ticket),run=g.orderRuns[ticket.id],progress=ticketProgress(ticket);
   const paper=rank===3?'purple':rank===5?'pink':rank===7?'rainbow':'gold';
   return `<button type="button" class="scene-ticket hub-ticket ticket coin-tier-${rank}" data-ticket-id="${ticket.id}" data-order-food="${food.id}" onclick="startTicket(${ticket.id})" aria-label="${run?.phase==='claim'?'Collect':run?'Resume':'Start'} ${hubEscape(ticketOrderLabel(ticket))}, ${hubEscape(food.name)}, ${ticket.a} × ${ticket.b}, ${progress}% complete, ${hubEscape(hubCoinTierName(rank))}">
   ${worldImage('ticket-'+paper,'scene-ticket-shell')}<span class="scene-ticket-reward">${sceneRewardArt(rank)}</span><span class="scene-ticket-plaque">${hubEscape(hubCoinTierName(rank))}</span>
-  <span class="scene-ticket-main"><span class="scene-ticket-equation"><span class="equation-group">${hubFoodArt(food.id,'scene-order-food')}<strong>× ${ticket.a}</strong></span><span class="equation-group">${worldImage('tray','scene-tray')}<strong>× ${ticket.b}</strong></span></span><span class="scene-ticket-progress scene-meter" role="progressbar" aria-label="Order progress" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i><span>${run?.phase==='claim'?'Collect':run?'Resume':'Progress'}</span><b>${progress}%</b></span></span></button>`;
+  <span class="scene-ticket-main"><span class="scene-ticket-equation${String(ticket.a).length>3?' is-wide-math':''}"><span class="equation-group"><strong>${ticket.a}</strong>${sceneEquationFood(food.id)}</span><span class="equation-times">×</span><span class="equation-group"><strong>${ticket.b}</strong>${worldImage('tray','scene-tray')}</span></span><span class="scene-ticket-progress scene-meter" role="progressbar" aria-label="Order progress" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i><span>${run?.phase==='claim'?'Collect':run?'Resume':'Progress'}</span><b>${progress}%</b></span></span></button>`;
  }).join('');
 }
 function renderWorldOrders(){
@@ -77,12 +103,12 @@ function renderWorldOrders(){
 function renderBakeryWorld(){
  return `<div class="scene-window"><main id="stage" class="bakery-ui faithful-world" data-rendered="true" aria-label="My Panaderya bakery"><div class="world-track" style="transform:translate3d(${-bakeryCameraX()}px,0,0)"><div class="scene-room" aria-hidden="true"></div>${BAKERY_PAGES.map((name,i)=>`<div class="scene-page" data-world-page="${name}" style="left:${BAKERY_CENTERS[i]-1000}px">${name==='menu'?renderWorldMenu():name==='packages'?renderWorldPackages():renderWorldOrders()}</div>`).join('')}</div></main></div>
  <div class="scene-hud world-hud" aria-label="Bakery controls"><button type="button" class="scene-wallet" id="wallet-button" data-hub-action="wallet" aria-label="View ${amountLabel(g.coins)} coins">${worldImage('price-coin')}<span id="walletCoins">${amountLabel(g.coins)}</span></button><button type="button" class="scene-boost boost-counter" id="boost-status" data-hub-action="boost" aria-label="Baker's Boost ×${multiplierLabel(bakeryValue())}">${hubBoostDiamond()}<b id="bakerBoost">×${multiplierLabel(bakeryValue())}</b></button><button type="button" class="scene-round scene-help" id="help-button" data-hub-action="help" aria-label="Help">${bakeryIcon('help')}</button><button type="button" class="scene-round scene-settings" id="settings-button" data-hub-action="settings" aria-label="Settings">${bakeryIcon('settings')}</button></div>
- <nav class="scene-nav world-nav" aria-label="Bakery navigation">${worldButton('Packages','packages',{icon:'gift-icon',classes:'nav-packages',extra:'data-world-nav="packages"'})}${worldButton(bakeryPage==='menu'?'View All Foods':'Menu','center',{icon:'hat-icon',classes:'nav-home',extra:'data-world-nav="menu"'})}${worldButton('Orders','orders',{icon:'orders-icon',classes:'nav-orders',extra:'data-world-nav="orders"'})}</nav><span class="scene-announcement" aria-live="polite"></span>`;
+ <nav class="scene-nav world-nav" aria-label="Bakery navigation">${worldButton('Packages','packages',{icon:'gift-icon',classes:'nav-packages',extra:'data-world-nav="packages"'})}${worldButton('Menu','center',{icon:'hat-icon',classes:'nav-home',extra:'data-world-nav="menu"'})}${worldButton('Orders','orders',{icon:'orders-icon',classes:'nav-orders',extra:'data-world-nav="orders"'})}</nav><span class="scene-announcement" aria-live="polite"></span>`;
 }
 function fitBakeryWorld(){
  const compact=matchMedia('(max-height:600px) and (orientation:landscape)').matches;
- const scale=compact?innerWidth/2000:Math.min(innerWidth/2000,innerHeight/1200),stage=$('stage');
- document.body.style.setProperty('--bakery-scale',scale);document.body.style.setProperty('--scene-target',`${44/scale}px`);
+ const scale=(compact?innerWidth/2000:Math.min(innerWidth/2000,innerHeight/1200))*BAKERY_CAMERA_ZOOM,stage=$('stage');
+ document.body.style.setProperty('--bakery-scale',scale);document.body.style.setProperty('--scene-target',`${44/(scale*.92)}px`);
  document.body.style.setProperty('--scene-phone-scale',innerWidth/2000);
  if(stage)stage.style.transform=`scale(${scale})`;
  const carousel=$('package-carousel');if(carousel&&!carousel.dataset.restored){carousel.scrollTop=bakeryCarouselScroll;carousel.dataset.restored='true'}
@@ -99,10 +125,6 @@ function syncBakeryPages(){
  for(const button of document.querySelectorAll('[data-world-nav]')){
   const active=button.dataset.worldNav===bakeryPage;button.setAttribute('aria-pressed',String(active));
   if(active)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');
-  if(button.dataset.worldNav==='menu'){
-   button.querySelector('span').textContent=bakeryPage==='menu'?'View All Foods':'Menu';
-   button.querySelector('.button-icon').src=`assets/bakery-faithful/${bakeryPage==='menu'?'book-icon':'hat-icon'}.png`;
-  }
  }
  const message=document.querySelector('.scene-announcement');if(message)message.textContent=bakeryPage==='menu'?'Menu':bakeryPage==='packages'?'Packages':'Orders';
 }
@@ -145,7 +167,8 @@ function bindBakeryWorld(){
  home.addEventListener('scroll',event=>{if(event.target.id==='package-carousel')bakeryCarouselScroll=event.target.scrollTop},true);
  home.addEventListener('keydown',event=>{
   if(!event.target.closest('#package-carousel'))return;
-  const next=event.key==='Home'?0:event.key==='End'?PACKAGE_SHOP.length-1:['ArrowLeft','ArrowUp'].includes(event.key)?Math.max(0,bakeryTier-1):['ArrowRight','ArrowDown'].includes(event.key)?Math.min(PACKAGE_SHOP.length-1,bakeryTier+1):null;
+  const index=BAKERY_PACKAGE_DISPLAY_ORDER.indexOf(bakeryTier);
+  const next=event.key==='Home'?7:event.key==='End'?0:['ArrowLeft','ArrowUp'].includes(event.key)?BAKERY_PACKAGE_DISPLAY_ORDER[Math.max(0,index-1)]:['ArrowRight','ArrowDown'].includes(event.key)?BAKERY_PACKAGE_DISPLAY_ORDER[Math.min(7,index+1)]:null;
   if(next!==null){event.preventDefault();selectBakeryTier(next)}
  });
 }
@@ -159,4 +182,4 @@ openPackages=function(tab='buy',rank=null){
 showPackageCollection=function(restore=false){if(!isBakeryHub())return sceneShowPackageCollection(restore);navigateBakery('packages')};
 showSelectedPackage=function(rank){if(!isBakeryHub())return sceneShowSelectedPackage(rank);navigateBakery('packages');return selectBakeryTier(rank)};
 const sceneText=window.render_game_to_text;
-window.render_game_to_text=()=>{const state=JSON.parse(sceneText());state.scene={page:bakeryPage,camera:bakeryCamera,cameraX:bakeryCameraX(),transitioning:!!bakeryJourney,order:BAKERY_PAGES,presentation:'approved-artwork-v3'};if(bakeryPage==='packages'&&!packageBatchView)state.packages.view='scene';state.packages.selected=bakeryTier;return JSON.stringify(state)};
+window.render_game_to_text=()=>{const state=JSON.parse(sceneText());state.scene={page:bakeryPage,camera:bakeryCamera,cameraX:bakeryCameraX(),zoom:BAKERY_CAMERA_ZOOM,transitioning:!!bakeryJourney,order:BAKERY_PAGES,presentation:'approved-artwork-v3'};if(bakeryPage==='packages'&&!packageBatchView)state.packages.view='scene';state.packages.selected=bakeryTier;return JSON.stringify(state)};

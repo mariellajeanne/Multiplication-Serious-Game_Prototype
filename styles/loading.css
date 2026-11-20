@@ -1,0 +1,14 @@
+/* Available before game scripts run; also used when initialization fails. */
+.bakery-loading{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;background:#fff3cf;color:#704832;font:700 22px/1.5 "Panaderya Rounded",sans-serif}
+.bakery-loading[hidden]{display:none}
+.loading-center{width:min(320px,70vw);text-align:center}
+.loading-center h1{font-size:clamp(28px,3vw,40px);margin:0 0 24px;font-weight:800}
+.loading-center progress{display:block;appearance:none;width:100%;height:14px;border:1.5px solid #c29b6a;border-radius:10px;background:#efdfbd;overflow:hidden}
+.loading-center progress::-webkit-progress-bar{background:#efdfbd}
+.loading-center progress::-webkit-progress-value{background:#edbe65;border-radius:8px}
+.loading-center progress::-moz-progress-bar{background:#edbe65;border-radius:8px}
+.loading-status{min-height:3em;font-size:15px;margin:16px 0 0;color:#896d50}
+.loading-skip{position:absolute;left:50%;bottom:max(40px,8vh,env(safe-area-inset-bottom));transform:translateX(-50%);min-height:48px;padding:10px 30px;border:2px solid #bc9668;border-radius:14px;background:#f8dc93;color:#704832;font:800 18px/1.3 "Panaderya Rounded",sans-serif;box-shadow:inset 0 2px #fff4d1,0 2px #d5b580;cursor:pointer}
+.loading-skip:disabled{background:#eee2c6;border-color:#d2c0a0;color:#a28f73;box-shadow:none;cursor:default}
+.loading-skip:focus-visible{outline:3px solid #795276;outline-offset:4px}
+.loading-skip:active:not(:disabled){background:#efce85;box-shadow:inset 0 2px #d6b276}

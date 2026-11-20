@@ -1,0 +1,18 @@
+{
+  "tool": "built-in image_gen",
+  "edits": [
+    {
+      "target": "assets/bakery-approved/packages-frame.png",
+      "savedAsset": "assets/bakery-approved/packages-frame-no-ribbon.png",
+      "integration": "Only the lower-center rectangle (620,820,1050,941) is used; all other pixels come from the original.",
+      "transparentBackground": true,
+      "prompt": "Use case: precise-object-edit. Edit target: supplied transparent Packages kiosk frame. Make one strictly localized change: erase ONLY the small pink bow and its tails at the BOTTOM CENTER (approximately x630..1040,y820..941 of the 1670x941 original), reconstructing the warm orange wooden base behind it by continuing the existing wood fill, restrained highlight and brown base outline from its immediate left and right. The original base bottom edge is at about y910. Below that edge must be transparent, with no residual ribbon pixels. Preserve every other part exactly: same 1670x941 canvas, same placement, outer silhouette and feet, large TOP bow and all top ribbons, Packages lettering and gift icons, all colors, outlines, supports, entire transparent interior aperture, and genuine alpha background. Do not redesign, regenerate, crop, shift, recolor, or simplify any other area. Return just the transparent edited asset."
+    },
+    {
+      "target": "assets/bakery-approved/background-floor-source.png",
+      "savedAsset": "assets/bakery-approved/background-floor-extended.png",
+      "transparentBackground": false,
+      "prompt": "Use case: precise-object-edit / horizontal scenery extension. Edit target: the supplied bakery interior 1774x887 pixels. Expand the canvas HORIZONTALLY to a 3:1 panorama, 2661x887 pixels (add about 443 pixels on each side). Preserve the ENTIRE original central 1774x887 illustration, its natural aspect ratio, all architecture and floor geometry, colors, perspective and object proportions. Do not zoom, crop, stretch or move the central source. Outpaint only the new left and right strips, continuing the same cheerful pastel cream bakery, orange wood arches and wall base molding, pink fabric swags, green plants, tall windows and floor tiles in correct single-plane perspective. New side strips may have small shelves and plants, but keep the floor walkable, no prominent counters or large foreground objects; this is scenery behind three separate game station assets. Maintain exactly the source's simple polished cartoon linework, colors, warm daylight, spatial scale and floor horizon about y475. No text, logos, new UI, or foreground game stations. Return one coherent seamless 3:1 bakery panorama."
+    }
+  ]
+}
