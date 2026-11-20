@@ -49,7 +49,7 @@ function renderWorldMenu(){
  <div class="scene-menu-opening"><div id="cabinet-scroll" class="scene-food-scroll showcase-scroll" tabindex="0" aria-label="Your real bakery foods, scroll to browse"><div id="cabinet-grid" class="scene-food-grid">${renderSceneFoods()}</div></div>${sceneScrollRail('food')}</div>
  <button type="button" class="counter-packages world-counter-packages hub-package" data-hub-action="packages" aria-label="Visit Packages">${worldImage('counter-gifts')}</button>
  ${worldImage('register','counter-register world-register')}
- ${worldButton('View All Foods','collection',{icon:'book-icon',classes:'view-all-foods'})}
+ <div class="collection-sign">${worldImage('collection-holder','collection-holder')}${worldButton('View All Foods','collection',{icon:'book-icon',classes:'view-all-foods'})}</div>
  </section>`;
 }
 function renderWorldPackages(){
@@ -65,8 +65,7 @@ function renderWorldPackages(){
  </section>`;
 }
 function sceneRewardArt(rank){
- const name={3:'bucket',4:'cart',5:'chest',7:'crown'}[rank];
- return name?worldImage('reward-'+name,'scene-reward-image',hubCoinTierName(rank)):hubCoinArt(rank,'scene-reward-image');
+ return hubCoinArt(rank,'scene-reward-image');
 }
 // Alpha bounds measured from the existing artwork. Crop only its transparent
 // margins in the equation viewport; the original food images remain untouched.

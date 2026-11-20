@@ -1,20 +1,25 @@
 /* Approved artwork. Only the screen and intended inner lists clip the world. */
 /* Blur is in world CSS pixels (0 disables it); never applied to foreground art. */
-body[data-view="hub"] .hub-home{--bakery-background-blur:.55px;--control-ink:#69422f;--control-outline:#ae7d4e;background:#fff0ce;font-family:"Bakery UI",sans-serif;color:#67351f}
+body[data-view="hub"] .hub-home{--bakery-background-blur:0px;--control-ink:#58331f;--control-outline:#956239;background:#fff0ce;font-family:"Bakery UI",sans-serif;color:#67351f}
 body[data-view="hub"] .scene-window{position:absolute;inset:0;overflow:hidden}
 body[data-view="hub"] .hub-home #stage.faithful-world{position:absolute;left:50%;top:50%;width:2000px;height:1200px;margin:-600px 0 0 -1000px;transform-origin:center;background:none;overflow:visible;pointer-events:none}
 body[data-view="hub"] .faithful-world .world-track{position:absolute;left:0;top:0;width:5086px;height:1200px;will-change:transform}
-/* The supplied 2:1 interior is extended sideways to 3:1. No independent x/y scaling.
-   Wall meets floor at world y~760; the fixtures stand in front at y~1000. */
-body[data-view="hub"] .scene-room{position:absolute;left:-457px;top:-340px;width:6000px;height:2000px;background:url('../assets/bakery-runtime/background-floor-restored.webp') center/100% auto no-repeat;filter:blur(var(--bakery-background-blur));pointer-events:none}
+/* Native-detail wall bays repeat within the finite world. The vector floor
+   shares its y760 seam and one perspective; neither layer moves independently. */
+body[data-view="hub"] .scene-room{position:absolute;left:-457px;top:-340px;width:6000px;height:2000px;background:url('../assets/bakery-ui/floor-blush.svg') left bottom/6000px 900px no-repeat;filter:blur(var(--bakery-background-blur));pointer-events:none}
+body[data-view="hub"] .scene-room::before{content:"";position:absolute;left:0;right:0;top:0;height:1100px;background:url('../assets/bakery-runtime/wall-soft.webp') 0 0/1120px 1120px repeat-x}
 body[data-view="hub"] .faithful-world .scene-page{position:absolute;top:0;width:2000px;height:1200px;overflow:visible;pointer-events:none}
 body[data-view="hub"] .scene-page>section{pointer-events:auto}
 body[data-view="hub"] .scene-page[inert]>section{pointer-events:none}
 body[data-view="hub"] .scene-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;pointer-events:none}
 body[data-view="hub"] .faithful-menu{position:absolute;left:175px;top:85px;width:1650px;height:989px;transform:translateY(-70px) scale(.92);transform-origin:center bottom}
-body[data-view="hub"] :is(.faithful-menu,.faithful-packages,.faithful-orders)::before{content:"";position:absolute;left:5%;right:5%;bottom:-13px;height:38px;border-radius:50%;background:radial-gradient(ellipse,#92552838 0%,#a2653030 38%,#a2653000 72%);filter:blur(9px);pointer-events:none}
-body[data-view="hub"] .faithful-packages::before{left:3%;right:3%;bottom:2px}
-body[data-view="hub"] .faithful-orders::before{left:11%;right:11%;bottom:-9px;height:32px}
+/* Two floor ellipses follow the alpha silhouette's base, not the PNG box. */
+body[data-view="hub"] :is(.faithful-menu,.faithful-packages,.faithful-orders)::before{content:"";position:absolute;left:3%;right:3%;bottom:-18px;height:57px;border-radius:50%;background:radial-gradient(ellipse,#70443c42 0%,#83564b2b 42%,#83564b00 73%);filter:blur(7px);pointer-events:none}
+body[data-view="hub"] :is(.faithful-menu,.faithful-packages,.faithful-orders)::after{content:"";position:absolute;left:8%;right:8%;bottom:9px;height:15px;background:radial-gradient(ellipse,#663e354d 0%,#663e3526 46%,#663e3500 73%);filter:blur(3px);pointer-events:none}
+body[data-view="hub"] .faithful-packages::before{left:1%;right:1%;bottom:1px}
+body[data-view="hub"] .faithful-packages::after{left:5%;right:5%;bottom:25px}
+body[data-view="hub"] .faithful-orders::before{left:10%;right:10%;bottom:-15px;height:48px}
+body[data-view="hub"] .faithful-orders::after{left:17%;right:17%;bottom:7px}
 body[data-view="hub"] .scene-menu-opening{position:absolute;left:225px;right:216px;top:300px;bottom:245px;z-index:2}
 body[data-view="hub"] #cabinet-scroll.scene-food-scroll{position:absolute;inset:0 52px 0 0;overflow:auto;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y}
 body[data-view="hub"] .hub-home #cabinet-grid.scene-food-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:3px 5px 8px;min-height:100%;align-content:start}
@@ -50,7 +55,8 @@ body[data-view="hub"] .scroll-finish::after{transform:translate(-50%,-70%) rotat
 body[data-view="hub"] .scene-scroll-rail.is-idle{visibility:hidden}
 /* Packages: vertical selector, selected illustration and exactly three fixed odds. */
 body[data-view="hub"] .hub-home #package-station.faithful-packages{position:absolute;left:165px;top:130px;width:1670px;height:941px;transform:translateY(-70px) scale(.92);transform-origin:center bottom}
-body[data-view="hub"] .package-paper{position:absolute;left:164px;right:164px;top:190px;bottom:143px;background:#fff0d4;border-radius:45px}
+/* Bleed beneath the carved aperture; the raster owns the only visible edge. */
+body[data-view="hub"] .package-paper{position:absolute;left:150px;right:150px;top:180px;bottom:128px;background:#fff0d4;border-radius:40px}
 body[data-view="hub"] .package-showcase{position:absolute;left:445px;top:244px;width:350px;height:412px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px}
 body[data-view="hub"] .featured-package{width:330px;height:330px;object-fit:contain}
 body[data-view="hub"] .package-showcase>strong{font-size:30px;color:#734026;line-height:1.1;white-space:nowrap}
@@ -111,7 +117,7 @@ body[data-view="hub"] .scene-ticket.coin-tier-0 .scene-ticket-shell{filter:satur
 body[data-view="hub"] .scene-ticket.coin-tier-1 .scene-ticket-shell{filter:hue-rotate(45deg) saturate(.75)}
 body[data-view="hub"] .scene-ticket.coin-tier-2 .scene-ticket-shell{filter:hue-rotate(135deg) saturate(.65)}
 body[data-view="hub"] .scene-ticket.coin-tier-6 .scene-ticket-shell{filter:hue-rotate(-25deg) saturate(1.3)}
-body[data-view="hub"] .scene-ticket-reward{position:absolute;left:8%;top:11%;width:19%;height:49%;display:flex;align-items:center;justify-content:center}
+body[data-view="hub"] .scene-ticket-reward{position:absolute;left:7%;top:8%;width:21%;height:54%;display:flex;align-items:center;justify-content:center}
 body[data-view="hub"] .scene-ticket-reward .scene-reward-image{position:static;display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;margin:0;flex:none}
 body[data-view="hub"] .scene-ticket-plaque{position:absolute;left:5.8%;width:23.9%;top:65.5%;height:21%;display:flex;align-items:center;justify-content:center;color:#fff9ef;font-size:18px;line-height:1;white-space:nowrap;text-shadow:none;-webkit-text-stroke:.6px #7e462b;paint-order:stroke fill}
 body[data-view="hub"] .scene-ticket-main{position:absolute;left:34%;right:5%;top:12%;bottom:15%;display:flex;flex-direction:column;gap:9px}
@@ -150,11 +156,11 @@ body[data-view="hub"] .hub-home .scene-nav .scene-button{position:relative;left:
 body[data-view="hub"] .scene-nav .button-icon{width:clamp(44px,3.8vw,76px);height:clamp(46px,4vw,80px)}
 body[data-view="hub"] .hub-home .scene-nav [aria-current="page"]{background:#fff0be;box-shadow:inset 0 3px #fff9e9,0 3px #c79d68}
 body[data-view="hub"] .scene-nav [aria-current="page"]::before{content:"";position:absolute;left:35%;right:35%;bottom:5px;height:3px;border-radius:2px;background:#b98b51}
-/* A mounted plaque on the clear front apron, below the scalloped shelf trim. */
-body[data-view="hub"] .hub-home .view-all-foods{position:absolute;left:50%;top:792px;transform:translateX(-50%);height:78px;min-height:var(--scene-target,44px);z-index:6;width:340px;padding:9px 18px;gap:12px;font-size:31px;background:#ffe8e5;border:3px solid #a76b51;border-radius:18px;box-shadow:inset 0 3px #fff8ed,0 4px #c58360}
-body[data-view="hub"] .view-all-foods::before,body[data-view="hub"] .view-all-foods::after{content:"";position:absolute;top:calc(50% - 4px);width:8px;height:8px;border:1px solid #a76b51;border-radius:50%;background:#d5a177;box-shadow:inset 0 1px #ffe1b3;pointer-events:none}
-body[data-view="hub"] .view-all-foods::before{left:9px}
-body[data-view="hub"] .view-all-foods::after{right:9px}
+/* The carved holder crosses the scalloped seam and rests on a beveled foot. */
+body[data-view="hub"] .collection-sign{position:absolute;left:50%;top:752px;transform:translateX(-50%);width:430px;height:max(142px,calc(var(--scene-target,44px) + 64px));z-index:6;filter:drop-shadow(0 5px 2px #62351b40)}
+body[data-view="hub"] .collection-holder{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;pointer-events:none}
+body[data-view="hub"] .hub-home .view-all-foods{position:absolute;left:50%;top:35px;transform:translateX(-50%);height:78px;min-height:var(--scene-target,44px);z-index:1;width:346px;padding:9px 12px;gap:10px;font-size:31px;background:linear-gradient(#fff0ec,#f8cdd5);border:3px solid #8a4944;border-radius:15px;box-shadow:inset 0 3px #fff9ef,0 3px #653622;color:#63352c}
+body[data-view="hub"] .view-all-foods::before,body[data-view="hub"] .view-all-foods::after{content:none}
 body[data-view="hub"] .view-all-foods .button-icon{width:41px;height:39px}
 body[data-view="hub"] .scene-announcement{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
 body[data-view="hub"] .hub-home :is(.scene-button,.scene-buy,.package-tier,.scene-hud button):focus-visible{outline:3px solid #795276;outline-offset:4px;filter:none}
@@ -162,6 +168,17 @@ body[data-view="hub"] .hub-home :is(.scene-button,.scene-buy):active:not(:disabl
 body[data-view="hub"] .hub-home .view-all-foods:active:not(:disabled){background:#f2c6d4;box-shadow:inset 0 2px #c18b962b,0 1px #c89299}
 body[data-view="hub"] .hub-home .scene-button:disabled{background:#e8ddc7;color:#9c8b74;border-color:#c5b59e;box-shadow:inset 0 2px #f3eddf;cursor:default}
 body[data-view="hub"] .scene-hud button:active{filter:brightness(.95)}
+/* Stronger ink and rims keep fixed controls readable over the light scenery. */
+body[data-view="hub"] .hub-home .scene-hud button{border-width:3px;font-weight:900}
+body[data-view="hub"] .hub-home .scene-hud .scene-wallet{border-color:#a67632;color:#593419;box-shadow:inset 0 2px #fffae6,0 3px #b7864559}
+body[data-view="hub"] #walletCoins{font-weight:900;-webkit-text-stroke:.45px currentColor;paint-order:stroke fill}
+body[data-view="hub"] .hub-home .scene-hud .scene-boost{border-width:3px;border-color:#9469a6;color:#59316b;box-shadow:inset 0 2px #fff7ff,0 3px #8b649750}
+body[data-view="hub"] .hub-home .scene-hud .scene-help{border-color:#8b9f5b;color:#506533;box-shadow:inset 0 2px #fbffe9,0 3px #81924f50}
+body[data-view="hub"] .hub-home .scene-hud .scene-settings{border-color:#ab845d;color:#76502f;box-shadow:inset 0 2px #fffaed,0 3px #a37c5650}
+body[data-view="hub"] .scene-settings svg path{fill:#d6b484}
+body[data-view="hub"] .hub-home .scene-nav .scene-button{border-color:#956239;border-width:4px;box-shadow:inset 0 3px #fff7db,0 4px #ac7b4859}
+body[data-view="hub"] .hub-home .scene-nav [aria-current="page"]{border-color:#84542f;background:#fff1c3;box-shadow:inset 0 3px #fffbed,0 4px #ac7b4859}
+body[data-view="hub"] .scene-nav [aria-current="page"]::before{height:4px;background:#986339}
 @media(hover:hover){body[data-view="hub"] :is(.scene-button,.scene-buy,.package-tier):hover:not(:disabled){filter:brightness(1.04)}}
 @media(max-height:600px) and (orientation:landscape){
  body[data-view="hub"] .scene-window{top:64px;bottom:78px;overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#c79155 #ffe7bd}
@@ -169,13 +186,14 @@ body[data-view="hub"] .scene-hud button:active{filter:brightness(.95)}
  body[data-view="hub"] .faithful-world .world-track{height:var(--scene-phone-height);scale:var(--bakery-scale);transform-origin:top left}
  body[data-view="hub"] .faithful-world .world-track{left:calc((100vw - 2000px * var(--bakery-scale)) / 2)}
  body[data-view="hub"] .faithful-world .scene-page{height:var(--scene-phone-height);overflow-x:visible;overflow-y:clip}
- body[data-view="hub"] .scene-room{top:0;height:var(--scene-phone-height);background-size:6000px 2000px;background-position:center -340px}
+ body[data-view="hub"] .scene-room{top:-340px;height:calc(var(--scene-phone-height) + 340px);background-size:6000px calc(var(--scene-phone-height) - 760px);background-position:left bottom}
  body[data-view="hub"] .scene-hud{--hud-height:44px;top:8px;gap:7px}
  body[data-view="hub"] .hub-home .scene-hud .scene-round{padding:10px;border-radius:14px}
  body[data-view="hub"] .scene-nav{height:58px;bottom:max(14px,env(safe-area-inset-bottom))}
  body[data-view="hub"] .hub-home .scene-nav .scene-button{font-size:21px;gap:8px;padding:7px 12px;border-width:2px;border-radius:17px}
  body[data-view="hub"] .scene-nav .button-icon{width:36px;height:39px}
- body[data-view="hub"] .hub-home .view-all-foods{font-size:36px;width:380px;padding:7px 24px}
+ body[data-view="hub"] .collection-sign{width:470px}
+ body[data-view="hub"] .hub-home .view-all-foods{font-size:36px;width:378px;padding:7px 14px}
  body[data-view="hub"] .hub-home .scene-food-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
  body[data-view="hub"] .scene-food-card .food-meta{font-size:25px}
  body[data-view="hub"] .package-tier small{font-size:23px}

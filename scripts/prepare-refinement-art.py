@@ -23,7 +23,7 @@ def export(name, source, limit=None):
     target = OUT / ((source.stem if restored else name) + '.webp')
     # The opaque scenery can use high-quality compression. Frame/prop alpha and
     # color remain lossless; icons retain at least twice their displayed size.
-    scenery = name == 'background-floor'
+    scenery = name in ['background-floor', 'wall-soft']
     im.save(target, 'WEBP', lossless=restored or not scenery, quality=96, exact=True, method=6)
     check = Image.open(target).convert('RGBA')
     assert check.getchannel('A').tobytes() == im.convert('RGBA').getchannel('A').tobytes()
@@ -70,6 +70,15 @@ for kind, count in [('food', 17), ('coin', 8)]:
     for i in range(1, count + 1):
         name = f'{kind}-{i:02}'
         export(name, ROOT / f'assets/bakery-ui/illustrated/{name}.png', 300 if kind == 'coin' else None)
+
+# The scoped polish uses native-detail repeating wall bays and a vector floor.
+# Preserve that selection when rebuilding the original runtime exports.
+wall = ROOT / 'assets/bakery-approved/wall-soft.png'
+if wall.exists():
+    export('wall-soft', wall)
+    assets['background-wall'] = assets.pop('wall-soft')
+    assets['background-floor'] = 'assets/bakery-ui/floor-blush.svg'
+assets['collection-holder'] = 'assets/bakery-ui/collection-holder.svg'
 
 (ROOT / 'src/bakery-assets.js').write_text('/* Source-preserving runtime exports; regenerate with scripts/prepare-refinement-art.py. */\nconst BAKERY_ASSETS=Object.freeze(' + json.dumps(assets, indent=2) + ');\n', encoding='utf-8')
 (OUT / 'provenance.json').write_text(json.dumps({'packagePatch': patch, 'editTool': 'built-in image_gen',

@@ -1,6 +1,8 @@
 /* Source-preserving runtime exports; regenerate with scripts/prepare-refinement-art.py. */
 const BAKERY_ASSETS=Object.freeze({
-  "background-floor": "assets/bakery-runtime/background-floor-restored.webp",
+  "collection-holder": "assets/bakery-ui/collection-holder.svg",
+  "background-floor": "assets/bakery-ui/floor-blush.svg",
+  "background-wall": "assets/bakery-runtime/wall-soft.webp",
   "menu-frame": "assets/bakery-runtime/menu-frame.webp",
   "orders-frame": "assets/bakery-runtime/orders-frame.webp",
   "packages-frame": "assets/bakery-runtime/packages-frame.webp",

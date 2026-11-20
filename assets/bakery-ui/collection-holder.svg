@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="430" height="142" viewBox="0 0 430 142" fill="none">
+ <defs>
+  <linearGradient id="wood" x2="0" y2="1"><stop stop-color="#b87345"/><stop offset=".5" stop-color="#985630"/><stop offset="1" stop-color="#774020"/></linearGradient>
+  <linearGradient id="lip" x2="0" y2="1"><stop stop-color="#d69259"/><stop offset="1" stop-color="#a76134"/></linearGradient>
+ </defs>
+ <!-- A raised carved back, an inset socket and a broad foot on the counter. -->
+ <path d="M27 119V40Q27 25 42 25H65Q77 25 83 17L90 8H340L347 17Q353 25 365 25H388Q403 25 403 40V119Z" fill="url(#wood)" stroke="#63331f" stroke-width="5" stroke-linejoin="round"/>
+ <path d="M37 110V42Q37 35 46 35H69Q82 35 91 24L96 18H334L339 24Q348 35 361 35H384Q393 35 393 42V110" stroke="#e4a46c" stroke-width="3" stroke-linecap="round"/>
+ <rect x="42" y="35" width="346" height="78" rx="15" fill="#683922" stroke="#d38c55" stroke-width="2"/>
+ <path d="M28 116H402L419 127Q424 131 419 136H11Q6 131 11 127Z" fill="url(#lip)" stroke="#63331f" stroke-width="5" stroke-linejoin="round"/>
+ <path d="M27 124H403M29 132H401" stroke="#e8a66b" stroke-width="2" stroke-linecap="round"/>
+ <path d="M46 48V99M384 48V99" stroke="#e4a46c" stroke-width="2" stroke-linecap="round" opacity=".6"/>
+</svg>

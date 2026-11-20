@@ -1,0 +1,48 @@
+{
+  "tool": "built-in image_gen",
+  "selectedAsset": {
+    "source": "assets/bakery-approved/wall-soft.png",
+    "runtime": "assets/bakery-runtime/wall-soft.webp",
+    "sourceDimensions": [
+      1254,
+      1254
+    ],
+    "renderedModuleDimensions": [
+      1120,
+      1120
+    ],
+    "encoding": "WebP quality 96",
+    "prompt": "Create a SQUARE 2048 x 2048 pixel illustration (1:1 aspect ratio, NOT a panorama). A seamless horizontally repeating architectural wall module for a polished illustrated bakery game. WALL ONLY, full front view, warm light cream yellow wall all the way from top to bottom, no floor. Three equally wide shallow arch bays arranged across this square, slender pale honey beige pilasters. At left and right image edges are identical vertical pilasters at precisely the same heights/colors, so the square can repeat horizontally with no seam. One small arched blue window in central bay, and one small shelf of three pastel jars with a small green plant in each outer bay. Small pink fabric swags at top. Window and shelves centered around 50 percent height, with bottom third of wall clear cream yellow wainscot, simple narrow honey baseboard at bottom. Clean smooth crisp cartoon ink outlines, restrained warm-brown lines and delicate cel shading, high-resolution edges, no grain or texture. Soft light background colors far lighter and less saturated than orange and brown foreground UI frames. Hand-drawn illustrated mobile bakery game style. Pale yellow cream walls, muted honey wood, light blush pink swags, warm daylight, sparse balanced decor. NO tables/chairs/cabinets/floor plants/characters/UI/text. SQUARE canvas, architectural wall fills the entire image, deliberately keep wall decor compact and evenly spaced; straight-on camera and horizontal baseboard."
+  },
+  "implementation": {
+    "wall": "Repeat native-detail architectural bays horizontally inside the existing finite 6000-unit world; clip at world y760. Module downsampled from 1254 to 1120 world units. No enlarged panorama, no blur.",
+    "floor": "assets/bakery-ui/floor-blush.svg, code-drawn 6000x900 vector floor, coherent single vanishing point; blush palette",
+    "holder": "assets/bakery-ui/collection-holder.svg, code-drawn brown carved holder; inset native pink button",
+    "rewards": "Reuse existing assets/bakery-ui/illustrated/coin-01..08.png through existing runtime sprites for all ticket tiers."
+  },
+  "unusedGenerationTrials": [
+    {
+      "reason": "Composition improved, but source retained 2172x724 dimensions.",
+      "prompt": "Use case: precise-object-edit / illustration-story. Project-bound production bakery game BACKGROUND ONLY. Edit target and style reference: attached existing panorama. Redraw this bakery interior as a genuinely higher-resolution clean illustrated panorama. Output desired 6000 x 2000 pixels (3:1 aspect ratio), crisp deliberate clean cartoon linework, smooth restrained cel shading, no blurry painted texture. Preserve overall approved bakery visual language, eye-level frontal camera, warm cream-yellow walls, repeated arch bays, small arched blue windows, sparse pastel jars and small plants on wall shelves, full room width with a large uninterrupted floor. Wall-floor boundary EXACTLY at 55 percent image height. Floor should be light blush pink with very subtle peach-pink perspective tile joints, not orange or bright yellow. Background architectural trim should be pale honey/beige, soft brown thin outlines, noticeably lighter and less saturated than the original orange outlines, keeping foreground orange/wood game station frames dominant. Deliberate balanced visual weight across the ENTIRE panorama, evenly spaced architectural bays, restrained wall decor in upper half. Remove ALL tables, chairs, freestanding plants, pastry cabinets and low furniture, because they peek awkwardly behind large foreground game stations. All decor wall-mounted above wall-floor boundary. No large blank wall followed by an overcrowded region: small windows and compact shelves at consistent rhythm. Keep floor totally unobstructed, tiled and natural perspective with coherent lines. No counters, signs, text, foreground frames, UI, buttons or characters. This image will be enlarged for a landscape tablet game so produce true high detail edges at high output resolution, not an upscaled low-resolution image."
+    },
+    {
+      "reason": "New panorama still returned 2172x724; selected native-detail wall module instead.",
+      "prompt": "Create a brand-new high-resolution production game background, horizontal 3:1 panorama, desired 6000x2000 pixels. Highest available output resolution, use at least 4096 pixels wide if 6000 is not supported. Do not use the 2172x724 resolution of any earlier image. Clean crisp hand-inked cartoon bakery interior matching a soft illustrated mobile bakery game. Eye-level frontal camera, long cream-yellow wall with a rhythm of identical shallow arch bays and slender pale honey-colored pilasters. Small arched blue-sky windows alternate with small compact shelves of pastel jars and a small leafy plant, in a regular balanced rhythm across the whole width. Restrained upper pink fabric swags, clean polished cel shading, smooth true sharp linework, not pixelated. Architecture pale beige trim and light warm brown thin outlines, light cream wall, pastel pink decor. Wall-floor seam at precisely 55 percent of image height. Entire lower 45 percent is clear blush-pink tiled floor in coherent one-point perspective, thin muted rose tile joints. Furnishings limited to wall-mounted small shelves/windows. NO tables, NO chairs, NO pastry displays, NO floor plants, NO freestanding furniture anywhere. This is unobtrusive scenery behind large saturated orange illustrated UI stations which must stand out. Warm inviting delicate soft pastel colors, evenly balanced, visual detail enough to feel alive but spare. No text, labels, logos, people or UI. Fill the entire panorama edge to edge. Create real detailed high-resolution artwork."
+    }
+  ],
+  "validation": {
+    "node": "293/293 passed",
+    "browsers": [
+      "Edge",
+      "WebKit"
+    ],
+    "passedRunners": [
+      "browser-world.py",
+      "browser-visual-polish.py",
+      "browser-scene-loading.py",
+      "browser-responsive.py"
+    ],
+    "screenshots": "output/refinement/current/{2000,1280}-{menu,packages,orders}.png",
+    "review": "All six tablet screenshots, reward tiers, skill client Orders/collection and compact WebKit inspected. No browser page/console errors. Physical tablet untested."
+  }
+}
