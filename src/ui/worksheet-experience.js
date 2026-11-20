@@ -12,9 +12,13 @@ function worksheetRewardDisplays(r){
 renderWorksheet=function(){
  const r=g.run;if(!r||r.phase==='failed'||!usesStepCoins(r)&&r.phase==='claim')return previousWorksheetRenderer();
  const food=orderFood(r.ticket);
- return `<main class="worksheet-stage worksheet-modern"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div></header>${worksheetRewardDisplays(r)}${WorksheetComponents.workspace({done:r.bridgeDone||0,total:r.steps.length,complete:r.procedureComplete,pool:fmt(r.pool),actions:worksheetBottomActions()})}</main>`;
+ return `<main class="worksheet-stage worksheet-modern"><header class="worksheet-order-header"><div class="worksheet-order-expression" aria-label="${r.ticket.a} ${food.name} times ${r.ticket.b} trays">${worksheetFoodArt(food.id)}<b>${r.ticket.a}</b><span>×</span>${hubImage('tray-icon.png','worksheet-tray')}<b>${r.ticket.b}</b></div></header>${worksheetRewardDisplays(r)}${WorksheetComponents.workspace({done:r.bridgeDone||0,total:r.steps.length,complete:r.procedureComplete,pool:fmt(r.pool),actions:worksheetBottomActions(!!r.procedureComplete)})}</main>`;
 };
-function worksheetBottomActions(){return '<div class="worksheet-header-actions"><button class="worksheet-settings illustrated-worksheet-button" title="Worksheet settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">&#9881;</button><button class="worksheet-exit illustrated-worksheet-button" aria-label="Save &amp; Exit" onclick="abandonTicket()">&#8677; Save &amp; Exit</button></div>'}
+function worksheetBottomActions(complete){
+ // Keep the helper/settings controls in the middle. Save & Exit shares the
+ // rightmost action slot with Complete Order, never displaying beside it.
+ return `<div class="worksheet-header-actions"><button class="worksheet-settings illustrated-worksheet-button" title="Worksheet settings" aria-label="Worksheet settings" onclick="openWorksheetSettings()">&#9881;</button></div><button id="worksheetSaveExit" class="worksheet-exit illustrated-worksheet-button" aria-label="Save &amp; Exit" ${complete?'hidden':''} onclick="abandonTicket()">&#8677; Save &amp; Exit</button>`;
+}
 function currentWorksheetCalculation(){
  const r=g.run,state=r?.worksheetSession?.state;
  if(!r||r.phase!=='engine'||r.paused||!state)return null;
@@ -62,7 +66,9 @@ function paintWorksheetExperience(){
   panel.innerHTML=html;panel.dataset.markup=html;
   if(focus){const target=panel.querySelector(`[data-calc-key="${focus}"]`)||$(focus);target?.focus?.({preventScroll:true})}
  }
- const complete=$('collectRewards');if(complete)complete.disabled=!r.procedureComplete;
+ const complete=$('collectRewards'),exit=$('worksheetSaveExit');
+ if(complete){complete.disabled=!r.procedureComplete;complete.hidden=!r.procedureComplete;}
+ if(exit)exit.hidden=!!r.procedureComplete;
  const progress=$('worksheetStepProgress');if(progress)progress.textContent=`${r.bridgeDone||0} / ${r.steps.length} pairs placed`;
  if(typeof paintRewardDock==='function')paintRewardDock(r);
  if(r.settlement&&!worksheetSummaryView)scheduleWorksheetSummaryRecovery();
@@ -114,8 +120,13 @@ fitWorksheet=function(){
  syncRewardPresentation();if(typeof cancelWorksheetDrag==='function')cancelWorksheetDrag();
  const rows=String(g.run.ticket.b).length,cols=String(g.run.ticket.a*g.run.ticket.b).length,gap=6;
  const surface=stage.querySelector('.worksheet-left'),rect=surface.getBoundingClientRect();
- const available=Math.max(200,rect.height),byWidth=Math.floor((rect.width-100-gap*(cols-1))/cols);
- const {cell}=WorksheetComponents.layout({rows,cols,available,byWidth,gap,minArea:0});
+ // Match the iframe's height to the calculated math grid. The old fixed
+ // 400px iframe truncated large tablet cells and wasted the writing surface.
+ // On short landscape phones, the containing wrap scrolls the full-height
+ // iframe instead of shrinking the tappable digits below 44px.
+ const available=Math.max(200,rect.height-12),byWidth=Math.floor((rect.width-100-gap*(cols-1))/cols);
+ const {cell,height}=WorksheetComponents.layout({rows,cols,available,byWidth,gap,minArea:0});
+ frame.style.height=height+'px';
  sendEngine('layout',{cell,gap,rows});paintWorksheetExperience();
 };
 function worksheetSummaryMarkup(r){

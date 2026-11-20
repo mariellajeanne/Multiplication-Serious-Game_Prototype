@@ -111,9 +111,9 @@
  document.addEventListener('pointercancel',()=>gesture=null);
  window.addEventListener('resize',notices);
  window.openCoBakerHelp=open;
- const prior=renderWorksheet;renderWorksheet=function(...args){let html=prior.apply(this,args);if(html.includes('worksheet-modern'))html=html.replace('<div class="worksheet-header-actions">','<div class="worksheet-header-actions"><button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#9742; Call for Help</button>');return html;};
+ const prior=renderWorksheet;renderWorksheet=function(...args){let html=prior.apply(this,args);if(html.includes('worksheet-modern'))html=html.replace('<div class="worksheet-header-actions">','<div class="worksheet-header-actions"><button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#129309; Call for Help</button>');return html;};
  const initialHeader=document.querySelector('.worksheet-modern .worksheet-header-actions');
- if(initialHeader&&!initialHeader.querySelector('.cobaker-help-button'))initialHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#9742; Call for Help</button>');
+ if(initialHeader&&!initialHeader.querySelector('.cobaker-help-button'))initialHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Call for Help" onclick="openCoBakerHelp()">&#129309; Call for Help</button>');
  const current=d();if(current?.help){current.help.worksheet=()=>sheetActive()||!!(current.help.active?.role==='Learner'&&!current.help.active.lostAt&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
  // Modal closure only stops scanning/refilling. Delivered calls and the live
  // worksheet reservation remain owned by Help until their own terminal state.

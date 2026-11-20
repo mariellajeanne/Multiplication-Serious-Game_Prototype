@@ -12,3 +12,8 @@ body{position:fixed;inset:0;padding:6px;box-sizing:border-box}
 #observedWorkbench .worksheet-complete-bar [data-worksheet-control='undo']{width:100%;min-height:48px;font-size:16px}
 #observedWorkbench .worksheet-complete-bar :is(#collectRewards,#worksheetStepProgress){display:none}
 @media(max-height:600px),(max-width:1000px){#observedWorkbench{grid-template-rows:44px minmax(0,1fr)}#observedWorkbench .worksheet-complete-bar{margin:0 8px 6px}#observedWorkbench .reward-info{height:46px}#observedWorkbench .reward-probability{font-size:15px;padding:1px 10px}}
+
+/* The observer uses the helper's own bottom collaboration controls. Do not
+   overlay a disabled learner action on the calculator or its keypad. */
+#observedWorkbench .worksheet-complete-bar{display:none}
+#observedWorkbench .worksheet-calculator{padding-bottom:12px;scroll-padding-bottom:12px}
