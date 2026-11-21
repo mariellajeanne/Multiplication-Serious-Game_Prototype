@@ -223,3 +223,8 @@ body.addition-active{touch-action:none;overscroll-behavior:contain}
   box-shadow:none!important;
 }
 .floating.typeon-sized .fx-typeon .char{font-size:23px;line-height:1;min-width:17px}
+
+/* Android: actual math digit/tile drags, not native page pans. The worksheet
+   background still handles downward addition swipes as before. */
+.sheet button[data-top],.sheet button[data-bottom],.sheet button[data-slot],
+.sheet button[data-carry],#floating button[data-part]{touch-action:none;-webkit-user-select:none;user-select:none}

@@ -109,3 +109,18 @@ body[data-view='hub'] .worksheet-complete-bar .worksheet-exit{font-size:clamp(16
 @supports(padding:max(0px)){.hub-order-workspace{padding-top:max(12px,env(safe-area-inset-top));padding-right:max(12px,env(safe-area-inset-right));padding-bottom:max(12px,env(safe-area-inset-bottom));padding-left:max(12px,env(safe-area-inset-left))}@media(max-height:600px),(max-width:1000px){.hub-order-workspace{padding-top:max(6px,env(safe-area-inset-top));padding-right:max(6px,env(safe-area-inset-right));padding-bottom:max(6px,env(safe-area-inset-bottom));padding-left:max(6px,env(safe-area-inset-left))}}}
 .hub-order-workspace .worksheet-stage.worksheet-modern{height:100%}
 .worksheet-calculator #generateAnswer{min-height:clamp(48px,6vh,76px);font-size:clamp(17px,1.5vw,27px)}
+
+/* Dragging a calculator digit across the iframe is an intentional game gesture.
+   Without touch-action:none Android WebView can issue pointercancel as it pans,
+   so learners have to drag the same tile multiple times. */
+.worksheet-modern .worksheet-digit-tray [data-answer-digit]{touch-action:none;-webkit-user-select:none;user-select:none}
+/* An overlay guide spanning the shell and its same-origin worksheet iframe. */
+.worksheet-full-guide{position:fixed;inset:0;width:100vw;height:100dvh;pointer-events:none;z-index:32;overflow:visible;color:#be6b1e}
+.worksheet-full-guide .guide-track{fill:none;stroke:#fff8e5;stroke-width:11;stroke-linecap:round;filter:drop-shadow(0 2px 2px #58391c72)}
+.worksheet-full-guide .guide-dash{fill:none;stroke:#bf681f;stroke-width:5;stroke-linecap:round;stroke-dasharray:12 11;animation:full-guide-flow 1s linear infinite}
+.worksheet-full-guide .guide-origin{fill:#ffe8a9;stroke:#b96b2c;stroke-width:3}
+.worksheet-full-guide .guide-goal{fill:#ffeccc55;stroke:#bf681f;stroke-width:4;stroke-dasharray:4 4}
+.worksheet-full-guide .guide-tip{fill:#bf681f;stroke:#fff8e5;stroke-width:2}
+.worksheet-full-guide .guide-caption{font-family:ui-rounded,system-ui,sans-serif;font-weight:900;font-size:17px;paint-order:stroke;stroke:#fff7dd;stroke-width:6px;fill:#6c421c;stroke-linejoin:round}
+@keyframes full-guide-flow{to{stroke-dashoffset:-46}}
+@media(prefers-reduced-motion:reduce){.worksheet-full-guide .guide-dash{animation:none}}

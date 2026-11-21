@@ -242,3 +242,36 @@ test('repeat cooldown follows acknowledged delivery even when radio setup is slo
 test('batch API cannot overrun the same rolling rate budget used by individual calls',()=>{
  const {n,a,bakers:b}=classroom();a.help.callTimes=Array(CoBakerHelpRules.maxCallsPerWindow-1).fill(n.now());const r=a.help.request(b.slice(0,3).map(p=>p.profile.id));assert.equal(r.ok,true);assert.equal(a.help.calls.size,1);assert.equal(a.help.callTimes.length,CoBakerHelpRules.maxCallsPerWindow);
 });
+
+test('calls in both directions work with tablet clocks minutes apart',()=>{
+ for(const skew of [7*60*1000,-7*60*1000]){
+  const n=network(),a=n.join(1),b=n.join(2);n.flush();
+  a.help.clock=()=>n.now()+skew;
+  b.help.clock=()=>n.now();
+  a.isOnWorksheet=true;
+  assert.equal(a.help.request([b.profile.id]).ok,true);
+  n.flush();
+  assert.equal(b.help.incoming.size,1,'receiver must not reject caller time');
+  assert.equal(a.help.calls.get(b.profile.id).expiresAt-a.help.clock(),15000,'caller must use local clock for ACK');
+  assert.equal([...b.help.incoming.values()][0].expiresAt-b.help.clock(),15000,'recipient must have a local 15-second lease');
+  const req=[...b.help.incoming.keys()][0];assert.equal(b.help.accept(req),true);n.flush();
+  assert.equal(a.help.active?.role,'Learner');assert.equal(b.help.active?.role,'Helper');
+  b.help.end();n.flush();
+  // Reverse roles with the same differing clocks and fresh direct-cooldowns.
+  b.isOnWorksheet=true;
+  assert.equal(b.help.request([a.profile.id]).ok,true);n.flush();
+  assert.equal(a.help.incoming.size,1);
+  const reverse=[...a.help.incoming.keys()][0];assert.equal(a.help.accept(reverse),true);n.flush();
+  assert.equal(b.help.active?.role,'Learner');assert.equal(a.help.active?.role,'Helper');
+ }
+});
+
+test('new Help Notifications preferences override a stale legacy availability flag',async()=>{
+ await import('../src/network/baker-preferences.js');
+ const old={getItem:key=>key==='panaderyaAvailableToHelpV1'?'false':null,setItem(){}};
+ const d={profile:{id:'a'.repeat(32)},peers:new Map(),transport:null};
+ const help=new CoBakerHelp(d,{storage:old});
+ assert.equal(help.status(),'Available','all six new switches off is the default');
+ const persisted={getItem:key=>key==='panaderyaCoBakerPreferencesV1'?JSON.stringify({mutes:{dnd:true}}):null,setItem(){}};
+ assert.equal(new CoBakerHelp(d,{storage:persisted}).status(),'Unavailable');
+});

@@ -63,7 +63,7 @@ function paintWorksheetExperience(){
  }
  const phase=r.procedureComplete?'complete':r.worksheetSession?.state.phase==='sum'?'add':context?.state.phase==='select'?'connect':context?.state.phase==='product'?(context.state.revealed?context.state.mixed?'place':'carry':'calculate'):'connect';
  const stage=document.querySelector('.worksheet-modern');if(stage)stage.dataset.worksheetPhase=phase;
- sendEngine('focus-phase',{attemptId:r.worksheetRewards.attemptId,phase,guideLevel:g.tutorialArrows?(g.completed===0?2:g.completed<3?1:0):0});
+ sendEngine('focus-phase',{attemptId:r.worksheetRewards.attemptId,phase,guideLevel:g.tutorialArrows?(g.completed<3?2:1):0});
  const html=calculationPanelMarkup(context);
  if(panel.dataset.markup!==html){
   const active=document.activeElement,focus=panel.contains(active)?active?.dataset.calcKey||active?.id:null;
@@ -76,6 +76,7 @@ function paintWorksheetExperience(){
  const progress=$('worksheetStepProgress');if(progress)progress.textContent=`${r.bridgeDone||0} / ${r.steps.length} pairs placed`;
  if(typeof paintRewardDock==='function')paintRewardDock(r);
  if(r.settlement&&!worksheetSummaryView)scheduleWorksheetSummaryRecovery();
+ if(typeof scheduleWorksheetFullGuide==='function')scheduleWorksheetFullGuide();
  window.panaderyaCoBaker?.observation?.publish(r.worksheetSession);
 }
 function changeWorksheetCalculation(change){
@@ -132,6 +133,7 @@ fitWorksheet=function(){
  const {cell,height}=WorksheetComponents.layout({rows,cols,available,byWidth,gap,minArea:0});
  frame.style.height=height+'px';
  sendEngine('layout',{cell,gap,rows});paintWorksheetExperience();
+ if(typeof scheduleWorksheetFullGuide==='function')scheduleWorksheetFullGuide();
 };
 function worksheetSummaryMarkup(r){return orderCompletionMarkup(r)}
 function finishWorksheetSummaryAnimation(){worksheetSummaryView?.sequence?.finish()}

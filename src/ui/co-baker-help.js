@@ -34,11 +34,17 @@
  }
  function notices(){const help=get();if(!help)return;let holder=document.getElementById('coBakerInvitations');
   if(!holder){holder=document.createElement('aside');holder.id='coBakerInvitations';holder.setAttribute('aria-label','Help Requests');document.body.appendChild(holder)}
+  const modalOpen=!!document.querySelector('#modals .modal');
   const observer=document.getElementById('coBakerObservation');
   const calculator=document.querySelector('.worksheet-modern .worksheet-calculator');
-  const dock=observer||(calculator?.getClientRects().length?calculator:null);
-  if(dock&&holder.parentElement!==dock){if(observer)observer.querySelector('header').after(holder);else dock.prepend(holder);holder.classList.add('is-docked')}
-  if(!dock&&holder.parentElement!==document.body){document.body.appendChild(holder);holder.classList.remove('is-docked')}
+  // With Settings/Network Test open, worksheet and helper-viewer docks are
+  // underneath the modal stacking context. Portal invitations to <body> so
+  // learners can accept from Settings without losing or covering their work.
+  const dock=!modalOpen&&(observer||(calculator?.getClientRects().length?calculator:null));
+  if(dock&&holder.parentElement!==dock){if(observer)observer.querySelector('header').after(holder);else dock.prepend(holder)}
+  if(!dock&&holder.parentElement!==document.body)document.body.appendChild(holder);
+  holder.classList?.toggle?.('is-docked',!!dock);
+  holder.classList?.toggle?.('is-modal-tray',modalOpen);
   const invitations=[...help.incoming.values()].filter(i=>i.expiresAt>help.clock());
   for(const id of confirms.keys())if(!invitations.some(i=>i.requestId===id))confirms.delete(id);
   const active=help.active,currently=help.accepting,header=document.querySelector('.worksheet-modern .worksheet-header-actions');
@@ -142,7 +148,11 @@
  }
  // Modal closure only stops scanning/refilling. Delivered calls and the live
  // worksheet reservation remain owned by Help until their own terminal state.
- if(typeof MutationObserver==='function')new MutationObserver(()=>{const help=get();if(help?.pickerOpen&&!document.getElementById('coBakerHelpBody'))help.setPicker(false)}).observe(document.getElementById('modals')||document.body,{childList:true,subtree:true});
+ if(typeof MutationObserver==='function')new MutationObserver(()=>{
+  const help=get();if(help?.pickerOpen&&!document.getElementById('coBakerHelpBody'))help.setPicker(false);
+  // Moving to/from Settings changes the tray's stacking context and dock.
+  notices();
+ }).observe(document.getElementById('modals')||document.body,{childList:true,subtree:true});
  setInterval(()=>{timers();if(endConfirm&&get()?.clock()>=endConfirm.until){endConfirm=null;lastList='';renderHelp();notices()}},250);
  const priorText=window.render_game_to_text;
  if(typeof priorText==='function')window.render_game_to_text=()=>{const text=JSON.parse(priorText()),help=get();text.coBaker={transport:d()?.transport?.label||'Unavailable',availability:help?.status()||'Unavailable',nearby:d()?nearby().length:0,favorites:help?.preferences?.crew.size||0,calling:help?.calls.size||0,finding:!!help?.search?.active,calls:[...help?.calls.values()||[]].map(c=>({baker:name(c.id),source:c.source,state:c.state,remainingMs:Math.max(0,c.expiresAt-help.clock())})),requests:[...help?.incoming.values()||[]].map(i=>({baker:name(i.ownerId),remainingMs:Math.max(0,i.expiresAt-help.clock()),confirming:confirms.has(i.requestId)}))};return JSON.stringify(text)};

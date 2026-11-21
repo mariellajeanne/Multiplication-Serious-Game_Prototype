@@ -11,9 +11,13 @@
  class Help{
   constructor(discovery,options={}){
    this.d=discovery;this.clock=options.clock||(()=>Date.now());this.storage=options.storage||root.localStorage;
-   try{this.available=this.storage?.getItem(PREF)!=='false'}catch(_){this.available=true}
-   this.presence=new Map();this.incoming=new Map();this.calls=new Map();this.search=null;this.pickerOpen=false;this.active=null;this.accepting=null;
    this.preferences=root.CoBakerPreferences?new root.CoBakerPreferences(this.storage):null;
+   // The six Help Notifications switches, not the obsolete single-toggle key,
+   // determine availability. Otherwise a previous legacy opt-out can advertise
+   // Unavailable until somebody toggles DND even when all six switches are off.
+   if(this.preferences)this.available=this.preferences.available('bakery');
+   else try{this.available=this.storage?.getItem(PREF)!=='false'}catch(_){this.available=true}
+   this.presence=new Map();this.incoming=new Map();this.calls=new Map();this.search=null;this.pickerOpen=false;this.active=null;this.accepting=null;
    this.records=new Map();this.callerTimes=new Map();this.directTimes=new Map();this.interrupted=new Map();this.callTimes=[];this.terminals=new Map();this.random=options.random||Math.random;
    this.log=[];this.listeners=new Set();this.lastAdvertise=0;this.worksheet=()=>false;
   }
@@ -33,7 +37,7 @@
   setAvailable(value){if(this.preferences)this.preferences.set('dnd',!value);this.available=!!value;try{this.storage?.setItem(PREF,String(this.available))}catch(_){}this.broadcastPresence();this.changed()}
   state(id){return this.presence.get(id)||(this.d.candidates?.has(id)?{available:this.d.candidates.get(id).available,status:this.d.candidates.get(id).available?'Available':'Unavailable'}:{available:false,status:'Unavailable'}) }
   eligible(id){return (this.d.peers.has(id)||this.d.candidates?.has(id))&&this.state(id).status==='Available'&&id!==this.d.profile.id}
-  online(){this.lastAdvertise=0;this.broadcastPresence();this.changed()}
+  online(){this.lastAdvertise=0;this.refreshAvailability();this.broadcastPresence();this.changed()}
   expired(){return !!this.active?.lostAt&&this.clock()-this.active.lostAt>=GRACE_MS}
   reconnecting(){if(this.active&&!this.active.lostAt){this.active.lostAt=this.clock();this.changed()}}
   reconnected(){if(!this.active||this.expired())return false;const lost=!!this.active.lostAt;this.active.lostAt=0;if(lost)this.note('Connected again!');else this.changed();return true}
@@ -98,7 +102,7 @@
    this.d.transport?.cancelConnect?.(id);
    // Report a completed manual request's real terminal outcome. Automatic
    // searches may probe several peers, so don't spam a toast per candidate.
-   const outcome={declined:'Help request declined.',expired:'Help request expired.',failed:'Could not send the help request.',lost:'Baker disconnected before answering.'}[reason];
+   const outcome={declined:'Help request declined.',unavailable:'Baker unavailable to help. Check Help Notifications.',expired:'Help request expired.',failed:'Could not send the help request.',lost:'Baker disconnected before answering.'}[reason];
    if(outcome&&c.source==='manual')this.note(outcome);else this.changed();return true;
   }
   decline(requestId){const invitation=this.incoming.get(requestId);if(!invitation)return;
@@ -127,15 +131,21 @@
    if(h.kind==='presence'){this.presence.set(id,{available:h.available,status:h.available?'Available':'Unavailable'});this.changed();return}
    if(h.kind==='invite'){
     this.refreshAvailability();if(this.records.has(h.requestId)||this.incoming.has(h.requestId))return;
-    if(h.expiresAt<=now||h.expiresAt>now+INVITE_MS+1000||!this.available){this.remember(h.requestId);this.send(id,{kind:'unavailable',requestId:h.requestId,reason:'busy'});return}
+    // expiresAt is a timestamp in the *caller's* clock. Tablet clocks can be
+    // minutes apart, so it cannot validate recency against this device's clock.
+    // A fresh, session-bound request ID gets a receiver-local 15-second lease;
+    // an obsolete request cannot be assigned by the learner after its own lease.
+    if(!this.available){this.remember(h.requestId);this.send(id,{kind:'unavailable',requestId:h.requestId,reason:'busy'});return}
     if(now-(this.callerTimes.get(id)??-Infinity)<RULES.directCooldownMs||[...this.incoming.values()].some(i=>i.ownerId===id)){this.remember(h.requestId);return}
     if(this.incoming.has(h.requestId)||this.incoming.size>=MAX_INVITES)return;
     this.callerTimes.set(id,now);while(this.callerTimes.size>RULES.maxRecords)this.callerTimes.delete(this.callerTimes.keys().next().value);
     const expiresAt=now+INVITE_MS;
     this.remember(h.requestId);this.incoming.set(h.requestId,{requestId:h.requestId,ownerId:id,expiresAt});this.send(id,{kind:'delivered',requestId:h.requestId,expiresAt});this.note(`${m.player.name} #${m.player.number} needs help!`);return;
    }
-   if(h.kind==='delivered'){const c=this.calls.get(id);if(!c||c.requestId!==h.requestId||c.state!=='delivering'||c.setupUntil<=now||h.expiresAt<=now||h.expiresAt>now+INVITE_MS+1000)return;
-    c.state='calling';c.waiting=false;c.expiresAt=h.expiresAt;this.directTimes.set(id,now);this.changed();return;
+   if(h.kind==='delivered'){const c=this.calls.get(id);if(!c||c.requestId!==h.requestId||c.state!=='delivering'||c.setupUntil<=now)return;
+    // ACK delivery, not a remote wall clock, starts the learner's 15-second
+    // actionable window. The helper independently counts down from receipt.
+    c.state='calling';c.waiting=false;c.expiresAt=now+INVITE_MS;this.directTimes.set(id,now);this.changed();return;
    }
    if(h.kind==='cancel'){const invite=this.incoming.get(h.requestId);this.remember(h.requestId);if(invite?.ownerId===id||this.accepting?.requestId===h.requestId&&this.accepting.ownerId===id){this.incoming.delete(h.requestId);this.terminal(h.requestId,id,'cancelled the call');if(this.accepting?.requestId===h.requestId)this.accepting=null;this.broadcastPresence();this.changed()}return}
    if(h.kind==='unavailable'){
@@ -147,7 +157,7 @@
    }
    if(h.kind==='decline'||h.kind==='unavailable'){
     const c=this.calls.get(id);if(!c||c.requestId!==h.requestId)return;
-    this.finishCall(id,'declined');this.fillSearch();return;
+    this.finishCall(id,h.kind==='unavailable'?'unavailable':'declined');this.fillSearch();return;
    }
    if(h.kind==='accept'){
     const o=this.calls.get(id);

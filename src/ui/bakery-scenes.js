@@ -254,7 +254,7 @@ function buyBakeryPackage(count){
 // entire gesture, even when their scroll/carousel happens to be at an endpoint.
 function bindBakeryPageSwipe(home){
  let swipe=null,frame=0,clickUntil=0;
- const blocked='button,a,input,select,textarea,iframe,[contenteditable],[draggable="true"],[role="slider"],[role="scrollbar"],#package-carousel,.scene-scroll-rail,.scene-hud,.scene-nav';
+ const blocked='a,input,select,textarea,iframe,[contenteditable],[draggable="true"],[role="slider"],[role="scrollbar"],#package-carousel,.scene-scroll-rail,.scene-hud,.scene-nav';
  const unavailable=()=>modal||hubCollection||packageBatchView||g.run&&!g.run.paused||$('app')?.inert;
  const draw=()=>{frame=0;if(swipe){bakeryCamera=swipe.camera;paintBakeryCamera()}};
  const finish=(cancel=false)=>{
@@ -276,7 +276,9 @@ function bindBakeryPageSwipe(home){
  };
  home.addEventListener('touchstart',event=>{
   if(swipe){finish(true);return}
-  if(event.touches.length!==1||unavailable()||bakeryJourney||!event.target.closest('.scene-window')||event.target.closest(blocked))return;
+  // A new deliberate touch is never the synthetic click from the prior swipe.
+  clickUntil=0;
+  if(event.touches.length!==1||unavailable()||!event.target.closest('.scene-window')||event.target.closest(blocked))return;
   for(let node=event.target;node&&node!==home;node=node.parentElement){
    const style=getComputedStyle(node);
    if(/auto|scroll/.test(style.overflowX+' '+style.overflowY)&&!node.matches('.scene-window'))return;
@@ -293,13 +295,17 @@ function bindBakeryPageSwipe(home){
    if(Math.abs(dy)>10&&Math.abs(dy)>=Math.abs(dx)){swipe=null;return}
    if(Math.abs(dx)<12||Math.abs(dx)<Math.abs(dy)*1.4)return;
    swipe.dragging=true;
+   // A new swipe may interrupt the 480ms navigation animation. Continue from
+   // the camera's *actual* position instead of throwing away the gesture.
+   if(bakeryJourney){cancelAnimationFrame(bakeryFrame);bakeryFrame=0;bakeryJourney=null}
+   swipe.camera=bakeryCamera;swipe.startCamera=bakeryCamera;
   }
   if(!event.cancelable){finish(true);return}event.preventDefault();
   swipe.lastX=t.clientX;
   const boundary=swipe.index===0&&dx>0||swipe.index===2&&dx<0;
   const offset=boundary?Math.sign(dx)*36*(1-Math.exp(-Math.abs(dx)/110)):Math.max(-160,Math.min(160,dx*.65));
   const centers=bakeryWorldCenters(),segment=dx>0?Math.max(0,swipe.index-1):Math.min(1,swipe.index);
-  swipe.camera=swipe.index-offset/(swipe.scale*(centers[segment+1]-centers[segment]));
+  swipe.camera=Math.max(0,Math.min(BAKERY_PAGES.length-1,(swipe.startCamera??swipe.index)-offset/(swipe.scale*(centers[segment+1]-centers[segment]))));
   if(!frame)frame=requestAnimationFrame(draw);
  },{passive:false});
  home.addEventListener('touchend',()=>finish());
@@ -328,6 +334,8 @@ function bindBakeryWorld(){
  });
  home.addEventListener('pointerdown',event=>{
   const carousel=event.target.closest('#package-carousel');if(!carousel||!event.isPrimary||event.button!==0)return;
+  // A fresh press must work even if the previous carousel swipe just ended.
+  suppressClickUntil=0;
   gesture={id:event.pointerId,x:event.clientX,y:event.clientY,carousel,dragged:false};
  });
  home.addEventListener('pointermove',event=>{

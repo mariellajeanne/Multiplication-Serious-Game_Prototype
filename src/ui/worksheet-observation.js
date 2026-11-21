@@ -60,7 +60,7 @@
   const step=r.steps.find(item=>item.row===s.row&&item.col===s.k),context=step?{r,state:s,step,key:worksheetStepKey(step)}:null;
   const phase=r.procedureComplete?'complete':s.phase==='sum'?'add':s.phase==='select'?'connect':s.phase==='product'?(s.revealed?s.mixed?'place':'carry':'calculate'):'connect';
   const e=session.entry||{},visual=document.getElementById('worksheetFrame')?.worksheetVisual;
-  return {order:{foodId:orderFood(r.ticket).id,sprite:HUB_FOOD_SPRITES[orderFood(r.ticket).id]||1},rewards:usesStepCoins(r)?r.stepCoins.options.map(o=>({rank:o.rank,name:worksheetCoinName(o.rank),chance:o.chance,base:o.base,count:r.stepCoins.counts[o.rank]})):[],calculator:calculationPanelView(context),phase,tutorial:!!g.tutorialArrows,guideLevel:g.tutorialArrows?(g.completed===0?2:g.completed<3?1:0):0,entry:{selected:e.selected||null,value:e.value||'',feedback:e.feedback||'',level:e.level||0,hintTargets:visual?.hintTargets||[]}};
+  return {order:{foodId:orderFood(r.ticket).id,sprite:HUB_FOOD_SPRITES[orderFood(r.ticket).id]||1},rewards:usesStepCoins(r)?r.stepCoins.options.map(o=>({rank:o.rank,name:worksheetCoinName(o.rank),chance:o.chance,base:o.base,count:r.stepCoins.counts[o.rank]})):[],calculator:calculationPanelView(context),phase,tutorial:!!g.tutorialArrows,guideLevel:g.tutorialArrows?(g.completed<3?2:1):0,entry:{selected:e.selected||null,value:e.value||'',feedback:e.feedback||'',level:e.level||0,hintTargets:visual?.hintTargets||[]}};
  };
  observation.onSnapshot=()=>observation.publish(g.run?.worksheetSession);
  window.addEventListener('message',e=>{

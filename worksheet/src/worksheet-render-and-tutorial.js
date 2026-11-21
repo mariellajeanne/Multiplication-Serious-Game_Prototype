@@ -104,7 +104,12 @@ function updateTutorial(){
   const p=pointOf(to);if(p){const cue=document.createElement('span');cue.className='tap-cue';cue.style.left=p.x+'px';cue.style.top=p.y+'px';layer.append(cue)}
  }else if(worksheetExternalCalculator){
   text=worksheetDigitEntry.feedback||(s.carryArmed?'Carry selected. Add it to the product.':s.incoming&&!s.mixed?'Add the waiting carry first.':'Drag each digit, or tap a digit then its tile.');
-  if(document.body.dataset.guideLevel==='2'&&s.mixed){const expected=worksheetPlacementExpected();to=Q(digitTargetSelector(expected?.target)||'.no-entry-target')}
+  if(document.body.dataset.guideLevel==='2'){
+   const expected=worksheetPlacementExpected();
+   if(expected?.target)to=Q(digitTargetSelector(expected.target)||'.no-entry-target');
+   if(s.incoming&&!s.mixed)from=Q(`[data-carry="${s.k}"]`);
+   else if(s.tensLocation==='row'&&!lastDigit())from=Q(`[data-slot="${s.row}:${currentCol()+1}"]`);
+  }
  }else{
   const onesSource=s.onesPlaced?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
   if(s.incoming&&!s.mixed){from=Q(`[data-carry="${s.k}"]`);to=onesSource;text='Bring the carry into the ones.';}

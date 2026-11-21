@@ -282,3 +282,8 @@ body[data-view="hub"] .package-locked-details>span{display:grid;place-items:cent
 body[data-view="hub"] .package-locked-details>strong{font-size:31px}
 body[data-view="hub"] .package-locked-details p{margin:0;font-size:25px;line-height:1.35;max-width:440px}
 @media(prefers-reduced-motion:reduce){body[data-view="hub"] :is(.package-slide,.package-preview){transition:none!important}}
+
+
+/* Horizontal navigation belongs to the bakery scene; vertical scrolling belongs
+   to its independent Menu/Orders scroll surfaces. Keep native button taps. */
+body[data-view="hub"] .hub-home .scene-window{touch-action:pan-y}

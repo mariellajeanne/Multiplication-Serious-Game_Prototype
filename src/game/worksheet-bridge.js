@@ -5,7 +5,7 @@
 function sendEngine(type,data={}){const fr=$('worksheetFrame');if(fr?.contentWindow)fr.contentWindow.postMessage({source:'bc-shell',type,...data},typeof location!=='undefined'&&location.origin!=='null'?location.origin:'*')}
 function worksheetGuideLabel(){return `${bakeryIcon('guide')}<span>Guide ${g.tutorialArrows?'ON':'OFF'}</span>`}
 function worksheetSoundLabel(){return `${bakeryIcon(g.sound?'sound':'mute')}<span>Sound ${g.sound?'ON':'OFF'}</span>`}
-function toggleArrows(){g.tutorialArrows=!g.tutorialArrows;save();sendEngine('tutorial',{enabled:g.tutorialArrows});const b=$('arrowToggle');if(b){b.innerHTML=worksheetGuideLabel();b.setAttribute('aria-pressed',String(g.tutorialArrows))}}
+function toggleArrows(){g.tutorialArrows=!g.tutorialArrows;save();sendEngine('tutorial',{enabled:g.tutorialArrows});if(typeof scheduleWorksheetFullGuide==='function')scheduleWorksheetFullGuide();const b=$('arrowToggle');if(b){b.innerHTML=worksheetGuideLabel();b.setAttribute('aria-pressed',String(g.tutorialArrows))}}
 function toggleSfx(){g.sound=!g.sound;save();sendEngine('sound',{enabled:g.sound,volume:1});const b=$('sfxToggle');if(b){b.innerHTML=worksheetSoundLabel();b.setAttribute('aria-pressed',String(g.sound))}}
 
 function renderWorksheet(){
