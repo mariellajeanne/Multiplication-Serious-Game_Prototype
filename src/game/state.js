@@ -119,7 +119,7 @@ g.seenUnlocks=(g.seenUnlocks||[]).filter(key=>key!=='kitchen');
 // Old established players keep their saved guide preference.
 if(typeof g.guideGraduated!=='boolean')g.guideGraduated=g.completed>=3;
 function graduateGuideAfterOrder(){if(g.completed>=3&&!g.guideGraduated){g.guideGraduated=true;g.tutorialArrows=false;}}
-let modal=null;let music=null;let musicTimer=null;let animationTimers=[];let modalReturnFocus=null;
+let modal=null;let music=null;let animationTimers=[];let modalReturnFocus=null;
 const F=id=>FOOD.find(x=>x.id===id);
 const rarityLabel=r=>`★${r+1} · ${RARITIES[r]}`;
 const rarityTag=r=>`<span class="tag rarity-r${r} ${RARITIES[r].toLowerCase().replaceAll(' ','-')}">${rarityLabel(r)}</span>`;
@@ -173,29 +173,33 @@ function save(){
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if((stored?.coBakerRewards?.revision||0)>(g.coBakerRewards?.revision||0)){toast('Co-Baker rewards changed in another tab. Reload to continue.');return false}}catch(_){}
  try{const stored=JSON.parse(localStorage.getItem('panaderyaQuestV2'));if(Object.keys(stored?.claimedOrders||{}).some(id=>!g.claimedOrders[id])){toast('Progress was collected in another tab. Reload to continue.');return false}if((stored?.packageRevision||0)>(g.packageRevision||0)){toast('Packages changed in another tab. Reload to continue.');return false}mergePackageAcknowledgements(g,stored)}catch(_){}
  reconcileAutoEquip();reconcileOrderFoods();g.economyPeakBase=pricingMenuBase();syncRefreshDeadline();orderNow();if(g.run)g.orderRuns[g.run.ticket.id]=g.run;if(typeof validatePurchaseUndo==='function')validatePurchaseUndo();const rewardRevision=g.coBakerRewards?.revision||0;if(g.coBakerRewards)g.coBakerRewards.revision=rewardRevision+1;try{localStorage.setItem('panaderyaQuestV2',JSON.stringify(g));return true}catch(_){if(g.coBakerRewards)g.coBakerRewards.revision=rewardRevision;if(typeof document.createElement==='function')toast('Saving is unavailable. Keep this page open to retain your progress.');return false}}
-let toastTimer=null;
+// Ordinary notifications stay in the bottom-left. Actionable help requests and
+// purchase-undo have their own UI; a status toast never takes their place.
+const ordinaryToastTimers=new Set(),ordinaryToastRecently=new Map();
 function positionNotifications(){
- const dock=$('notificationDock');if(!dock||(!g.purchaseUndo&&!$('toasts')?.childElementCount))return;
- // Prefer noninteractive illustration areas, keeping repeated purchase controls clear.
- for(const selector of ['.package-possible','.current-bakery-preview','.food-panel-scroll','.menu-grid','.order-narrative']){
-  const anchor=document.querySelector(selector);if(!anchor)continue;
-  const r=anchor.getBoundingClientRect(),top=Math.max(8,r.top),bottom=Math.min(innerHeight-8,r.bottom);
-  if(r.width<160||r.left<0||r.right>innerWidth||bottom-top<60)continue;
-  dock.style.width=Math.min(280,r.width-16)+'px';
-  if(dock.offsetHeight>bottom-top-8)continue;
-  dock.style.left=(r.left+8)+'px';
-  dock.style.top=(selector==='.menu-grid'?top+4:bottom-dock.offsetHeight-4)+'px';
-  return;
- }
- dock.style.left='12px';dock.style.width='min(280px, calc(100vw - 24px))';dock.style.top=Math.max(8,innerHeight-dock.offsetHeight-12)+'px';
+ const dock=$('notificationDock');if(!dock)return;
+ dock.style.left='max(12px, env(safe-area-inset-left))';
+ dock.style.width='min(360px, calc(100vw - 28px))';
+ dock.style.top='auto';dock.style.bottom='max(12px, env(safe-area-inset-bottom))';
 }
-function clearNotifications(){clearTimeout(toastTimer);const root=$('toasts');if(root)root.replaceChildren()}
-function toast(text){
- const root=$('toasts');if(!root)return;
- clearNotifications();
- if(modal){let note=document.querySelector?.('.modal .dialog-notice');if(!note){note=document.createElement('p');note.className='dialog-notice';note.setAttribute('role','status');document.querySelector?.('.modalbody')?.appendChild(note)}note.textContent=text;return}
- const el=document.createElement('div');el.className='toast';el.textContent=text;root.appendChild(el);positionNotifications();toastTimer=setTimeout(()=>el.remove(),2800);
+function clearNotifications(){
+ for(const timer of ordinaryToastTimers)clearTimeout(timer);ordinaryToastTimers.clear();
+ const root=$('toasts');if(root)root.replaceChildren();
 }
+function toast(text,{forceDock=false}={}){
+ const root=$('toasts');if(!root||!text)return;
+ if(modal&&!forceDock){let note=document.querySelector?.('.modal .dialog-notice');if(!note){note=document.createElement('p');note.className='dialog-notice';note.setAttribute('role','status');document.querySelector?.('.modalbody')?.appendChild(note)}note.textContent=text;return}
+ const message=String(text),now=Date.now();
+ if(now-(ordinaryToastRecently.get(message)||0)<1200)return;
+ ordinaryToastRecently.set(message,now);
+ if(ordinaryToastRecently.size>30){for(const [key,at] of ordinaryToastRecently)if(now-at>10000)ordinaryToastRecently.delete(key)}
+ const el=document.createElement('div');el.className='toast';el.textContent=message;el.setAttribute('role','status');root.appendChild(el);
+ while(root.children.length>3)root.firstElementChild.remove();
+ positionNotifications();
+ const timer=setTimeout(()=>{ordinaryToastTimers.delete(timer);el.remove()},Math.max(3100,Math.min(5200,1700+message.length*37)));
+ ordinaryToastTimers.add(timer);
+}
+
 function captureFocus(el){return el?{node:el,id:el.id,key:el.getAttribute?.('data-focus'),action:el.getAttribute?.('onclick'),label:el.getAttribute?.('aria-label')}:null}
 function restoreFocus(target){
  if(!target)return;let el=target.node?.isConnected?target.node:target.id?$(target.id):null;

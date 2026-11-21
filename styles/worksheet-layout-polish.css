@@ -110,7 +110,8 @@
   border:4px solid var(--action-border)!important;
   border-radius:18px!important;
   box-shadow:0 5px 0 var(--action-ridge),inset 0 2px 0 #ffffff80!important;
-  min-height:clamp(54px,6.2vh,82px);
+  height:clamp(54px,5.4vw,78px);
+  min-height:clamp(54px,5.4vw,78px);
   padding:9px clamp(11px,1.3vw,25px)!important;
   font-size:clamp(17px,1.55vw,29px)!important;
   font-weight:1000;
@@ -128,7 +129,7 @@
 .worksheet-modern .worksheet-complete-bar .worksheet-header-actions .worksheet-settings{
   --action-border:#b68740;--action-ridge:#a7793f;
   background:#ffe19d!important;color:#744720!important;
-  width:clamp(54px,5.4vw,78px);height:auto;padding:8px!important;
+  width:clamp(54px,5.4vw,78px);height:clamp(54px,5.4vw,78px);padding:8px!important;
   font-size:clamp(26px,2.5vw,36px)!important;
 }
 .worksheet-modern .worksheet-complete-bar .worksheet-header-actions .cobaker-help-button{
@@ -160,7 +161,7 @@ body[data-view='hub'] .worksheet-modern .worksheet-complete-bar>#worksheetSaveEx
   .worksheet-modern .worksheet-complete-bar>.worksheet-header-actions{gap:clamp(4px,.65vw,9px)}
   .worksheet-modern .worksheet-complete-bar button.illustrated-worksheet-button,
   .worksheet-modern .worksheet-complete-bar .worksheet-header-actions .worksheet-settings{
-    min-height:48px;border-width:3px!important;border-radius:12px!important;
+    height:48px;min-height:48px;border-width:3px!important;border-radius:12px!important;
     padding:6px clamp(6px,.8vw,11px)!important;
     font-size:clamp(12px,1.65vw,18px)!important;
     box-shadow:0 3px 0 var(--action-ridge),inset 0 1px 0 #ffffff80!important;
@@ -192,7 +193,7 @@ body[data-view='hub'] .worksheet-modern .worksheet-complete-bar>#worksheetSaveEx
     "rewards order calculator"
     "rewards sheet calculator"
     "rewards footer calculator";
-  grid-template-rows:52px minmax(0,1fr) clamp(72px,7.4vh,106px);
+  grid-template-rows:52px minmax(0,1fr) calc(clamp(54px,5.4vw,78px) + 22px);
   column-gap:clamp(8px,1vw,20px);
   row-gap:0;
 }
@@ -235,6 +236,9 @@ body[data-view='hub'] .worksheet-modern .worksheet-complete-bar>#worksheetSaveEx
   align-items:center;
   justify-content:center;
   gap:clamp(4px,.5vw,10px);
+}
+@media(min-width:1001px) and (min-height:601px){
+  .worksheet-modern .worksheet-complete-bar>.worksheet-header-actions{overflow:visible}
 }
 .worksheet-modern .worksheet-help-symbols{
   display:inline-flex;

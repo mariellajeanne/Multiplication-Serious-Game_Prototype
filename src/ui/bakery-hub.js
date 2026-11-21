@@ -1,5 +1,11 @@
 /* Illustrated bakery view. All actions and values use the production controllers. */
 let hubCollection=false,hubFoodDirect=false,hubMountedRun=null,hubMountedPhase=null,hubRenderingWorksheet=false,hubScrollControls=null,hubCollectionFocus=null;
+// A rerendered dialog receives programmatic focus. Retain its input modality so
+// pointer opening does not get mistaken for keyboard navigation by the browser.
+if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+ document.addEventListener('pointerdown',()=>{document.documentElement.dataset.focusInput='pointer'},true);
+ document.addEventListener('keydown',()=>{document.documentElement.dataset.focusInput='keyboard'},true);
+}
 function isBakeryHub(){return typeof document!=='undefined'&&document.body?.dataset.view==='hub'}
 function hubEscape(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function hubAsset(name){
@@ -46,7 +52,7 @@ function renderHubTickets(){
  return g.board.map(ticket=>{
   const food=orderFood(ticket),rank=ticketCoinTier(ticket),run=g.orderRuns[ticket.id],progress=ticketProgress(ticket);
   const label=ticketOrderLabel(ticket),status=run?.phase==='claim'?'Collect':run?'Resume':'Progress';
-  return `<button type="button" class="order-ticket hub-ticket ticket coin-tier-${rank}${String(ticket.a).length>3?' is-wide-math':''}" data-ticket-id="${ticket.id}" data-order-food="${food.id}" onclick="startTicket(${ticket.id})" aria-label="${run?.phase==='claim'?'Collect coins for':run?'Resume':'Start'} ${hubEscape(label)}, ${hubEscape(food.name)}, ${ticket.a} × ${ticket.b}, ${progress}% complete, ${hubEscape(hubCoinTierName(rank))} reward"><span class="ticket-shadow" aria-hidden="true"></span><span class="ticket-cutout">${hubTicketPaper(ticket,rank)}<span class="ticket-safe-content"><span class="coin-hero hub-ticket-reward">${hubCoinArt(rank)}</span><span class="order-main"><span class="order-math">${hubFoodArt(food.id,'food-symbol')}<span class="order-quantity">${ticket.a}</span><span class="times">×</span>${hubImage('tray-icon.png','tray-symbol','tray')}<span class="order-quantity">${ticket.b}</span></span><span class="hub-ticket-progress" role="progressbar" aria-label="Order progress" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" style="--progress:${progress}%"><span>${status}</span><strong>${progress}%</strong></span></span></span></span></button>`;
+  return `<button type="button" class="order-ticket hub-ticket ticket coin-tier-${rank}${String(ticket.a).length>3?' is-wide-math':''}" data-ticket-id="${ticket.id}" data-order-food="${food.id}" onclick="startTicket(${ticket.id})" aria-label="${run?.phase==='claim'?'Collect coins for':run?'Resume':'Start'} ${hubEscape(label)}, ${hubEscape(food.name)}, ${ticket.a} × ${ticket.b}, ${progress}% complete, ${hubEscape(hubCoinTierName(rank))} reward"><span class="ticket-shadow" aria-hidden="true"></span><span class="ticket-cutout">${hubTicketPaper(ticket,rank)}<span class="ticket-safe-content"><span class="coin-hero hub-ticket-reward">${hubCoinArt(rank)}<span class="scene-coin-star-badge" aria-hidden="true">${rank+1} ★</span></span><span class="order-main"><span class="order-math">${hubFoodArt(food.id,'food-symbol')}<span class="order-quantity">${ticket.a}</span><span class="times">×</span>${hubImage('tray-icon.png','tray-symbol','tray')}<span class="order-quantity">${ticket.b}</span></span><span class="hub-ticket-progress" role="progressbar" aria-label="Order progress" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" style="--progress:${progress}%"><span>${status}</span><strong>${progress}%</strong></span></span></span></span></button>`;
  }).join('');
 }
 function getHubCollectionFoods(){
@@ -79,7 +85,7 @@ function renderHubSelectionToolbar(foods){
 }
 function renderHubCollectionHeaderExtras(){
  const progress=Math.max(0,Math.min(100,Math.round((g.activeMenu.length/Math.max(1,g.menuSlots))*100)));
- const slotLabel=g.menuSlots>=FOOD.length?'All slots owned':`+1 Slot · 🪙 ${amountLabel(slotCost())}`;
+ const slotLabel=g.menuSlots>=FOOD.length?'All slots owned':`+1 Slot · ${amountLabel(slotCost())} <img class="menu-slot-coin" src="assets/bakery-runtime/price-coin.webp" alt="" aria-hidden="true" draggable="false">`;
  return `<div class="collection-header-summary"><div class="collection-status-pill" style="--equipped-progress:${progress}%"><span class="collection-status-segment collection-equipped-progress"><strong>${g.activeMenu.length}/${g.menuSlots} Equipped</strong></span><span class="collection-pill-divider" aria-hidden="true"></span><button class="secondary collection-status-segment collection-slot-button" ${g.menuSlots>=FOOD.length?'disabled':''} onclick="buyMenuSlot()">${slotLabel}</button></div><button class="secondary collection-index" onclick="openIndex()">📖 Food Index</button></div>`;
 }
 function renderHubCollectionToolbar(foods){
@@ -106,18 +112,25 @@ function hubPopupChrome(title,body,{collection=false,variant='',headerExtras=''}
 }
 function renderHubFoodCard(o){
  const food=F(o.id),equipped=g.activeMenu.includes(o.uid),selected=selectedFoods.has(o.uid),busy=!!(g.run&&!g.run.paused);
- return `<article class="compact-food collection-card r${food.rarity} ${equipped?'is-equipped':'is-unequipped'} ${selected?'is-selected':''}" data-uid="${o.uid}"><button class="food-card-target" aria-pressed="${selected}" onclick="selectFood(${o.uid})" aria-label="Manage ${hubEscape(food.name)}, ${rarityLabel(food.rarity)}, Mastery ${recipeMastery(o)}">${hubFoodArt(food.id)}<strong>${hubEscape(food.name)}</strong><span class="food-card-rarity">${RARITIES[food.rarity]} · ×${multiplierLabel(foodValue(o))}</span><small class="food-card-bottom">Mastery ${recipeMastery(o)}${availableMastery(o)?` · +${availableMastery(o)} available`:''}</small></button><button class="collection-equip ${equipped?'equipped':''}" onclick="hubToggleEquip(${o.uid})" ${busy||!equipped&&g.activeMenu.length>=g.menuSlots?'disabled':''}>${equipped?'Equipped ✓':'Equip'}</button></article>`;
+ return `<article class="compact-food collection-card r${food.rarity} ${equipped?'is-equipped':'is-unequipped'} ${selected?'is-selected':''}" data-uid="${o.uid}"><button class="food-card-target" aria-pressed="${selected}" onclick="selectFood(${o.uid})" aria-label="Manage ${hubEscape(food.name)}, ${rarityLabel(food.rarity)}, Level ${displayedFoodLevel(o)}"><span class="collection-card-statline"><span class="collection-card-boost">${boostSymbol()} ×${multiplierLabel(foodValue(o))}</span><span class="collection-card-levels"><span>Lv. ${displayedFoodLevel(o)}</span><span class="${availableMastery(o)?'has-upgrades':''}">↑${availableMastery(o)}</span></span></span><span class="collection-card-image">${hubFoodArt(food.id)}</span><strong class="collection-card-name">${hubEscape(food.name)}</strong><span class="food-card-rarity">${food.rarity+1}★ ${RARITIES[food.rarity]}</span></button><button class="collection-equip ${equipped?'equipped':''}" onclick="hubToggleEquip(${o.uid})" ${busy||!equipped&&g.activeMenu.length>=g.menuSlots?'disabled':''}>${equipped?'Equipped ✓':'Equip'}</button></article>`;
 }
 function renderHubCollection(){
  // Clicking an equipped food opens only its details, not the collection inventory.
  if(hubFoodDirect)return `<div class="hub-collection-overlay bakery-popup-backdrop food-direct-backdrop" onclick="if(event.target===this)closeHubCollection()"><div class="food-direct-host" role="dialog" aria-modal="true" aria-label="Food details"><div id="foodPanel">${renderFoodPanel()}</div></div></div>`;
  const foods=getHubCollectionFoods();
- return hubPopupChrome('Menu Collection',`<main class="illustrated-collection-content" style="--owned-rows:${Math.min(2,Math.max(1,Math.ceil(foods.length/4)))}"><div class="collection-toolbar">${renderHubCollectionToolbar(foods)}</div><div class="collection-toolbar-hint-row">${uiText("Long-press (hold) a food item to select many items.")}</div><div class="menu-grid collection-grid" data-food-count="${foods.length}" tabindex="0" aria-label="Owned foods, scroll to browse">${foods.map(renderHubFoodCard).join('')}${!foods.length?'<p>No foods in this view. Show all foods or open a package.</p>':''}</div><div id="foodPanel">${renderFoodPanel()}</div></main>`,{collection:true,variant:foods.length<5?'small-collection':'',headerExtras:renderHubCollectionHeaderExtras()});
+ // A selected food is a sibling modal on top of the inventory, never a child
+ // of the scrollable food grid. The collection stays mounted underneath.
+ const detailVisible=!multiSelect&&selectedFoods.size===1;
+ const collection=hubPopupChrome('Menu Collection',`<main class="illustrated-collection-content" style="--owned-rows:${Math.min(2,Math.max(1,Math.ceil(foods.length/4)))}"><div class="collection-toolbar">${renderHubCollectionToolbar(foods)}</div><div class="collection-toolbar-hint-row">${uiText("Long-press (hold) a food item to select many items.")}</div><div class="menu-grid collection-grid" data-food-count="${foods.length}" tabindex="${detailVisible?-1:0}" aria-label="Owned foods, scroll to browse">${foods.map(renderHubFoodCard).join('')}${!foods.length?'<p>No foods in this view. Show all foods or open a package.</p>':''}</div>${detailVisible?'':'<div id="foodPanel"></div>'}</main>`,{collection:true,variant:foods.length<5?'small-collection':'',headerExtras:renderHubCollectionHeaderExtras()});
+ return detailVisible?collection+`<div class="hub-collection-overlay bakery-popup-backdrop food-direct-backdrop food-collection-detail-backdrop" role="presentation" onclick="if(event.target===this)closeFoodPanel()"><div class="food-direct-host" role="dialog" aria-modal="true" aria-label="Selected food details"><div id="foodPanel">${renderFoodPanel()}</div></div></div>`:collection;
 }
 function hubToggleEquip(uid){
  if(suppressFoodTap===uid){suppressFoodTap=null;return false}
  const selection=selectedFoods;selectedFoods=new Set([uid]);
- const ok=selectionEquip(!g.activeMenu.includes(uid));selectedFoods=selection;paintFoodPanel();return ok;
+ const ok=selectionEquip(!g.activeMenu.includes(uid));selectedFoods=selection;
+ // selectionEquip renders its temporary one-food selection. Reconcile the
+ // restored selection too, so quick equipment cannot leave a blank detail modal.
+ render();return ok;
 }
 function openHubCollection(){hubCollectionFocus=captureFocus(document.activeElement);hubFoodDirect=false;hubCollection=true;render();const grid=$('hubCollection').querySelector('.menu-grid');if(grid)grid.scrollTop=0;document.querySelector('.hub-collection-back')?.focus({preventScroll:true})}
 function closeHubCollection(){selectedFoods.clear();multiSelect=false;hubFoodDirect=false;hubCollection=false;render();restoreFocus(hubCollectionFocus);if(!document.activeElement?.getClientRects().length||document.activeElement===document.body)document.querySelector('.view-all-foods,.nav-collection')?.focus({preventScroll:true})}
@@ -190,13 +203,28 @@ showCoinsInfo=function(){
 showBoostInfo=function(){
  if(!isBakeryHub())return preservedShowBoostInfo();
  const foods=g.activeMenu.map(uid=>g.owned.find(o=>o.uid===uid)).filter(Boolean);
- showModal("Baker's Boost",`<div class="hub-boost-detail">${hubBoostDiamond()}<div><span>Your order multiplier</span><strong id="menuBoostComponent">×${boostComponentLabel(bakeryValue())}</strong></div></div><h3 class="contributions-heading">Equipped foods add up</h3><div class="boost-food-list">${foods.map(o=>`<div>${hubFoodArt(o.id)}<span><b>${hubEscape(F(o.id).name)}</b><small>Mastery ${recipeMastery(o)}</small></span><strong>+${multiplierLabel(foodValue(o))}</strong></div>`).join('')||'<p>No foods equipped.</p>'}</div><div class="mastery-growth">${boostSymbol()}<span>Recipe Mastery ↑ <b>Boost ↑</b><small>Duplicates unlock more Mastery.</small></span></div><div class="btnrow hub-info-actions"><button class="primary" onclick="closeModal();openHubCollection()">Manage Foods</button></div>`,'hud-info-modal');
+ showModal("Baker's Boost",`<div class="hub-boost-detail">${hubBoostDiamond()}<div><span>Your order multiplier</span><strong id="menuBoostComponent">×${boostComponentLabel(bakeryValue())}</strong></div></div><h3 class="contributions-heading">Equipped foods add up</h3><div class="boost-food-list">${foods.map(o=>`<div>${hubFoodArt(o.id)}<span><b>${hubEscape(F(o.id).name)}</b><small>Level ${displayedFoodLevel(o)}</small></span><strong>+${multiplierLabel(foodValue(o))}</strong></div>`).join('')||'<p>No foods equipped.</p>'}</div><div class="mastery-growth">${boostSymbol()}<span>Recipe Mastery ↑ <b>Boost ↑</b><small>Duplicates unlock more Mastery.</small></span></div><div class="btnrow hub-info-actions"><button class="primary" onclick="closeModal();openHubCollection()">Manage Foods</button></div>`,'hud-info-modal');
 };
+// A Settings toggle must not throw the child back to the first section.
+// Keep the open dialog's scroll and restore focus to the same control.
+function preserveSettingsView(change){
+ const panel=document.querySelector('#modals .settings-modal .popup-body,#modals .settings-modal .modalbody');
+ const scroll=panel?.scrollTop||0,active=document.activeElement;
+ const label=active?.getAttribute?.('aria-label'),name=active?.name;
+ change();
+ const next=document.querySelector('#modals .settings-modal .popup-body,#modals .settings-modal .modalbody');
+ if(!next)return;
+ next.scrollTop=scroll;
+ const focus=label?[...next.querySelectorAll('button,[aria-label]')].find(el=>el.getAttribute('aria-label')===label):
+  name?next.querySelector(`[name="${name}"]`):null;
+ focus?.focus?.({preventScroll:true});
+ next.scrollTop=scroll;
+}
 const preservedOpenSettings=openSettings;
 openSettings=function(){
  if(!isBakeryHub())return preservedOpenSettings();
  const row=(icon,label,on,action)=>`<div class="settings-row"><b>${bakeryIcon(icon)}${label}</b><button class="secondary setting-toggle" aria-label="${label}" aria-pressed="${on}" onclick="${action}"><span class="toggle-dot" aria-hidden="true"></span>${on?'ON':'OFF'}</button></div>`;
- showModal('Settings',`${languageSettingsMarkup()}<div class="settings-list">${row('sound','Sounds',g.sound,'toggleSfx();openSettings()')}${row('guide','Guide',g.tutorialArrows,'toggleArrows();openSettings()')}${row('sound','Music',g.musicOn,'toggleMusic()')}</div><div class="btnrow settings-actions"><button class="secondary" onclick="showTutorial()">${bakeryIcon('guide')}Show me</button><button class="secondary" onclick="openHubHelp()">How to Play</button></div>${g.completed>=3?`<div class="settings-extras">${g.completed>=6?'<button class="secondary" onclick="openStaff()">Helper</button>':''}<button class="secondary" onclick="openModes()">Game modes</button>${g.completed>=5?'<button class="secondary" onclick="openIngredients()">Ingredient pantry</button>':''}</div>`:''}<details class="adult-tools"><summary>Advanced · grown-ups</summary><p>${uiText("These controls change saved progress.")}</p><div class="btnrow"><button class="secondary" onclick="unlockDemo()">Demo bakery</button><button class="secondary" onclick="resetGame()">Erase progress…</button></div></details>`,'settings-modal');
+ showModal('Settings',`<div class="settings-main-sections">${languageSettingsMarkup()}<section class="settings-preferences"><h3>Sounds &amp; Music</h3><div class="settings-list">${row('sound','Sounds',g.sound,'preserveSettingsView(()=>{toggleSfx();openSettings()})')}${row('sound','Music',g.musicOn,'preserveSettingsView(()=>toggleMusic())')}</div></section><div id="hubHelpSettings"></div><section class="settings-guide"><h3>Guide</h3><div class="settings-list">${row('guide','Guide arrows',g.tutorialArrows,'preserveSettingsView(()=>{toggleArrows();openSettings()})')}</div><div class="btnrow settings-actions"><button class="secondary" onclick="showTutorial()">${bakeryIcon('guide')}Show Me</button><button class="secondary" onclick="openHubHelp()"><span class="guide-question" aria-hidden="true">?</span>How to Play</button></div></section></div><details class="adult-tools"><summary>Advanced Controls</summary><div id="coBakerAdvanced"></div><p>${uiText("These controls change saved progress.")}</p><div class="btnrow"><button class="secondary" onclick="unlockDemo()">Demo bakery</button><button class="secondary" onclick="resetGame()">Erase progress…</button></div></details>`,'settings-modal');
 };
 const preservedRequestSelectedSale=requestSelectedSale;
 requestSelectedSale=function(){
@@ -213,7 +241,7 @@ coinRewardMarkup=function(r){
  return `<section class="coin-order-reward"><div class="hub-wallet-detail">${hubCoinArt(ticketCoinTier(r.ticket))}<div><span>Coins collected</span><strong class="coin-reward-total">+${amountLabel(r.pool)}</strong></div></div><div class="reward-formula"><span>Base coins<b>${amountLabel(base)}</b></span><b>×</b><span>Baker's Boost<b>×${multiplierLabel(boost)}</b></span><b>=</b><span>Total coins<b>${amountLabel(r.pool)}</b></span></div><div class="btnrow"><button class="primary" onclick="closeModal()">Back to Bakery</button></div></section>`;
 };
 function dispatchHubAction(action){
- const actions={packages:()=>openPackages(),home:()=>navigateBakery('menu'),center:()=>navigateBakery('menu'),orders:()=>navigateBakery('orders'),slot:buyMenuSlot,collection:openHubCollection,play:playHubOrder,boost:showBoostInfo,wallet:showCoinsInfo,help:openHubHelp,settings:openSettings,odds:openProbabilities,refresh:()=>refreshRemaining()>0?requestRefreshSkip():refreshOrders()};
+ const actions={packages:()=>openPackages(),home:()=>navigateBakery('menu'),center:()=>navigateBakery('menu'),orders:()=>navigateBakery('orders'),slot:buyMenuSlot,collection:openHubCollection,'equip-best':()=>equipBest('final'),play:playHubOrder,boost:showBoostInfo,wallet:showCoinsInfo,help:openHubHelp,settings:openSettings,odds:openProbabilities,refresh:()=>refreshRemaining()>0?requestRefreshSkip():refreshOrders()};
  if(actions[action])return actions[action]();
  const match=/^(food|order)-(up|down)$/.exec(action);
  if(match)$(match[1]==='food'?'cabinet-scroll':'order-scroller')?.scrollBy({top:(match[2]==='up'?-1:1)*180,behavior:'smooth'});
@@ -226,9 +254,10 @@ if(typeof window!=='undefined'){
  window.addEventListener('resize',fitHubInterface);
  document.addEventListener('keydown',e=>{
   if(!hubCollection||modal||e.defaultPrevented)return;
-  if(e.key==='Escape'){e.preventDefault();closeHubCollection();return}
+  if(e.key==='Escape'){e.preventDefault();if(!hubFoodDirect&&!multiSelect&&selectedFoods.size===1)closeFoodPanel();else closeHubCollection();return}
   if(e.key!=='Tab')return;
-  const root=$('hubCollection'),buttons=[...root.querySelectorAll('button:not(:disabled),select,[tabindex="0"]')].filter(el=>el.getClientRects().length),first=buttons[0],last=buttons.at(-1);
+  const root=document.querySelector('.food-collection-detail-backdrop,.food-direct-backdrop')||$('hubCollection');
+  const buttons=[...root.querySelectorAll('button:not(:disabled),select,[tabindex="0"]')].filter(el=>el.getClientRects().length),first=buttons[0],last=buttons.at(-1);
   if(e.shiftKey&&document.activeElement===first){e.preventDefault();last?.focus()}
   else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first?.focus()}
  });

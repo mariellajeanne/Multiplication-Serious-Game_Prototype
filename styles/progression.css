@@ -312,3 +312,10 @@ button:not(:disabled){transition:background-color var(--feedback-press),box-shad
 }
 
 @media(prefers-reduced-motion:reduce){.ui-pulse,.package-reward,.package-type::after{animation:none!important;transition:none!important}}
+
+/* V18: stable bottom-left notification lane, regardless of active screen. */
+.notification-dock{left:max(12px,env(safe-area-inset-left))!important;top:auto!important;bottom:max(12px,env(safe-area-inset-bottom))!important;width:min(360px,calc(100vw - 28px))!important;max-height:min(62dvh,370px);pointer-events:none}
+.notification-dock>.toaststack{display:grid;gap:9px;min-height:0;max-height:50dvh;overflow:hidden}
+.notification-dock .toast{width:100%;font-size:clamp(15px,1.15vw,21px);font-weight:850;line-height:1.25;padding:12px 15px;overflow-wrap:anywhere;animation:slidein .2s both}
+.notification-dock .purchase-undo{pointer-events:auto}
+@media(max-height:460px){.notification-dock{width:min(290px,calc(100vw - 28px))!important;max-height:72dvh}.notification-dock .toast{font-size:14px;padding:8px 11px}}

@@ -18,6 +18,11 @@ function ones(){return value()%10}function tens(){return Math.floor(value()/10)}
 function currentCol(){return s.row+s.k}function lastDigit(){return s.k===s.A.length-1}
 function currentIncoming(){return Number(s.carrySlots[s.k]?.value||0)}
 function productActive(){return s.phase==='product'}
-function operand(kind,c){if(s.phase!=='select')return;const wanted=kind==='top'?s.k:s.row;if(c!==wanted){invalid();status('Try another digit pair.',true);return}if(!s.first){s.first={kind,c};play('link');render();return}if(s.first.kind===kind){s.first={kind,c};render();return}snapshot();s.first=null;s.phase='product';s.revealed=false;s.raw=s.A[s.k]*s.B[s.row];s.incoming=currentIncoming();s.mixed=!s.incoming;s.onesPlaced=false;s.tensPlaced=false;s.tensLocation=null;s.chosen=null;s.carryArmed=false;selection=null;play('link');render();startMultiplySequence();}
+function operand(kind,c){if(s.phase!=='select')return;const wanted=kind==='top'?s.k:s.row;if(c!==wanted){invalid();status('Try another digit pair.',true);return}if(!s.first){s.first={kind,c};play('link');render();return}if(s.first.kind===kind){s.first={kind,c};render();return}snapshot();
+// Preserve the direction the child actually connected, without changing math operands.
+const connectionStart=s.first.kind==='top'?s.A[s.k]:s.B[s.row];
+const connectionEnd=kind==='top'?s.A[s.k]:s.B[s.row];
+s.expressionOrder=[connectionStart,connectionEnd];s.expressionActivated=false;s.goldenOffer=false;
+s.first=null;s.phase='product';s.revealed=false;s.raw=s.A[s.k]*s.B[s.row];s.incoming=currentIncoming();s.mixed=!s.incoming;s.onesPlaced=false;s.tensPlaced=false;s.tensLocation=null;s.chosen=null;s.carryArmed=false;selection=null;play('link');render();startMultiplySequence();}
 function flashConnection(){const id=run;$('pair').classList.add('live');clearTimeout(connectionTimer);connectionTimer=setTimeout(()=>{if(id===run)$('pair').classList.remove('live')},440)}
 // A single soft confirming sound: no repeated count-by beeps.

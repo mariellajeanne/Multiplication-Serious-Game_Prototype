@@ -115,7 +115,31 @@
  const prior=renderWorksheet;renderWorksheet=function(...args){let html=prior.apply(this,args);if(html.includes('worksheet-modern'))html=html.replace('<div class="worksheet-header-actions">','<div class="worksheet-header-actions"><button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Find a Helper" title="Find a helper over the network" data-network-icon="1" onclick="openCoBakerHelp()">'+worksheetHelperButtonContent+'</button>');return html;};
  const initialHeader=document.querySelector('.worksheet-modern .worksheet-header-actions');
  if(initialHeader&&!initialHeader.querySelector('.cobaker-help-button'))initialHeader.insertAdjacentHTML('afterbegin','<button type="button" class="illustrated-worksheet-button cobaker-help-button" aria-label="Find a Helper" title="Find a helper over the network" data-network-icon="1" onclick="openCoBakerHelp()">'+worksheetHelperButtonContent+'</button>');
- const current=d();if(current?.help){current.help.worksheet=()=>sheetActive()||!!(current.help.active?.role==='Learner'&&!current.help.active.lostAt&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);current.help.observe(()=>{renderHelp();notices()});current.observe(()=>{renderHelp();notices()})}
+ const current=d();if(current?.help){
+  const help=current.help;
+  // Only newly recorded, non-actionable status messages become bottom-left toasts.
+  // The invitation/accept/decline choices stay in the existing consent tray.
+  let lastLog=help.log[0]||null,lastActive=help.active;
+  const isFeedback=message=>/calling|connected|is helping|accepted|declined|expired|failed|canceled|ended|left|reconnect|request|no longer|already being helped|unavailable/i.test(message);
+  help.worksheet=()=>sheetActive()||!!(help.active?.role==='Learner'&&!help.active.lostAt&&typeof g!=='undefined'&&g.run?.phase==='engine'&&!g.run.paused&&g.run.procedureComplete);
+  help.observe(()=>{
+   const log=help.log[0];
+   if(log&&log!==lastLog){
+    if(isFeedback(log.message)&&typeof toast==='function'){
+     const wasHelper=lastActive?.role==='Helper'&&!help.active;
+     const text=wasHelper&&/Your Co-Baker left/.test(log.message)?'The other Baker ended this help session.':log.message;
+     toast(text,{forceDock:true});
+    }
+    lastLog=log;
+    if(!help.active&&/ended|left/i.test(log.message))lastActive=null;
+   }
+   // Presence broadcasts can clear active before the terminal log arrives.
+   // Keep the previous role until that message has been presented.
+   if(help.active)lastActive=help.active;
+   renderHelp();notices();
+  });
+  current.observe(()=>{renderHelp();notices()});
+ }
  // Modal closure only stops scanning/refilling. Delivered calls and the live
  // worksheet reservation remain owned by Help until their own terminal state.
  if(typeof MutationObserver==='function')new MutationObserver(()=>{const help=get();if(help?.pickerOpen&&!document.getElementById('coBakerHelpBody'))help.setPicker(false)}).observe(document.getElementById('modals')||document.body,{childList:true,subtree:true});

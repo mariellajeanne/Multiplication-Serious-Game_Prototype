@@ -117,3 +117,36 @@ test('temporary written tens remain movable to carry without duplicating their s
  assert.equal(w.exec(`worksheetDropDigit('tens',{kind:'carry',c:1},2)`),true);assert.equal(w.exec('s.done'),1);
  assert.equal(w.exec('s.rows[0][1]'),undefined);assert.equal(w.exec('s.carrySlots[1].value'),2);
 });
+
+test('V19: 9 × 0 produces a real zero digit that can be placed, not a blank result',()=>{
+ const w=worksheet(9,10);w.connect();
+ assert.equal(w.exec('s.raw'),0);assert.equal(w.exec('ones()'),0);
+ assert.equal(w.exec("worksheetDropDigit('ones',{kind:'slot',r:0,c:0},0)"),true);
+ assert.equal(w.exec('s.rows[0][0]'),0);
+ assert.equal(w.exec('s.done'),1);
+});
+test('V19: 6 × 7 yields separate ones 2 and tens 4 placements',()=>{
+ const w=worksheet(6,7);w.connect();assert.equal(w.exec('s.raw'),42);
+ assert.equal(w.exec("worksheetDropDigit('ones',{kind:'slot',r:0,c:0},2)"),true);
+ assert.equal(w.exec("worksheetDropDigit('tens',{kind:'slot',r:0,c:1},4)"),true);
+ assert.equal(w.exec('s.complete'),true);
+ assert.deepEqual(w.json('s.rows[0]'),{0:2,1:4});
+});
+test('V19: 79 × 18 mixed carry, Undo, and save/resume keep math valid',()=>{
+ const w=worksheet(79,18);w.connect();
+ // 9 × 8 = 72, place the 2 and carry 7.
+ assert.equal(w.exec('s.raw'),72);
+ assert.equal(w.exec("worksheetDropDigit('ones',{kind:'slot',r:0,c:0},2)"),true);
+ assert.equal(w.exec("worksheetDropDigit('tens',{kind:'carry',c:1},7)"),true);
+ assert.equal(w.exec('s.done'),1);
+ w.connect();assert.equal(w.exec('s.raw'),56);
+ // Allow ones placement before bringing the incoming 7 carry down.
+ assert.equal(w.exec("worksheetDropDigit('ones',{kind:'slot',r:0,c:1},6)"),true);
+ w.exec('saved=window.getWorksheetSession()');
+ w.exec('s=history.pop().s;render()');
+ assert.equal(w.exec('s.onesPlaced'),false);
+ w.exec("externalStart({id:77,a:79,b:18},'A',true,saved)");
+ assert.equal(w.exec('s.onesPlaced'),true);
+ assert.equal(w.exec("worksheetCarryTarget({kind:'slot',r:0,c:1})"),true);
+ assert.equal(w.exec('s.rows[0][1]'),3);
+});

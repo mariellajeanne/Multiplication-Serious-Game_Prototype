@@ -45,7 +45,7 @@ function requestInventoryAction(kind){
  const foods=kind==='sell'?state.selected:state.removing;
  pendingInventoryAction={kind,uids:foods.map(o=>o.uid),fingerprint:inventoryFingerprint(foods)};
  const price=foods.reduce((sum,o)=>sum+resalePrice(o),0);
- showModal(kind==='sell'?`Sell ${foods.length} ${foods.length===1?'food':'foods'}?`:'Remove selected foods?',`<div class="selection-review">${foods.map(o=>`<div>${foodArt(o.id)}<span><b>${F(o.id).name}</b><small>Level ${o.level} · Tier ${o.fusion}</small></span>${kind==='sell'?`<strong>🪙 ${fmt(resalePrice(o))}</strong>`:''}</div>`).join('')}</div><p class="warning">${kind==='sell'?'These whole copies and their upgrades will be sold and removed from your menu. Discoveries stay in Food Index.':'These copies stop contributing to the Menu multiplier. Your food and upgrades stay in Food Inventory.'}</p>${kind==='sell'?`<div class="costrow"><span>Total sale · includes existing upgrade refunds</span><strong>+${fmt(price)} 🪙</strong></div>`:''}<div class="btnrow"><button class="secondary" onclick="openMenu(inventoryIntent,true)">Cancel</button><button class="primary" onclick="confirmInventoryAction()">${kind==='sell'?`Sell · ${fmt(price)} 🪙`:'Remove from menu'}</button></div>`);return true;
+ showModal(kind==='sell'?`Sell ${foods.length} ${foods.length===1?'food':'foods'}?`:'Remove selected foods?',`<div class="selection-review">${foods.map(o=>`<div>${foodArt(o.id)}<span><b>${F(o.id).name}</b><small>Level ${displayedFoodLevel(o)} · Tier ${o.fusion}</small></span>${kind==='sell'?`<strong>🪙 ${fmt(resalePrice(o))}</strong>`:''}</div>`).join('')}</div><p class="warning">${kind==='sell'?'These whole copies and their upgrades will be sold and removed from your menu. Discoveries stay in Food Index.':'These copies stop contributing to the Menu multiplier. Your food and upgrades stay in Food Inventory.'}</p>${kind==='sell'?`<div class="costrow"><span>Total sale · includes existing upgrade refunds</span><strong>+${fmt(price)} 🪙</strong></div>`:''}<div class="btnrow"><button class="secondary" onclick="openMenu(inventoryIntent,true)">Cancel</button><button class="primary" onclick="confirmInventoryAction()">${kind==='sell'?`Sell · ${fmt(price)} 🪙`:'Remove from menu'}</button></div>`);return true;
 }
 function confirmInventoryAction(){
  const action=pendingInventoryAction;pendingInventoryAction=null;if(!action||g.run)return false;
@@ -73,22 +73,87 @@ function openStaff(){if(g.completed<6){toast('Helpers open after 6 orders.');ret
  const running=g.staff.until>Date.now(),rate=running?g.staff.rate:staffRate(),fee=Math.ceil(staffRate()*36);
  showModal('A helping hand',`<div class="introbox"><div class="introart">👩‍🍳</div><h2>${running?'Your helper is baking!':'Meet your bakery helper'}</h2><div class="tool-preview" style="justify-content:center">🪙 ${rate.toFixed(1)}<small> / second</small></div><p>${uiText("A 2-minute shift. Complete orders for coins. Packages are at the Package Counter.")}</p><b id="staffTimer">${running?Math.ceil((g.staff.until-Date.now())/1000)+'s remaining':'Ready to help'}</b><button class="primary" ${running||g.coins<fee||g.run?'disabled':''} onclick="hireStaff()">${running?'Working…':`Hire · 🪙 ${fmt(fee)}`}</button></div>`);
 }
-function openIndex(){showModal('Food Index',`<p class="dialog-note">${g.discovered.length}/${FOOD.length} ${uiText("discovered · discoveries stay, even after selling.")}</p><div class="modalgrid food-choices">${FOOD.map(f=>{const seen=g.discovered.includes(f.id),owned=g.owned.filter(o=>o.id===f.id);return `<div class="itemcard">${seen?presentedFoodArt(f.id):'<div class="locked-food" aria-hidden="true">?</div>'}<h3>${seen?f.name:'A new discovery'}</h3>${rarityTag(f.rarity)}<small>${seen?`${owned.length} owned`:'Find in a package'}</small>${owned.length?`<button class="secondary" onclick="openFoodItem(${owned[0].uid})">View food</button>`:''}</div>`}).join('')}</div>`)}
+function openIndexFood(uid){
+ // Preserve a collection the player deliberately opened, while direct Index
+ // visits still open only the food details.
+ if(typeof isBakeryHub==='function'&&isBakeryHub()&&typeof openHubFood==='function'){
+  if(modal)closeModal();
+  if(hubCollection&&!hubFoodDirect){multiSelect=false;selectFood(uid);return}
+  openHubFood(uid);return;
+ }
+ openFoodItem(uid);
+}
+function openIndex(){showModal('Food Index',`<p class="dialog-note">${g.discovered.length}/${FOOD.length} ${uiText("discovered · discoveries stay, even after selling.")}</p><div class="modalgrid food-choices">${FOOD.map(f=>{const seen=g.discovered.includes(f.id),owned=g.owned.filter(o=>o.id===f.id);return `<div class="itemcard index-food-card r${f.rarity}">${seen?presentedFoodArt(f.id):'<div class="locked-food" aria-hidden="true">?</div>'}<h3>${seen?f.name:'A new discovery'}</h3>${rarityTag(f.rarity)}<small>${seen?`${owned.length} owned`:'Find in a package'}</small>${owned.length?`<button class="secondary" onclick="openIndexFood(${owned[0].uid})">View food</button>`:''}</div>`}).join('')}</div>`)}
 function openModes(){
  const descriptions={normal:'Take your time. Unlimited retries.',lookup:'Keep multiplication facts close by.',blindfold:'Recall products before placing digits.',streak:'Build your best chain of correct pairs.',bullseye:'Practice careful, accurate multiplication.',survival:'Limited lives. Choose your challenge.'};
  showModal('Choose how to play',`<div class="modalgrid">${MODE.map(m=>`<div class="itemcard"><div class="itemtop"><span style="font-size:32px">${m.icon}</span><div><h3>${m.name}</h3><small>${g.completed<m.unlock?`${m.unlock} orders to unlock`:g.mode===m.id?'✓ Playing this mode':"Base coins \u00d7 Baker's Boost"}</small></div></div><p>${uiText(descriptions[m.id])}</p><button class="${g.mode===m.id?'secondary':'primary'}" ${g.completed<m.unlock||g.run?'disabled':''} onclick="chooseMode('${m.id}')">${g.mode===m.id?'Selected':g.completed<m.unlock?'🔒 Locked':'Play '+m.name}</button></div>`).join('')}</div>${g.completed>=6?`<div class="settings-row"><b>Survival lives</b><div class="btnrow">${[1,3,5].map(n=>`<button class="${g.lives===n?'primary':'secondary'}" ${g.run?'disabled':''} aria-pressed="${g.lives===n}" onclick="chooseLives(${n});openModes()">${n} ♥</button>`).join('')}</div></div><p class="dialog-note">${uiText("Choose the lives you want. Normal is always here.")}</p>`:''}`);
 }
-function openSettings(){showModal('Make yourself at home',`${languageSettingsMarkup()}<div class="settings-row"><b>${bakeryIcon('sound')}Sounds</b><button class="secondary" aria-pressed="${g.sound}" onclick="toggleSfx();openSettings()">${g.sound?'ON':'OFF'}</button></div><div class="settings-row"><b>${bakeryIcon('guide')}Guide</b><button class="secondary" aria-pressed="${g.tutorialArrows}" onclick="toggleArrows();openSettings()">${g.tutorialArrows?'ON':'OFF'}</button></div><div class="settings-row"><b>${bakeryIcon('sound')}Music</b><button class="secondary" aria-pressed="${g.musicOn}" onclick="toggleMusic()">${g.musicOn?'ON':'OFF'}</button></div><div class="settings-row"><b>${uiText("Need a hand?")}</b><button class="secondary" onclick="showTutorial()">Show me</button></div>${g.completed>=3?`<div class="btnrow">${g.completed>=6?'<button class="secondary" onclick="openStaff()">Helper</button>':''}<button class="secondary" onclick="openModes()">Game modes</button>${g.completed>=5?'<button class="secondary" onclick="openIngredients()">Ingredient pantry</button>':''}</div>`:''}<details class="adult-tools"><summary>For grown-ups · testing & reset</summary><p>${uiText("These controls change saved progress.")}</p><div class="btnrow"><button class="secondary" onclick="unlockDemo()">Demo bakery</button><button class="secondary" onclick="resetGame()">Erase progress…</button></div></details>`)}
+function openSettings(){showModal('Make yourself at home',`${languageSettingsMarkup()}<div class="settings-row"><b>${bakeryIcon('sound')}Sounds</b><button class="secondary" aria-pressed="${g.sound}" onclick="toggleSfx();openSettings()">${g.sound?'ON':'OFF'}</button></div><div class="settings-row"><b>${bakeryIcon('guide')}Guide</b><button class="secondary" aria-pressed="${g.tutorialArrows}" onclick="toggleArrows();openSettings()">${g.tutorialArrows?'ON':'OFF'}</button></div><div class="settings-row"><b>${bakeryIcon('sound')}Music</b><button class="secondary" aria-pressed="${g.musicOn}" onclick="toggleMusic()">${g.musicOn?'ON':'OFF'}</button></div><div class="settings-row"><b>${uiText("Need a hand?")}</b><button class="secondary" onclick="showTutorial()">Show me</button></div><details class="adult-tools"><summary>For grown-ups · testing & reset</summary><p>${uiText("These controls change saved progress.")}</p><div class="btnrow"><button class="secondary" onclick="unlockDemo()">Demo bakery</button><button class="secondary" onclick="resetGame()">Erase progress…</button></div></details>`)}
 function openProbabilities(){
  const odds=ticketProbabilities(ticketLuckMastery());
  showModal('Coin Reward Tier Odds',`<p>\u{1f340} Permanent Luck grows as you complete orders. It increases the chance of higher coin tiers on new Order Tickets.</p><div class="package-odds-table">${odds.map((p,i)=>`<div><b>${i+1}\u2605 ${COIN_TIERS[i]}</b><span>${probabilityLabel(p).replace('<','&lt;')}</span></div>`).join('')}</div><p>Base coins \u00d7 Baker's Boost = total coins. A ticket keeps its tier until it is finished or replaced.</p><p>Packages are available from the Package Counter. Permanent Luck does not change package contents.</p>`);
 }
-function sellFoodPrompt(uid){const o=g.owned.find(x=>x.uid===uid);if(!o)return;showModal('Sell this whole food?',`<div class="food-detail">${foodArt(o.id)}<div><h2>${F(o.id).name}</h2><p>Level ${o.level} · Fusion ${o.fusion}</p><div class="tool-preview">🪙 +${fmt(resalePrice(o))}</div></div></div><div class="warning">This removes this copy and its upgrades from your menu. Your discovery stays in Food Index.</div><p class="dialog-note" style="margin-top:12px">${fmt(baseResale(o))} base + ${fmt(Math.floor(o.spent*.5))} upgrade refund</p><div class="btnrow"><button class="primary" onclick="closeModal()">Keep my food</button><button class="secondary" onclick="sellFood(${uid})">Sell for 🪙 ${fmt(resalePrice(o))}</button></div>`)}
+function sellFoodPrompt(uid){const o=g.owned.find(x=>x.uid===uid);if(!o)return;showModal('Sell this whole food?',`<div class="food-detail">${foodArt(o.id)}<div><h2>${F(o.id).name}</h2><p>Level ${displayedFoodLevel(o)} · Fusion ${o.fusion}</p><div class="tool-preview">🪙 +${fmt(resalePrice(o))}</div></div></div><div class="warning">This removes this copy and its upgrades from your menu. Your discovery stays in Food Index.</div><p class="dialog-note" style="margin-top:12px">${fmt(baseResale(o))} base + ${fmt(Math.floor(o.spent*.5))} upgrade refund</p><div class="btnrow"><button class="primary" onclick="closeModal()">Keep my food</button><button class="secondary" onclick="sellFood(${uid})">Sell for 🪙 ${fmt(resalePrice(o))}</button></div>`)}
 function unlockDemo(){if(g.run){toast('Finish your current order before changing bakery upgrades.');return;}if(!confirm('Demo shortcut: unlock every feature and add test coins? You can reset afterward.'))return;g.completed=Math.max(g.completed,16);g.mastery=Math.max(g.mastery,28);g.permanentLuck=Math.floor(g.mastery/4);g.coins+=100000;g.activeMenu=[...new Set(g.owned.map(x=>x.id))].slice(0,g.menuSlots).map(id=>g.owned.find(x=>x.id===id).uid);g.board=[];refillBoard();save();closeModal();toast('🧪 All systems unlocked! Test coins added. Foods still come only from purchased packages.');}
-function resetGame(){if(!confirm('Erase all saved My Panaderya progress?'))return;try{localStorage.removeItem('panaderyaQuestV2');localStorage.removeItem('panaderyaQuestV2BeforeProgression')}catch(_){}g=fresh();migrateBakeryHub(g);refillBoard();save();closeModal();render();showTutorial()}
-function toggleMusic(){g.musicOn=!g.musicOn;save();if(g.musicOn){startMusic()}else stopMusic();openSettings()}
-function startMusic(){if(musicTimer)return;try{music=new(window.AudioContext||window.webkitAudioContext)();let i=0;musicTimer=setInterval(()=>{if(!g.musicOn)return;const extra=g.decor>=2?2:0;const seq=[60,64,67,72,67,64,62,67,65,62,60,67];const midi=seq[i++%seq.length]+(extra&&i%8===0?12:0);const osc=music.createOscillator(),gain=music.createGain();osc.type='sine';osc.frequency.value=440*Math.pow(2,(midi-69)/12);gain.gain.setValueAtTime(.0001,music.currentTime);gain.gain.exponentialRampToValueAtTime(.017,music.currentTime+.04);gain.gain.exponentialRampToValueAtTime(.0001,music.currentTime+.32);osc.connect(gain).connect(music.destination);osc.start();osc.stop(music.currentTime+.34)},400)}catch(e){g.sound=false;toast('Music unavailable in this browser.')}}
-function stopMusic(){if(musicTimer){clearInterval(musicTimer);musicTimer=null}if(music){music.close();music=null}}
+function resetGame(){if(!confirm('Erase all saved My Panaderya progress?'))return;try{localStorage.removeItem('panaderyaQuestV2');localStorage.removeItem('panaderyaQuestV2BeforeProgression');localStorage.removeItem('panaderyaWholeGameTourV1')}catch(_){}g=fresh();migrateBakeryHub(g);refillBoard();save();closeModal();render();showTutorial()}
+// One native streaming player survives every render, modal and worksheet iframe.
+// Keep its position when paused; never decode the long track into a Web Audio buffer.
+let musicPlayPending=null,musicResumeRequested=false,musicAwaitingGesture=true,musicPlaybackFailed=false;
+function toggleMusic(){g.musicOn=!g.musicOn;save();if(g.musicOn){musicPlaybackFailed=false;startMusic(true)}else stopMusic();openSettings()}
+function startMusic(fromGesture=false){
+ if(!g.musicOn||musicPlaybackFailed||musicAwaitingGesture&&!fromGesture)return;
+ if(fromGesture)musicAwaitingGesture=false;
+ if(music&&!music.paused)return;
+ if(musicPlayPending){musicResumeRequested=true;return}
+ const failed=error=>{
+  if(error?.name==='NotAllowedError')musicAwaitingGesture=true;
+  else if(error?.name!=='AbortError')musicPlaybackFailed=true;
+ };
+ try{
+  if(!music){
+   music=new Audio();
+   music.preload='none';music.loop=true;music.volume=.35;
+   music.src='assets/music/My Panaderya - Background Music.mp3';
+   music.addEventListener('error',()=>{musicPlaybackFailed=true});
+  }
+  const request={};musicPlayPending=request;
+  const settled=()=>{
+   if(musicPlayPending!==request)return;
+   musicPlayPending=null;
+   const resume=musicResumeRequested;musicResumeRequested=false;
+   if(resume&&g.musicOn&&!musicAwaitingGesture&&!musicPlaybackFailed)startMusic();
+  };
+  // Both rejected promises (autoplay, OFF while loading) and older WebViews
+  // with a void play() return are handled without unhandled console errors.
+  try{Promise.resolve(music.play()).then(()=>{if(!g.musicOn)music.pause()},failed).then(settled)}
+  catch(error){failed(error);settled()}
+ }catch(error){failed(error)}
+}
+function stopMusic(){musicResumeRequested=false;if(music)music.pause()}
+if(typeof document!=='undefined'&&typeof document.addEventListener==='function'){
+ const musicInteraction=event=>{
+  if(!event.isTrusted||event.repeat||event.ctrlKey||event.metaKey||event.altKey||event.button>0)return;
+  if(event.type==='keydown'&&['Shift','Control','Alt','Meta','Escape','Tab'].includes(event.key))return;
+  if(!g.musicOn){stopMusic();return}
+  if(musicAwaitingGesture||music?.paused)startMusic(true);
+ };
+ const musicDocuments=new WeakSet();
+ const listenForMusic=doc=>{
+  if(!doc||musicDocuments.has(doc))return;musicDocuments.add(doc);
+  for(const type of ['pointerup','click','keydown'])doc.addEventListener(type,musicInteraction);
+  // A saved worksheet can be the first screen after reload. Its genuine taps
+  // unlock the same parent player, without adding music to the worksheet engine.
+  const listenInFrame=frame=>{try{listenForMusic(frame.contentDocument)}catch(_){}};
+  doc.addEventListener('load',event=>{if(event.target.tagName==='IFRAME')listenInFrame(event.target)},true);
+  for(const frame of doc.querySelectorAll?.('iframe')||[])listenInFrame(frame);
+ };
+ listenForMusic(document);
+ // pagehide is also emitted by the Android wrapper when the app pauses.
+ if(typeof window!=='undefined'&&typeof window.addEventListener==='function'){
+  window.addEventListener('pagehide',stopMusic);
+  for(const type of ['pageshow','co-baker-resume'])window.addEventListener(type,()=>{if(music)startMusic()});
+ }
+}
 
 /* One package workspace. Stock/foods persist; revealed slots live only in this session. */
 const PACKAGE_CAPACITY=50;

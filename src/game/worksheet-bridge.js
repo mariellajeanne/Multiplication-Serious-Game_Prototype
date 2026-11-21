@@ -98,6 +98,22 @@ function handleWorksheetMessage(ev){
   sendEngine('sound',{enabled:g.sound,volume:1});sendEngine('tutorial',{enabled:g.tutorialArrows});sendEngine('theme',{level:themeLevel()});fitWorksheet();return;
  }
  if(m.attemptId!==ledger.attemptId)return;
+ if((m.type==='fact-activate'||m.type==='fact-choice-select')&&typeof currentWorksheetCalculation==='function'){
+  const context=currentWorksheetCalculation();
+  if(!context||context.step.row!==m.row||context.step.col!==m.col||context.state.revealed)return;
+  const answer=ensureFactAnswer(r,context.step);
+  if(m.type==='fact-activate'){
+   if(answer.status!=='waiting')return;
+   // Child sends this immediately after tapping; do not require a second click.
+   context.state.expressionActivated=true;
+   if(answer.offered&&!answer.accepted)sendEngine('fact-choice',{attemptId:ledger.attemptId,row:m.row,col:m.col,offered:true});
+   else if(!generateWorksheetAnswer())sendEngine('fact-reset',{attemptId:ledger.attemptId,row:m.row,col:m.col});
+  }else if(context.state.expressionActivated&&answer.offered&&!answer.accepted&&answer.status==='waiting'){
+   if(m.option==='manual'&&!chooseWorksheetChallenge())sendEngine('fact-reset',{attemptId:ledger.attemptId,row:m.row,col:m.col});
+   if(m.option==='auto'&&!generateWorksheetAnswer())sendEngine('fact-reset',{attemptId:ledger.attemptId,row:m.row,col:m.col});
+  }
+  return;
+ }
  if(m.type==='fact-key'&&typeof handleWorksheetCalcMessage==='function'){handleWorksheetCalcMessage(m);return}
  if(m.type==='placement-target'&&typeof handleWorksheetPlacementTarget==='function'){handleWorksheetPlacementTarget(m);return}
  if(m.type==='digit-drop-result'&&typeof handleWorksheetDropResult==='function'){handleWorksheetDropResult(m);return}

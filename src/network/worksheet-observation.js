@@ -12,8 +12,8 @@
   if(kind==='bottom')return +a<s.B.length;
   if(kind==='sum')return s.complete&&s.B.length>1&&+a<s.cols;
   if(kind==='slot')return +a<s.B.length&&+b<s.cols&&(+a<=s.row||s.phase==='sum'||s.complete)&&(!s.complete||+a===0);
-  if(kind==='calculator')return c?.mode==='fact'&&(a==='product'||!!c.tray&&(a==='tray'||a==='carry'&&c.tray.waiting>0||c.tray.digits.some(d=>d.part===a)));
-  return a==='undo'||a==='add'&&s.phase==='sum'||a==='generate'&&!!c?.generate||a==='challenge'&&!!c?.offered;
+  if(kind==='calculator')return c?.mode==='fact'&&(a==='product'||s.phase==='product'&&s.revealed&&(a==='ones'||a==='tens'&&Math.floor((s.raw+(s.mixed?s.incoming:0))/10)>0)||!!c.tray&&(a==='tray'||a==='carry'&&c.tray.waiting>0||c.tray.digits.some(d=>d.part===a)));
+  return a==='undo'||a==='add'&&s.phase==='sum'||a==='generate'&&(!!c?.generate||s.phase==='product'&&!s.revealed&&!c?.manual)||a==='challenge'&&!!c?.offered;
  }
  function validCue(h){
   return keys(h,['kind','sessionId','streamId','recipientId','cueToken','sequence','stateVersion','target','hint'])&&Number.isSafeInteger(h.stateVersion)&&h.stateVersion>0&&
@@ -21,12 +21,15 @@
    (h.kind==='point'?!('hint'in h)&&validTarget(h.target):h.kind==='hint'&&!('target'in h)&&typeof h.hint==='string'&&Object.hasOwn(hints,h.hint));
  }
  const fields=['a','b','A','B','cols','row','k','first','phase','revealed','raw','mixed','incoming','onesPlaced','tensPlaced','tensLocation','chosen','carrySlots','rows','sum','sumCol','sumCarry','done','boxes','complete','carryArmed'];
+ const connectionFields=['expressionOrder','expressionActivated','goldenOffer'];
  const object=v=>!!v&&typeof v==='object'&&!Array.isArray(v);
  const keys=(v,list)=>object(v)&&Object.keys(v).every(k=>list.includes(k));
  const int=(v,max)=>Number.isInteger(v)&&v>=0&&v<=max;
  const digits=(v,max=6)=>object(v)&&Object.keys(v).length<=max+1&&Object.entries(v).every(([k,n])=>/^[0-6]$/.test(k)&&int(n,9));
  function validState(s){
-  if(!keys(s,fields)||fields.some(k=>!(k in s)))return false;
+  if(!keys(s,[...fields,...connectionFields])||fields.some(k=>!(k in s)))return false;
+  if(s.expressionOrder!==undefined&&(!Array.isArray(s.expressionOrder)||s.expressionOrder.length!==2||!s.expressionOrder.every(n=>int(n,9))))return false;
+  if(['expressionActivated','goldenOffer'].some(k=>s[k]!==undefined&&typeof s[k]!=='boolean'))return false;
   if(!int(s.a,99999)||s.a<1||!int(s.b,99)||s.b<1)return false;
   const rev=n=>String(n).split('').reverse().map(Number);
   if(JSON.stringify(s.A)!==JSON.stringify(rev(s.a))||JSON.stringify(s.B)!==JSON.stringify(rev(s.b))||s.cols!==String(s.a*s.b).length)return false;
@@ -56,7 +59,7 @@
  function validSnapshot(data){return keys(data,['schema','state','presentation'])&&validState(data.state)&&(data.schema===1?!('presentation'in data):data.schema===2&&validPresentation(data.presentation))}
  function snapshot(session,presentation){
   if(!session?.state)return null;
-  const state={};for(const key of fields)state[key]=session.state[key];
+  const state={};for(const key of [...fields,...connectionFields])if(session.state[key]!==undefined)state[key]=session.state[key];
   const data={schema:presentation?2:1,state:JSON.parse(JSON.stringify(state)),...(presentation?{presentation:JSON.parse(JSON.stringify(presentation))}:{})};return validSnapshot(data)?data:null;
  }
  function validMessage(h){

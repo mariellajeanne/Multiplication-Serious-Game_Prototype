@@ -23,7 +23,16 @@ function targetClicked(el){
 }
 function worksheetTap(el){
  if(!el||busy)return;
+ if(productActive()&&s.revealed&&el.hasAttribute('data-part')&&worksheetExternalCalculator){
+  if(s.carryArmed){if(el.dataset.part==='ones')addCarry('floating');else invalid()}
+  else chooseTile(el.dataset.part);
+  return;
+ }
  if(worksheetExternalCalculator&&productActive()&&s.revealed){
+  if(s.chosen&&(el.hasAttribute('data-slot')||el.hasAttribute('data-carry'))){
+   const target=el.hasAttribute('data-carry')?{kind:'carry',c:Number(el.dataset.carry)}:(()=>{const [r,c]=el.dataset.slot.split(':').map(Number);return {kind:'slot',r,c}})();
+   worksheetDropDigit(s.chosen,target,s.chosen==='tens'?tens():ones());bridgePoll();return;
+  }
   if(el.hasAttribute('data-carry')){
    const c=Number(el.dataset.carry);
    if(s.carryArmed&&c!==s.k){worksheetCarryTarget({kind:'carry',c});return}
@@ -39,14 +48,27 @@ function worksheetTap(el){
   }
   if(el.hasAttribute('data-part'))return;
  }
- if(el.closest('#equationReveal')){revealProduct();return}
+ if(el.closest('[data-golden-option]')){
+  if(worksheetExternalCalculator&&productActive()&&s.expressionActivated&&s.goldenOffer&&!worksheetChallengeInput){
+   report('fact-choice-select',{row:s.row,col:s.k,option:el.dataset.goldenOption});
+  }
+  return;
+ }
+ if(el.closest('#equationReveal')){
+  if(worksheetExternalCalculator){
+   if(s.expressionActivated)return;
+   s.expressionActivated=true;render();bridgePoll();
+   report('fact-activate',{row:s.row,col:s.k});
+  }else revealProduct();
+  return;
+ }
  if(el.hasAttribute('data-part')){if(s.carryArmed){if(el.dataset.part==='ones')addCarry('floating');else{invalid();status('Carry must combine with the ones part of the product.',true)}}else chooseTile(el.dataset.part);return}
  targetClicked(el);
 }
 $('math').addEventListener('click',e=>{if(!ignoreClick)worksheetTap(e.target.closest('button'))});
 $('floating').addEventListener('click',e=>{if(!ignoreClick)worksheetTap(e.target.closest('button'))});
 // Drags have the same effect as selecting a tile then tapping its destination.
-function isPointerTarget(el){return el&&el.closest('#equationReveal,[data-part],[data-top],[data-bottom],[data-carry],[data-slot]')}
+function isPointerTarget(el){return el&&el.closest('#equationReveal,[data-golden-option],[data-part],[data-top],[data-bottom],[data-carry],[data-slot]')}
 function digitCenter(el){if(!el)return null;const base=$('sheet').getBoundingClientRect(),r=el.getBoundingClientRect();return {x:r.left+r.width/2-base.left,y:r.top+r.height/2-base.top};}
 // A single geometry function for BOTH the held connector and final connection.
 // Each cap is a convex outward cubic semicircle, never an inward SVG arc.
@@ -71,14 +93,14 @@ function previewDrag(e){if(!pointer||pointer.pid!==e.pointerId||!['top','bottom'
  $('previewGlow').setAttribute('d',shape);$('previewHalo').setAttribute('d',shape);$('previewTrace').setAttribute('d',`M ${start.x} ${start.y} L ${end.x} ${end.y}`);$('connectorPreview').classList.add('active');
 }
 function hidePreview(){$('connectorPreview').classList.remove('active')}
-function down(e){ignoreClick=false;if(busy||!isPointerTarget(e.target))return;let el=isPointerTarget(e.target),kind=el.id==='equationReveal'?'equation':el.dataset.part?'tile':el.hasAttribute('data-carry')?'carry':el.hasAttribute('data-slot')?'slot':el.hasAttribute('data-top')?'top':'bottom';if(kind==='slot'&&productActive()&&s.tensLocation==='row'&&el.dataset.slot===`${s.row}:${currentCol()+1}`)kind='rowtens';pointer={pid:e.pointerId,kind,el,part:el.dataset.part,c:el.hasAttribute('data-top')?Number(el.dataset.top):el.hasAttribute('data-bottom')?Number(el.dataset.bottom):el.hasAttribute('data-carry')?Number(el.dataset.carry):null,x:e.clientX,y:e.clientY,drag:false,ghost:null};if(['top','bottom'].includes(kind))previewDrag(e);}
+function down(e){ignoreClick=false;if(busy||!isPointerTarget(e.target))return;let el=isPointerTarget(e.target),kind=el.id==='equationReveal'||el.hasAttribute('data-golden-option')?'equation':el.dataset.part?'tile':el.hasAttribute('data-carry')?'carry':el.hasAttribute('data-slot')?'slot':el.hasAttribute('data-top')?'top':'bottom';if(kind==='slot'&&productActive()&&s.tensLocation==='row'&&el.dataset.slot===`${s.row}:${currentCol()+1}`)kind='rowtens';pointer={pid:e.pointerId,kind,el,part:el.dataset.part,c:el.hasAttribute('data-top')?Number(el.dataset.top):el.hasAttribute('data-bottom')?Number(el.dataset.bottom):el.hasAttribute('data-carry')?Number(el.dataset.carry):null,x:e.clientX,y:e.clientY,drag:false,ghost:null};if(['top','bottom'].includes(kind))previewDrag(e);}
 function move(e){if(!pointer||pointer.pid!==e.pointerId)return;if(e.cancelable)e.preventDefault();previewDrag(e);let d=Math.hypot(e.clientX-pointer.x,e.clientY-pointer.y);if(d>10){try{$('sheet').setPointerCapture(e.pointerId)}catch(_){};pointer.drag=true;if((pointer.kind==='tile'||pointer.kind==='carry'||pointer.kind==='rowtens')&&!pointer.ghost&&productActive()){let ghost=document.createElement('div');ghost.className='ghost';ghost.textContent=pointer.el.textContent;document.body.append(ghost);pointer.ghost=ghost}if(pointer.ghost){pointer.ghost.style.left=(e.clientX-21)+'px';pointer.ghost.style.top=(e.clientY-21)+'px'}}}
 function up(e){if(!pointer||pointer.pid!==e.pointerId)return;const p=pointer;pointer=null;hidePreview();p.ghost?.remove();if(!p.drag){
  // Touch clicks can be lost after capture or DOM/layout updates on mobile browsers.
  // Commit the tap here; the following compatibility click must not repeat it.
  if(e.pointerType==='touch'){ignoreClick=true;setTimeout(()=>ignoreClick=false,450);worksheetTap(p.el)}
  return;
-}ignoreClick=true;setTimeout(()=>ignoreClick=false,450);let target=document.elementFromPoint(e.clientX,e.clientY)?.closest('button');if(worksheetExternalCalculator&&!['top','bottom'].includes(p.kind)){if(p.kind==='rowtens'&&target){let t;if(target.hasAttribute('data-carry'))t={kind:'carry',c:Number(target.dataset.carry)};else if(target.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);t={kind:'slot',r,c}}if(t)worksheetDropDigit('tens',t,tens());return}if(p.kind==='carry'&&p.c===s.k&&!s.mixed){if(target?.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);worksheetCarryTarget({kind:'slot',r,c})}else if(target?.hasAttribute('data-carry')){worksheetCarryTarget({kind:'carry',c:Number(target.dataset.carry)})}else{const fr=window.frameElement.getBoundingClientRect();report('carry-result-drop',{row:s.row,col:s.k,point:{x:fr.left+e.clientX,y:fr.top+e.clientY}})}return}if(target)worksheetTap(target);return}if(p.kind==='carry'&&target&&productActive()&&!s.mixed&&p.c===s.k){if(target.dataset.part==='ones'&&!s.onesPlaced)addCarry('floating');else if(target.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row&&c===currentCol()&&s.onesPlaced)addCarry('placed');else{invalid();status('Carry must join the ones digit.',true)}}return;}if(p.kind==='rowtens'&&target?.hasAttribute('data-carry')&&Number(target.dataset.carry)===s.k+1){liftTens();return}if(p.kind==='tile'&&target){if(target.hasAttribute('data-slot')){let [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row)place(p.part,'slot',c)}else if(target.hasAttribute('data-carry'))place(p.part,'carry',Number(target.dataset.carry));return}if((p.kind==='top'||p.kind==='bottom')&&target){if(target.hasAttribute('data-top')||target.hasAttribute('data-bottom')){let kind=target.hasAttribute('data-top')?'top':'bottom',c=Number(target.dataset[kind]);if(kind!==p.kind&&s.phase==='select'){operand(p.kind,p.c);operand(kind,c)}}}}
+}ignoreClick=true;setTimeout(()=>ignoreClick=false,450);let target=document.elementFromPoint(e.clientX,e.clientY)?.closest('button');if(worksheetExternalCalculator&&!['top','bottom'].includes(p.kind)){if(p.kind==='tile'&&target){const dest=target.hasAttribute('data-carry')?{kind:'carry',c:Number(target.dataset.carry)}:target.hasAttribute('data-slot')?(()=>{const [r,c]=target.dataset.slot.split(':').map(Number);return {kind:'slot',r,c}})():null;if(dest)worksheetDropDigit(p.part,dest,p.part==='tens'?tens():ones());bridgePoll();return}if(p.kind==='rowtens'&&target){let t;if(target.hasAttribute('data-carry'))t={kind:'carry',c:Number(target.dataset.carry)};else if(target.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);t={kind:'slot',r,c}}if(t)worksheetDropDigit('tens',t,tens());return}if(p.kind==='carry'&&p.c===s.k&&!s.mixed){if(target?.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);worksheetCarryTarget({kind:'slot',r,c})}else if(target?.hasAttribute('data-carry')){worksheetCarryTarget({kind:'carry',c:Number(target.dataset.carry)})}else{const fr=window.frameElement.getBoundingClientRect();report('carry-result-drop',{row:s.row,col:s.k,point:{x:fr.left+e.clientX,y:fr.top+e.clientY}})}return}if(target)worksheetTap(target);return}if(p.kind==='carry'&&target&&productActive()&&!s.mixed&&p.c===s.k){if(target.dataset.part==='ones'&&!s.onesPlaced)addCarry('floating');else if(target.hasAttribute('data-slot')){const [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row&&c===currentCol()&&s.onesPlaced)addCarry('placed');else{invalid();status('Carry must join the ones digit.',true)}}return;}if(p.kind==='rowtens'&&target?.hasAttribute('data-carry')&&Number(target.dataset.carry)===s.k+1){liftTens();return}if(p.kind==='tile'&&target){if(target.hasAttribute('data-slot')){let [r,c]=target.dataset.slot.split(':').map(Number);if(r===s.row)place(p.part,'slot',c)}else if(target.hasAttribute('data-carry'))place(p.part,'carry',Number(target.dataset.carry));return}if((p.kind==='top'||p.kind==='bottom')&&target){if(target.hasAttribute('data-top')||target.hasAttribute('data-bottom')){let kind=target.hasAttribute('data-top')?'top':'bottom',c=Number(target.dataset[kind]);if(kind!==p.kind&&s.phase==='select'){operand(p.kind,p.c);operand(kind,c)}}}}
 $('sheet').addEventListener('pointerdown',down);window.addEventListener('pointermove',move,{passive:false});window.addEventListener('pointerup',up);window.addEventListener('pointercancel',()=>{hidePreview();pointer?.ghost?.remove();pointer=null});
 // Connector style is fixed to capsule for this lab.
 

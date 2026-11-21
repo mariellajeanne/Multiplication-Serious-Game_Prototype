@@ -40,9 +40,11 @@ function calculationPanelView(context){
  const resolved=answer&&answer.status!=='waiting',manual=answer?.accepted&&!resolved,entry=r?.worksheetSession?.entry;
  const carryAdded=resolved&&context.state.mixed&&context.state.incoming>0;
  const display=resolved?String(step.p+(carryAdded?context.state.incoming:0)):manual?(answer.entry||'—'):'?';
+ const expressionReady=!!context?.state?.expressionActivated;
  const status=resolved?(entry?.feedback||(context.state.carryArmed?'Carry selected. Tap the ones digit here or on the sheet.':!context.state.mixed&&context.state.incoming?'Add the carry now, or place the ones first.':answer.status==='success'?`×${answer.multiplier} bonus ready. Place each digit to earn it.`:'Drag a digit, or tap it and then its destination.')):
-  calculationNotice||(manual?`${3-answer.attempts.length} ${3-answer.attempts.length===1?'try':'tries'} left`:active?'Get an answer, then write its digits.':'Connect the two digits first.');
- return {mode:'fact',expression:step?`${step.a} \u00d7 ${step.b}`:'Ready?',display,carryEquation:carryAdded?`${step.p} + ${context.state.incoming} carry =`:'',golden:answer?.status==='success',manual:!!manual,offered:!!(answer?.offered&&!answer.accepted&&!resolved),multiplier:answer?.multiplier||1,tray:resolved?worksheetDigitTrayView(context):null,status:uiText(status),placementError:!!entry?.level,generate:!resolved,active:!!active,guide:!!(active&&g.tutorialArrows&&!answer?.offered&&!manual)};
+  calculationNotice||(manual?`${3-answer.attempts.length} ${3-answer.attempts.length===1?'try':'tries'} left`:active?(expressionReady?'Choose how to find the answer.':'Tap the multiplication expression first.'):'Connect the two digits first.');
+ const expression=context?.state?.expressionOrder?.length===2?context.state.expressionOrder.join(' × '):active&&expressionReady&&step?`${step.a} × ${step.b}`:'? × ?';
+ return {mode:'fact',expression,display,carryEquation:carryAdded?`${step.p} + ${context.state.incoming} carry =`:'',golden:answer?.status==='success',manual:!!manual,offered:!!(expressionReady&&answer?.offered&&!answer.accepted&&!resolved),multiplier:answer?.multiplier||1,tray:null,status:uiText(status),placementError:!!entry?.level,generate:!!(expressionReady&&!resolved),active:!!(active&&expressionReady),guide:!!(active&&g.tutorialArrows&&!answer?.offered&&!manual)};
 }
 function calculationPanelMarkup(context){return WorksheetComponents.calculator(calculationPanelView(context))}
 
@@ -53,6 +55,8 @@ function paintWorksheetExperience(){
  if(identity!==calculationIdentity){calculationIdentity=identity;calculationNotice=''}
  if(context?.state.phase==='product'){
   const answer=ensureFactAnswer(r,context.step);
+  if(!context.state.revealed&&context.state.expressionActivated&&answer.offered&&!answer.accepted&&answer.status==='waiting')
+   sendEngine('fact-choice',{attemptId:r.worksheetRewards.attemptId,row:context.step.row,col:context.step.col,offered:true});
   if(context.state.revealed&&answer.status==='waiting'){answer.status='generated';answer.entry=String(context.step.p)}
   sendEngine('challenge-input',{attemptId:r.worksheetRewards.attemptId,enabled:answer.accepted&&answer.status==='waiting',progressive:['generated','forfeited'].includes(answer.status)});
   if(!context.state.revealed&&answer.status!=='waiting')sendEngine('fact-answer',{attemptId:r.worksheetRewards.attemptId,row:context.step.row,col:context.step.col,restore:true,progressive:['generated','forfeited'].includes(answer.status)});

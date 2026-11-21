@@ -3,9 +3,9 @@
  'use strict';
  const selectors={
   'calculator:product':'#calculationAnswer','calculator:tray':'.worksheet-digit-tray',
-  'calculator:ones':'[data-answer-digit="ones"]','calculator:tens':'[data-answer-digit="tens"]',
-  'calculator:carry':'.carry-source','control:generate':'#generateAnswer',
-  'control:undo':'[data-worksheet-control="undo"]','control:add':'#addRows','control:challenge':'#goldenChallenge'
+  'calculator:ones':'[data-answer-digit="ones"],[data-part="ones"]','calculator:tens':'[data-answer-digit="tens"],[data-part="tens"]',
+  'calculator:carry':'.carry-source','control:generate':'#generateAnswer,#equationReveal,[data-golden-option="auto"]',
+  'control:undo':'[data-worksheet-control="undo"]','control:add':'#addRows','control:challenge':'#goldenChallenge,[data-golden-option="manual"]'
  };
  function selector(t){
   if(!root.CoBakerWorksheet.validTarget(t))return null;

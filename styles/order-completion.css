@@ -1,6 +1,6 @@
 /* Order Complete: unframed earned art, one dominant total, a quiet formula. */
 body[data-view='hub'] .bakery-popup.worksheet-summary-modal{width:min(980px,94vw);padding:12px 24px 18px}
-body[data-view='hub'] .bakery-popup-backdrop:has(.worksheet-summary-modal){padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+body[data-view='hub'] .bakery-popup-backdrop:has(.worksheet-summary-modal){padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:transparent;backdrop-filter:none}
 body[data-view='hub'] .worksheet-summary-modal .popup-head{border:0;margin-bottom:4px;padding-bottom:6px}
 body[data-view='hub'] .worksheet-summary-modal .popup-head h2{width:100%;text-align:center;font-size:clamp(26px,3vw,40px)}
 .worksheet-summary-modal .dialog-wallet{display:none}
@@ -76,3 +76,9 @@ body[data-view='hub'] .worksheet-summary-modal #worksheetSettlementError{font-si
  .summary-details{min-height:30px}
 }
 @media(prefers-reduced-motion:reduce){.worksheet-summary-modal{animation:none!important}.worksheet-summary *{animation:none!important;transition:none!important}}
+
+/* Whole denomination art+quantity flies together; the popup stays bright. */
+.summary-flight.summary-art{display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:5}
+.summary-flight.summary-art .summary-quantity{position:absolute}
+.worksheet-summary[data-summary-phase="boost"] .summary-boost{visibility:visible;min-height:1.35em;padding:5px 10px;font-size:clamp(38px,4.6vw,64px)}
+@media(max-height:460px){.worksheet-summary[data-summary-phase="boost"] .summary-boost{font-size:29px;padding:2px 8px}}

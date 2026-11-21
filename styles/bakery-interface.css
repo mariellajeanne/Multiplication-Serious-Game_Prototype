@@ -307,3 +307,11 @@ body[data-view="hub"] .hub-collection .illustrated-collection-content .food-deta
  body[data-view="hub"] .hub-collection .food-detail-redesign .food-detail-actions button{min-height:48px;padding:4px 8px;font-size:clamp(15px,1.8vw,19px);border-width:2px;border-radius:11px}
  body[data-view="hub"] .hub-collection .food-detail-redesign .food-panel-close{top:3px;right:3px;width:44px;height:44px;min-height:44px;min-width:44px}
 }
+
+/* V18: selected Inventory food is a modal sibling, never nested in grid. */
+body[data-view="hub"] .hub-collection .food-collection-detail-backdrop{z-index:45;pointer-events:auto;background:#351f1590}
+body[data-view="hub"] .hub-collection:has(.food-collection-detail-backdrop)>.hub-collection-overlay:not(.food-collection-detail-backdrop){pointer-events:none}
+body[data-view="hub"] .hub-collection:has(.food-collection-detail-backdrop)>.hub-collection-overlay:not(.food-collection-detail-backdrop) .bakery-popup{filter:brightness(.9)}
+
+.menu-slot-coin{display:inline-block;width:1.25em;height:1.25em;object-fit:contain;vertical-align:-.25em;margin-left:3px;flex:none}
+body[data-view="hub"] .hub-collection .collection-slot-button{display:inline-flex;align-items:center;gap:4px}

@@ -1,0 +1,11 @@
+/* Golden choices appear at the connected digits, not in the calculator panel. */
+#floating[hidden]{display:none!important}
+.external-calculator .floating:has(.floating-golden-choice){z-index:90;min-width:clamp(240px,calc(var(--cell,64px)*2.2),360px)!important;max-width:min(94vw,380px);padding:0!important;border-radius:22px!important;overflow:hidden}
+.floating-golden-choice{display:grid;grid-template-rows:1fr 1fr;gap:0;width:100%;font-family:inherit}
+.floating-golden-choice button{width:100%;border-radius:0;border:0;min-height:clamp(48px,calc(var(--cell,64px)*.48),74px);padding:10px 14px;font-family:inherit;font-size:clamp(19px,calc(var(--cell,64px)*.18),28px);font-weight:900;line-height:1.15;white-space:normal;cursor:pointer}
+.floating-golden-choice .floating-golden-manual{background:linear-gradient(110deg,#ffe68b,#eac8fc,#c6efe8,#ffe4a3);color:#624026;border-bottom:2px solid #c89a50}
+.floating-golden-auto{background:#fff0c7;color:#694529}
+.floating-golden-choice button:focus-visible{outline:3px solid #328a74;outline-offset:2px}
+button:focus:not(:focus-visible){outline:0}
+button:focus-visible{outline:3px solid #328a74;outline-offset:2px}
+@media(max-height:450px){.external-calculator .floating:has(.floating-golden-choice){min-width:220px!important}.floating-golden-choice button{min-height:44px;padding:7px 10px}}

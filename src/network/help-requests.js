@@ -95,7 +95,11 @@
    if(['cancel','taken','expired','failed'].includes(reason))this.send(id,['cancel','failed'].includes(reason)?{kind:'cancel',requestId:c.requestId}:{kind:'unavailable',requestId:c.requestId,reason});
    if(['cancel','taken','failed','lost'].includes(reason))this.interrupted.set(id,this.clock()+RULES.interruptedCooldownMs);
    while(this.interrupted.size>RULES.maxRecords)this.interrupted.delete(this.interrupted.keys().next().value);
-   this.d.transport?.cancelConnect?.(id);this.changed();return true;
+   this.d.transport?.cancelConnect?.(id);
+   // Report a completed manual request's real terminal outcome. Automatic
+   // searches may probe several peers, so don't spam a toast per candidate.
+   const outcome={declined:'Help request declined.',expired:'Help request expired.',failed:'Could not send the help request.',lost:'Baker disconnected before answering.'}[reason];
+   if(outcome&&c.source==='manual')this.note(outcome);else this.changed();return true;
   }
   decline(requestId){const invitation=this.incoming.get(requestId);if(!invitation)return;
    this.incoming.delete(requestId);this.remember(requestId);this.send(invitation.ownerId,{kind:'decline',requestId});this.changed()}

@@ -25,7 +25,8 @@ function worldButton(label,action,{icon='',classes='',extra=''}={}){
 function worldPackageImage(rank,classes=''){
  return worldImage(`package-${String(rank+1).padStart(2,'0')}`,classes,`${PACKAGE_TYPES[rank]} Package`);
 }
-const SCENE_ORIGINAL_FOODS=new Set(['ube-ensaymada','brazo','buko-pie','pianono','ensaymada','ube-pandesal']);
+// The older tiny Ube Ensaymada art had jagged/dirty edges; use the clean numbered sprite 17.
+const SCENE_ORIGINAL_FOODS=new Set(['brazo','buko-pie','pianono','ensaymada','ube-pandesal']);
 const scenePreservedFoodArt=hubFoodArt;
 hubFoodArt=function(id,extra=''){
  return SCENE_ORIGINAL_FOODS.has(id)?worldImage('food-'+id,`food-art illustrated-food ${extra}`,F(id).name):scenePreservedFoodArt(id,extra);
@@ -36,14 +37,16 @@ function sceneScrollRail(kind){
  return `<div id="${rail}" class="scene-scroll-rail ${kind}-rail"><span class="scroll-rail-art" aria-hidden="true"></span><button type="button" class="scene-scroll-end scroll-start" data-scene-scroll="${sc}" data-scroll-direction="-1" aria-label="Scroll ${kind}s backward"></button><div class="scene-scroll-track" id="${track}"><span id="${thumb}" class="scene-scroll-thumb" role="scrollbar" tabindex="0" aria-label="${kind} scroll position" aria-controls="${sc}" aria-orientation="vertical" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span class="scroll-thumb-art" aria-hidden="true"></span></span></div><button type="button" class="scene-scroll-end scroll-finish" data-scene-scroll="${sc}" data-scroll-direction="1" aria-label="Scroll ${kind}s forward"></button></div>`;
 }
 function renderSceneFoods(){
- const foods=sortedMenuFoods([...g.owned]),equipped=new Set(g.activeMenu);
- const slot=g.menuSlots>=FOOD.length?'':worldButton(`<b class="slot-plus">+</b><strong>Add Menu Slot</strong><small>${amountLabel(slotCost())} coins</small>`,'slot',{classes:'scene-food-card slot-card'});
- let result=slot+foods.map(o=>{const f=F(o.id),label=multiplierLabel(foodValue(o)),level=recipeMastery(o)+1,available=availableMastery(o);
+ // The showcase represents owned *menu slots*, not every food in inventory.
+ // Do not manufacture locked/undiscovered tiles to pad the grid to eight.
+ const equipped=sortedMenuFoods(g.activeMenu.map(uid=>g.owned.find(o=>o.uid===uid)).filter(Boolean));
+ const slots=Math.max(0,Math.min(FOOD.length,g.menuSlots));
+ let result=equipped.slice(0,slots).map(o=>{const f=F(o.id),label=multiplierLabel(foodValue(o)),level=displayedFoodLevel(o),available=availableMastery(o);
   // All overlays live inside the existing single card button. The level-up
   // indicator opens the same food-details flow, without a nested button.
-  return `<button type="button" class="scene-food-card hub-food r${f.rarity}" data-food="${f.id}" data-uid="${o.uid}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(f.name)}, ${RARITIES[f.rarity]}, Level ${level}, Baker's Boost ${label}${available?`, ${available} level-ups available`:''}, ${equipped.has(o.uid)?'equipped':'owned but not equipped'}">${hubFoodArt(f.id,'scene-food-image')}${available?`<span class="food-upgrade-ready" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 20V4M5 11l7-7 7 7"/></svg><b>${available}</b></span>`:''}<span class="food-stats" aria-hidden="true"><span class="food-level">Lv ${level}</span><span class="food-multiplier" style="--boost-font:${label.length>9?18:label.length>7?20:24}px">${hubBoostDiamond()}<b>×${label}</b></span></span></button>`;
+  return `<button type="button" class="scene-food-card hub-food r${f.rarity}" data-food="${f.id}" data-uid="${o.uid}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(f.name)}, ${RARITIES[f.rarity]}, Level ${level}, Baker's Boost ${label}${available?`, ${available} level-ups available`:''}, equipped">${hubFoodArt(f.id,'scene-food-image')}${available?`<span class="food-upgrade-ready" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 20V4M5 11l7-7 7 7"/></svg><b>${available}</b></span>`:''}<span class="food-stats" aria-hidden="true"><span class="food-level">Lv. ${level}</span><span class="food-multiplier" style="--boost-font:${label.length>9?18:label.length>7?20:24}px">${hubBoostDiamond()}<b>×${label}</b></span></span></button>`;
  }).join('');
- for(let i=foods.length+(slot?1:0);i<8;i++)result+=`<div class="scene-food-card unfilled-slot" aria-label="${i<g.menuSlots?'Available menu slot':'More menu slots to unlock'}">${worldImage('hat-icon')}<span>${uiText(i<g.menuSlots?'Ready for a recipe':'More recipes to discover')}</span></div>`;
+ for(let i=equipped.length;i<slots;i++)result+=worldButton('<b class="slot-plus">+</b><strong>Empty Slot</strong>','collection',{classes:'scene-food-card empty-menu-slot',extra:'aria-label="Empty menu slot. Open Food Inventory to equip a food."'});
  return result;
 }
 function renderWorldMenu(){
@@ -51,7 +54,7 @@ function renderWorldMenu(){
  <div class="scene-menu-opening"><div id="cabinet-scroll" class="scene-food-scroll showcase-scroll" tabindex="0" aria-label="Your real bakery foods, scroll to browse"><div id="cabinet-grid" class="scene-food-grid">${renderSceneFoods()}</div></div>${sceneScrollRail('food')}</div>
  <button type="button" class="counter-packages world-counter-packages hub-package" data-hub-action="packages" aria-label="Visit Packages">${worldImage('counter-gifts')}</button>
  ${worldImage('register','counter-register world-register')}
- <div class="collection-sign">${worldImage('collection-holder','collection-holder')}${worldButton('View All Foods','collection',{icon:'book-icon',classes:'view-all-foods'})}</div>
+ <div class="collection-sign" role="group" aria-label="Menu actions"><button type="button" class="scene-button view-all-foods" data-hub-action="collection" aria-label="Open Food Inventory"><span class="inventory-bag-icon" aria-hidden="true"></span><span>Food Inventory</span></button><button type="button" class="scene-button scene-equip-best" data-hub-action="equip-best" aria-label="Equip your best foods"><span>Equip Best</span></button></div>
  </section>`;
 }
 // Selection stays independent of affordability and survives unrelated renders.
@@ -119,7 +122,7 @@ function refreshBakeryDiscovery(){
  if(typeof schedulePackageUnlockCelebration==='function')schedulePackageUnlockCelebration();
 }
 function sceneRewardArt(rank){
- return hubCoinArt(rank,'scene-reward-image');
+ return WorksheetComponents.coinArt(rank,hubAsset(`coin-${String(rank+1).padStart(2,'0')}.png`)).replace('coin-tier-art illustrated-coin','coin-tier-art illustrated-coin scene-reward-image');
 }
 // Alpha bounds measured from the existing artwork. Crop only its transparent
 // margins in the equation viewport; the original food images remain untouched.
@@ -138,7 +141,7 @@ const SCENE_ORIGINAL_FOOD_BOUNDS=Object.freeze({
 });
 // These eight approved art sprites have their own square canvas and do not
 // need the legacy tight crop applied to the original rectangular food assets.
-const SCENE_APPROVED_SQUARE_FOODS=new Set(['brazo','buko-pie','ube-pandesal','pianono','mamon','hopia','ensaymada','kalihim']);
+const SCENE_APPROVED_SQUARE_FOODS=new Set(['brazo','buko-pie','ube-pandesal','pianono','mamon','hopia','ensaymada','kalihim','ube-ensaymada']);
 function sceneEquationFood(id){
  if(SCENE_APPROVED_SQUARE_FOODS.has(id)){
   return `<span class="equation-food" style="--food-ratio:1;--food-width:100%;--food-height:100%;--food-left:0%;--food-top:0%">${hubFoodArt(id,'scene-order-food')}</span>`;
@@ -150,7 +153,7 @@ function renderSceneTickets(){
  return g.board.map(ticket=>{const rank=ticketCoinTier(ticket),food=orderFood(ticket),run=g.orderRuns[ticket.id],progress=ticketProgress(ticket);
   const paper=rank===3?'purple':rank===5?'pink':rank===7?'rainbow':'gold';
   return `<button type="button" class="scene-ticket hub-ticket ticket coin-tier-${rank}" data-ticket-id="${ticket.id}" data-order-food="${food.id}" onclick="startTicket(${ticket.id})" aria-label="${run?.phase==='claim'?'Collect':run?'Resume':'Start'} ${hubEscape(ticketOrderLabel(ticket))}, ${hubEscape(food.name)}, ${ticket.a} × ${ticket.b}, ${progress}% complete, ${hubEscape(hubCoinTierName(rank))}">
-  ${worldImage('ticket-'+paper,'scene-ticket-shell')}<span class="scene-ticket-reward">${sceneRewardArt(rank)}</span><span class="scene-ticket-plaque">${hubEscape(hubCoinTierName(rank))}</span>
+  ${worldImage('ticket-'+paper,'scene-ticket-shell')}<span class="scene-ticket-coin-paper" aria-hidden="true"></span><span class="scene-ticket-reward">${sceneRewardArt(rank)}<span class="scene-coin-star-badge" aria-hidden="true">${rank+1} ★</span></span>
   <span class="scene-ticket-main"><span class="scene-ticket-equation${String(ticket.a).length>3?' is-wide-math':''}"><span class="equation-group"><strong>${ticket.a}</strong>${sceneEquationFood(food.id)}</span><span class="equation-times">×</span><span class="equation-group"><strong>${ticket.b}</strong>${worldImage('tray','scene-tray')}</span></span><span class="scene-ticket-progress scene-meter" role="progressbar" aria-label="Order progress" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100"><i style="width:${progress}%"></i><span>${run?.phase==='claim'?'Collect':run?'Resume':'Progress'}</span><b>${progress}%</b></span></span></button>`;
  }).join('');
 }
@@ -189,7 +192,7 @@ function fitPhoneBakeryKiosks(compact,worldScale){
  for(const section of document.querySelectorAll('.scene-page>section')){
   const kind=section.closest('[data-world-page]').dataset.worldPage;
   const end=kind==='packages'?section.querySelector('.package-interior').offsetTop+section.querySelector('.package-interior').offsetHeight:
-   kind==='menu'?section.querySelector('.collection-sign').offsetTop+section.querySelector('.view-all-foods').offsetTop:
+   kind==='menu'?section.querySelector('.collection-sign').offsetTop+Math.max(0,section.querySelector('.collection-sign').offsetHeight-78):
    section.offsetHeight-parseFloat(getComputedStyle(section.querySelector('.scene-order-scroll')).bottom);
   const unit=phoneBakeryKioskScale(kind,section.offsetWidth,end,innerWidth-32,availableHeight,worldScale);
   section.style.setProperty('--phone-kiosk-scale',unit/worldScale);

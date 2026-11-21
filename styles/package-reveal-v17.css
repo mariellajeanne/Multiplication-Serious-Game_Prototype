@@ -1,0 +1,20 @@
+/* V17 package reveal: stationary food first, a single card rises behind it. */
+.batch-reward{isolation:isolate;gap:0}
+.batch-reward-frame{position:absolute;z-index:0;top:calc(var(--batch-art-size)*.08);left:0;right:0;bottom:0;visibility:hidden;opacity:0;border:3px solid var(--rank-ink,#875a3e);border-radius:20px;background:color-mix(in srgb,var(--rank-fill,#fff0cf) 35%,#fff6df 65%);box-shadow:inset 0 2px #fffaf4,0 4px #42231335;pointer-events:none}
+.batch-reward-visual{z-index:2}
+.batch-reward-copy{z-index:3;min-height:0;grid-template-rows:minmax(0,1.3fr) minmax(0,1fr);border:0;border-radius:0;background:transparent;box-shadow:none;animation:none;visibility:hidden;opacity:0}
+.batch-reward-copy.has-no-mastery{grid-template-rows:minmax(0,1.3fr) minmax(0,1fr)}
+.batch-card-indicators{position:absolute;inset:10px 10px auto;display:flex;align-items:flex-start;justify-content:space-between;gap:5px;color:#71412c;font-size:clamp(12px,1.2vw,19px);font-weight:900}
+.batch-boost-value,.batch-mastery-value{display:inline-flex;align-items:center;justify-content:center;padding:5px 8px;border-radius:9px;border:1px solid #b88b56;background:#fff8e9ee;white-space:nowrap}
+.batch-boost-value .boost-gem{width:1.1em;height:1.1em}
+.batch-mastery-value{color:#38623f;background:#cae5b9eb;border-color:#78a572}
+.batch-reward.is-revealed .batch-food>.food-art{animation:batch-food-first 160ms ease-out both}
+.batch-reward.is-revealed .batch-reward-frame{visibility:visible;opacity:1;animation:batch-panel-emerge var(--batch-panel-duration) 85ms cubic-bezier(.2,.8,.2,1) both}
+.batch-reward.is-revealed .batch-reward-copy{visibility:visible;opacity:1;animation:batch-info-arrive 200ms 110ms ease-out both}
+.batch-reward[data-phase="settled"] .batch-reward-frame,.batch-reward[data-phase="settled"] .batch-reward-copy{will-change:auto}
+.reveal-instant .batch-reward-frame,.reveal-instant .batch-reward-copy,.reveal-instant .batch-food>.food-art{animation:none!important;visibility:visible!important;opacity:1!important;transform:none!important}
+@keyframes batch-food-first{from{opacity:0}to{opacity:1}}
+@keyframes batch-info-arrive{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes batch-panel-emerge{from{opacity:0;transform:translateY(54px)}to{opacity:1;transform:translateY(0)}}
+@media(max-height:600px){.batch-card-indicators{inset:6px 5px auto;font-size:clamp(10px,1.3vw,13px)}.batch-boost-value,.batch-mastery-value{padding:2px 5px;border-radius:6px}.batch-reward-frame{border-width:2px;border-radius:13px}}
+@media(prefers-reduced-motion:reduce){.batch-reward.is-revealed .batch-reward-frame,.batch-reward.is-revealed .batch-reward-copy,.batch-reward.is-revealed .batch-food>.food-art{animation:none!important;opacity:1!important}}

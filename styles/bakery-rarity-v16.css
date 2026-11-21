@@ -1,0 +1,211 @@
+/* V16 — Eight recipe rarities. Visual treatment only; preserve every existing
+   food-card image, badge, footer, button and text position/size. */
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r0{
+ --food-rarity-edge:#b5a792;--food-rarity-wash:rgba(255,252,243,.83);--food-rarity-soft:rgba(255,251,237,.91);--food-rarity-level:#eee2cb;--food-rarity-boost:#fffdfa;--food-rarity-ink:#725d45;
+}
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r1{
+ --food-rarity-edge:#9a6244;--food-rarity-wash:rgba(183,122,85,.78);--food-rarity-soft:rgba(238,205,171,.90);--food-rarity-level:#dfb386;--food-rarity-boost:#fff6e8;--food-rarity-ink:#78482f;
+}
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r2{
+ --food-rarity-edge:#cf991e;--food-rarity-wash:rgba(255,211,83,.78);--food-rarity-soft:rgba(255,235,161,.89);--food-rarity-level:#ffe08f;--food-rarity-boost:#fffceb;--food-rarity-ink:#875d22;
+}
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r3{
+ --food-rarity-edge:#c66b88;--food-rarity-wash:rgba(247,157,187,.77);--food-rarity-soft:rgba(255,218,229,.90);--food-rarity-level:#f8becf;--food-rarity-boost:#fff7fa;--food-rarity-ink:#974867;
+}
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r4{
+ --food-rarity-edge:#9558ba;--food-rarity-wash:rgba(183,133,219,.78);--food-rarity-soft:rgba(235,212,248,.91);--food-rarity-level:#d7b2ee;--food-rarity-boost:#faf6ff;--food-rarity-ink:#775196;
+}
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r5{
+ --food-rarity-edge:#4a80c4;--food-rarity-wash:rgba(128,173,231,.78);--food-rarity-soft:rgba(207,230,252,.91);--food-rarity-level:#b4d4fa;--food-rarity-boost:#f3f9ff;--food-rarity-ink:#38689c;
+}
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r6{
+ --food-rarity-edge:#2798a9;--food-rarity-wash:rgba(117,224,230,.78);--food-rarity-soft:rgba(204,250,246,.91);--food-rarity-level:#a8eff0;--food-rarity-boost:#f2ffff;--food-rarity-ink:#247c86;
+}
+body[data-view="hub"] :is(.scene-food-card.hub-food,.collection-card,.index-food-card,.food-detail-showcase).r7{
+ --food-rarity-edge:#a867c9;--food-rarity-wash:rgba(235,208,247,.80);--food-rarity-soft:rgba(247,227,255,.88);--food-rarity-level:#eac4f6;--food-rarity-boost:#fff9fd;--food-rarity-ink:#744c97;
+}
+
+/* Main menu: identical frame dimensions/art placement and a one-piece split footer.
+   Only the hue of the frame, slim rim, and two footer surfaces changes. */
+body[data-view="hub"] .hub-home .scene-food-card.hub-food{
+ background:var(--food-rarity-wash);border-color:var(--food-rarity-edge);
+ box-shadow:inset 0 2px rgba(255,255,255,.50),0 2px rgba(75,39,26,.22);
+}
+body[data-view="hub"] .hub-home .scene-food-card.hub-food:is(.r3,.r4,.r5,.r6){border-width:3px}
+body[data-view="hub"] .hub-home .scene-food-card.hub-food.r7{
+ border:4px solid transparent;
+ background:linear-gradient(rgba(242,218,250,.79),rgba(224,237,253,.77)) padding-box,
+ conic-gradient(from 35deg,#e8a3e3,#92cfff,#8be1bd,#ffe69c,#ffb1a6,#cfb2ff,#e8a3e3) border-box;
+ box-shadow:inset 0 0 0 1px #fff6da,0 2px rgba(70,38,68,.29);
+}
+body[data-view="hub"] .scene-food-card.hub-food .food-stats{
+ border-top-color:var(--food-rarity-edge);
+}
+body[data-view="hub"] .scene-food-card.hub-food .food-level{
+ background:var(--food-rarity-level);border-right-color:var(--food-rarity-edge);
+}
+body[data-view="hub"] .hub-home .scene-food-card.hub-food .food-multiplier{
+ background:var(--food-rarity-boost);
+}
+body[data-view="hub"] .hub-home .scene-food-card.hub-food.r7 .food-stats{
+ border-top-color:#ad87c0;
+}
+
+/* Menu Collection: rarity must remain visible even when equipped. Equipment
+   status stays on the green Equip/Equipped action, not the card background. */
+body[data-view="hub"] .hub-collection .collection-card.r0,
+body[data-view="hub"] .hub-collection .collection-card.r1,
+body[data-view="hub"] .hub-collection .collection-card.r2,
+body[data-view="hub"] .hub-collection .collection-card.r3,
+body[data-view="hub"] .hub-collection .collection-card.r4,
+body[data-view="hub"] .hub-collection .collection-card.r5,
+body[data-view="hub"] .hub-collection .collection-card.r6,
+body[data-view="hub"] .hub-collection .collection-card.r7{
+ background:var(--food-rarity-soft);border-color:var(--food-rarity-edge);
+ box-shadow:0 3px 0 color-mix(in srgb,var(--food-rarity-edge),#7b4d39 22%);
+}
+body[data-view="hub"] .hub-collection .collection-card.r7{
+ border:3px solid transparent;
+ background:linear-gradient(rgba(251,239,255,.93),rgba(236,244,255,.93)) padding-box,
+ conic-gradient(from 30deg,#bc76ce,#89c9f6,#69d6b7,#ffe29a,#f5a6ab,#bc76ce) border-box;
+}
+body[data-view="hub"] .hub-collection .collection-card.is-equipped{
+ outline:2px solid rgba(70,132,84,.60);outline-offset:-5px;
+}
+body[data-view="hub"] .hub-collection .collection-card.is-selected{
+ outline:3px solid #9957a3;outline-offset:-5px;
+}
+
+/* Food Index: preserves image/name/rarity/owned/button positions and dimensions. */
+body[data-view="hub"] .bakery-popup .food-choices .itemcard.index-food-card{
+ background:var(--food-rarity-soft);border:2px solid var(--food-rarity-edge);
+ box-shadow:0 2px color-mix(in srgb,var(--food-rarity-edge),#fff 32%);
+}
+body[data-view="hub"] .bakery-popup .food-choices .itemcard.index-food-card.r7{
+ border:3px solid transparent;
+ background:linear-gradient(rgba(252,242,255,.94),rgba(240,252,255,.94)) padding-box,
+ conic-gradient(#c274d3,#8ecdf9,#74ddba,#ffe6a0,#ffc0aa,#c274d3) border-box;
+}
+
+/* Individual food popup: tint the food showcase ONLY, not the boost numbers,
+   mastery purchase row, or Sell/Equip controls. */
+body[data-view="hub"] .hub-collection .food-detail-showcase.r0,
+body[data-view="hub"] .hub-collection .food-detail-showcase.r1,
+body[data-view="hub"] .hub-collection .food-detail-showcase.r2,
+body[data-view="hub"] .hub-collection .food-detail-showcase.r3,
+body[data-view="hub"] .hub-collection .food-detail-showcase.r4,
+body[data-view="hub"] .hub-collection .food-detail-showcase.r5,
+body[data-view="hub"] .hub-collection .food-detail-showcase.r6,
+body[data-view="hub"] .hub-collection .food-detail-showcase.r7{
+ background:var(--food-rarity-soft);border-color:var(--food-rarity-edge);
+}
+body[data-view="hub"] .hub-collection .food-detail-showcase.r7{
+ border:3px solid transparent;
+ background:linear-gradient(rgba(251,242,255,.91),rgba(237,249,255,.92)) padding-box,
+ conic-gradient(#c774d2,#8ccfff,#8ee1bd,#ffde91,#f5a5ad,#c774d2) border-box;
+}
+body[data-view="hub"] .hub-collection .food-detail-showcase .food-detail-rarity{color:var(--food-rarity-ink)}
+
+/* True empty *owned* slot. No fake or undiscovered slots are rendered. */
+body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot{
+ padding:16px 8px;gap:8px;min-height:0;background:rgba(255,245,224,.24);
+ border:2px dashed #d8af83;border-radius:19px;color:#ffe5be;
+ box-shadow:inset 0 1px rgba(255,243,215,.2);
+}
+body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot .slot-plus{
+ font-size:56px;line-height:.9;color:#ffe6b8;-webkit-text-stroke:1.3px #9b6d4e;
+}
+body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot strong{
+ font-size:23px;line-height:1.1;color:#ffe5be;text-shadow:0 1px #734529;
+}
+body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot:focus-visible{outline:3px solid #ffefa1;outline-offset:3px}
+
+/* Two separate actions on one simple orange counter stand, no decorative SVG.
+   The buttons keep touch size when the whole scene scales on landscape phones. */
+body[data-view="hub"] .hub-home .collection-sign{
+ position:absolute;top:752px;left:50%;transform:translateX(-50%);
+ width:750px;height:146px;display:flex;align-items:flex-start;justify-content:center;
+ gap:14px;padding:13px 25px 0;filter:none;z-index:6;
+}
+body[data-view="hub"] .hub-home .collection-sign::before{
+ content:"";position:absolute;left:17%;right:17%;bottom:16px;height:39px;
+ border:4px solid #86502e;border-radius:8px 8px 12px 12px;
+ background:#d88b49;box-shadow:inset 0 3px #f3b273;z-index:0;
+}
+body[data-view="hub"] .hub-home .collection-sign::after{
+ content:"";position:absolute;left:5%;right:5%;bottom:10px;height:16px;
+ border:3px solid #86502e;border-radius:6px;background:#ac643a;z-index:0;
+}
+body[data-view="hub"] .hub-home .collection-sign .scene-button{
+ position:relative;inset:auto;left:auto;top:auto;bottom:auto;right:auto;
+ transform:none;flex:1 1 0;width:auto;height:79px;min-height:79px;min-width:0;
+ display:flex;align-items:center;justify-content:center;gap:12px;
+ border:4px solid #80502d;border-radius:21px;
+ box-shadow:inset 0 3px rgba(255,255,255,.7),0 5px #90542e;
+ padding:7px 13px;z-index:1;font-size:28px;font-weight:900;white-space:nowrap;
+ color:#704027;text-shadow:none;
+}
+body[data-view="hub"] .hub-home .collection-sign .view-all-foods{
+ background:#ffe1dc;
+}
+body[data-view="hub"] .hub-home .collection-sign .scene-equip-best{
+ background:#d5ebc9;color:#356342;
+}
+body[data-view="hub"] .hub-home .collection-sign .inventory-bag-icon{
+ position:relative;display:block;flex:none;width:37px;height:32px;
+ margin-top:6px;border:3px solid #874d30;border-radius:5px 5px 8px 8px;
+ background:#f5b37d;box-shadow:inset 0 2px #ffe0bc;
+}
+body[data-view="hub"] .hub-home .collection-sign .inventory-bag-icon::before{
+ content:"";position:absolute;left:8px;right:8px;top:-13px;height:16px;
+ border:3px solid #874d30;border-bottom:0;border-radius:12px 12px 0 0;
+}
+body[data-view="hub"] .hub-home .collection-sign .scene-button:active:not(:disabled),
+body[data-view="hub"] .hub-home .collection-sign .scene-button.is-pressed:not(:disabled){
+ box-shadow:inset 0 3px rgba(135,74,32,.17),0 1px #90542e;
+ transform:translateY(3px);
+}
+@media(hover:hover){
+ body[data-view="hub"] .hub-home .collection-sign .scene-button:hover:not(:disabled){filter:brightness(1.035)}
+}
+
+@media(max-height:600px) and (orientation:landscape){
+ body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot{padding:4px 2px;gap:3px;border-width:1px}
+ body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot .slot-plus{font-size:calc(24px / var(--phone-kiosk-unit));-webkit-text-stroke:1px #9b6d4e}
+ body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot strong{font-size:calc(12px / var(--phone-kiosk-unit))}
+ body[data-view="hub"] .hub-home .collection-sign{
+  width:max(710px,calc(305px / var(--phone-kiosk-unit)));
+  height:max(146px,calc(72px / var(--phone-kiosk-unit)));
+  padding:8px max(15px,calc(6px / var(--phone-kiosk-unit))) 0;
+  gap:max(9px,calc(5px / var(--phone-kiosk-unit)));
+ }
+ body[data-view="hub"] .hub-home .collection-sign .scene-button{
+  width:auto;height:max(70px,calc(52px / var(--phone-kiosk-unit)));
+  min-height:max(70px,calc(52px / var(--phone-kiosk-unit)));
+  font-size:max(22px,calc(13px / var(--phone-kiosk-unit)));
+  border-width:3px;border-radius:16px;padding:4px 10px;gap:7px;
+ }
+ body[data-view="hub"] .hub-home .collection-sign .inventory-bag-icon{
+  width:calc(19px / var(--phone-kiosk-unit));height:calc(17px / var(--phone-kiosk-unit));border-width:calc(1.5px / var(--phone-kiosk-unit));
+ }
+ body[data-view="hub"] .hub-home .collection-sign .inventory-bag-icon::before{
+  left:23%;right:23%;top:calc(-8px / var(--phone-kiosk-unit));height:calc(10px / var(--phone-kiosk-unit));border-width:calc(1.5px / var(--phone-kiosk-unit));
+ }
+ body[data-view="hub"] .hub-home .collection-sign::before{
+  bottom:calc(9px / var(--phone-kiosk-unit));height:calc(17px / var(--phone-kiosk-unit));
+ }
+ body[data-view="hub"] .hub-home .collection-sign::after{
+  bottom:calc(4px / var(--phone-kiosk-unit));height:calc(9px / var(--phone-kiosk-unit));
+ }
+}
+body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot>span{
+ display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;
+}
+body[data-view="hub"] .bakery-popup .food-choices .itemcard.index-food-card .tag[class*="rarity-r"]{
+ color:var(--food-rarity-ink);background:var(--food-rarity-level);
+ border-color:var(--food-rarity-edge);
+}
+body[data-view="hub"] .hub-collection .collection-card .food-card-rarity{color:var(--food-rarity-ink)}
+@media(max-height:600px) and (orientation:landscape){
+ body[data-view="hub"] .hub-home .scene-food-card.empty-menu-slot>span{gap:calc(3px / var(--phone-kiosk-unit))}
+}

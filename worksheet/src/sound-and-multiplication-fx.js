@@ -104,7 +104,7 @@ function startMultiplySequence(){
  clearTimeout(connectionTimer);
  $('pair').classList.add('live');
  render();
- status(worksheetExternalCalculator?'Use Generate Answer or try the Golden Challenge.':'Tap the multiplication expression to reveal its product.');
+ status('Tap the multiplication expression to continue.');
 }
 function revealProduct(restore=false){
  if(!productActive()||busy||s.revealed)return;

@@ -25,7 +25,7 @@ function render(){const active=productActive(),last=lastDigit();$('addRows').hid
 }
 function positionFloater(){
  const float=$('floating'),svg=$('pair');
- if(!productActive()){$('pair').classList.remove('live');float.classList.remove('show','multiply-running');float.innerHTML='';delete float.dataset.markup;updateTutorial();return}
+ if(!productActive()){$('pair').classList.remove('live');float.hidden=true;float.classList.remove('show','multiply-running','equation-pending','typeon-sized');float.innerHTML='';delete float.dataset.markup;updateTutorial();return}
  const ta=Q(`[data-top="${s.k}"]`),bo=Q(`[data-bottom="${s.row}"]`);if(!ta||!bo)return;
  const rect=$('sheet').getBoundingClientRect(),a=ta.getBoundingClientRect(),b=bo.getBoundingClientRect();
  const ax=a.left+a.width/2-rect.left,ay=a.top+a.height/2-rect.top,bx=b.left+b.width/2-rect.left,by=b.top+b.height/2-rect.top;
@@ -34,27 +34,38 @@ function positionFloater(){
  $('pairHalo').setAttribute('d',capsule);$('pairGlow').setAttribute('d',capsule);
  $('pairTrace').setAttribute('d',`M ${ax} ${ay} L ${bx} ${by}`);
  const T=tens(),O=ones();
- float.dataset.equation=`${s.B[s.row]} × ${s.A[s.k]} =`;
+ float.dataset.equation=`${(s.expressionOrder||[s.B[s.row],s.A[s.k]]).join(' × ')} =`;
  float.setAttribute('aria-label',`Product ${value()}; select either digit`);
  const leftVisible=T>0;
  let markup=`${leftVisible?`<button class="ftile ${s.tensPlaced?'done ':''}${s.chosen==='tens'?'selected ':''}${!s.mixed?'pretend ':''}" data-part="tens" aria-label="Tens digit ${T}">${T}</button>`:''}<button class="ftile ${s.onesPlaced?'done ':''}${s.chosen==='ones'?'selected ':''}${s.carryArmed?'targeted ':''}${!s.mixed?'pretend ':''}" data-part="ones" aria-label="Ones digit ${O}">${O}</button>`;
- if(worksheetExternalCalculator){float.classList.remove('show');float.innerHTML='';delete float.dataset.markup;updateTutorial();return}
  if(!s.revealed){
-   markup=`<button type="button" id="equationReveal" class="equation-reveal" aria-label="Multiply ${s.B[s.row]} by ${s.A[s.k]} and show the product">${s.B[s.row]} × ${s.A[s.k]}</button>`;
+   const [first,second]=s.expressionOrder||[s.B[s.row],s.A[s.k]];
+   const label=text=>typeof uiText==='function'?uiText(text):text;
+   markup=s.expressionActivated&&s.goldenOffer&&!worksheetChallengeInput?
+    `<div class="floating-golden-choice" role="group" aria-label="Choose how to solve ${first} × ${second}"><button type="button" class="floating-golden-manual" data-golden-option="manual">✦ ${label('Try It Yourself')}</button><button type="button" class="floating-golden-auto" data-golden-option="auto">${label('Just Generate')}</button></div>`:
+    `<button type="button" id="equationReveal" class="equation-reveal" ${s.expressionActivated?'disabled':''} aria-label="Multiply ${first} by ${second}">${first} × ${second}</button>`;
+   if(worksheetExternalCalculator&&worksheetChallengeInput){float.hidden=true;float.classList.remove('show','equation-pending','typeon-sized');float.innerHTML='';delete float.dataset.markup;updateTutorial();return}
  }
  // A scroll/resize or the next animation frame must not detach a live touch
  // target between pointerdown and click. Only actual state changes replace it.
  if(float.dataset.markup!==markup){float.dataset.markup=markup;float.innerHTML=markup}
- float.classList.add('show');float.classList.remove('multiply-running');float.classList.toggle('equation-pending',!s.revealed);
+ float.hidden=false;float.classList.add('show');float.classList.remove('multiply-running');float.classList.toggle('equation-pending',!s.revealed);
  const typeOnActive=!s.revealed;
  float.classList.toggle('typeon-sized',typeOnActive);
  // Set dimensions BEFORE measuring and positioning: a 1-digit result must still fit '7 × 1'.
- float.style.minWidth=typeOnActive?'132px':'';
+ float.style.minWidth=typeOnActive?(s.goldenOffer?'200px':'132px'):'';
  const w=float.offsetWidth,h=float.offsetHeight;
- const onesBtn=float.querySelector('[data-part="ones"]');
- const onesCenter=onesBtn?onesBtn.offsetLeft+onesBtn.offsetWidth/2:w/2;
- // The product ones digit stays vertically under the current multiplicand digit.
- let x=(typeOnActive?ax-w/2:ax-onesCenter), y=(ay+by)/2-h/2-6;
+ const rightTile=float.querySelector('[data-part="ones"]');
+ const rightTileEdge=rightTile?rightTile.getBoundingClientRect().right-float.getBoundingClientRect().left:w;
+ // The result ones tile shares the multiplicand cell's right edge in every
+ // column. Measure the real frame/tile border boxes, including their padding.
+ let x=(typeOnActive?ax-w/2:a.left+a.width-rect.left-rightTileEdge), y=(ay+by)/2-h/2;
+ // On short worksheets the two choices are taller than the connection gap.
+ // Use the room beside that connection so both operand digits stay readable.
+ if(float.querySelector('.floating-golden-choice')&&h+16>Math.abs(by-ay)){
+  const left=Math.min(a.left,b.left)-rect.left,right=Math.max(a.left+a.width,b.left+b.width)-rect.left;
+  x=left>=rect.width-right?Math.max(4,left-w-10):Math.min(rect.width-w-4,right+10);
+ }
  x=Math.max(4,Math.min(rect.width-w-4,x));y=Math.max(22,Math.min(rect.height-h-5,y));
  float.style.left=x+'px';float.style.top=y+'px';
  updateTutorial();
@@ -89,7 +100,7 @@ function updateTutorial(){
   text=s.first?'Now touch the other digit.':'Connect these two digits.';
  }else if(s.phase==='sum'){text='Swipe down to add the rows.';updateAdditionSwipeGuide();}
  else if(!s.revealed){
-  to=$('equationReveal');text=worksheetExternalCalculator?(worksheetChallengeInput?'Try the keypad on the right.':'Get an answer on the right, then place it.'):'Tap to see the product.';
+  to=$('equationReveal')||Q('.floating-golden-manual');text=worksheetExternalCalculator?(s.expressionActivated?'Choose how to solve it.':'Tap the multiplication expression.'):'Tap to see the product.';
   const p=pointOf(to);if(p){const cue=document.createElement('span');cue.className='tap-cue';cue.style.left=p.x+'px';cue.style.top=p.y+'px';layer.append(cue)}
  }else if(worksheetExternalCalculator){
   text=worksheetDigitEntry.feedback||(s.carryArmed?'Carry selected. Add it to the product.':s.incoming&&!s.mixed?'Add the waiting carry first.':'Drag each digit, or tap a digit then its tile.');

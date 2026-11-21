@@ -1,0 +1,119 @@
+/* V19 targeted polish; preserve tier accents and existing interactive handlers. */
+/* Cover the baked plaque inside the retained ticket shell, below standalone art. */
+body[data-view="hub"] .scene-ticket-coin-paper{
+ position:absolute;left:5.6%;top:10%;width:25.2%;height:79%;
+ border-radius:8px;background:#fff1dc;z-index:1;pointer-events:none;
+}
+body[data-view="hub"] .scene-ticket .scene-ticket-reward{
+ left:6.6%;top:14%;width:23%;height:71%;z-index:2;overflow:visible;padding:15px 6px 4px;
+}
+body[data-view="hub"] .scene-ticket .scene-ticket-reward .scene-reward-image{
+ width:100%;height:100%;object-fit:contain;object-position:center;
+}
+body[data-view="hub"] .scene-ticket .scene-ticket-main{z-index:2}
+body[data-view="hub"] .scene-ticket .scene-coin-star-badge{
+ right:0;top:-2%;font-size:clamp(17px,1.25vw,23px);
+ min-width:49px;min-height:34px;padding:3px 10px;border-radius:11px;
+ box-shadow:0 3px #bd9366;
+}
+body[data-view="hub"] .hub-home .scene-ticket .scene-coin-star-badge{right:0;top:-2%}
+/* Older, narrower ticket layout also uses the newly released coin-label space. */
+body[data-view="hub"] .hub-home .ticket-safe-content{grid-template-columns:76px minmax(0,1fr)}
+body[data-view="hub"] .hub-home .coin-hero img{width:76px;height:100%;max-height:95px;object-fit:contain}
+@media(max-height:600px) and (orientation:landscape){
+ body[data-view="hub"] .scene-ticket .scene-coin-star-badge{font-size:clamp(13px,1.2vw,20px);min-width:35px;min-height:27px;padding:2px 6px}
+ body[data-view="hub"] .scene-ticket-coin-paper{border-radius:4px}
+}
+/* Package reveal: position the food centrally in the actual illustration region;
+   the frame still slides up independently from its stationary food. */
+.batch-reward .batch-food{box-sizing:border-box;padding:calc(var(--batch-art-size) * .08 + 56px) 12px 8px;transform:none}
+/* Collection cards: one quiet pastel shell, compact info corners, uncluttered art. */
+body[data-view="hub"] .hub-collection .collection-card{
+ border:2px solid #b3916c!important;
+ border-radius:17px!important;
+ background:color-mix(in srgb,var(--food-rarity-soft,#fff7e8) 24%,#fff9eb 76%)!important;
+ box-shadow:inset 0 5px color-mix(in srgb,var(--food-rarity-edge,#d9b283) 50%,transparent 50%),0 3px 0 #b99b76!important;
+ padding:9px 10px 11px;gap:6px;
+}
+body[data-view="hub"] .hub-collection .food-card-target{
+ gap:3px!important;display:flex;flex-direction:column;align-items:stretch;
+ justify-content:flex-start;min-height:0;overflow:hidden;text-align:center;
+}
+body[data-view="hub"] .hub-collection .collection-card-statline{
+ width:100%;min-height:29px;display:flex;align-items:center;justify-content:space-between;gap:4px;
+ white-space:nowrap;color:#684025;font-size:clamp(11px,1vw,16px);font-weight:900;
+}
+body[data-view="hub"] .hub-collection .collection-card-boost{display:inline-flex;align-items:center;gap:2px;min-width:0}
+body[data-view="hub"] .hub-collection .collection-card-boost .boost-gem{width:1.3em;height:1.3em;flex:none}
+body[data-view="hub"] .hub-collection .collection-card-levels{display:flex;align-items:center;gap:4px;flex:none}
+body[data-view="hub"] .hub-collection .collection-card-levels>span{padding:3px 5px;border-radius:6px;background:#fff6dfaa;border:1px solid #c5a582;line-height:1.15}
+body[data-view="hub"] .hub-collection .collection-card-levels .has-upgrades{background:#d7ecca;border-color:#91b38c;color:#38653d}
+body[data-view="hub"] .hub-collection .collection-card-image{display:grid;place-items:center;min-height:0;flex:1;width:100%;border-radius:10px;background:#fff6e771;border:1px solid #dcc1a0;overflow:hidden}
+body[data-view="hub"] .hub-collection .collection-card-image .food-art{display:block;object-fit:contain;width:92%;height:100%;max-height:108px;max-width:none;margin:0;filter:none}
+body[data-view="hub"] .hub-collection .food-card-target>.collection-card-name{font-size:clamp(14px,1.1vw,20px);font-weight:900;line-height:1.12;min-height:0;overflow-wrap:anywhere;text-align:center}
+body[data-view="hub"] .hub-collection .food-card-target>.food-card-rarity{font-size:clamp(11px,.87vw,15px);font-weight:800;line-height:1.1;color:#87583c}
+body[data-view="hub"] .hub-collection .collection-equip,
+body[data-view="hub"] .hub-collection .collection-equip:not(:disabled){
+ align-self:stretch;width:100%;max-width:none;min-height:42px;border-radius:12px!important;
+ border:2px solid #9b744e!important;background:#f8e0bb!important;color:#71452b!important;
+ box-shadow:0 3px #bc986f!important;font-weight:900;
+}
+body[data-view="hub"] .hub-collection .collection-equip.equipped:not(:disabled){background:#438369!important;color:#fff6e3!important;border-color:#37654d!important;box-shadow:0 3px #315c46!important}
+body[data-view="hub"] .hub-collection .collection-equip::before{display:none!important}
+body[data-view="hub"] .hub-collection .collection-card.is-selected{outline:3px solid #965caa;outline-offset:1px}
+/* One shallow, solid stamp body surrounds both independent buttons. */
+body[data-view="hub"] .hub-home .collection-sign{top:738px;height:132px;padding:12px 18px 28px;gap:13px;filter:none}
+body[data-view="hub"] .hub-home .collection-sign::before{
+ inset:0 0 19px;height:auto;width:auto;border:4px solid #86502e;border-radius:21px;
+ background:#eb9f58;box-shadow:inset 0 4px #f8c080;z-index:0;
+}
+body[data-view="hub"] .hub-home .collection-sign::after{
+ left:-1.5%;right:-1.5%;bottom:3px;height:18px;border:3px solid #7d4528;
+ border-radius:3px 3px 9px 9px;background:#ad623b;z-index:0;
+}
+body[data-view="hub"] .hub-home .collection-sign .scene-button{height:72px;min-height:72px;border-width:3px;border-radius:16px;box-shadow:inset 0 2px #fff9ef,0 3px #955c34}
+/* Mouse/touch focus shouldn't leave outlines; keyboard focus stays visible. */
+body button:focus:not(:focus-visible),
+body select:focus:not(:focus-visible),
+body input:focus:not(:focus-visible){outline:0!important;outline-offset:0!important}
+body :is(button,select,input):focus-visible{outline:3px solid #2e8571!important;outline-offset:3px}
+html[data-focus-input="pointer"] .hub-collection :is(button,select,input):focus{outline:0!important;outline-offset:0!important}
+/* Compact layouts can wrap; a wide tablet uses one header and one toolbar row. */
+body[data-view="hub"] .hub-collection .collection-popup-head{display:grid;grid-template-columns:minmax(0,1fr) 56px}
+body[data-view="hub"] .hub-collection .collection-popup-head>h2{white-space:normal}
+body[data-view="hub"] .hub-collection .collection-header-summary{grid-column:1/-1;grid-row:2;flex-wrap:wrap;justify-content:space-between}
+body[data-view="hub"] .hub-collection .collection-popup-head .hub-collection-back{grid-column:2;grid-row:1}
+body[data-view="hub"] .hub-collection .collection-toolbar-actions{grid-template-columns:minmax(0,1fr)}
+body[data-view="hub"] .hub-collection .collection-browse-controls{flex-wrap:wrap;justify-content:center}
+body[data-view="hub"] .hub-collection .collection-equip-pill{justify-self:center;max-width:100%}
+body[data-view="hub"] .hub-collection .collection-status-pill{flex:none;max-width:100%}
+body[data-view="hub"] .hub-collection .menu-grid{max-height:calc(100dvh - 460px)}
+body[data-view="hub"] .hub-collection .bakery-popup.collection-modal{width:min(1480px,96vw)}
+@media(min-width:1200px){
+ body[data-view="hub"] .hub-collection .collection-popup-head{display:flex;align-items:center;gap:16px;min-height:56px;padding-bottom:8px;margin-bottom:8px}
+ body[data-view="hub"] .hub-collection .collection-popup-head>h2{white-space:nowrap}
+ body[data-view="hub"] .hub-collection .collection-header-summary{flex:1;flex-wrap:nowrap;align-items:center;gap:16px}
+ body[data-view="hub"] .hub-collection .collection-status-pill{width:max-content;flex:none}
+ body[data-view="hub"] .hub-collection .collection-popup-head .hub-collection-back{margin:0}
+ body[data-view="hub"] .hub-collection .collection-toolbar-actions{grid-template-columns:minmax(0,1fr) auto;gap:12px}
+ body[data-view="hub"] .hub-collection .collection-browse-controls{flex-wrap:nowrap;justify-content:flex-start;gap:12px}
+ body[data-view="hub"] .hub-collection .collection-browse-controls .hub-select-field:nth-child(2){width:250px}
+ body[data-view="hub"] .hub-collection .collection-browse-controls .hub-select-field:nth-child(3){width:280px}
+ body[data-view="hub"] .hub-collection .collection-equip-pill{justify-self:end}
+ body[data-view="hub"] .hub-collection .collection-toolbar{padding-bottom:0}
+ body[data-view="hub"] .hub-collection .illustrated-collection-content{gap:8px}
+ body[data-view="hub"] .hub-collection .collection-toolbar-hint-row{padding-top:6px}
+ body[data-view="hub"] .hub-collection .menu-grid{max-height:calc(100dvh - 310px)}
+}
+@media(min-width:1200px) and (max-width:1500px){
+ body[data-view="hub"] .hub-collection .collection-toolbar-actions{grid-template-columns:1fr}
+ body[data-view="hub"] .hub-collection .collection-equip-pill{justify-self:start}
+}
+@media(max-height:600px) and (orientation:landscape){
+ body[data-view="hub"] .hub-home .collection-sign{width:max(710px,calc(305px / var(--phone-kiosk-unit,.36)));height:max(130px,calc(91px / var(--phone-kiosk-unit,.36)));padding:8px 12px 25px}
+ body[data-view="hub"] .hub-home .collection-sign .scene-button{min-height:max(70px,calc(52px / var(--phone-kiosk-unit,.36)));height:max(70px,calc(52px / var(--phone-kiosk-unit,.36)));border-width:calc(2.5px / var(--phone-kiosk-unit,.36));font-size:max(22px,calc(15px / var(--phone-kiosk-unit,.36)))}
+ body[data-view="hub"] .hub-home .collection-sign::before{bottom:calc(9px / var(--phone-kiosk-unit,.36))}
+ body[data-view="hub"] .hub-home .collection-sign::after{bottom:calc(4px / var(--phone-kiosk-unit,.36));height:calc(18px / var(--phone-kiosk-unit,.36))}
+ body[data-view="hub"] .hub-collection .collection-card-statline{font-size:12px}
+ body[data-view="hub"] .hub-collection .collection-card-image .food-art{max-height:78px}
+}

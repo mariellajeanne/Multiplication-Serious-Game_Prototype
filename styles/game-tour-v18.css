@@ -1,0 +1,9 @@
+/* No text coach or blocking overlay: real targets keep their native gestures. */
+.bakery-tour-highlight{outline:4px solid #ffe99a!important;outline-offset:5px!important;filter:drop-shadow(0 0 9px #ffc44a)!important;animation:bakery-guide-pulse 1.2s ease-in-out infinite}
+.bakery-game-tour{position:fixed;inset:0;z-index:250;pointer-events:none}
+.bakery-game-tour .tour-arrow{display:none;position:absolute;left:var(--target-x);top:var(--target-y);transform:translateX(-50%);font:900 32px/1 system-ui;color:#e5a529;text-shadow:0 2px #fff8d0;pointer-events:none}
+.bakery-game-tour.has-target .tour-arrow{display:block}
+.bakery-game-tour button{position:absolute;left:18px;bottom:18px;pointer-events:auto;min-width:80px;min-height:44px;border:2px solid #ad835a;border-radius:12px;background:#fff3d6;color:#633b27;font:900 16px Nunito,system-ui,sans-serif;padding:8px 16px}
+.bakery-game-tour button:focus-visible{outline:3px solid #2e8571;outline-offset:3px}
+@keyframes bakery-guide-pulse{50%{outline-color:#fffbe3;filter:drop-shadow(0 0 14px #ffc44a)}}
+@media(prefers-reduced-motion:reduce){.bakery-tour-highlight{animation:none}}

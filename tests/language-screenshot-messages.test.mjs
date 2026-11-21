@@ -41,8 +41,10 @@ test('worksheet title, guidance, carry, challenge, sum and complete appear in Ta
  assert.match(t.calc({mode:'sum'}),/I-add ang mga hanay/);
  assert.match(t.calc({mode:'sum'}),/Mag-swipe pababa sa worksheet/);
  const offered=t.calc({mode:'fact',expression:'6 × 6',display:'?',offered:true,multiplier:2,status:'Connect these two digits.'});
- assert.match(offered,/Gintong Hamon!/);
- assert.match(offered,/Sagutan mo nang mag-isa/);
+ // Choices moved to the connected digits; the calculator must not duplicate them.
+ assert.doesNotMatch(offered,/data-golden-option|goldenChallenge|generateAnswer/);
+ assert.equal(t.translate('Try It Yourself'),'Subukan Mo Muna');
+ assert.equal(t.translate('Just Generate'),'Ipakita ang Sagot');
  assert.match(offered,/Pagdugtungin ang dalawang digit na ito/);
  const carried=t.tray({waiting:1,armed:false,label:'Add the waiting carry',digits:[{part:'ones',value:3}],demo:true,demoDigit:'3'});
  assert.match(carried,/Idagdag ang carry/);
@@ -52,7 +54,7 @@ test('worksheet title, guidance, carry, challenge, sum and complete appear in Ta
 });
 test('package and home use dynamic translations, while bridge protocol remains unchanged',()=>{
  const scenes=read('src/ui/bakery-scenes.js');
- assert.match(scenes,/uiText\(i<g\.menuSlots\?/);
+ assert.match(scenes,/Empty Slot/); // V16 displays purchased menu slots only
  assert.match(scenes,/uiText\('A new surprise awaits!'\)/);
  assert.match(scenes,/uiText\('Earn coins from playing to discover your next package\.'\)/);
  assert.match(scenes,/uiText\('Next Discovery'\)/);

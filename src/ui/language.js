@@ -27,7 +27,12 @@ const TAGALOG_UI=Object.freeze({
  'A 2-minute shift. Complete orders for coins. Packages are at the Package Counter.':'Dalawang minuto ang trabaho ng helper. Kumpletuhin ang mga order para kumita ng coin. Makukuha ang mga package sa Package Counter.',
  'discovered · discoveries stay, even after selling.':'ang nadiskubre · hindi mawawala ang mga nadiskubre kahit maibenta ang pagkain.',
  'Foods and purchased Mastery will be sold.':'Maibebenta ang mga pagkain pati ang nabili nilang Mastery.',
- 'Food Index discoveries and unlocked Mastery stay.':'Mananatili ang mga nadiskubre sa Food Index at ang na-unlock na Mastery.',
+ 'Try It Yourself':'Subukan Mo Muna',
+ 'Just Generate':'Ipakita ang Sagot',
+ 'Show Answer':'Ipakita ang Sagot',
+ 'Choose how to find the answer.':'Piliin kung paano sasagutin.',
+ 'Tap the multiplication expression first.':'I-tap muna ang multiplication.',
+  'Food Index discoveries and unlocked Mastery stay.':'Mananatili ang mga nadiskubre sa Food Index at ang na-unlock na Mastery.',
  'Long-press (hold) a food item to select many items.':'Pindutin nang matagal ang pagkain para makapili ng marami.',
  'Tap foods to choose them.':'I-tap ang mga pagkain para piliin ang mga ito.',
  'Started orders keep their saved reward. Package food odds are separate.':'Mananatili ang naka-save na reward ng mga nasimulang order. Iba ang tsansa ng pagkain sa mga package.',
@@ -106,7 +111,7 @@ function setGameLanguage(value){
  panaderyaLanguage=value;
  try{localStorage.setItem(PANADERYA_LANGUAGE_KEY,value)}catch(_){}
  if(typeof document!=='undefined')document.documentElement.lang=value;
- if(typeof render==='function')render();
- if(typeof openSettings==='function')openSettings();
+ const refresh=()=>{if(typeof render==='function')render();if(typeof openSettings==='function')openSettings()};
+ if(typeof preserveSettingsView==='function')preserveSettingsView(refresh);else refresh();
  return true;
 }

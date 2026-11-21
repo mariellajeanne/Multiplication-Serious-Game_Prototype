@@ -58,7 +58,7 @@ function createOrderCompletionSequence(root,totals,onFinish,onDispose){
   let ghost;
   add(270,()=>{
    root.dataset.summaryPhase='contribution';root.dataset.summaryStage='2';
-   const value=group.querySelector('.summary-contribution'),from=value.getBoundingClientRect(),to=total.getBoundingClientRect(),bounds=root.getBoundingClientRect();
+   const value=group.querySelector('.summary-art'),from=value.getBoundingClientRect(),to=total.getBoundingClientRect(),bounds=root.getBoundingClientRect();
    ghost=value.cloneNode(true);ghost.classList.add('summary-flight');ghost.setAttribute('aria-hidden','true');
    Object.assign(ghost.style,{left:(from.left-bounds.left)+'px',top:(from.top-bounds.top)+'px',width:from.width+'px',height:from.height+'px'});
    root.append(ghost);ghosts.add(ghost);
@@ -68,10 +68,10 @@ function createOrderCompletionSequence(root,totals,onFinish,onDispose){
   add(210,()=>{ghost?.remove();ghosts.delete(ghost);pop()},t=>setNumber(t===1?to:Math.round(from+(to-from)*ease(t))));
  });
  add(320,()=>{root.dataset.summaryPhase='boost';root.dataset.summaryStage='3';visible(boost);animate(boost,[{opacity:0,transform:'translateY(24px) scale(.9)'},{opacity:1,transform:'translateY(-3px) scale(1.03)',offset:.8},{opacity:1,transform:'none'}],320)});
- add(110);
- add(300,()=>{
+ add(518); // Hold the enlarged multiplier before it feeds into the total.
+ add(390,()=>{
   const from=boost.getBoundingClientRect(),to=total.getBoundingClientRect();
-  animate(boost,[{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:`translateY(${to.top+to.height/2-from.top-from.height/2}px) scale(.6)`}],300);
+  animate(boost,[{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:`translateY(${to.top+to.height/2-from.top-from.height/2}px) scale(.6)`}],390);
  });
  add(600,()=>{
   boost.classList.remove('is-visible');root.dataset.summaryPhase='final-total';root.dataset.summaryStage='5';pop(true);

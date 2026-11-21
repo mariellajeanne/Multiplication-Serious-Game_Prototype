@@ -82,9 +82,10 @@ function packageRewardMastery(reward){
  return available>0?`+${available} Mastery available`:'';
 }
 function packageRewardCard(reward,index,rank){
- const food=F(reward.foodId),mastery=packageRewardMastery(reward);
- // The carousel owns the approved tier mapping; no generic box or new art.
- return `<article class="batch-reward r${food.rarity}" data-reward-index="${index}" data-phase="waiting" style="--batch-delay:${index*PACKAGE_REVEAL_TIMING.stagger}ms" aria-label="Package ${index+1}, not yet revealed"><div class="batch-reward-visual"><div class="batch-package" aria-hidden="true">${worldPackageImage(rank,'batch-package-art')}</div><div class="batch-food" aria-hidden="true">${foodArt(food.id)}</div></div><div class="batch-reward-copy${mastery?'':' has-no-mastery'}" aria-hidden="true"><strong>${hubEscape(food.name)}</strong><span><b aria-hidden="true">${food.rarity+1}★</b> ${RARITIES[food.rarity]}</span><small${mastery?'':' hidden'}>${mastery}</small></div></article>`;
+ const food=F(reward.foodId),mastery=packageRewardMastery(reward),owned=g.owned.find(o=>o.uid===reward.uid),boost=owned?multiplierLabel(foodValue(owned)):multiplierLabel(food.base);
+ // The food stays anchored while the rarity-colored frame rises behind it.
+ // The card is presentation only: receipts and Mastery still come from the existing transaction.
+ return `<article class="batch-reward r${food.rarity}" data-reward-index="${index}" data-phase="waiting" style="--batch-delay:${index*PACKAGE_REVEAL_TIMING.stagger}ms" aria-label="Package ${index+1}, not yet revealed"><div class="batch-reward-frame" aria-hidden="true"><div class="batch-card-indicators"><span class="batch-boost-value">×${boost} ${boostSymbol()}</span>${mastery?`<span class="batch-mastery-value">↑${Number(reward.masteryUnlocked)||0}</span>`:''}</div></div><div class="batch-reward-visual"><div class="batch-package" aria-hidden="true">${worldPackageImage(rank,'batch-package-art')}</div><div class="batch-food" aria-hidden="true">${foodArt(food.id)}</div></div><div class="batch-reward-copy${mastery?'':' has-no-mastery'}" aria-hidden="true"><strong>${hubEscape(food.name)}</strong><span><b aria-hidden="true">${food.rarity+1}★</b> ${RARITIES[food.rarity]}</span></div></article>`;
 }
 function presentPackageBatch(resumed=false){
  const receipt=g.packageBatchReceipt;

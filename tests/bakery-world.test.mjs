@@ -13,7 +13,7 @@ function worldHarness(){
   performance={now:()=>now};matchMedia=query=>({matches:query.includes('reduced-motion')&&reduced});
   requestAnimationFrame=()=>1;cancelAnimationFrame=()=>{};
   showPackageCollection=()=>{};showSelectedPackage=()=>{};
-  purchasePackageBatch=id=>commitPackageBatch(id);`);
+  purchasePackageBatch=id=>commitPackageBatch(id);uiText=s=>s;`);
  vm.runInContext(readFileSync(new URL('../src/ui/bakery-scenes.js',import.meta.url),'utf8'),h.c);
  return h;
 }
@@ -28,7 +28,8 @@ test('world preserves scene order and canonical state while rendering real raste
  assert.equal((html.match(/world-odds-row/g)||[]).length,3);
  assert.match(html,/assets\/bakery-approved\/menu-frame.png/);
  assert.match(html,/counter-register world-register/);assert.match(html,/world-counter-packages/);
- assert.equal((html.match(/View All Foods/g)||[]).length,1);
+ assert.equal((html.match(/Food Inventory/g)||[]).length,2);
+ assert.match(html,/data-hub-action="equip-best"/);
  assert.match(html,/data-hub-action="center"/);
  assert.doesNotMatch(html,/1113\.75|373\.3M|food_tile_|order_ticket_/);
 });

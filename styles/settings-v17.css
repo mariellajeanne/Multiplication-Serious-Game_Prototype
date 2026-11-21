@@ -1,0 +1,29 @@
+/* V17: daily settings in the order children encounter them. */
+body[data-view="hub"] .bakery-popup.settings-modal .popup-body{overflow:auto;overscroll-behavior:contain}
+body[data-view="hub"] .settings-modal .baker-profile{padding-bottom:14px;margin:0 0 12px}
+body[data-view="hub"] .settings-modal .baker-profile form{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 12px;align-items:end}
+body[data-view="hub"] .settings-modal .baker-profile label{grid-column:1/-1;margin:0}
+body[data-view="hub"] .settings-modal .baker-profile-edit{min-width:0;display:flex;align-items:center;gap:0;margin:0;border:2px solid #bd936d;border-radius:16px;background:#fff8e9;overflow:hidden}
+body[data-view="hub"] .settings-modal .baker-number-prefix{padding:0 13px;min-height:46px;display:flex;align-items:center;color:#aa947a;white-space:nowrap;font-size:.9em;border-left:1px solid #dfcdb3;user-select:none}
+body[data-view="hub"] .settings-modal .baker-profile input{min-height:46px;padding:7px 12px;width:100%;border:0;background:transparent;box-shadow:none}
+body[data-view="hub"] .settings-modal .baker-save-name{min-height:48px;white-space:nowrap}
+body[data-view="hub"] .settings-modal .baker-profile [role=status]{grid-column:1/-1;margin:0}
+body[data-view="hub"] .settings-modal .settings-main-sections{display:flex;flex-direction:column;gap:14px}
+body[data-view="hub"] .settings-modal :is(.settings-preferences,.settings-guide,.cobaker-availability-setting){display:grid;gap:8px}
+body[data-view="hub"] .settings-modal :is(.settings-preferences,.settings-guide,.cobaker-availability-setting) h3{font-size:1.06em;margin:0;color:#744526}
+body[data-view="hub"] .settings-modal .cobaker-mute-parent{margin:0}
+body[data-view="hub"] .settings-modal .cobaker-mute-explanation{margin:2px 0 0;color:#89643f}
+body[data-view="hub"] .settings-modal .cobaker-mute-section{display:grid;gap:5px}
+body[data-view="hub"] .settings-modal .settings-actions{display:flex;align-items:stretch;justify-content:flex-start;gap:12px;margin:0}
+body[data-view="hub"] .settings-modal .settings-actions>button{min-height:52px;display:inline-flex;align-items:center;justify-content:center;gap:9px;padding:9px 18px}
+body[data-view="hub"] .settings-modal .guide-question{display:inline-grid;place-items:center;width:26px;height:26px;border:2px solid currentColor;border-radius:50%;font-weight:900;line-height:1}
+body[data-view="hub"] .settings-modal .adult-tools{margin-top:16px;padding-top:12px;border-top:1px solid #d1b08b}
+body[data-view="hub"] .settings-modal .cobaker-settings-connection{display:grid;gap:7px;margin:8px 0 15px}
+body[data-view="hub"] .settings-modal .cobaker-settings-connection small{font-size:.9em}
+body[data-view="hub"] .settings-modal .cobaker-settings-connection button{justify-self:start;min-height:48px}
+@media(max-width:720px){body[data-view="hub"] .settings-modal .baker-profile form{grid-template-columns:1fr}body[data-view="hub"] .settings-modal .settings-actions{flex-wrap:wrap}}
+
+/* V19: help notification rows read as one group, without extra separators. */
+body[data-view="hub"] .settings-modal .cobaker-mute-section{border-top:0;margin-top:0;padding-top:0}
+body[data-view="hub"] .settings-modal .cobaker-mute-explanation{margin-bottom:0}
+body[data-view="hub"] .settings-modal .baker-profile input{flex:1;min-width:0}

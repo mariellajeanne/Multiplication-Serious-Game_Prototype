@@ -1,0 +1,6 @@
+/* V17 Orders: small tier badge over coin artwork; ticket text/plaque removed. */
+body[data-view="hub"] .scene-ticket-plaque{display:none!important}
+body[data-view="hub"] :is(.scene-ticket-reward,.hub-ticket-reward){isolation:isolate}
+body[data-view="hub"] .scene-coin-star-badge{position:absolute;z-index:5;right:-6%;top:0;display:flex;align-items:center;justify-content:center;min-width:35px;min-height:24px;padding:2px 7px;border:2px solid #9d663c;border-radius:9px;background:#fff2c8;color:#764526;font-family:'Bakery UI',var(--game-font);font-size:clamp(12px,1vw,17px);font-weight:900;line-height:1;box-shadow:0 2px #bd9366;white-space:nowrap;pointer-events:none}
+body[data-view="hub"] .hub-home .scene-coin-star-badge{right:-4%;top:4%}
+@media(max-width:800px) and (max-height:600px){body[data-view="hub"] .scene-coin-star-badge{font-size:12px;min-height:22px;min-width:31px;border-width:1px;padding:2px 5px}}

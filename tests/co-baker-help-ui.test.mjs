@@ -86,3 +86,13 @@ test('learner removal uses delayed two taps in place and leaves worksheet state 
  click(b,{helpAction:'end'});assert.ok(h.active);assert.match(b.helpBody.innerHTML,/confirm-leave/);click(b,{helpAction:'end'});assert.ok(h.active);
  now+=650;click(b,{helpAction:'end'});assert.equal(h.active,null);assert.equal(JSON.stringify(b.vmc.g.run),before);
 });
+
+test('helper-end feedback retains its role across the preceding presence broadcast',()=>{
+ const b=browser(),h=b.vmc.panaderyaCoBaker.help,messages=[];
+ b.vmc.toast=(text,options)=>messages.push({text,options});
+ h.active={sessionId:'a'.repeat(32),otherId:'b'.repeat(32),role:'Helper'};h.changed();
+ h.active=null;h.broadcastPresence();h.note('Your Co-Baker left. You can keep practicing!');
+ assert.equal(messages.at(-1).text,'The other Baker ended this help session.');
+ assert.equal(messages.at(-1).options.forceDock,true);
+ h.note('Ada #3720 is helping!');assert.equal(messages.at(-1).text,'Ada #3720 is helping!');
+});

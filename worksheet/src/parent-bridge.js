@@ -145,11 +145,13 @@ window.addEventListener('message',event=>{
   worksheetExternalCalculator=!!m.calculationPanel;document.body.classList.toggle('external-calculator',worksheetExternalCalculator);
   externalStart(m.ticket,m.attemptId,false,m.session);
  }
+ if(m.type==='fact-choice'&&m.attemptId===worksheetAttemptId&&productActive()&&m.row===s.row&&m.col===s.k){s.goldenOffer=!!m.offered;render();bridgePoll()}
+ if(m.type==='fact-reset'&&m.attemptId===worksheetAttemptId&&productActive()&&m.row===s.row&&m.col===s.k&&!s.revealed){s.expressionActivated=false;s.goldenOffer=false;render();bridgePoll()}
  if(m.type==='fact-answer'&&m.attemptId===worksheetAttemptId&&worksheetExternalCalculator&&productActive()&&m.row===s.row&&m.col===s.k){
   if(typeof setWorksheetPlacementPath==='function')setWorksheetPlacementPath(m.progressive);
   worksheetAnswerAuthorized=true;try{revealProduct(!!m.restore)}finally{worksheetAnswerAuthorized=false}bridgePoll();
  }
- if(m.type==='challenge-input'&&m.attemptId===worksheetAttemptId){const changed=worksheetChallengeInput!==!!m.enabled;worksheetChallengeInput=!!m.enabled;if(productActive()&&s.revealed&&typeof setWorksheetPlacementPath==='function')setWorksheetPlacementPath(m.progressive);if(changed)updateTutorial()}
+ if(m.type==='challenge-input'&&m.attemptId===worksheetAttemptId){const changed=worksheetChallengeInput!==!!m.enabled;worksheetChallengeInput=!!m.enabled;if(productActive()&&s.revealed&&typeof setWorksheetPlacementPath==='function')setWorksheetPlacementPath(m.progressive);if(changed)render()}
  if(m.type==='digit-key'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k)worksheetDigitKey(m.key);
  if(m.type==='digit-drop'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k&&m.target&&Number.isInteger(m.target.c)&&['slot','carry'].includes(m.target.kind)){const accepted=worksheetDropDigit(m.part,m.target,m.value);report('digit-drop-result',{dropId:m.dropId,accepted,row:m.row,col:m.col})}
  if(m.type==='arm-carry'&&m.attemptId===worksheetAttemptId){armCarry();bridgePoll()}

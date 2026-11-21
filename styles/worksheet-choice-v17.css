@@ -1,0 +1,8 @@
+/* V17: two-choice answer card, no change to answer-generation rules. */
+.worksheet-calculator .worksheet-golden-choice{display:grid;grid-template-rows:1.2fr 1fr;gap:0;overflow:hidden;border:3px solid #b88b63;border-radius:18px;background:#fff2d8;box-shadow:0 4px #b18d62;min-height:160px}
+.worksheet-calculator .worksheet-golden-choice button{width:100%;max-width:none;min-height:68px;margin:0;border:0;border-radius:0;box-shadow:none;padding:12px 16px;white-space:normal}
+.worksheet-calculator .worksheet-golden-choice .golden-challenge-button{background:linear-gradient(120deg,#f9d477,#eed0f8,#ccedee,#ffd982)!important;color:#69412b;border-bottom:2px solid #b88b63;display:flex;align-items:center;justify-content:center;gap:10px;font-size:clamp(18px,2vw,28px);font-weight:900}
+.worksheet-calculator .worksheet-golden-choice .golden-challenge-button small{display:block;font-size:clamp(12px,1.1vw,15px);font-weight:700}
+.worksheet-calculator .worksheet-golden-choice .golden-show-answer{background:#ffedc9!important;color:#704327;font-size:clamp(18px,1.8vw,25px);font-weight:800}
+.worksheet-calculator .worksheet-golden-choice button:focus-visible{outline:3px solid #2d8674;outline-offset:-4px}
+@media(max-height:600px){.worksheet-calculator .worksheet-golden-choice{min-height:116px;border-width:2px}.worksheet-calculator .worksheet-golden-choice button{min-height:52px;padding:7px 10px}}

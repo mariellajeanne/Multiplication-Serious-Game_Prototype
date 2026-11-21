@@ -41,6 +41,19 @@ test('confirmed helper alone receives initial snapshot and procedural states inc
  assert.equal(co.latest,null);const last=bo.received;set({...bo.latest.state});assert.equal(bo.received,last);
  const own=ao.latest;b.help.send(a.profile.id,{kind:'worksheet',watchVersion:bo.watchVersion,sessionId:a.help.active.sessionId,streamId:ao.streamId,version:999,snapshot:w.snapshot({state:initial})});n.flush();assert.equal(ao.latest,own);
 });
+
+test('connected expression direction and floating Golden choice survive two-peer sync',()=>{
+ const {bo,co,set}=pair();
+ for(const changes of [
+  {expressionOrder:[8,9],expressionActivated:false,goldenOffer:false},
+  {expressionOrder:[9,8],expressionActivated:true,goldenOffer:true},
+  {expressionOrder:[9,8],expressionActivated:true,goldenOffer:true,revealed:true,chosen:'ones'}
+ ]){
+  const state={...initial,phase:'product',raw:72,...changes};set(state);
+  assert.deepEqual(bo.latest.state,state);assert.equal(co.latest,null);
+ }
+ for(const patch of [{expressionOrder:[9,18]},{expressionOrder:'9x8'},{goldenOffer:1},{expressionActivated:'yes'}])assert.equal(w.validState({...initial,...patch}),false);
+});
 test('stale, duplicate, out of order, unrelated and expired messages cannot update the viewer',()=>{
  const {n,a,b,c,ao,bo,co}=pair();const h={kind:'worksheet',watchVersion:bo.watchVersion,sessionId:a.help.active.sessionId,streamId:bo.streamId,version:bo.received+1,snapshot:w.snapshot({state:{...initial,first:{kind:'top',c:0}}})};
  const deliver=(from,help,session=from.session)=>b.receive({kind:'message',message:{...api.packet(from.profile,session,'help'),help}});
