@@ -1,5 +1,5 @@
 /* Illustrated bakery view. All actions and values use the production controllers. */
-let hubCollection=false,hubMountedRun=null,hubMountedPhase=null,hubRenderingWorksheet=false,hubScrollControls=null,hubCollectionFocus=null;
+let hubCollection=false,hubFoodDirect=false,hubMountedRun=null,hubMountedPhase=null,hubRenderingWorksheet=false,hubScrollControls=null,hubCollectionFocus=null;
 function isBakeryHub(){return typeof document!=='undefined'&&document.body?.dataset.view==='hub'}
 function hubEscape(value){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function hubAsset(name){
@@ -72,6 +72,8 @@ function renderHubFoodCard(o){
  return `<article class="compact-food collection-card r${food.rarity} ${equipped?'is-equipped':'is-unequipped'} ${selected?'is-selected':''}" data-uid="${o.uid}"><button class="food-card-target" aria-pressed="${selected}" onclick="selectFood(${o.uid})" aria-label="Manage ${hubEscape(food.name)}, ${rarityLabel(food.rarity)}, Mastery ${recipeMastery(o)}">${hubFoodArt(food.id)}<strong>${hubEscape(food.name)}</strong><span class="food-card-rarity">${RARITIES[food.rarity]} · ×${multiplierLabel(foodValue(o))}</span><small class="food-card-bottom">Mastery ${recipeMastery(o)}${availableMastery(o)?` · +${availableMastery(o)} available`:''}</small></button><button class="collection-equip ${equipped?'equipped':''}" onclick="hubToggleEquip(${o.uid})" ${busy||!equipped&&g.activeMenu.length>=g.menuSlots?'disabled':''}>${equipped?'Equipped ✓':'Equip'}</button></article>`;
 }
 function renderHubCollection(){
+ // Clicking an equipped food opens only its details, not the collection inventory.
+ if(hubFoodDirect)return `<div class="hub-collection-overlay bakery-popup-backdrop food-direct-backdrop" onclick="if(event.target===this)closeHubCollection()"><div class="food-direct-host" role="dialog" aria-modal="true" aria-label="Food details"><div id="foodPanel">${renderFoodPanel()}</div></div></div>`;
  const foods=sortedMenuFoods(g.owned.filter(o=>!hideUnequipped||g.activeMenu.includes(o.uid)));
  return hubPopupChrome('Menu Collection',`<main class="illustrated-collection-content" style="--owned-rows:${Math.min(2,Math.max(1,Math.ceil(foods.length/4)))}"><div class="collection-toolbar"><div class="collection-slot-controls"><b>${g.activeMenu.length}/${g.menuSlots} equipped</b><button class="secondary" ${g.menuSlots>=FOOD.length?'disabled':''} onclick="buyMenuSlot()">${g.menuSlots>=FOOD.length?'All slots owned':`+ Slot · 🪙 ${amountLabel(slotCost())}`}</button><button class="secondary collection-index" onclick="openIndex()">Food Index</button></div><div class="collection-equip-controls"><button class="primary" onclick="equipBest('final')">Equip Best</button>${renderAutoEquipControl()}</div><div class="collection-filter-controls"><button class="secondary" aria-pressed="${hideUnequipped}" onclick="hideUnequipped=!hideUnequipped;render()">${hideUnequipped?'Show All':'Hide Unequipped'}</button><button class="secondary" data-focus="select-foods" aria-pressed="${multiSelect}" onclick="toggleFoodSelection()">${multiSelect?'Done selecting':'Select Foods'}</button><span class="collection-sort-note">Rarity · Boost</span></div></div><div class="menu-grid collection-grid" data-food-count="${foods.length}" tabindex="0" aria-label="Owned foods, scroll to browse">${foods.map(renderHubFoodCard).join('')}${!foods.length?'<p>No foods in this view. Show all foods or open a package.</p>':''}</div><div id="foodPanel">${renderFoodPanel()}</div></main>`,{collection:true,variant:foods.length<5?'small-collection':''});
 }
@@ -80,9 +82,9 @@ function hubToggleEquip(uid){
  const selection=selectedFoods;selectedFoods=new Set([uid]);
  const ok=selectionEquip(!g.activeMenu.includes(uid));selectedFoods=selection;paintFoodPanel();return ok;
 }
-function openHubCollection(){hubCollectionFocus=captureFocus(document.activeElement);hubCollection=true;render();const grid=$('hubCollection').querySelector('.menu-grid');if(grid)grid.scrollTop=0;document.querySelector('.hub-collection-back')?.focus({preventScroll:true})}
-function closeHubCollection(){selectedFoods.clear();multiSelect=false;hubCollection=false;render();restoreFocus(hubCollectionFocus);if(!document.activeElement?.getClientRects().length||document.activeElement===document.body)document.querySelector('.view-all-foods,.nav-collection')?.focus({preventScroll:true})}
-function openHubFood(uid){hubCollectionFocus=captureFocus(document.activeElement);hubCollection=true;selectedFoods=new Set([uid]);multiSelect=false;render();document.querySelector('.food-panel-close')?.focus({preventScroll:true})}
+function openHubCollection(){hubCollectionFocus=captureFocus(document.activeElement);hubFoodDirect=false;hubCollection=true;render();const grid=$('hubCollection').querySelector('.menu-grid');if(grid)grid.scrollTop=0;document.querySelector('.hub-collection-back')?.focus({preventScroll:true})}
+function closeHubCollection(){selectedFoods.clear();multiSelect=false;hubFoodDirect=false;hubCollection=false;render();restoreFocus(hubCollectionFocus);if(!document.activeElement?.getClientRects().length||document.activeElement===document.body)document.querySelector('.view-all-foods,.nav-collection')?.focus({preventScroll:true})}
+function openHubFood(uid){hubCollectionFocus=captureFocus(document.activeElement);hubFoodDirect=true;hubCollection=true;selectedFoods=new Set([uid]);multiSelect=false;render();document.querySelector('.food-panel-close')?.focus({preventScroll:true})}
 function playHubOrder(){const ticket=g.run?.ticket||g.board.find(t=>g.orderRuns[t.id])||g.board[0];if(ticket){hubCollection=false;startTicket(ticket.id)}}
 function openHubHelp(){showModal('How to Play',`<div class="hub-help"><ol class="help-steps"><li>${bakeryIcon('ticket')}<span><b>Choose an order</b><small>Tap a ticket to start or resume.</small></span></li><li>${bakeryIcon('guide')}<span><b>Multiply, one pair at a time</b><small>Connect digits. Place products and carries.</small></span></li><li>${hubCoinArt(0)}<span><b>Collect your coins</b><small>Finish the worksheet, then collect.</small></span></li><li>${bakeryIcon('inventory')}<span><b>Open packages. Equip foods.</b><small>Grow your Baker's Boost.</small></span></li></ol><details class="worksheet-tips"><summary>Worksheet tips</summary><ul><li>Tap or drag between the digits.</li><li>Tap the × bubble to reveal product tiles.</li><li>Swipe down to add the partial rows.</li><li>Save & Exit keeps your work.</li></ul></details><div class="btnrow"><button class="primary" onclick="closeModal()">Got it!</button><button class="secondary" onclick="openSettings()">Guide & Sound</button></div></div>`)}
 function fitHubInterface(){
@@ -101,14 +103,14 @@ function renderBakeryHub(){
  reconcileAutoEquip();refillBoard();reconcileOrderFoods();
  if(!$('hubHome'))$('app').innerHTML='<div id="hubHome" class="hub-home"></div><div id="hubCollection" class="hub-collection" hidden></div><div id="hubOrder" class="hub-order-workspace" hidden></div>';
  const playing=!!g.run&&!g.run.paused,home=$('hubHome'),collection=$('hubCollection'),order=$('hubOrder');
- if(playing)hubCollection=false;
+ if(playing){hubCollection=false;hubFoodDirect=false;}
  home.hidden=playing;collection.hidden=playing||!hubCollection;order.hidden=!playing;
  home.inert=hubCollection;document.body.classList.toggle('hub-working',playing);$('app').className=playing?'playing':'browsing';
  const foodScroll=home.querySelector('.showcase-scroll')?.scrollTop||0,orderScroll=home.querySelector('.hub-order-scroll')?.scrollTop||0;
  if(!playing){
   hubScrollControls?.destroy();home.innerHTML=renderHubHome();home.querySelector('.showcase-scroll').scrollTop=foodScroll;home.querySelector('.hub-order-scroll').scrollTop=orderScroll;
   if(typeof bindIllustratedScrollbars==='function')hubScrollControls=bindIllustratedScrollbars(home);
-  if(hubCollection){const scroll=collection.querySelector('.menu-grid')?.scrollTop||0;collection.innerHTML=renderHubCollection();collection.querySelector('.menu-grid').scrollTop=scroll;}
+  if(hubCollection){const scroll=collection.querySelector('.menu-grid')?.scrollTop||0;collection.innerHTML=renderHubCollection();if(collection.querySelector('.menu-grid'))collection.querySelector('.menu-grid').scrollTop=scroll;}
  }
  // Preserve the original mounted engine and outer worksheet markup without reskinning.
  if(g.run&&(hubMountedRun!==g.run||hubMountedPhase!==g.run.phase||!order.firstChild)){

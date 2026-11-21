@@ -24,10 +24,19 @@ body[data-view="hub"] .scene-menu-opening{position:absolute;left:225px;right:216
 body[data-view="hub"] #cabinet-scroll.scene-food-scroll{position:absolute;inset:0 52px 0 0;overflow:auto;scrollbar-width:none;overscroll-behavior:contain;touch-action:pan-y}
 body[data-view="hub"] .hub-home #cabinet-grid.scene-food-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;padding:3px 5px 8px;min-height:100%;align-content:start}
 body[data-view="hub"] .hub-home .scene-food-card{position:relative;height:205px;min-height:0;min-width:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:5px;padding:28px 12px 44px;background:#fff0d820;border:2px solid #ffd3a477;border-radius:19px;box-shadow:inset 0 2px #fff4d828;overflow:hidden;font-size:23px;isolation:isolate}
-body[data-view="hub"] .scene-food-card .scene-food-image{position:static;width:88%;height:122px;max-height:122px;max-width:225px;object-fit:contain;flex:none;margin:0}
-body[data-view="hub"] .scene-food-card .food-meta{position:absolute;top:12px;left:13px;right:10px;text-align:left;color:#ffe5bf;font-size:18px;line-height:1;z-index:2;text-shadow:none}
-body[data-view="hub"] .hub-home .scene-food-card .food-multiplier{position:absolute;left:12px;right:12px;bottom:9px;top:auto;width:auto;max-width:none;min-width:0;transform:none;height:36px;padding:0 6px;gap:5px;display:flex;align-items:center;justify-content:center;background:#ffc773;border:2px solid #914621;border-radius:12px;box-shadow:inset 0 2px #ffeac2;color:#643019;font-size:var(--boost-font,30px);text-shadow:none;line-height:1}
-body[data-view="hub"] .scene-food-card .boost-star{position:static;width:29px;height:29px;flex:none;object-fit:contain}
+/* Menu foods: leave the existing card frame/background neutral for future rarity themes.
+   Food is centered in the entire parent card; overlays sit above, not beside it. */
+body[data-view="hub"] .hub-home .scene-food-card.hub-food{padding:0;gap:0}
+body[data-view="hub"] .scene-food-card.hub-food .scene-food-image{position:absolute;inset:0 0 21% 0;width:100%;height:79%;max-height:none;max-width:none;object-fit:contain;object-position:center center;margin:0;padding:3px;transform:scale(1.08);transform-origin:center center;pointer-events:none;z-index:0}
+body[data-view="hub"] .scene-food-card.hub-food .food-upgrade-ready{position:absolute;z-index:3;right:8px;top:8px;min-width:78px;height:47px;padding:0 10px;display:flex;align-items:center;justify-content:center;gap:3px;background:#c9e4b7;border:2px solid #7b9a6a;border-radius:12px;color:#36582f;font-weight:900;font-size:26px;line-height:1;box-shadow:0 2px 0 #638454;pointer-events:none}
+body[data-view="hub"] .scene-food-card.hub-food .food-upgrade-ready svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* One uninterrupted footer, divided between equal-height level and boost. */
+body[data-view="hub"] .hub-home .scene-food-card.hub-food .food-stats{position:absolute;z-index:2;left:0;right:0;bottom:0;height:47px;display:grid;grid-template-columns:minmax(62px,28%) minmax(0,1fr);border-top:2px solid #ac8358;overflow:hidden;pointer-events:none}
+body[data-view="hub"] .scene-food-card.hub-food .food-level{display:flex;align-items:center;justify-content:center;min-width:0;padding:0 3px;background:#ffe1a3;border-right:2px solid #c39c6c;color:#60391f;font-size:20px;font-weight:900;white-space:nowrap;line-height:1}
+body[data-view="hub"] .hub-home .scene-food-card.hub-food .food-multiplier{position:static;inset:auto;transform:none;width:100%;max-width:none;min-width:0;height:100%;padding:0 3px;gap:3px;display:flex;align-items:center;justify-content:center;background:#fffdf5;border:0;border-radius:0;box-shadow:none;color:#60391f;font-size:var(--boost-font,24px);font-weight:900;line-height:1;letter-spacing:-.5px;text-shadow:none;white-space:nowrap}
+body[data-view="hub"] .scene-food-card.hub-food .food-multiplier b{min-width:0;overflow:hidden;text-overflow:clip}
+body[data-view="hub"] .scene-food-card.hub-food .boost-star{position:static;width:24px;height:24px;flex:none;object-fit:contain}
+body[data-view="hub"] .scene-food-card.hub-food:focus-visible{outline:3px solid #ffdf88;outline-offset:2px}
 body[data-view="hub"] .hub-home .slot-card{background:#f8c65a;border:3px solid #a55a2d;color:#fff6df;padding:12px;gap:8px;box-shadow:inset 0 3px #ffedab,0 3px #8f4728}
 body[data-view="hub"] .slot-card strong,body[data-view="hub"] .slot-card small{color:#6a351e;line-height:1.15;text-shadow:none;font-size:23px}
 body[data-view="hub"] .slot-card small{font-size:21px}
@@ -36,9 +45,9 @@ body[data-view="hub"] .slot-plus{font-size:62px;line-height:1;color:#fff0c3;font
 body[data-view="hub"] .unfilled-slot{padding:20px 12px;background:#fff0d810}
 body[data-view="hub"] .unfilled-slot img{width:70px;height:70px;object-fit:contain;opacity:.35}
 body[data-view="hub"] .unfilled-slot span{max-width:210px;color:#f5cda7;font-size:22px;text-align:center;line-height:1.2}
-body[data-view="hub"] .counter-packages{position:absolute;left:78px;bottom:134px;width:260px;height:248px;padding:0;border:0;background:none;box-shadow:none;z-index:5}
+body[data-view="hub"] .counter-packages{position:absolute;left:16px;bottom:86px;width:260px;height:248px;padding:0;border:0;background:none;box-shadow:none;z-index:5}
 body[data-view="hub"] .counter-packages img{width:100%;height:100%;object-fit:contain;object-position:center bottom;filter:drop-shadow(0 5px 2px #7d432340)}
-body[data-view="hub"] .counter-register{position:absolute;right:52px;bottom:134px;width:280px;height:264px;object-fit:contain;object-position:center bottom;pointer-events:none;z-index:5;filter:drop-shadow(0 5px 2px #7d432340)}
+body[data-view="hub"] .counter-register{position:absolute;right:42px;bottom:86px;width:280px;height:264px;object-fit:contain;object-position:center bottom;pointer-events:none;z-index:5;filter:drop-shadow(0 5px 2px #7d432340)}
 /* Clean synchronized native scrollbars; the thumb travels between exact endpoints. */
 body[data-view="hub"] .scene-scroll-rail{position:absolute;width:38px;z-index:5}
 body[data-view="hub"] .food-rail{right:0;top:0;bottom:0}
@@ -211,10 +220,14 @@ body[data-view="hub"] .scene-nav [aria-current="page"]::before{height:4px;backgr
  body[data-view="hub"] .view-all-foods .button-icon{width:calc(16px / var(--phone-kiosk-unit));height:calc(16px / var(--phone-kiosk-unit))}
  body[data-view="hub"] .hub-home .scene-food-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
  body[data-view="hub"] .hub-home .scene-food-card{height:calc(84px / var(--phone-kiosk-unit));padding:calc(26px / var(--phone-kiosk-unit)) 12px calc(22px / var(--phone-kiosk-unit))}
- body[data-view="hub"] .scene-food-card .food-meta{font-size:calc(11px / var(--phone-kiosk-unit))}
- body[data-view="hub"] .scene-food-card .scene-food-image{height:calc(32px / var(--phone-kiosk-unit));max-height:none}
- body[data-view="hub"] .hub-home .scene-food-card .food-multiplier{height:calc(18px / var(--phone-kiosk-unit));font-size:calc(11.5px / var(--phone-kiosk-unit))}
- body[data-view="hub"] .scene-food-card .boost-star{width:calc(12px / var(--phone-kiosk-unit));height:calc(12px / var(--phone-kiosk-unit))}
+ body[data-view="hub"] .hub-home .scene-food-card.hub-food{padding:0}
+ body[data-view="hub"] .scene-food-card.hub-food .scene-food-image{height:79%;max-height:none;padding:2px;transform:scale(1.08)}
+ body[data-view="hub"] .hub-home .scene-food-card.hub-food .food-stats{height:calc(28px / var(--phone-kiosk-unit));grid-template-columns:minmax(0,35%) minmax(0,1fr);border-top-width:1px}
+ body[data-view="hub"] .scene-food-card.hub-food .food-level{font-size:calc(10px / var(--phone-kiosk-unit));padding:0 1px;border-right-width:1px}
+ body[data-view="hub"] .hub-home .scene-food-card.hub-food .food-multiplier{height:100%;font-size:calc(11px / var(--phone-kiosk-unit));letter-spacing:-.35px;gap:2px;padding:0 2px}
+ body[data-view="hub"] .scene-food-card.hub-food .boost-star{width:calc(12px / var(--phone-kiosk-unit));height:calc(12px / var(--phone-kiosk-unit))}
+ body[data-view="hub"] .scene-food-card.hub-food .food-upgrade-ready{top:calc(3px / var(--phone-kiosk-unit));right:calc(3px / var(--phone-kiosk-unit));min-width:calc(43px / var(--phone-kiosk-unit));height:calc(30px / var(--phone-kiosk-unit));font-size:calc(17px / var(--phone-kiosk-unit));border-radius:calc(7px / var(--phone-kiosk-unit));padding:0 calc(4px / var(--phone-kiosk-unit));gap:1px}
+ body[data-view="hub"] .scene-food-card.hub-food .food-upgrade-ready svg{width:calc(16px / var(--phone-kiosk-unit));height:calc(16px / var(--phone-kiosk-unit))}
  body[data-view="hub"] .hub-home .scene-food-card.slot-card{padding:10px;gap:6px}
  body[data-view="hub"] .slot-card strong{font-size:calc(12px / var(--phone-kiosk-unit))}
  body[data-view="hub"] .slot-card small{font-size:calc(11px / var(--phone-kiosk-unit))}

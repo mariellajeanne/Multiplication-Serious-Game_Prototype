@@ -23,7 +23,7 @@ function selectFood(uid){
  paintFoodPanel();
 }
 function openFoodItem(uid){if(modal)closeModal();if(!$('foodPanel'))render();selectedFoods=new Set([uid]);multiSelect=false;paintFoodPanel();foodReturnFocus=captureFocus(document.querySelector?.(`[data-uid="${uid}"] .food-card-target`));}
-function closeFoodPanel(){selectedFoods.clear();multiSelect=false;paintFoodPanel();restoreFocus(foodReturnFocus);foodReturnFocus=null}
+function closeFoodPanel(){if(typeof isBakeryHub==='function'&&isBakeryHub()&&typeof hubFoodDirect!=='undefined'&&hubFoodDirect){closeHubCollection();return}selectedFoods.clear();multiSelect=false;paintFoodPanel();restoreFocus(foodReturnFocus);foodReturnFocus=null}
 function toggleFoodSelection(){multiSelect=!multiSelect;selectedFoods.clear();foodReturnFocus=captureFocus(document.activeElement);paintFoodPanel()}
 function deselectAllFoods(){multiSelect=true;selectedFoods.clear();paintFoodPanel()}
 function selectAllFoods(){multiSelect=true;selectedFoods=new Set(g.owned.filter(o=>!hideUnequipped||g.activeMenu.includes(o.uid)).map(o=>o.uid));paintFoodPanel()}
@@ -57,10 +57,33 @@ function renderSelectionActions(state,bulk=false){
  const masteryNote=!eligible.length?'Find another copy to unlock more Recipe Mastery.':g.coins<total?'Not enough coins for this Mastery upgrade.':'';
  return `<div class="food-action-area"><div class="food-panel-actions ${mixed?'mixed-selection':''}"><button class="secondary action-sell" ${!foods.length||busy?'disabled':''} onclick="requestSelectedSale()">${bulk?'Sell Selected':'Sell…'}</button><button class="primary action-mastery" ${!eligible.length||g.coins<total||busy?'disabled':''} title="${masteryNote}" onclick="requestSelectedMastery()"><span>${bulk?'Mastery for Selected':'+1 ♛ Mastery'}</span>${price?`<small>${amountLabel(price)} 🪙</small>`:''}</button><div class="food-equip-actions">${adding.length?`<button class="secondary action-equip" ${blocked?'disabled':''} title="${blocked}" onclick="selectionEquip(true)">${mixed?`Equip (${adding.length})`:bulk?'Equip Selected':'Equip'}</button>`:''}${removing.length?`<button class="secondary action-unequip" ${busy?'disabled':''} onclick="selectionEquip(false)">${mixed?`Unequip (${removing.length})`:bulk?'Unequip Selected':'Unequip'}</button>`:''}${!foods.length?'<button class="secondary action-equip" disabled>Equip Selected</button>':''}</div></div></div>`;
 }
+// A compact, two-column food detail for the bakery scene. Upgrades are a single
+// visual row with three *invisible* columns (no interior frames or dividers).
+function renderHubSingleFoodPanel(state){
+ const o=state.foods[0],f=F(o.id),mastery=recipeMastery(o),available=availableMastery(o),base=tierBase(o),contribution=foodValue(o),bonus=contribution-base;
+ const next=foodValue({...o,mastery:mastery+1})-contribution,price=foodLevelPrice(o),busy=!!(g.run&&!g.run.paused),equipped=g.activeMenu.includes(o.uid);
+ const blocked=selectionBlockedReason(state),affordable=g.coins>=price,canBuy=available>0&&affordable&&!busy;
+ // Keep the potential next gain visible even before an upgrade is unlocked.
+ const nextText=`↑1 &nbsp; +${multiplierLabel(next)} ${boostSymbol()}`;
+ return `<section class="food-selection-popup food-selection-single food-detail-redesign" role="region" aria-label="${hubEscape(f.name)} food details"><button class="close food-panel-close" onclick="closeFoodPanel()" aria-label="Close food details">×</button>
+ <div class="food-detail-layout">
+  <div class="food-detail-showcase">${presentedFoodArt(f.id)}<h2>${hubEscape(f.name)}</h2><div class="food-detail-rarity">${f.rarity+1}★ ${hubEscape(RARITIES[f.rarity])}</div></div>
+  <div class="food-detail-right">
+   <div class="food-detail-boost"><span class="food-boost-caption">Baker's Boost</span><strong class="detail-contribution">×${multiplierLabel(contribution)} ${boostSymbol()}</strong><div class="food-boost-line"><span>Base</span><b>×${multiplierLabel(base)} ${boostSymbol()}</b></div><div class="food-boost-line"><span>Mastery Bonus</span><b>+${multiplierLabel(bonus)} ${boostSymbol()}</b></div></div>
+   <div class="food-detail-upgrade" aria-label="Level ${mastery}, ${available} upgrades available, next boost gain ${multiplierLabel(next)}">
+    <div class="upgrade-current"><strong>Lv. ${mastery}</strong><span>+${multiplierLabel(bonus)} ${boostSymbol()}</span></div>
+    <div class="upgrade-next"><span class="upgrade-available ${available?'':'is-empty'}">↑${available} Available</span><span class="upgrade-gain">${nextText}</span></div>
+    <button class="primary action-mastery upgrade-purchase" ${canBuy?'':'disabled'} title="${available?'Upgrade one level for '+amountLabel(price)+' coins':'No unlocked level-ups available'}" onclick="requestSelectedMastery()"><strong>UPGRADE</strong><span>🪙 ${amountLabel(price)}</span></button>
+   </div>
+   <div class="food-detail-actions"><button class="secondary action-sell" ${busy?'disabled':''} onclick="requestSelectedSale()">Sell…</button><button class="secondary ${equipped?'action-unequip':'action-equip'}" ${busy||!equipped&&!!blocked?'disabled':''} ${!equipped&&blocked?`title="${hubEscape(blocked)}"`:''} onclick="selectionEquip(${!equipped})">${equipped?'Unequip':'Equip'}</button></div>
+  </div>
+ </div></section>`;
+}
 function renderFoodPanel(){
  const state=selectionState(),{foods}=state;if(!foods.length&&!multiSelect)return '';
  const bulk=foods.length!==1;
  if(bulk)return `<section class="food-selection-popup food-selection-multi" role="region" aria-label="Selected foods"><button class="close food-panel-close" onclick="closeFoodPanel()" aria-label="Close food details">×</button><div class="selection-tools"><button class="secondary action-select" ${!foods.length?'disabled':''} onclick="deselectAllFoods()">Deselect All</button><button class="secondary action-select" onclick="selectAllFoods()">Select All</button></div>${renderSelectionActions(state,true)}</section>`;
+ if(typeof isBakeryHub==='function'&&isBakeryHub())return renderHubSingleFoodPanel(state);
  const o=foods[0],f=F(o.id),mastery=recipeMastery(o),base=tierBase(o),contribution=foodValue(o),next=foodValue({...o,mastery:mastery+1})-contribution;
  return `<section class="food-selection-popup food-selection-single" role="region" aria-label="Selected food details"><button class="close food-panel-close" onclick="closeFoodPanel()" aria-label="Close food details">×</button><div class="food-panel-scroll"><div class="recipe-detail"><div class="selection-food-visual">${presentedFoodArt(f.id)}<div class="selection-rarity-stars" aria-hidden="true">${'★'.repeat(f.rarity+1)}</div><strong class="selection-rarity-name">${f.rarity+1}★ ${RARITIES[f.rarity]}</strong></div><div class="selection-food-stats"><h2>${f.name}</h2><div class="selection-boost"><strong class="detail-contribution">Boost: ×${multiplierLabel(contribution)} ${boostSymbol()}</strong><small>Base: ×${multiplierLabel(base)} ${boostSymbol()}</small></div><div class="selection-mastery"><b>Mastery: ${mastery} ♛</b><span>Bonus: +${multiplierLabel(contribution-base)} ${boostSymbol()}</span></div><div class="mastery-availability"><b>Available +${availableMastery(o)} ♛</b><span>Next: +${multiplierLabel(next)} ${boostSymbol()}</span></div></div></div></div><p class="selection-hint">💡 Multi-select by long-pressing an item.</p>${renderSelectionActions(state)}</section>`;
 }
@@ -87,7 +110,7 @@ function requestSelectedSale(){
 function confirmSelectedSale(){
  const tx=saleConfirmation;saleConfirmation=null;if(!tx||g.run&&!g.run.paused)return false;
  const foods=tx.uids.map(uid=>g.owned.find(o=>o.uid===uid));if(foods.some(o=>!o)||inventoryFingerprint(foods)!==tx.fingerprint){toast('Foods changed. Review the sale again.');return false}
- commitPurchaseUndo('Foods sold');g.coins+=foods.reduce((sum,o)=>sum+resalePrice(o),0);g.owned=g.owned.filter(o=>!tx.uids.includes(o.uid));g.activeMenu=g.activeMenu.filter(uid=>!tx.uids.includes(uid));selectedFoods.clear();save();closeModal();return true;
+ commitPurchaseUndo('Foods sold');g.coins+=foods.reduce((sum,o)=>sum+resalePrice(o),0);g.owned=g.owned.filter(o=>!tx.uids.includes(o.uid));g.activeMenu=g.activeMenu.filter(uid=>!tx.uids.includes(uid));selectedFoods.clear();save();closeModal();if(typeof isBakeryHub==='function'&&isBakeryHub()&&typeof hubFoodDirect!=='undefined'&&hubFoodDirect)closeHubCollection();return true;
 }
 function renderMenu(){
  const items=sortedMenuFoods(g.owned.filter(o=>!hideUnequipped||g.activeMenu.includes(o.uid)));

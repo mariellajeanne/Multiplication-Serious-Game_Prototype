@@ -170,3 +170,68 @@ body[data-view="hub"] .package-shop-modal button:is(.primary,.package-open-all){
 /* Programmatically focused dialog roots must not draw the browser black/white
    auto-focus ring around the illustrated frame. Controls retain focus-visible. */
 body[data-view="hub"] .bakery-popup[tabindex="-1"]:focus{outline:none}
+
+
+/* Food detail V8: standalone when tapping a menu food; two-column tablet-first design.
+   The level strip is ONE outer rounded rectangle with invisible column partitions. */
+body[data-view="hub"] .hub-collection .food-direct-backdrop{pointer-events:auto}
+body[data-view="hub"] .hub-collection .food-direct-host{width:min(1100px,calc(100vw - 40px));height:min(565px,calc(100dvh - 36px));min-height:0;pointer-events:auto}
+body[data-view="hub"] .hub-collection .food-direct-host #foodPanel{position:static;display:block;width:100%;height:100%;min-height:0;max-height:none;transform:none;pointer-events:auto}
+body[data-view="hub"] .hub-collection .food-detail-redesign{position:relative;left:auto;right:auto;top:auto;bottom:auto;width:100%;height:100%;padding:24px;display:block;overflow:hidden;border:3px solid #966b48;border-radius:22px;background:#fff0d4;box-shadow:0 5px 0 #a67d55;animation:hub-popup-in .14s ease-out}
+body[data-view="hub"] .hub-collection .food-detail-redesign .food-panel-close{top:10px;right:10px;width:52px;height:52px;min-width:52px;min-height:52px;z-index:5}
+body[data-view="hub"] .hub-collection .food-detail-layout{height:100%;min-height:0;display:grid;grid-template-columns:40% minmax(0,1fr);gap:24px;align-items:stretch}
+body[data-view="hub"] .hub-collection .food-detail-showcase{min-width:0;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;padding:16px;background:#fff8e8;border:2px solid #d1b189;border-radius:18px;overflow:hidden}
+body[data-view="hub"] .hub-collection .food-detail-showcase .food-art{flex:1 1 0;width:100%;height:100%;min-height:0;min-width:0;max-width:100%;max-height:100%;margin:0;object-fit:contain;object-position:center}
+body[data-view="hub"] .hub-collection .food-detail-showcase h2{flex:none;margin:0;max-width:100%;text-align:center;line-height:1.12;font-size:clamp(21px,2.3vw,34px);overflow-wrap:anywhere}
+body[data-view="hub"] .hub-collection .food-detail-rarity{flex:none;margin:0 0 4px;text-align:center;font-weight:850;color:#9b7042;font-size:clamp(15px,1.35vw,21px)}
+body[data-view="hub"] .hub-collection .food-detail-right{min-height:0;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:18px;padding:12px 2px 0}
+body[data-view="hub"] .hub-collection .food-detail-boost{min-width:0;min-height:0;flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:6px;padding:0 12px 2px}
+body[data-view="hub"] .hub-collection .food-boost-caption{color:#896241;font-size:clamp(23px,2.25vw,33px);font-weight:900}
+body[data-view="hub"] .hub-collection .food-detail-boost .detail-contribution{display:flex;align-items:center;flex-wrap:nowrap;gap:6px;white-space:nowrap;color:#327f6e;font-size:clamp(42px,4.2vw,70px);line-height:1.1}
+body[data-view="hub"] .hub-collection .food-detail-boost .boost-gem{width:1em;height:1em}
+body[data-view="hub"] .hub-collection .food-boost-line{display:flex;flex-wrap:wrap;align-items:center;gap:9px;color:#82613f;font-size:clamp(18px,1.65vw,25px);line-height:1.18}
+body[data-view="hub"] .hub-collection .food-boost-line b{color:#694329}
+body[data-view="hub"] .hub-collection .food-boost-line .boost-gem{width:1em;height:1em}
+body[data-view="hub"] .hub-collection .food-detail-upgrade{flex:0 0 auto;min-width:0;min-height:128px;display:grid;grid-template-columns:28% 36% minmax(0,36%);gap:0;align-items:stretch;padding:12px 16px;border:2px solid #c6a47d;border-radius:16px;background:#fff8e9}
+body[data-view="hub"] .hub-collection .food-detail-upgrade :is(.upgrade-current,.upgrade-next){min-width:0;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;gap:12px}
+body[data-view="hub"] .hub-collection .food-detail-upgrade .upgrade-current strong{color:#694027;font-size:clamp(30px,2.7vw,44px);line-height:1;white-space:nowrap}
+body[data-view="hub"] .hub-collection .food-detail-upgrade .upgrade-current>span{color:#79543a;font-weight:850;font-size:clamp(15px,1.4vw,21px);white-space:nowrap}
+body[data-view="hub"] .hub-collection .food-detail-upgrade :is(.upgrade-current,.upgrade-next) .boost-gem{width:1em;height:1em;vertical-align:-.15em}
+body[data-view="hub"] .hub-collection .upgrade-available{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:5px 12px;border:2px solid #86a274;border-radius:10px;background:#cae5b9;color:#36613a;font-size:clamp(15px,1.4vw,20px);font-weight:900;white-space:nowrap}
+body[data-view="hub"] .hub-collection .upgrade-available.is-empty{background:#f0ead9;border-color:#c4b69c;color:#877c67}
+body[data-view="hub"] .hub-collection .upgrade-gain{font-size:clamp(15px,1.35vw,20px);color:#715038;font-weight:850;white-space:nowrap}
+body[data-view="hub"] .hub-collection .food-detail-redesign .upgrade-purchase{align-self:stretch;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;margin:0 0 0 7px;min-width:0;min-height:98px;padding:10px 6px;border:3px solid #407451;border-radius:14px;background:#c9dfb7;color:#32583c;box-shadow:0 4px 0 #81a36d;font-size:clamp(15px,1.4vw,21px);line-height:1.1}
+body[data-view="hub"] .hub-collection .food-detail-redesign .upgrade-purchase strong{font-size:clamp(18px,1.8vw,26px);font-weight:950}
+body[data-view="hub"] .hub-collection .food-detail-redesign .upgrade-purchase span{font-size:clamp(17px,1.6vw,23px);font-weight:900;white-space:nowrap}
+body[data-view="hub"] .hub-collection .food-detail-redesign .upgrade-purchase:disabled{opacity:.58;filter:saturate(.6)}
+body[data-view="hub"] .hub-collection .food-detail-actions{flex:0 0 auto;display:grid;grid-template-columns:1fr 1fr;gap:18px;min-height:66px;margin-top:auto}
+body[data-view="hub"] .hub-collection .food-detail-redesign .food-detail-actions button{min-width:0;min-height:66px;padding:8px 12px;font-size:clamp(17px,1.5vw,23px);font-weight:900;border:3px solid #9f7654;border-radius:16px;background:#ffe6bc;color:#704729;box-shadow:0 4px 0 #bb9870}
+body[data-view="hub"] .hub-collection .food-detail-redesign .food-detail-actions .action-sell{border-color:#aa7771;background:#f3d1c9;color:#77433c}
+body[data-view="hub"] .hub-collection .food-detail-redesign .food-detail-actions .action-equip{background:#cce5ba;border-color:#8ba57b;color:#385e3e}
+/* The inventory page can still show its detail popup. Avoid its legacy three-box style. */
+body[data-view="hub"] .hub-collection .illustrated-collection-content .food-detail-redesign{padding:22px}
+@media (max-height:550px){
+ body[data-view="hub"] .hub-collection .food-direct-host{width:calc(100vw - 20px);height:calc(100dvh - 16px)}
+ body[data-view="hub"] .hub-collection .food-detail-redesign{padding:12px;border-width:2px;border-radius:13px}
+ body[data-view="hub"] .hub-collection .food-detail-layout{grid-template-columns:36% minmax(0,1fr);gap:12px}
+ body[data-view="hub"] .hub-collection .food-detail-showcase{padding:7px;gap:3px;border-width:1px;border-radius:10px}
+ body[data-view="hub"] .hub-collection .food-detail-showcase h2{font-size:clamp(16px,2.35vw,23px)}
+ body[data-view="hub"] .hub-collection .food-detail-rarity{font-size:clamp(12px,1.7vw,16px)}
+ body[data-view="hub"] .hub-collection .food-detail-right{gap:8px;padding:2px 0 0}
+ body[data-view="hub"] .hub-collection .food-detail-boost{gap:3px;padding:0 10px;justify-content:center}
+ body[data-view="hub"] .hub-collection .food-boost-caption{font-size:clamp(16px,1.9vw,21px)}
+ body[data-view="hub"] .hub-collection .food-detail-boost .detail-contribution{font-size:clamp(28px,3.35vw,42px)}
+ body[data-view="hub"] .hub-collection .food-boost-line{font-size:clamp(13px,1.6vw,17px);gap:5px}
+ body[data-view="hub"] .hub-collection .food-detail-upgrade{min-height:100px;padding:8px 7px;border-radius:10px;grid-template-columns:26% 39% minmax(0,35%)}
+ body[data-view="hub"] .hub-collection .food-detail-upgrade :is(.upgrade-current,.upgrade-next){gap:4px}
+ body[data-view="hub"] .hub-collection .food-detail-upgrade .upgrade-current strong{font-size:clamp(24px,3vw,32px)}
+ body[data-view="hub"] .hub-collection .food-detail-upgrade .upgrade-current>span{font-size:clamp(11px,1.4vw,15px)}
+ body[data-view="hub"] .hub-collection .upgrade-available{min-height:32px;padding:2px 5px;font-size:clamp(11px,1.45vw,15px);border-width:1px;border-radius:6px}
+ body[data-view="hub"] .hub-collection .upgrade-gain{font-size:clamp(11px,1.45vw,15px)}
+ body[data-view="hub"] .hub-collection .food-detail-redesign .upgrade-purchase{min-height:75px;padding:5px 3px;margin-left:4px;border-width:2px;border-radius:10px}
+ body[data-view="hub"] .hub-collection .food-detail-redesign .upgrade-purchase strong{font-size:clamp(13px,1.65vw,18px)}
+ body[data-view="hub"] .hub-collection .food-detail-redesign .upgrade-purchase span{font-size:clamp(13px,1.6vw,18px)}
+ body[data-view="hub"] .hub-collection .food-detail-actions{gap:10px;min-height:48px}
+ body[data-view="hub"] .hub-collection .food-detail-redesign .food-detail-actions button{min-height:48px;padding:4px 8px;font-size:clamp(15px,1.8vw,19px);border-width:2px;border-radius:11px}
+ body[data-view="hub"] .hub-collection .food-detail-redesign .food-panel-close{top:3px;right:3px;width:44px;height:44px;min-height:44px;min-width:44px}
+}

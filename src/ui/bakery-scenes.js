@@ -38,8 +38,10 @@ function sceneScrollRail(kind){
 function renderSceneFoods(){
  const foods=sortedMenuFoods([...g.owned]),equipped=new Set(g.activeMenu);
  const slot=g.menuSlots>=FOOD.length?'':worldButton(`<b class="slot-plus">+</b><strong>Add Menu Slot</strong><small>${amountLabel(slotCost())} coins</small>`,'slot',{classes:'scene-food-card slot-card'});
- let result=slot+foods.map(o=>{const f=F(o.id),label=multiplierLabel(foodValue(o));
-  return `<button type="button" class="scene-food-card hub-food r${f.rarity}" data-food="${f.id}" data-uid="${o.uid}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(f.name)}, ${RARITIES[f.rarity]}, Mastery ${recipeMastery(o)}, Boost ${label}"><span class="food-meta">${f.rarity+1}★ · Lv ${recipeMastery(o)+1}${equipped.has(o.uid)?'':' · Owned'}</span>${hubFoodArt(f.id,'scene-food-image')}<span class="food-multiplier" style="--boost-font:${label.length>9?23:30}px">${hubBoostDiamond()}<b>×${label}</b></span></button>`;
+ let result=slot+foods.map(o=>{const f=F(o.id),label=multiplierLabel(foodValue(o)),level=recipeMastery(o)+1,available=availableMastery(o);
+  // All overlays live inside the existing single card button. The level-up
+  // indicator opens the same food-details flow, without a nested button.
+  return `<button type="button" class="scene-food-card hub-food r${f.rarity}" data-food="${f.id}" data-uid="${o.uid}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(f.name)}, ${RARITIES[f.rarity]}, Level ${level}, Baker's Boost ${label}${available?`, ${available} level-ups available`:''}, ${equipped.has(o.uid)?'equipped':'owned but not equipped'}">${hubFoodArt(f.id,'scene-food-image')}${available?`<span class="food-upgrade-ready" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 20V4M5 11l7-7 7 7"/></svg><b>${available}</b></span>`:''}<span class="food-stats" aria-hidden="true"><span class="food-level">Lv ${level}</span><span class="food-multiplier" style="--boost-font:${label.length>9?18:label.length>7?20:24}px">${hubBoostDiamond()}<b>×${label}</b></span></span></button>`;
  }).join('');
  for(let i=foods.length+(slot?1:0);i<8;i++)result+=`<div class="scene-food-card unfilled-slot" aria-label="${i<g.menuSlots?'Available menu slot':'More menu slots to unlock'}">${worldImage('hat-icon')}<span>${i<g.menuSlots?'Ready for a recipe':'More recipes to discover'}</span></div>`;
  return result;
@@ -134,7 +136,13 @@ const SCENE_ORIGINAL_FOOD_BOUNDS=Object.freeze({
  'buko-pie':[155,120,4,4,151,116],pianono:[154,120,4,4,150,116],
  ensaymada:[150,119,4,4,146,115],'ube-pandesal':[173,116,4,4,162,104]
 });
+// These eight approved art sprites have their own square canvas and do not
+// need the legacy tight crop applied to the original rectangular food assets.
+const SCENE_APPROVED_SQUARE_FOODS=new Set(['brazo','buko-pie','ube-pandesal','pianono','mamon','hopia','ensaymada','kalihim']);
 function sceneEquationFood(id){
+ if(SCENE_APPROVED_SQUARE_FOODS.has(id)){
+  return `<span class="equation-food" style="--food-ratio:1;--food-width:100%;--food-height:100%;--food-left:0%;--food-top:0%">${hubFoodArt(id,'scene-order-food')}</span>`;
+ }
  const [iw,ih,x,y,r,b]=SCENE_ORIGINAL_FOOD_BOUNDS[id]||SCENE_FOOD_BOUNDS[(HUB_FOOD_SPRITES[id]||1)-1],w=r-x,h=b-y;
  return `<span class="equation-food" style="--food-ratio:${w/h};--food-width:${100*iw/w}%;--food-height:${100*ih/h}%;--food-left:${-100*x/w}%;--food-top:${-100*y/h}%">${hubFoodArt(id,'scene-order-food')}</span>`;
 }
