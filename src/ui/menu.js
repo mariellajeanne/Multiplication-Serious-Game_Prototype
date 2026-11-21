@@ -57,22 +57,27 @@ function renderSelectionActions(state,bulk=false){
  const masteryNote=!eligible.length?'Find another copy to unlock more Recipe Mastery.':g.coins<total?'Not enough coins for this Mastery upgrade.':'';
  return `<div class="food-action-area"><div class="food-panel-actions ${mixed?'mixed-selection':''}"><button class="secondary action-sell" ${!foods.length||busy?'disabled':''} onclick="requestSelectedSale()">${bulk?'Sell Selected':'Sell…'}</button><button class="primary action-mastery" ${!eligible.length||g.coins<total||busy?'disabled':''} title="${masteryNote}" onclick="requestSelectedMastery()"><span>${bulk?'Mastery for Selected':'+1 ♛ Mastery'}</span>${price?`<small>${amountLabel(price)} 🪙</small>`:''}</button><div class="food-equip-actions">${adding.length?`<button class="secondary action-equip" ${blocked?'disabled':''} title="${blocked}" onclick="selectionEquip(true)">${mixed?`Equip (${adding.length})`:bulk?'Equip Selected':'Equip'}</button>`:''}${removing.length?`<button class="secondary action-unequip" ${busy?'disabled':''} onclick="selectionEquip(false)">${mixed?`Unequip (${removing.length})`:bulk?'Unequip Selected':'Unequip'}</button>`:''}${!foods.length?'<button class="secondary action-equip" disabled>Equip Selected</button>':''}</div></div></div>`;
 }
-// A compact, two-column food detail for the bakery scene. Upgrades are a single
-// visual row with three *invisible* columns (no interior frames or dividers).
+// A compact, two-column food detail for the bakery scene. The right side keeps
+// the reward logic tight: current contribution first, then the next gain, then
+// the upgrade action directly beside it.
 function renderHubSingleFoodPanel(state){
  const o=state.foods[0],f=F(o.id),mastery=recipeMastery(o),available=availableMastery(o),base=tierBase(o),contribution=foodValue(o),bonus=contribution-base;
  const next=foodValue({...o,mastery:mastery+1})-contribution,price=foodLevelPrice(o),busy=!!(g.run&&!g.run.paused),equipped=g.activeMenu.includes(o.uid);
  const blocked=selectionBlockedReason(state),affordable=g.coins>=price,canBuy=available>0&&affordable&&!busy;
- // Keep the potential next gain visible even before an upgrade is unlocked.
- const nextText=`↑1 &nbsp; +${multiplierLabel(next)} ${boostSymbol()}`;
  return `<section class="food-selection-popup food-selection-single food-detail-redesign" role="region" aria-label="${hubEscape(f.name)} food details"><button class="close food-panel-close" onclick="closeFoodPanel()" aria-label="Close food details">×</button>
  <div class="food-detail-layout">
   <div class="food-detail-showcase">${presentedFoodArt(f.id)}<h2>${hubEscape(f.name)}</h2><div class="food-detail-rarity">${f.rarity+1}★ ${hubEscape(RARITIES[f.rarity])}</div></div>
   <div class="food-detail-right">
-   <div class="food-detail-boost"><span class="food-boost-caption">Baker's Boost</span><strong class="detail-contribution">×${multiplierLabel(contribution)} ${boostSymbol()}</strong><div class="food-boost-line"><span>Base</span><b>×${multiplierLabel(base)} ${boostSymbol()}</b></div><div class="food-boost-line"><span>Mastery Bonus</span><b>+${multiplierLabel(bonus)} ${boostSymbol()}</b></div></div>
+   <div class="food-detail-boost" aria-label="Current boost ×${multiplierLabel(contribution)}, base ×${multiplierLabel(base)}, level ${mastery} adds +${multiplierLabel(bonus)}">
+    <strong class="detail-contribution">×${multiplierLabel(contribution)} ${boostSymbol()}</strong>
+    <div class="food-boost-breakdown">
+     <div class="food-boost-line"><span>Base:</span><b>×${multiplierLabel(base)} ${boostSymbol()}</b></div>
+     <div class="food-boost-line"><span>Lv. ${mastery}:</span><b>+${multiplierLabel(bonus)} ${boostSymbol()}</b></div>
+    </div>
+   </div>
    <div class="food-detail-upgrade" aria-label="Level ${mastery}, ${available} upgrades available, next boost gain ${multiplierLabel(next)}">
     <div class="upgrade-current"><strong>Lv. ${mastery}</strong><span>+${multiplierLabel(bonus)} ${boostSymbol()}</span></div>
-    <div class="upgrade-next"><span class="upgrade-available ${available?'':'is-empty'}">↑${available} Available</span><span class="upgrade-gain">${nextText}</span></div>
+    <div class="upgrade-next"><span class="upgrade-available ${available?'':'is-empty'}">↑${available} Available</span><span class="upgrade-gain"><span class="upgrade-step">↑1</span><b>+${multiplierLabel(next)} ${boostSymbol()}</b></span></div>
     <button class="primary action-mastery upgrade-purchase" ${canBuy?'':'disabled'} title="${available?'Upgrade one level for '+amountLabel(price)+' coins':'No unlocked level-ups available'}" onclick="requestSelectedMastery()"><strong>UPGRADE</strong><span>🪙 ${amountLabel(price)}</span></button>
    </div>
    <div class="food-detail-actions"><button class="secondary action-sell" ${busy?'disabled':''} onclick="requestSelectedSale()">Sell…</button><button class="secondary ${equipped?'action-unequip':'action-equip'}" ${busy||!equipped&&!!blocked?'disabled':''} ${!equipped&&blocked?`title="${hubEscape(blocked)}"`:''} onclick="selectionEquip(${!equipped})">${equipped?'Unequip':'Equip'}</button></div>
@@ -82,6 +87,7 @@ function renderHubSingleFoodPanel(state){
 function renderFoodPanel(){
  const state=selectionState(),{foods}=state;if(!foods.length&&!multiSelect)return '';
  const bulk=foods.length!==1;
+ if(typeof isBakeryHub==='function'&&isBakeryHub()&&multiSelect)return '';
  if(bulk)return `<section class="food-selection-popup food-selection-multi" role="region" aria-label="Selected foods"><button class="close food-panel-close" onclick="closeFoodPanel()" aria-label="Close food details">×</button><div class="selection-tools"><button class="secondary action-select" ${!foods.length?'disabled':''} onclick="deselectAllFoods()">Deselect All</button><button class="secondary action-select" onclick="selectAllFoods()">Select All</button></div>${renderSelectionActions(state,true)}</section>`;
  if(typeof isBakeryHub==='function'&&isBakeryHub())return renderHubSingleFoodPanel(state);
  const o=foods[0],f=F(o.id),mastery=recipeMastery(o),base=tierBase(o),contribution=foodValue(o),next=foodValue({...o,mastery:mastery+1})-contribution;
@@ -90,7 +96,11 @@ function renderFoodPanel(){
 function paintFoodPanel(){
  selectedFoods=new Set([...selectedFoods].filter(uid=>g.owned.some(o=>o.uid===uid)));
  const panel=$('foodPanel');if(panel){clearNotifications();panel.innerHTML=renderFoodPanel()}
- const button=document.querySelector?.('[data-focus="select-foods"]');button?.setAttribute('aria-pressed',String(multiSelect));if(button)button.textContent=multiSelect?'Done selecting':'Select Foods';
+ if(typeof isBakeryHub==='function'&&isBakeryHub()&&hubCollection&&!hubFoodDirect){
+  const toolbar=document.querySelector('.hub-collection .collection-toolbar');
+  if(toolbar&&typeof renderHubCollectionToolbar==='function')toolbar.innerHTML=renderHubCollectionToolbar(typeof getHubCollectionFoods==='function'?getHubCollectionFoods():sortedMenuFoods(g.owned.filter(o=>!hideUnequipped||g.activeMenu.includes(o.uid))));
+ }
+ const button=document.querySelector?.('[data-focus="select-foods"]');button?.setAttribute('aria-pressed',String(multiSelect));if(button)button.textContent=multiSelect?'Done Selecting':'Multi-Select';
  for(const card of document.querySelectorAll?.('.menu-grid [data-uid]')||[]){const selected=selectedFoods.has(Number(card.dataset.uid));card.classList.toggle('is-selected',selected);card.querySelector('button')?.setAttribute('aria-pressed',String(selected))}
 }
 let saleConfirmation=null;

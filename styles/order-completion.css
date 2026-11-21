@@ -1,0 +1,78 @@
+/* Order Complete: unframed earned art, one dominant total, a quiet formula. */
+body[data-view='hub'] .bakery-popup.worksheet-summary-modal{width:min(980px,94vw);padding:12px 24px 18px}
+body[data-view='hub'] .bakery-popup-backdrop:has(.worksheet-summary-modal){padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))}
+body[data-view='hub'] .worksheet-summary-modal .popup-head{border:0;margin-bottom:4px;padding-bottom:6px}
+body[data-view='hub'] .worksheet-summary-modal .popup-head h2{width:100%;text-align:center;font-size:clamp(26px,3vw,40px)}
+.worksheet-summary-modal .dialog-wallet{display:none}
+.worksheet-summary{--summary-gap:clamp(12px,1.7vh,20px);position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:var(--summary-gap);text-align:center;line-height:1.2;padding:12px 16px 4px;isolation:isolate}
+.summary-coin-types{display:flex;justify-content:center;align-items:end;gap:clamp(18px,4vw,64px);padding:14px 12px 0}
+.summary-type{display:grid;justify-items:center;gap:16px;min-width:0;width:clamp(90px,18vw,210px);visibility:hidden;transform-origin:50% 75%}
+.summary-type.is-visible{visibility:visible}
+.summary-art{position:relative;width:86%;height:clamp(90px,14vh,165px);display:grid;place-items:center}
+.summary-art .coin-tier-art{display:block;width:100%;height:100%;max-width:none;max-height:none;object-fit:contain;margin:0}
+.summary-quantity{position:absolute;top:-10px;right:-12px;min-width:44px;padding:5px 9px;border:2px solid #ac7950;border-radius:12px;background:#fff7df;box-shadow:0 3px 0 #81553422;color:#704320;font-size:clamp(18px,2.3vw,28px);line-height:1;white-space:nowrap}
+.summary-contribution{display:flex;align-items:center;justify-content:center;gap:6px;max-width:100%;font-size:clamp(16px,2.3vw,29px);color:#704320;font-variant-numeric:tabular-nums}
+.summary-contribution b{overflow-wrap:anywhere;min-width:0}
+.summary-coin-icon{display:inline-block;width:1.1em;height:1.1em;object-fit:contain;flex:none;vertical-align:middle}
+.summary-total{position:relative;z-index:2;display:flex;justify-content:center;align-items:center;min-height:125px;padding:20px 28px;border:3px solid #c3914e;border-radius:20px;background:linear-gradient(#fff6d8,#f6d791);box-shadow:0 5px 0 #b07a3d,inset 0 0 0 4px #fff9e1;color:#70401e;transform-origin:center}
+.summary-total-value{display:flex;align-items:center;justify-content:center;gap:16px;width:100%;min-width:0}
+.summary-total-value strong{flex:none;font-size:clamp(44px,6.2vw,82px);line-height:1.1;white-space:nowrap;font-variant-numeric:tabular-nums;letter-spacing:-.025em}
+.summary-total-value .summary-coin-icon{width:clamp(44px,6vw,74px);height:clamp(44px,6vw,74px)}
+.summary-sparkles{position:absolute;inset:5% 7%;display:flex;align-items:center;justify-content:space-between;opacity:0;pointer-events:none;color:#a76c20;font-size:30px}
+.summary-sparkles i{align-self:start;font-style:normal;font-size:22px}
+.summary-details{position:relative;display:grid;grid-template-columns:minmax(0,1fr);place-items:center;min-height:52px;z-index:1}
+.summary-boost,.summary-equation{grid-area:1/1;visibility:hidden}
+.summary-boost{display:flex;align-items:center;justify-content:center;gap:12px;color:#765093;font-size:clamp(24px,3.2vw,42px);overflow-wrap:anywhere;min-width:0;max-width:100%}
+.summary-boost{position:absolute;inset-inline:0}
+.summary-boost b{min-width:0;overflow-wrap:anywhere}
+.worksheet-summary .summary-boost img.boost-gem{width:1.4em;height:auto}
+.summary-boost.is-visible,.summary-equation.is-visible{visibility:visible}
+.summary-equation{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px 10px;max-width:100%;font-size:clamp(14px,1.8vw,22px);color:#795335}
+.summary-equation>span{display:inline-flex;align-items:center;justify-content:center;gap:5px;max-width:100%;flex-wrap:wrap}
+.summary-equation b{overflow-wrap:anywhere;min-width:0}
+.summary-equation img.boost-gem{width:1.35em;height:auto}
+.summary-actions{display:flex;justify-content:center;min-height:72px;margin-bottom:22px}
+body[data-view='hub'] .worksheet-summary-modal #acknowledgeWorksheetSummary{visibility:hidden;width:100%;min-height:64px;font-size:clamp(20px,2.8vw,30px);padding:12px 24px 16px;transition:none}
+body[data-view='hub'] .worksheet-summary-modal #acknowledgeWorksheetSummary.is-visible{visibility:visible}
+body[data-view='hub'] .worksheet-summary-modal #skipWorksheetSummary.summary-skip{position:absolute;inset:auto 8px 0 auto;width:84px;min-height:44px;padding:6px 14px;font-size:17px}
+.summary-skip[hidden]{display:none!important}
+.summary-flight{position:absolute;z-index:1;pointer-events:none;max-width:none;white-space:nowrap}
+.summary-status{position:absolute;width:1px;height:1px;padding:0;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+body[data-view='hub'] .worksheet-summary-modal #worksheetSettlementError{font-size:16px;color:#8a3229;margin:0}
+@media(max-height:650px){
+ body[data-view='hub'] .bakery-popup.worksheet-summary-modal{width:min(800px,94vw);border-width:16px;padding:4px 16px 8px;max-height:calc(100dvh - 24px)}
+ body[data-view='hub'] .worksheet-summary-modal .popup-head{min-height:34px;padding:0 30px 2px;margin:0}
+ body[data-view='hub'] .worksheet-summary-modal .popup-head h2{font-size:26px}
+ body[data-view='hub'] .worksheet-summary-modal .popup-head .close{width:48px;height:48px;min-width:48px;min-height:48px;top:-16px;right:-23px}
+ .worksheet-summary{--summary-gap:7px;padding:4px 12px 0}
+ .summary-coin-types{padding-top:10px;gap:clamp(22px,5vw,48px)}
+ .summary-type{width:clamp(82px,17vw,155px);gap:5px}
+ .summary-art{height:clamp(54px,15vh,90px);width:70%}
+ .summary-quantity{font-size:18px;min-width:35px;padding:3px 6px;top:-6px}
+ .summary-contribution{font-size:19px}
+ .summary-total{min-height:72px;padding:8px 20px;border-radius:14px;box-shadow:0 3px 0 #b07a3d,inset 0 0 0 3px #fff9e1}
+ .summary-total-value strong{font-size:48px}
+ .summary-total-value .summary-coin-icon{width:42px;height:42px}
+ .summary-details{min-height:34px}
+ .summary-boost{font-size:27px}.summary-equation{font-size:15px}
+ .summary-actions{min-height:48px;margin-bottom:0}
+ body[data-view='hub'] .worksheet-summary-modal #acknowledgeWorksheetSummary{min-height:48px;padding:7px 20px 10px;font-size:22px}
+ body[data-view='hub'] .worksheet-summary-modal .summary-skip{bottom:0;right:2px}
+}
+@media(max-width:500px){
+ body[data-view='hub'] .bakery-popup.worksheet-summary-modal{padding:6px;border-width:16px}
+ .worksheet-summary{padding-inline:4px;--summary-gap:16px}
+ .summary-coin-types{gap:12px;padding-inline:6px}
+ .summary-art{height:95px;width:82%}.summary-quantity{font-size:16px;min-width:32px;right:-9px;padding:4px}
+ .summary-type{gap:10px}.summary-contribution{font-size:16px}
+ .summary-total{padding-inline:12px;min-height:95px}.summary-total-value strong{font-size:48px}
+ .summary-total-value .summary-coin-icon{width:40px;height:40px}.summary-actions{margin-bottom:24px}
+}
+@media(max-height:420px) and (min-width:501px){
+ .worksheet-summary{--summary-gap:5px;padding-block:0}
+ .summary-total{min-height:64px;padding-block:6px}
+ .summary-total-value strong{font-size:42px}
+ .summary-total-value .summary-coin-icon{width:38px;height:38px}
+ .summary-details{min-height:30px}
+}
+@media(prefers-reduced-motion:reduce){.worksheet-summary-modal{animation:none!important}.worksheet-summary *{animation:none!important;transition:none!important}}

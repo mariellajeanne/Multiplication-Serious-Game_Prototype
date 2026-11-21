@@ -12,21 +12,22 @@ function detailHarness(){
  return h;
 }
 
-test('food popup follows approved three-part upgrade row without nested frames',()=>{
+test('food popup follows approved three-part upgrade row with gain grouped beside the upgrade action',()=>{
  const h=detailHarness(),html=h.run('renderFoodPanel()');
  assert.match(html,/food-detail-showcase/);
  assert.match(html,/food-detail-upgrade/);
  assert.match(html,/class="upgrade-current"[^>]*><strong>Lv\. 8/);
  assert.match(html,/class="upgrade-next"/);
  assert.match(html,/↑3 Available/);
- assert.match(html,/↑1 &nbsp; \+/);
+ assert.match(html,/class="upgrade-step">↑1<\/span><b>\+/);
  assert.match(html,/class="primary action-mastery upgrade-purchase"/);
  assert.match(html,/UPGRADE/);
  assert.match(html,/class="food-detail-actions"/);
- assert.doesNotMatch(html,/selection-hint|selection-mastery|mastery-availability/);
+ assert.doesNotMatch(html,/selection-hint|selection-mastery|mastery-availability|Baker's Boost/);
  const styles=readFileSync(new URL('../styles/bakery-interface.css',import.meta.url),'utf8');
- assert.match(styles,/\.food-detail-upgrade\{[^}]*grid-template-columns:28% 36%/);
- assert.match(styles,/invisible column partitions/);
+ assert.match(styles,/\.food-detail-upgrade\{[^}]*grid-template-columns:minmax\(0,1\.05fr\) minmax\(0,1\.4fr\)/);
+ const menuScript=readFileSync(new URL('../src/ui/menu.js',import.meta.url),'utf8');
+ assert.match(menuScript,/current contribution first, then the next gain, then/);
 });
 
 test('tapping an equipped food opens direct detail rather than the inventory',()=>{
@@ -47,7 +48,7 @@ test('next mastery gain stays visible when there are no unlocked upgrades',()=>{
  h.run('g.recipeCeilings.pandesal=8;');
  const html=h.run('renderFoodPanel()');
  assert.match(html,/↑0 Available/);
- assert.match(html,/class="upgrade-gain">↑1 &nbsp; \+/);
+ assert.match(html,/class="upgrade-gain"><span class="upgrade-step">↑1<\/span><b>\+/);
  assert.doesNotMatch(html,/No upgrades ready/);
  assert.match(html,/action-mastery upgrade-purchase" disabled/);
 });

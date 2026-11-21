@@ -60,30 +60,6 @@
 .worksheet-step-flight .coin-tier-art{display:block;width:76px;height:70px;object-fit:contain;max-height:none;max-width:none;margin:0}
 .worksheet-step-flight strong{font-size:20px;font-weight:900;white-space:nowrap}
 .flight-golden-bonus{font-size:18px;color:#a87113;white-space:nowrap}
-body[data-view='hub'] .bakery-popup.worksheet-summary-modal{width:min(960px,94vw)}
-.worksheet-summary-modal .close{display:none!important}
-.worksheet-summary{display:grid;grid-template-columns:minmax(0,1fr);gap:12px;text-align:center;line-height:1.25}
-.summary-coin-types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
-.summary-type{display:grid;justify-items:center;gap:3px;min-width:0;padding:10px 6px;border:1px solid #ddbf88;border-radius:18px;background:#fff7e3}
-.summary-type .coin-tier-art{width:90px;height:82px;max-height:none;max-width:100%;object-fit:contain;margin:0}
-.summary-type strong{font-size:16px}.summary-type span{font-size:13px}.summary-type b{font-size:17px;color:#8a5d28}
-.summary-reveal{opacity:0;translate:0 7px;transition:opacity 160ms ease-out,translate 160ms ease-out}
-.summary-reveal.is-visible{opacity:1;translate:0 0}
-.summary-base{display:grid;gap:3px;padding-top:8px;border-top:2px dashed #d8b87e}
-.summary-base>span,.summary-total>span{font-size:15px;font-weight:900;letter-spacing:.6px;color:#88613c}
-.summary-base>strong{font-size:32px;line-height:1.1}.summary-base>small{font-size:13px;color:#926f4d}
-.summary-boost{display:flex;align-items:center;justify-content:center;gap:8px;font-size:20px;font-weight:900}
-.summary-boost img{width:36px;height:auto;object-fit:contain}.summary-boost b{color:#9652a4}
-.summary-equation{font-size:clamp(17px,1.7vw,24px);font-weight:900;overflow-wrap:anywhere}
-.summary-equation::after{content:'Rounded once to whole coins';display:block;margin-top:3px;font-size:12px;font-weight:800;color:#987651}
-.summary-total{position:relative;isolation:isolate;overflow:hidden;display:grid;gap:6px;padding:10px;border-radius:18px;background:#e4efce;color:#507841}
-.summary-total>strong{font-size:clamp(38px,4vw,60px);line-height:1.1;overflow-wrap:anywhere}
-.summary-total::before,.summary-total::after{content:'✦';position:absolute;left:10%;top:15%;font-size:30px;color:#ffe585;opacity:0;pointer-events:none}
-.summary-total::after{left:auto;right:10%;top:40%;font-size:22px}
-.summary-total.is-visible::before,.summary-total.is-visible::after{animation:summary-sparkle 650ms ease-out both}
-.summary-total.is-visible::after{animation-delay:80ms}
-body[data-view='hub'] .bakery-popup.worksheet-summary-modal #acknowledgeWorksheetSummary{width:min(360px,100%);min-height:64px;font-size:23px;padding:14px 24px 20px}
-.summary-final-pop{animation:summary-coin-pop 450ms ease-out 1}
 @keyframes worksheet-coin-arrive{40%{scale:1.06;filter:brightness(1.15)}100%{scale:1;filter:none}}
 @keyframes golden-invitation{40%{filter:brightness(1.12);scale:1.02}100%{filter:none;scale:1}}
 @keyframes summary-coin-pop{0%{scale:.88}65%{scale:1.08}100%{scale:1}}

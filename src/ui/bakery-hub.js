@@ -49,6 +49,43 @@ function renderHubTickets(){
   return `<button type="button" class="order-ticket hub-ticket ticket coin-tier-${rank}${String(ticket.a).length>3?' is-wide-math':''}" data-ticket-id="${ticket.id}" data-order-food="${food.id}" onclick="startTicket(${ticket.id})" aria-label="${run?.phase==='claim'?'Collect coins for':run?'Resume':'Start'} ${hubEscape(label)}, ${hubEscape(food.name)}, ${ticket.a} × ${ticket.b}, ${progress}% complete, ${hubEscape(hubCoinTierName(rank))} reward"><span class="ticket-shadow" aria-hidden="true"></span><span class="ticket-cutout">${hubTicketPaper(ticket,rank)}<span class="ticket-safe-content"><span class="coin-hero hub-ticket-reward">${hubCoinArt(rank)}</span><span class="order-main"><span class="order-math">${hubFoodArt(food.id,'food-symbol')}<span class="order-quantity">${ticket.a}</span><span class="times">×</span>${hubImage('tray-icon.png','tray-symbol','tray')}<span class="order-quantity">${ticket.b}</span></span><span class="hub-ticket-progress" role="progressbar" aria-label="Order progress" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100" style="--progress:${progress}%"><span>${status}</span><strong>${progress}%</strong></span></span></span></span></button>`;
  }).join('');
 }
+function getHubCollectionFoods(){
+ const foods=g.owned.filter(o=>hubCollectionFilter==='all'?true:hubCollectionFilter==='equipped'?g.activeMenu.includes(o.uid):!g.activeMenu.includes(o.uid));
+ return sortHubCollectionFoods(foods);
+}
+let hubCollectionFilter='all',hubCollectionSort='rarity-boost';
+function renderHubSelect(label,aria,value,options,handler,extraClass=''){
+ const opts=options.map(([v,t])=>`<option value="${v}" ${value===v?'selected':''}>${hubEscape(t)}</option>`).join('');
+ return `<label class="hub-select-field ${extraClass}"><span class="hub-select-label">${hubEscape(label)}</span><span class="hub-select-shell"><select aria-label="${hubEscape(aria)}" onchange="${handler}(this.value)">${opts}</select><span class="hub-select-caret" aria-hidden="true">▾</span></span></label>`;
+}
+function renderHubAutoEquipInline(){
+ return `<div class="auto-equip-inline"><button class="primary collection-inline-action" onclick="equipBest('final')">Equip Best</button><span class="collection-pill-divider" aria-hidden="true"></span>${renderHubSelect('Auto','Auto Equip',g.autoEquip==='off'?'off':g.autoEquip,[['off','Off'],['final','Best Boost'],['base','Best Base']],'setHubAutoEquip','auto-equip-select')}</div>`;
+}
+function setHubCollectionFilter(value){hubCollectionFilter=value||'all';render();}
+function setHubCollectionSort(value){hubCollectionSort=value||'rarity-boost';render();}
+function setHubAutoEquip(value){setAutoEquip(value==='off'?'final':value,value!=='off');}
+function sortHubCollectionFoods(foods){
+ const byName=(a,b)=>F(a.id).name.localeCompare(F(b.id).name,undefined,{sensitivity:'base'})||a.uid-b.uid;
+ return [...foods].sort((a,b)=>{
+  if(hubCollectionSort==='boost-rarity')return foodValue(b)-foodValue(a)||F(b.id).rarity-F(a.id).rarity||byName(a,b);
+  if(hubCollectionSort==='name')return byName(a,b);
+  return F(b.id).rarity-F(a.id).rarity||foodValue(b)-foodValue(a)||byName(a,b);
+ });
+}
+function renderHubSelectionToolbar(foods){
+ const state=selectionState(),busy=!!(g.run&&!g.run.paused),eligibleTotal=state.eligible.reduce((sum,o)=>sum+foodLevelPrice(o),0),blocked=selectionBlockedReason(state);
+ const allSelected=foods.length>0&&foods.every(o=>selectedFoods.has(o.uid));
+ return `<div class="collection-toolbar-row collection-selection-row" aria-label="Selection actions"><div class="collection-selection-status"><strong>Selecting foods…</strong><span>${selectedFoods.size?`${selectedFoods.size} chosen`:'Tap foods to choose them.'}</span></div><button class="secondary" onclick="${allSelected?'deselectAllFoods()':'selectAllFoods()'}">${allSelected?'Deselect All':'Select All'}</button><button class="secondary" ${!state.eligible.length||g.coins<eligibleTotal||busy?'disabled':''} onclick="requestSelectedMastery()">Upgrade Max · 🪙 ${amountLabel(eligibleTotal)}</button>${state.adding.length?`<button class="secondary" ${blocked?`disabled title="${hubEscape(blocked)}"`:''} onclick="selectionEquip(true)">Equip</button>`:''}${state.removing.length?`<button class="secondary" ${busy?'disabled':''} onclick="selectionEquip(false)">Unequip</button>`:''}${!state.adding.length&&!state.removing.length?'<button class="secondary" disabled>Equip</button>':''}<button class="secondary" ${!state.foods.length||busy?'disabled':''} onclick="requestSelectedSale()">Sell…</button></div>`;
+}
+function renderHubCollectionHeaderExtras(){
+ const progress=Math.max(0,Math.min(100,Math.round((g.activeMenu.length/Math.max(1,g.menuSlots))*100)));
+ const slotLabel=g.menuSlots>=FOOD.length?'All slots owned':`+1 Slot · 🪙 ${amountLabel(slotCost())}`;
+ return `<div class="collection-header-summary"><div class="collection-status-pill" style="--equipped-progress:${progress}%"><span class="collection-status-segment collection-equipped-progress"><strong>${g.activeMenu.length}/${g.menuSlots} Equipped</strong></span><span class="collection-pill-divider" aria-hidden="true"></span><button class="secondary collection-status-segment collection-slot-button" ${g.menuSlots>=FOOD.length?'disabled':''} onclick="buyMenuSlot()">${slotLabel}</button></div><button class="secondary collection-index" onclick="openIndex()">📖 Food Index</button></div>`;
+}
+function renderHubCollectionToolbar(foods){
+ return `<div class="collection-toolbar-row collection-toolbar-actions"><div class="collection-browse-controls"><button class="secondary" data-focus="select-foods" aria-pressed="${multiSelect}" onclick="toggleFoodSelection()">${multiSelect?'Done Selecting':'Multi-Select'}</button>${renderHubSelect('Show','Filter foods',hubCollectionFilter,[['all','All Foods'],['equipped','Equipped Only'],['unequipped','Unequipped Only']],'setHubCollectionFilter')}${renderHubSelect('Sort','Sort foods',hubCollectionSort,[['rarity-boost','Rarity · Boost'],['boost-rarity','Boost · Rarity'],['name','Name A–Z']],'setHubCollectionSort')}</div><div class="collection-equip-pill">${renderHubAutoEquipInline()}</div></div>${multiSelect?renderHubSelectionToolbar(foods):''}`;
+}
+
 function renderHubHome(){
  if(typeof renderBakeryWorld==='function')return renderBakeryWorld();
  const foods=g.activeMenu.map(uid=>g.owned.find(o=>o.uid===uid)).filter(Boolean),count=foods.length;
@@ -62,10 +99,10 @@ function renderHubHome(){
  <div class="top-hud hub-wallet"><button id="wallet-button" class="picture-button wallet-btn" type="button" data-hub-action="wallet" aria-label="View ${amountLabel(g.coins)} coins">${hubImage('hud-coin-shell.png')}<span class="wallet-count" id="walletCoins">${amountLabel(g.coins)}</span></button><button id="help-button" class="picture-button" type="button" data-hub-action="help" aria-label="Help">${hubImage('control-help.svg','','Help')}</button><button id="settings-button" class="picture-button" type="button" data-hub-action="settings" aria-label="Settings">${hubImage('control-settings.svg','','Settings')}</button></div>
  <nav class="bottom-nav hub-navigation" aria-label="Bakery navigation"><button class="picture-button nav-packages" type="button" data-hub-action="packages" aria-label="Packages">${hubImage('nav-packages.png','','Packages')}</button><button class="picture-button nav-play hub-play" type="button" data-hub-action="play" aria-label="${g.run?'Resume Order':'Play Orders'}" ${!g.board.length&&!g.run?'disabled':''}>${hubImage('nav-play.png','','Play Orders')}${g.run?'<span class="resume-indicator">Resume</span>':''}</button><button class="picture-button nav-collection" type="button" data-hub-action="collection" aria-label="Menu Collection">${hubImage('nav-collection.png','','Menu Collection')}</button></nav></main>`;
 }
-function hubPopupChrome(title,body,{collection=false,variant=''}={}){
+function hubPopupChrome(title,body,{collection=false,variant='',headerExtras=''}={}){
  const action=collection?'closeHubCollection()':'closeModal()',titleId=collection?'collectionTitle':'modalTitle';
  const size=collection||/modalgrid|hub-odds-grid|food-choices/.test(body)?'large':/hub-help|hub-boost|settings-list|hub-wallet|coin-order-reward/.test(body)?'medium':'small';
- return `<div class="${collection?'hub-collection-overlay':'backdrop bakery-overlay'} bakery-popup-backdrop" onclick="if(event.target===this)${action}"><section class="bakery-popup popup-${size} ${collection?'collection-modal':'modal'} ${variant}" role="dialog" aria-modal="true" aria-labelledby="${titleId}" tabindex="-1"><header class="${collection?'collection-popup-head':'modalhead'} popup-head"><h2 id="${titleId}">${hubEscape(title)}</h2><button class="picture-button close ${collection?'hub-collection-back':''}" aria-label="${collection?'Back to bakery':'Close'}" onclick="${action}">${hubImage('control-close.svg')}</button></header><div class="${collection?'collection-body':'modalbody'} popup-body">${body}</div></section></div>`;
+ return `<div class="${collection?'hub-collection-overlay':'backdrop bakery-overlay'} bakery-popup-backdrop" onclick="if(event.target===this)${action}"><section class="bakery-popup popup-${size} ${collection?'collection-modal':'modal'} ${variant}" role="dialog" aria-modal="true" aria-labelledby="${titleId}" tabindex="-1"><header class="${collection?'collection-popup-head':'modalhead'} popup-head"><h2 id="${titleId}">${hubEscape(title)}</h2>${collection&&headerExtras?headerExtras:''}<button class="picture-button close ${collection?'hub-collection-back':''}" aria-label="${collection?'Back to bakery':'Close'}" onclick="${action}">${hubImage('control-close.svg')}</button></header><div class="${collection?'collection-body':'modalbody'} popup-body">${body}</div></section></div>`;
 }
 function renderHubFoodCard(o){
  const food=F(o.id),equipped=g.activeMenu.includes(o.uid),selected=selectedFoods.has(o.uid),busy=!!(g.run&&!g.run.paused);
@@ -74,8 +111,8 @@ function renderHubFoodCard(o){
 function renderHubCollection(){
  // Clicking an equipped food opens only its details, not the collection inventory.
  if(hubFoodDirect)return `<div class="hub-collection-overlay bakery-popup-backdrop food-direct-backdrop" onclick="if(event.target===this)closeHubCollection()"><div class="food-direct-host" role="dialog" aria-modal="true" aria-label="Food details"><div id="foodPanel">${renderFoodPanel()}</div></div></div>`;
- const foods=sortedMenuFoods(g.owned.filter(o=>!hideUnequipped||g.activeMenu.includes(o.uid)));
- return hubPopupChrome('Menu Collection',`<main class="illustrated-collection-content" style="--owned-rows:${Math.min(2,Math.max(1,Math.ceil(foods.length/4)))}"><div class="collection-toolbar"><div class="collection-slot-controls"><b>${g.activeMenu.length}/${g.menuSlots} equipped</b><button class="secondary" ${g.menuSlots>=FOOD.length?'disabled':''} onclick="buyMenuSlot()">${g.menuSlots>=FOOD.length?'All slots owned':`+ Slot · 🪙 ${amountLabel(slotCost())}`}</button><button class="secondary collection-index" onclick="openIndex()">Food Index</button></div><div class="collection-equip-controls"><button class="primary" onclick="equipBest('final')">Equip Best</button>${renderAutoEquipControl()}</div><div class="collection-filter-controls"><button class="secondary" aria-pressed="${hideUnequipped}" onclick="hideUnequipped=!hideUnequipped;render()">${hideUnequipped?'Show All':'Hide Unequipped'}</button><button class="secondary" data-focus="select-foods" aria-pressed="${multiSelect}" onclick="toggleFoodSelection()">${multiSelect?'Done selecting':'Select Foods'}</button><span class="collection-sort-note">Rarity · Boost</span></div></div><div class="menu-grid collection-grid" data-food-count="${foods.length}" tabindex="0" aria-label="Owned foods, scroll to browse">${foods.map(renderHubFoodCard).join('')}${!foods.length?'<p>No foods in this view. Show all foods or open a package.</p>':''}</div><div id="foodPanel">${renderFoodPanel()}</div></main>`,{collection:true,variant:foods.length<5?'small-collection':''});
+ const foods=getHubCollectionFoods();
+ return hubPopupChrome('Menu Collection',`<main class="illustrated-collection-content" style="--owned-rows:${Math.min(2,Math.max(1,Math.ceil(foods.length/4)))}"><div class="collection-toolbar">${renderHubCollectionToolbar(foods)}</div><div class="collection-toolbar-hint-row">Long-press (hold) a food item to select many items.</div><div class="menu-grid collection-grid" data-food-count="${foods.length}" tabindex="0" aria-label="Owned foods, scroll to browse">${foods.map(renderHubFoodCard).join('')}${!foods.length?'<p>No foods in this view. Show all foods or open a package.</p>':''}</div><div id="foodPanel">${renderFoodPanel()}</div></main>`,{collection:true,variant:foods.length<5?'small-collection':'',headerExtras:renderHubCollectionHeaderExtras()});
 }
 function hubToggleEquip(uid){
  if(suppressFoodTap===uid){suppressFoodTap=null;return false}

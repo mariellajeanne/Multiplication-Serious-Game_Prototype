@@ -169,9 +169,10 @@ def run_zoom(pw):
     assert p.evaluate('g.run.factAnswers["0:0"].attempts.length')==0
     print('PASS actual worksheet Edge browser zoom',factor,p.evaluate('[innerWidth,innerHeight,devicePixelRatio]'),flush=True)
   finally:c.close()
-try:
- with s.sync_playwright() as pw:
-  requested=sys.argv[1:] or ['edge','webkit']
-  for engine in [e for e in requested if not e.startswith('--')]:run(pw,engine)
-  if ('edge' in requested and '--entry-only' not in requested) or '--zoom-only' in requested:run_zoom(pw)
-finally:s.server.shutdown()
+if __name__=='__main__':
+ try:
+  with s.sync_playwright() as pw:
+   requested=sys.argv[1:] or ['edge','webkit']
+   for engine in [e for e in requested if not e.startswith('--')]:run(pw,engine)
+   if ('edge' in requested and '--entry-only' not in requested) or '--zoom-only' in requested:run_zoom(pw)
+ finally:s.server.shutdown()
