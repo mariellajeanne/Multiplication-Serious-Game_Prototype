@@ -19,12 +19,12 @@ test('the menu contains exactly the purchased number of slots, never eight fake 
  let html=h.run('renderSceneFoods()');
  assert.equal((html.match(/class="scene-food-card hub-food/g)||[]).length,1);
  assert.equal((html.match(/class="scene-button scene-food-card empty-menu-slot/g)||[]).length,3);
- assert.equal((html.match(/scene-food-card/g)||[]).length,4);
- assert.match(html,/>Empty Slot<\/strong>/);
+ assert.equal((html.match(/scene-food-card/g)||[]).length,5);
+ assert.match(html,/>Empty Slot<\/strong>/);assert.match(html,/data-tour-target="buy-slot"/);
  assert.doesNotMatch(html,/More recipes to discover|More menu slots to unlock|Ready for a recipe/);
  h.run('g.menuSlots=1');
  html=h.run('renderSceneFoods()');
- assert.equal((html.match(/scene-food-card/g)||[]).length,1);
+ assert.equal((html.match(/scene-food-card/g)||[]).length,2);
  h.run('g.menuSlots=4;g.activeMenu=[]');
  html=h.run('renderSceneFoods()');
  assert.equal((html.match(/class="scene-button scene-food-card empty-menu-slot/g)||[]).length,4);
@@ -36,7 +36,7 @@ test('a collection full of owned but unequipped recipes does not overflow the pu
  const html=h.run('renderSceneFoods()');
  assert.equal((html.match(/class="scene-food-card hub-food/g)||[]).length,2);
  assert.equal((html.match(/class="scene-button scene-food-card empty-menu-slot/g)||[]).length,2);
- assert.equal((html.match(/scene-food-card/g)||[]).length,4);
+ assert.equal((html.match(/scene-food-card/g)||[]).length,5);
 });
 
 test('counter has two separate accessible actions with a plain bag icon, not an SVG holder',()=>{

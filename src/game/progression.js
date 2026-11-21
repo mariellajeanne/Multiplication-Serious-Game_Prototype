@@ -77,7 +77,7 @@ function consolidateOwnedFoods(state){
   state.recipeCeilings[keep.id]=Math.max(state.recipeCeilings[keep.id]||0,mastery,copies.length-1);
   return result;
  });
- state.menuSlots=clamp(state.menuSlots,1,FOOD.length);
+ state.menuSlots=clamp(state.menuSlots,state.tutorialStarterVersion===2?0:1,FOOD.length);
  state.activeMenu=[...new Set(state.activeMenu.map(uid=>replacements.get(uid)).filter(uid=>uid!==undefined))].slice(0,state.menuSlots);
  if(changed||state.purchaseUndo?.before?.owned&&new Set(state.purchaseUndo.before.owned.map(o=>o.id)).size!==state.purchaseUndo.before.owned.length)state.purchaseUndo=null;
  state.uniqueFoodsVersion=1;return state;

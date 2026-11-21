@@ -10,7 +10,7 @@ function ui(){
  for(const file of ['src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js',
    'src/ui/bakery-art.js','src/ui/dialogs.js','src/ui/scene.js','src/ui/menu.js'])
    vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
- vm.runInContext(`showModal=(title,html)=>{result={title,html}};toast=()=>{};render=()=>{};
+ vm.runInContext(`g.owned=[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}];g.discovered=['pandesal'];g.uidNext=2;g.menuSlots=1;g.activeMenu=[1];g.recipeCeilings={pandesal:0};showModal=(title,html)=>{result={title,html}};toast=()=>{};render=()=>{};
    closeModal=()=>{};Math.random=()=>{throw Error('Presentation must not consume reward RNG')}`,c);
  return c;
 }

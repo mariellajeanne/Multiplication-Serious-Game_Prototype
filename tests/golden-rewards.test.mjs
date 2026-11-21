@@ -10,6 +10,7 @@ function shell(saved=null){
   localStorage:{getItem:key=>store.get(key)||null,setItem:(key,value)=>store.set(key,value)}});
  for(const file of ['src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/golden-challenges.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/game/worksheet-bridge.js'])vm.runInContext(readFileSync(new URL('../'+file,import.meta.url),'utf8'),c);
  const run=code=>vm.runInContext(code,c),json=code=>JSON.parse(JSON.stringify(run(code)));
+ if(!saved)vm.runInContext("g.owned=[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}];g.activeMenu=[1];g.menuSlots=1;g.recipeCeilings={pandesal:0};",c);
  run('render=()=>{};toast=()=>{};coinFly=()=>{};showModal=()=>{};if(!g.run){g.board=[{id:41,a:79,b:18,rarity:1,coinTier:1,base:176}];startTicket(41)}');
  const actions=index=>run(`worksheetActionKinds(g.run.steps[${index}]).map(kind=>({id:worksheetActionId(g.run.worksheetRewards.attemptId,g.run.steps[${index}].row,g.run.steps[${index}].col,kind),row:g.run.steps[${index}].row,col:g.run.steps[${index}].col,kind}))`);
  const message=(data,source=frame.contentWindow,origin='http://local')=>c.handleWorksheetMessage({source,origin,data:{source:'pq-worksheet',type:'state',attemptId:run('g.run?.worksheetRewards.attemptId'),errors:0,...data}});

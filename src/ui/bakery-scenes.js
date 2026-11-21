@@ -41,12 +41,13 @@ function renderSceneFoods(){
  // Do not manufacture locked/undiscovered tiles to pad the grid to eight.
  const equipped=sortedMenuFoods(g.activeMenu.map(uid=>g.owned.find(o=>o.uid===uid)).filter(Boolean));
  const slots=Math.max(0,Math.min(FOOD.length,g.menuSlots));
- let result=equipped.slice(0,slots).map(o=>{const f=F(o.id),label=multiplierLabel(foodValue(o)),level=displayedFoodLevel(o),available=availableMastery(o);
+ let result=`<button type="button" class="scene-food-card tutorial-buy-slot" data-tour-target="buy-slot" onclick="buyMenuSlot()" ${g.menuSlots>=FOOD.length?'disabled':''} aria-label="Buy Slot for ${amountLabel(slotCost())} coins"><b class="slot-plus" aria-hidden="true">+</b><strong>Buy Slot</strong><small>${amountLabel(slotCost())} coins</small></button>`;
+ result+=equipped.slice(0,slots).map(o=>{const f=F(o.id),label=multiplierLabel(foodValue(o)),level=displayedFoodLevel(o),available=availableMastery(o);
   // All overlays live inside the existing single card button. The level-up
   // indicator opens the same food-details flow, without a nested button.
   return `<button type="button" class="scene-food-card hub-food r${f.rarity}" data-food="${f.id}" data-uid="${o.uid}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(f.name)}, ${RARITIES[f.rarity]}, Level ${level}, Baker's Boost ${label}${available?`, ${available} level-ups available`:''}, equipped">${hubFoodArt(f.id,'scene-food-image')}${available?`<span class="food-upgrade-ready" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 20V4M5 11l7-7 7 7"/></svg><b>${available}</b></span>`:''}<span class="food-stats" aria-hidden="true"><span class="food-level">Lv. ${level}</span><span class="food-multiplier" style="--boost-font:${label.length>9?18:label.length>7?20:24}px">${hubBoostDiamond()}<b>×${label}</b></span></span></button>`;
  }).join('');
- for(let i=equipped.length;i<slots;i++)result+=worldButton('<b class="slot-plus">+</b><strong>Empty Slot</strong>','collection',{classes:'scene-food-card empty-menu-slot',extra:'aria-label="Empty menu slot. Open Food Inventory to equip a food."'});
+ for(let i=equipped.length;i<slots;i++)result+=worldButton('<b class="slot-plus">+</b><strong>Empty Slot</strong>','collection',{classes:'scene-food-card empty-menu-slot',extra:'data-tour-target="empty-slot" aria-label="Empty menu slot. Open Food Inventory to equip a food."'});
  return result;
 }
 function renderWorldMenu(){

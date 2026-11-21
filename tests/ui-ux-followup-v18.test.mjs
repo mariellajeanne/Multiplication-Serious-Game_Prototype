@@ -26,15 +26,18 @@ test('helper toasts keep actual status reasons separate from invitations',()=>{
  assert.match(protocol,/expired:'Help request expired\.'/);
  assert.match(protocol,/if\(outcome&&c\.source==='manual'\)/);
 });
-test('first-time game guide uses live targets, persists skip, and does not replace worksheet instructions',()=>{
+test('six-task first-time guide uses persisted checkpoints, live spotlights and leaves worksheet math alone',()=>{
  const tour=src('src/ui/game-tour-v18.js'),css=src('styles/game-tour-v18.css');
- assert.match(tour,/panaderyaWholeGameTourV1/);
- assert.match(tour,/localStorage\.setItem\(KEY,skipped\?'skipped':'done'\)/);
- assert.match(tour,/\.nav-orders/);assert.match(tour,/\.scene-ticket/);assert.match(tour,/g\.run\?\.procedureComplete/);
- assert.doesNotMatch(tour,/data-tour="next"|tour-caption/);
- assert.match(tour,/\.nav-packages/);
+ assert.match(tour,/panaderyaWholeGameTourV2/);
+ assert.match(tour,/localStorage\.setItem\(KEY,skip\?'skipped':'done'\)/);
+ for(const label of ['Solve an Order','Earn Coins','Buy a Package','Unbox a Food','Add Food to Your Menu','Boost Coins with Equipped Food'])assert.ok(tour.includes(label));
+ for(const stage of ['nav-orders','ticket','worksheet','complete','summary','back','nav-packages','buy-package','package-reveal','package-collect','nav-menu','buy-slot','empty-slot','choose-food','equip','close-food','close-inventory','boost','ready'])assert.ok(tour.includes(stage));
+ assert.match(tour,/g\.run\?\.procedureComplete/);
+ assert.match(tour,/g\.claimedOrders\[orderId\]/);
+ assert.match(tour,/g\.activeMenu\.includes\(tour\.foodUid\)/);
+ assert.match(tour,/data-tour="next"/);
+ assert.match(css,/tour-shade/);assert.match(css,/tour-focus-ring/);assert.match(css,/animation:tour-fill 1\.5s/);
  assert.match(tour,/previousTutorial\.apply/);
- assert.doesNotMatch(css,/bakery-tour-highlight\{position:relative/);
  assert.match(src('index.html'),/src\/ui\/game-tour-v18\.js/);
 });
 test('coin artwork and count fly as one, with a readable boost and no dim overlay',()=>{
