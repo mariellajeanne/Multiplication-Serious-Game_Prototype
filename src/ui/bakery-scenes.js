@@ -43,7 +43,7 @@ function renderSceneFoods(){
   // indicator opens the same food-details flow, without a nested button.
   return `<button type="button" class="scene-food-card hub-food r${f.rarity}" data-food="${f.id}" data-uid="${o.uid}" onclick="openHubFood(${o.uid})" aria-label="Manage ${hubEscape(f.name)}, ${RARITIES[f.rarity]}, Level ${level}, Baker's Boost ${label}${available?`, ${available} level-ups available`:''}, ${equipped.has(o.uid)?'equipped':'owned but not equipped'}">${hubFoodArt(f.id,'scene-food-image')}${available?`<span class="food-upgrade-ready" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M12 20V4M5 11l7-7 7 7"/></svg><b>${available}</b></span>`:''}<span class="food-stats" aria-hidden="true"><span class="food-level">Lv ${level}</span><span class="food-multiplier" style="--boost-font:${label.length>9?18:label.length>7?20:24}px">${hubBoostDiamond()}<b>×${label}</b></span></span></button>`;
  }).join('');
- for(let i=foods.length+(slot?1:0);i<8;i++)result+=`<div class="scene-food-card unfilled-slot" aria-label="${i<g.menuSlots?'Available menu slot':'More menu slots to unlock'}">${worldImage('hat-icon')}<span>${i<g.menuSlots?'Ready for a recipe':'More recipes to discover'}</span></div>`;
+ for(let i=foods.length+(slot?1:0);i<8;i++)result+=`<div class="scene-food-card unfilled-slot" aria-label="${i<g.menuSlots?'Available menu slot':'More menu slots to unlock'}">${worldImage('hat-icon')}<span>${uiText(i<g.menuSlots?'Ready for a recipe':'More recipes to discover')}</span></div>`;
  return result;
 }
 function renderWorldMenu(){
@@ -69,7 +69,7 @@ function bakeryMysteryArt(){
  // A solid alpha mask of Gift hides every color/ornament of the unknown tier.
  return `<span class="package-mystery" aria-hidden="true"><span class="package-mystery-shape" style="mask-image:url('${typeof BAKERY_ASSETS!=='undefined'?BAKERY_ASSETS['package-01']:'assets/bakery-faithful/package-01.png'}')"></span><b>?</b></span>`;
 }
-function bakeryTierLabel(){return packageUnlocked(bakeryTier)?`<span>${bakeryTier+1}\u2605</span><span>${hubEscape(PACKAGE_TYPES[bakeryTier])}</span>`:'Next Discovery'}
+function bakeryTierLabel(){return packageUnlocked(bakeryTier)?`<span>${bakeryTier+1}\u2605</span><span>${hubEscape(PACKAGE_TYPES[bakeryTier])}</span>`:uiText('Next Discovery')}
 function positionBakeryCarouselLabel(){
  const carousel=$('package-carousel'),label=$('package-carousel-label');if(!carousel||!label)return;
  const viewport=carousel.querySelector('.package-carousel-viewport'),button=carousel.querySelector('[aria-pressed="true"]');
@@ -80,20 +80,20 @@ function positionBakeryCarouselLabel(){
 }
 function bakeryCarouselItem(rank,index,selected){
  const known=packageUnlocked(rank),offset=index-selected;
- return `<div class="package-slide" data-carousel-slide="${rank}" style="--offset:${offset}" aria-hidden="${Math.abs(offset)>1}"><button type="button" class="package-preview${known?'':' is-mystery'}" data-world-tier="${rank}" aria-label="${known?`${PACKAGE_TYPES[rank]} Package`:'Next Discovery'}" aria-pressed="${rank===bakeryTier}" tabindex="${Math.abs(offset)>1?-1:0}">${known?worldPackageImage(rank,'carousel-package'):bakeryMysteryArt()}</button></div>`;
+ return `<div class="package-slide" data-carousel-slide="${rank}" style="--offset:${offset}" aria-hidden="${Math.abs(offset)>1}"><button type="button" class="package-preview${known?'':' is-mystery'}" data-world-tier="${rank}" aria-label="${known?`${PACKAGE_TYPES[rank]} Package`:uiText('Next Discovery')}" aria-pressed="${rank===bakeryTier}" tabindex="${Math.abs(offset)>1?-1:0}">${known?worldPackageImage(rank,'carousel-package'):bakeryMysteryArt()}</button></div>`;
 }
 function bakeryDiscoveryMarkup(){
  const next=nextPackageToUnlock();if(!next)return '';
  const required=PACKAGE_DISCOVERY_COINS[next.rank],progress=Math.min(required,packageCoinCount(g.coinsEarnedSinceLastDiscovery));
- return `<div class="package-discovery scene-meter discovery-meter" role="progressbar" aria-label="Coins earned toward next package discovery" aria-valuemin="0" aria-valuemax="${required}" aria-valuenow="${progress}" aria-valuetext="${fmt(progress)} of ${fmt(required)} coins earned"><i style="width:${progress/required*100}%"></i><strong>Next Discovery</strong><span>${worldImage('price-coin')}<b>${fmt(progress)} / ${fmt(required)}</b></span></div>`;
+ return `<div class="package-discovery scene-meter discovery-meter" role="progressbar" aria-label="Coins earned toward next package discovery" aria-valuemin="0" aria-valuemax="${required}" aria-valuenow="${progress}" aria-valuetext="${fmt(progress)} of ${fmt(required)} coins earned"><i style="width:${progress/required*100}%"></i><strong>${uiText('Next Discovery')}</strong><span>${worldImage('price-coin')}<b>${fmt(progress)} / ${fmt(required)}</b></span></div>`;
 }
 function bakeryPackageDetails(){
  const rank=bakeryTier,unlocked=packageUnlocked(rank),odds=unlocked?packageProbabilities(rank):[];
- return `<div class="package-heading-group${nextPackageToUnlock()?' has-discovery':''}"><div class="package-title"><b>${unlocked?`${rank+1}\u2605`:'?'}</b><h2>${unlocked?`${hubEscape(PACKAGE_TYPES[rank])} Package`:'Next Discovery'}</h2></div>
+ return `<div class="package-heading-group${nextPackageToUnlock()?' has-discovery':''}"><div class="package-title"><b>${unlocked?`${rank+1}\u2605`:'?'}</b><h2>${unlocked?`${hubEscape(PACKAGE_TYPES[rank])} Package`:uiText('Next Discovery')}</h2></div>
  ${bakeryDiscoveryMarkup()}</div>
  ${unlocked?`<div class="chance-panel" aria-label="Food rarity chances"><div class="chance-rows">${odds.map((p,i)=>({p,i})).filter(({p})=>p>0).reverse().map(({p,i})=>`<div class="chance-row world-odds-row chance-${i}" style="--chance-color:${['#dba255','#ee9a50','#0fbdec','#be52ed','#ffc53b','#fa7e91','#9e59ed','#f0b52d'][i]}"><span class="chance-star" aria-hidden="true">\u2727</span><strong>${RARITIES[i]}</strong><span class="scene-meter"><i style="width:${p*100}%"></i></span><b>${probabilityLabel(p).replace('<','&lt;')}</b></div>`).join('')}</div></div>
  <div class="purchase-options">${[1,5,10].map(count=>`<button type="button" class="scene-buy" data-world-buy="${count}" ${packageBatchUnavailable(rank,count)?'disabled':''} aria-label="Open ${count} ${PACKAGE_TYPES[rank]} packages for ${amountLabel(packagePrice(rank)*count)} coins"><strong>Open \u00d7${count}</strong><span>${worldImage('price-coin')}<b>${amountLabel(packagePrice(rank)*count)}</b></span></button>`).join('')}</div>
- <p class="world-purchase-notice package-notice" role="status">${!g.packages[rank]&&g.coins<packagePrice(rank)?'Complete orders to earn more coins.':''}${g.packages[rank]?` <button type="button" data-world-saved>Open saved \u00d7${savedPackageBatch(rank)}</button>`:''}</p>`:`<div class="package-locked-details"><span aria-hidden="true">?</span><strong>A new surprise awaits!</strong><p>Earn coins from playing to discover your next package.</p></div>`}`;
+ <p class="world-purchase-notice package-notice" role="status">${!g.packages[rank]&&g.coins<packagePrice(rank)?'Complete orders to earn more coins.':''}${g.packages[rank]?` <button type="button" data-world-saved>Open saved \u00d7${savedPackageBatch(rank)}</button>`:''}</p>`:`<div class="package-locked-details"><span aria-hidden="true">?</span><strong>${uiText('A new surprise awaits!')}</strong><p>${uiText('Earn coins from playing to discover your next package.')}</p></div>`}`;
 }
 function renderWorldPackages(){
  ensureBakeryTier();const tiers=bakeryCarouselTiers(),selected=tiers.indexOf(bakeryTier);

@@ -1,0 +1,8 @@
+/* First settings row: one clear, tablet-friendly bilingual control. */
+.settings-language-row{display:flex;align-items:center;justify-content:space-between;gap:12px;min-width:0}
+.settings-language-row>b{white-space:nowrap}
+.settings-language-options{display:flex;gap:8px;align-items:stretch;flex-wrap:nowrap}
+.settings-language-options>button{min-height:48px;min-width:116px;padding:10px 16px;white-space:nowrap}
+body[data-view="hub"] .bakery-popup .settings-language-row{border-bottom:2px solid #dbb884;padding-top:2px;padding-bottom:16px}
+body[data-view="hub"] .bakery-popup .settings-language-options>button[aria-pressed="true"]{--button-art:url('../assets/bakery-ui/button-teal.svg');color:#fff7df}
+@media(max-width:520px){.settings-language-row{flex-wrap:wrap}.settings-language-options{width:100%}.settings-language-options>button{flex:1;min-width:0}}

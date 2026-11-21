@@ -104,7 +104,7 @@ function updateTutorial(){
    text=lastDigit()?'Place the last digit.':'Lift the tens to the carry shelf.';
   }
  }
- if(prompt)prompt.textContent=text;
+ if(prompt)prompt.textContent=typeof uiText==='function'?uiText(text):text;
  for(const el of [from,to])el?.classList.add('guide-target');
  if(s.phase==='select')document.querySelectorAll('.cell.number').forEach(el=>{if(el!==from&&el!==to)el.classList.add('guide-dim')});
  if(from&&to){const stream=makeStream(pointOf(from),pointOf(to),'next-action');if(stream)layer.append(stream);}
