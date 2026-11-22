@@ -59,7 +59,7 @@ function addCarry(target){
  const current=s.carrySlots[s.k];if(!current)return;
  const before=ones(),carry=s.incoming;
  snapshot();const from=Q(`[data-carry="${s.k}"]`);
- const to=target==='placed'||worksheetExternalCalculator?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
+ const to=target==='placed'?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
  animateMove(from,to,s.incoming,'down');s.mixed=true;s.carryArmed=false;delete s.carrySlots[s.k];
  if(s.onesPlaced)s.rows[s.row][currentCol()]=ones();
  if(s.tensPlaced){
@@ -68,7 +68,7 @@ function addCarry(target){
   else s.carrySlots[s.k+1]={value:tens(),provisional:false};
  }
  if(worksheetExternalCalculator){worksheetDigitEntry.guidance[digitStepKey()+'/carry-down']={mistakes:0};worksheetDigitEntry.feedback=`${before} + ${carry} = ${before+carry}. Carry resolved.`;worksheetDigitEntry.level=0}
- s.chosen=null;selection=null;play('mix');render();pulseWorksheet(target==='placed'||worksheetExternalCalculator?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]'));status('Combined.');
+ s.chosen=null;selection=null;play('mix');render();pulseWorksheet(target==='placed'?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]'));status('Combined.');
  if(worksheetExternalCalculator){if(target==='placed')showCarryCombination(Q(`[data-slot="${s.row}:${currentCol()}"]`),before,carry);else{bridgePoll();report('carry-combined',{before,carry})}}
  maybeAdvance();
 }

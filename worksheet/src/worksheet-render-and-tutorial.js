@@ -107,8 +107,14 @@ function updateTutorial(){
   if(document.body.dataset.guideLevel==='2'){
    const expected=worksheetPlacementExpected();
    if(expected?.target)to=Q(digitTargetSelector(expected.target)||'.no-entry-target');
-   if(s.incoming&&!s.mixed)from=Q(`[data-carry="${s.k}"]`);
+   if(s.incoming&&!s.mixed){
+    // A waiting carry goes to the ones tile of the floating product before
+    // that digit is placed; afterward it goes onto the placed ones tile.
+    from=Q(`[data-carry="${s.k}"]`);
+    to=s.onesPlaced?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');
+   }else if(!s.onesPlaced){from=Q('[data-part="ones"]');}
    else if(s.tensLocation==='row'&&!lastDigit())from=Q(`[data-slot="${s.row}:${currentCol()+1}"]`);
+   else if(tens()>0&&!s.tensPlaced)from=Q('[data-part="tens"]');
   }
  }else{
   const onesSource=s.onesPlaced?Q(`[data-slot="${s.row}:${currentCol()}"]`):Q('[data-part="ones"]');

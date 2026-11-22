@@ -14,7 +14,7 @@ export function setup({legacy=false}={}){
  function join(n,restore=false){
   const store=stores.get(n)||new Map();stores.set(n,store);let h,fail=false;
   const frame={contentWindow:{postMessage(){}},style:{}},c=vm.createContext({crypto:webcrypto,console,Date,Math:Object.assign(Object.create(Math),{random:()=>.5}),location:{origin:'http://local'},document:{getElementById:id=>id==='worksheetFrame'?frame:null,querySelector:()=>null},setTimeout:()=>{},clearTimeout:()=>{},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>{if(fail)throw Error('disk full');store.set(k,v)}}});
-  c.window=c;c.addEventListener=()=>{};for(const source of sources)vm.runInContext(source,c);
+  c.window=c;c.addEventListener=()=>{};c.uiText=text=>text;for(const source of sources)vm.runInContext(source,c);
   const run=code=>vm.runInContext(code,c),json=code=>clone(run(code));
   run('render=()=>{};toast=()=>{};showModal=()=>{};coinFly=()=>{};checkUnlocks=()=>{};if(!g.run){g.board=[{id:41,a:79,b:18,rarity:1,coinTier:1,base:ticketBase(1)}];startTicket(41)}');
   if(legacy&&!restore)run('delete g.run.stepCoins;g.run.baseCoins=g.run.ticket.base;save()');

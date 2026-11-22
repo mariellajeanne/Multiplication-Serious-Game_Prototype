@@ -287,8 +287,21 @@ public final class LanDiscovery {
     }
     private static void validateWorksheet(JSONObject s)throws JSONException{
         String[] fields={"a","b","A","B","cols","row","k","first","phase","revealed","raw","mixed","incoming","onesPlaced","tensPlaced","tensLocation","chosen","carrySlots","rows","sum","sumCol","sumCarry","done","boxes","complete","carryArmed"};
-        onlyKeys(s,fields);for(String k:fields)if(!s.has(k))throw new JSONException("Missing worksheet field");
+        onlyKeys(s,"a","b","A","B","cols","row","k","first","phase","revealed","raw","mixed","incoming","onesPlaced","tensPlaced","tensLocation","chosen","carrySlots","rows","sum","sumCol","sumCarry","done","boxes","complete","carryArmed","expressionOrder","expressionActivated","goldenOffer");for(String k:fields)if(!s.has(k))throw new JSONException("Missing worksheet field");
         int a=worksheetInt(s,"a",99999),b=worksheetInt(s,"b",99);if(a<1||b<1)throw new JSONException("Invalid operands");
+        // Schema 2 shares optional expression/Golden Challenge presentation state.
+        // Both browser and Android validators must accept the same safe fields.
+        if(s.has("expressionOrder")){
+            org.json.JSONArray order=s.getJSONArray("expressionOrder");
+            if(order.length()!=2)throw new JSONException("Invalid expression order");
+            for(int i=0;i<2;i++){
+                Object digit=order.opt(i);
+                if(!(digit instanceof Number)||order.getDouble(i)!=order.getInt(i)||order.getInt(i)<0||order.getInt(i)>9)
+                    throw new JSONException("Invalid expression digit");
+            }
+        }
+        for(String key:Arrays.asList("expressionActivated","goldenOffer"))
+            if(s.has(key)&&!(s.opt(key) instanceof Boolean))throw new JSONException("Invalid expression flag");
         int al=String.valueOf(a).length(),bl=String.valueOf(b).length();
         for(String key:Arrays.asList("A","B")){org.json.JSONArray arr=s.getJSONArray(key);String digits=new StringBuilder(String.valueOf(key.equals("A")?a:b)).reverse().toString();if(arr.length()!=digits.length())throw new JSONException("Invalid operand digits");for(int i=0;i<arr.length();i++)if(!(arr.opt(i) instanceof Number)||arr.getDouble(i)!=digits.charAt(i)-'0')throw new JSONException("Invalid operand digits");}
         if(worksheetInt(s,"cols",7)!=String.valueOf(a*b).length())throw new JSONException("Invalid columns");
@@ -314,7 +327,28 @@ public final class LanDiscovery {
         else if(!"carry".equals(t.opt("kind"))||t.has("r"))throw new JSONException("Invalid target kind");
     }
     private static void validatePresentation(JSONObject p)throws JSONException{
-        onlyKeys(p,"calculator","phase","tutorial","guideLevel","entry");worksheetFlags(p,"tutorial");worksheetInt(p,"guideLevel",2);
+        onlyKeys(p,"calculator","phase","tutorial","guideLevel","entry","order","rewards");worksheetFlags(p,"tutorial");
+        // Order art and up to three coin options are read-only UI data, not
+        // authority to alter the learner's ticket, coins or helper payout.
+        if(p.has("order")){
+            JSONObject order=p.getJSONObject("order");onlyKeys(order,"foodId","sprite");
+            worksheetText(order,"foodId",60);
+            if(!order.getString("foodId").matches("[a-z0-9-]+")||worksheetInt(order,"sprite",17)<1)
+                throw new JSONException("Invalid food display");
+        }
+        if(p.has("rewards")){
+            org.json.JSONArray rewards=p.getJSONArray("rewards");
+            if(rewards.length()>3)throw new JSONException("Too many displayed coin options");
+            for(int i=0;i<rewards.length();i++){
+                JSONObject item=rewards.getJSONObject(i);onlyKeys(item,"rank","name","chance","base","count");
+                worksheetInt(item,"rank",7);worksheetInt(item,"base",1000000000);worksheetInt(item,"count",100);
+                worksheetText(item,"name",80);
+                Object rawChance=item.opt("chance");
+                if(!(rawChance instanceof Number)||!Double.isFinite(item.getDouble("chance"))||item.getDouble("chance")<0||item.getDouble("chance")>1)
+                    throw new JSONException("Invalid displayed reward probability");
+            }
+        }
+worksheetInt(p,"guideLevel",2);
         if(!Arrays.asList("connect","calculate","carry","place","add","complete").contains(p.opt("phase")))throw new JSONException("Invalid view phase");
         JSONObject e=p.getJSONObject("entry");onlyKeys(e,"selected","value","feedback","level","hintTargets");worksheetTarget(e.get("selected"));worksheetText(e,"value",1);worksheetText(e,"feedback",240);worksheetInt(e,"level",3);
         if(!e.getString("value").matches("[0-9]?"))throw new JSONException("Invalid entry");

@@ -90,7 +90,7 @@ test('presentation schema rejects commands, economic fields, unsafe targets and 
  assert.equal(w.validSnapshot({schema:2,state:initial,presentation:view}),true);assert.equal(w.validSnapshot({schema:2,state:initial}),false);
 });
 test('shared observer components render supplied calculator values and strip executable controls',()=>{
- const p=structuredClone(view.calculator);p.display='73';p.status='<img src=x onerror=alert(1)>';
+ const p=structuredClone(view.calculator);p.manual=true;p.display='73';p.status='<img src=x onerror=alert(1)>';
  const html=WorksheetComponents.readOnly(WorksheetComponents.calculator(p)+WorksheetComponents.workspace({done:0,total:4,complete:false}));
  assert.match(html,/>73<\/output>/);assert.match(html,/&lt;img/);assert.doesNotMatch(html,/<img| onclick=/);assert.match(html,/button disabled aria-disabled="true"/);
  const small=WorksheetComponents.layout({rows:2,cols:4,available:390,byWidth:90});assert.ok(small.cell>=44&&small.height<=390);

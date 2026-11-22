@@ -12,6 +12,18 @@ tasks.register('stageGame', Sync) {
     from('../..') { include 'index.html', 'src/**', 'styles/**', 'assets/**', 'worksheet/**'; exclude '**/README.md' }
     into layout.buildDirectory.dir('game-assets/game')
 }
+// Keep the source repository and original artwork intact. Repack only the staged
+// Android copy; a source-code fingerprint mismatch disables all exclusions.
+tasks.named('stageGame').configure {
+    doLast {
+        def root = rootProject.projectDir.parentFile
+        def staging = layout.buildDirectory.dir('game-assets/game').get().asFile
+        project.exec {
+            workingDir root
+            commandLine 'node', new File(root, 'tools/android-optimize-stage.mjs').absolutePath, staging.absolutePath
+        }
+    }
+}
 tasks.named('preBuild').configure { dependsOn 'stageGame' }
 dependencies {
     implementation 'com.google.android.gms:play-services-nearby:19.5.1'

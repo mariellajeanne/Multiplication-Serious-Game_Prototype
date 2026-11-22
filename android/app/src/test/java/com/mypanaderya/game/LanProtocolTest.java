@@ -66,6 +66,26 @@ public class LanProtocolTest {
         state.put("coins",10);rejects(m);state.remove("coins");state.put("phase","<script>");rejects(m);
         state.put("phase","select");h.put("version",0);rejects(m);h.put("version","1");rejects(m);
     }
+    @Test public void productionWorksheetPresentationIsAcceptedForLanAndNearby() throws Exception {
+        // This is the actual Phase 3/4 envelope shape, including fields the
+        // previous native validator rejected while browser relay accepted.
+        JSONObject state=new JSONObject("{\"a\":79,\"b\":18,\"A\":[9,7],\"B\":[8,1],\"cols\":4,\"row\":0,\"k\":0,\"first\":null,\"phase\":\"product\",\"revealed\":false,\"raw\":72,\"mixed\":false,\"incoming\":0,\"onesPlaced\":false,\"tensPlaced\":false,\"tensLocation\":null,\"chosen\":null,\"carrySlots\":{},\"rows\":[{},{\"0\":0}],\"sum\":{},\"sumCol\":0,\"sumCarry\":0,\"done\":0,\"boxes\":0,\"complete\":false,\"carryArmed\":false}");
+        state.put("expressionOrder",new JSONArray().put(8).put(9)).put("expressionActivated",true).put("goldenOffer",false);
+        JSONObject calc=new JSONObject("{\"mode\":\"fact\",\"expression\":\"8 × 9\",\"display\":\"?\",\"carryEquation\":\"\",\"golden\":false,\"manual\":false,\"offered\":false,\"multiplier\":1,\"tray\":null,\"status\":\"Choose how to find the answer.\",\"placementError\":false,\"generate\":true,\"active\":true,\"guide\":true}");
+        JSONObject presentation=new JSONObject().put("calculator",calc).put("phase","calculate").put("tutorial",true).put("guideLevel",2)
+            .put("entry",new JSONObject().put("selected",JSONObject.NULL).put("value","").put("feedback","").put("level",0).put("hintTargets",new JSONArray()))
+            .put("order",new JSONObject().put("foodId","pandesal").put("sprite",1))
+            .put("rewards",new JSONArray().put(new JSONObject().put("rank",0).put("name","Coin Stack").put("chance",0.6).put("base",100).put("count",0)));
+        JSONObject snapshot=new JSONObject().put("schema",2).put("state",state).put("presentation",presentation);
+        JSONObject packet=hello().put("type","help").put("help",new JSONObject().put("kind","worksheet").put("sessionId","d".repeat(32))
+            .put("streamId","e".repeat(32)).put("watchVersion",1).put("version",1).put("cueToken","f".repeat(32)).put("snapshot",snapshot));
+        assertEquals("worksheet",parse(packet.toString()).getJSONObject("help").getString("kind"));
+        state.put("expressionActivated","false");rejects(packet);state.put("expressionActivated",true);
+        state.getJSONArray("expressionOrder").put(0,10);rejects(packet);state.getJSONArray("expressionOrder").put(0,8);
+        presentation.getJSONObject("order").put("sprite",99);rejects(packet);presentation.getJSONObject("order").put("sprite",1);
+        presentation.getJSONArray("rewards").getJSONObject(0).put("chance",1.2);rejects(packet);presentation.getJSONArray("rewards").getJSONObject(0).put("chance",0.6);
+        presentation.getJSONArray("rewards").getJSONObject(0).put("coins",100000);rejects(packet);
+    }
     @Test public void guidanceIsBoundedAndNeverContainsCommandsOrFreeText() throws Exception {
         JSONObject h=new JSONObject().put("kind","point").put("sessionId","d".repeat(32)).put("streamId","e".repeat(32))
             .put("recipientId","f".repeat(32)).put("cueToken","a".repeat(32)).put("sequence",1).put("stateVersion",1).put("target","carry:1");

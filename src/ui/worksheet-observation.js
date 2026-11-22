@@ -4,7 +4,7 @@
  const d=window.panaderyaCoBaker;if(!d?.help)return;
  const observation=new CoBakerWorksheet.Observation(d,{recoveryKey:()=>g.run?.phase==='engine'&&!g.run.paused&&!g.run.procedureComplete?g.run.worksheetRewards?.attemptId:null});
  const guidance=new CoBakerWorksheet.Guidance(d);
- let host=null,frame=null,ready=false,lastVersion=0,lastSession=null,lastSnapshot='';
+ let host=null,frame=null,ready=false,lastVersion=0,lastSession=null,lastSnapshot='',viewerRetry=null;
  let hint=null,hintTimer=null,hintFrame=null,feedbackTimer=null;
  guidance.targetVisible=target=>!!WorksheetCues.resolve(target);
  function clearHint(){clearTimeout(hintTimer);cancelAnimationFrame(hintFrame);hint?.remove();hint=null;}
@@ -27,7 +27,7 @@
  });
  const steps=s=>s.complete?'Order complete':s.phase==='sum'?'Add the partial products':s.phase==='select'?'Connect the operand digits':!s.revealed?'Generate the product':s.incoming&&!s.mixed?'Apply the waiting carry':!s.onesPlaced?'Place the ones digit':s.tensLocation==='row'?'Lift the tens to the carry shelf':'Place the remaining digit';
  function send(){if(ready&&frame&&observation.latest&&observation.received!==lastVersion){lastVersion=observation.received;const signature=JSON.stringify(observation.latest);if(signature===lastSnapshot)return;lastSnapshot=signature;frame.contentWindow.postMessage({source:'bc-shell',type:'observe',snapshot:observation.latest},location.origin)}}
- function close(){clearTimeout(feedbackTimer);host?.remove();host=null;frame=null;ready=false;lastVersion=0;lastSnapshot='';}
+ function close(){clearTimeout(feedbackTimer);clearInterval(viewerRetry);viewerRetry=null;host?.remove();host=null;frame=null;ready=false;lastVersion=0;lastSnapshot='';}
  function open(){
   if(d.help.active?.role!=='Helper')return;
   if(host){host.focus();return}
@@ -37,7 +37,12 @@
   const select=host.querySelector('#coBakerHintSelect');for(const [id,text]of Object.entries(CoBakerWorksheet.hints)){const option=document.createElement('option');option.value=id;option.textContent=text;select.appendChild(option)}
   host.querySelector('[data-observer-hint]').onclick=()=>{if(!guidance.send('hint',select.value))feedback('Wait a moment…')};
   host.addEventListener('keydown',event=>{if(event.target.tagName==='SELECT'){event.stopPropagation();return}if(/^\d$|^Enter$|^Backspace$/.test(event.key)&&!(event.key==='Enter'&&event.target.tagName==='BUTTON')){event.preventDefault();event.stopImmediatePropagation()}},true);
-  frame=host.querySelector('iframe');frame.onload=()=>frame?.contentWindow.postMessage({source:'bc-shell',type:'hello'},location.origin);frame.src='worksheet/worksheet-observer.html';
+  frame=host.querySelector('iframe');
+  const greet=()=>{if(host&&!ready)frame?.contentWindow?.postMessage({source:'bc-shell',type:'hello'},location.origin)};
+  frame.onload=greet;frame.src='worksheet/worksheet-observer.html';
+  // WebView may load the nested iframe while the outer dialog is attaching.
+  // Retry the read-only readiness probe; never recreate the learner worksheet.
+  viewerRetry=setInterval(greet,800);
   host.querySelector('[data-observer-close]').onclick=close;host.querySelector('[data-observer-end]').onclick=()=>d.help.end();document.body.appendChild(host);host.focus();paint();
  }
  function paint(){

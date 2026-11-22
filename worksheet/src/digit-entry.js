@@ -32,7 +32,7 @@ function worksheetDropDigit(part,target,digit){
 }
 function worksheetCarryTarget(target){
  if(!productActive()||!s.revealed||s.mixed||!s.incoming)return false;
- if(target.kind==='slot'&&target.r===s.row&&target.c===currentCol()){addCarry(s.onesPlaced?'placed':'floating');bridgePoll();return true}
+ if(target.kind==='slot'&&target.r===s.row&&target.c===currentCol()&&s.onesPlaced){addCarry('placed');bridgePoll();return true}
  const expected=worksheetPlacementExpected(),entry=worksheetDigitEntry,record=entry.guidance[expected.key]||(entry.guidance[expected.key]={mistakes:0});
  record.mistakes++;entry.level=entry.paths[digitStepKey()]===false?2:Math.min(3,record.mistakes);entry.feedback=entry.level===1?'Try again!':entry.level>=3?expected.exact:expected.hint;invalid();render();bridgePoll();return false;
 }

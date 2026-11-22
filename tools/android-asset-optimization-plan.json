@@ -1,0 +1,480 @@
+{
+  "version": 1,
+  "purpose": "Verified APK-only exclusions; all original repository assets are retained",
+  "sourceDigest": "43295f6027523d8374d52245618f1ed0a57f9cb32f02ccfbde9ea2e3a5cb9da8",
+  "exclude": [
+    {
+      "path": "assets/bakery-approved/background-floor-extended.png",
+      "sha256": "ba7a4bf67bdb68bb3702faa9b9c41a4bb418e5b09972e56d927e838ce613fb3e"
+    },
+    {
+      "path": "assets/bakery-approved/background-floor-restored.png",
+      "sha256": "e1134a1fa294d03e87691b103c5dca924e8e02caac5a1d801795acb9bb3f8033"
+    },
+    {
+      "path": "assets/bakery-approved/background-floor-restored.provenance.json",
+      "sha256": "e1c5427133cf33fa9f857089b60f9e98b93ca61e9d9748da2de89ac93bcc40ae"
+    },
+    {
+      "path": "assets/bakery-approved/background-floor-source.png",
+      "sha256": "29ed32011288f26a0411ca0dd8e163b9c4b4450ccc5fd17e81ce8781bb4c83db"
+    },
+    {
+      "path": "assets/bakery-approved/background.png",
+      "sha256": "42ef8cabbf9f37a46064de3fd2c2ac259844c32542fb6b5d7d2f987520c7c063"
+    },
+    {
+      "path": "assets/bakery-approved/menu-frame.png",
+      "sha256": "24768cd6c271f0a887f97730f26ea83b3770e601c602c6951d2bb93852a08ed8"
+    },
+    {
+      "path": "assets/bakery-approved/orders-frame.png",
+      "sha256": "c812878560c0f0c096eec0271c7d5d0e102ad1cc737d725f05821aa72ac5d971"
+    },
+    {
+      "path": "assets/bakery-approved/packages-frame-no-ribbon.png",
+      "sha256": "044e36f948a3f90d00fb3389eba1c4afc193bafb199750f92e541c5e5fbec697"
+    },
+    {
+      "path": "assets/bakery-approved/packages-frame.png",
+      "sha256": "94892ebd562cd059ae1a6dc0b39e43f1f8d4ad83148d2b773eceb5bca01ee3c0"
+    },
+    {
+      "path": "assets/bakery-approved/provenance.json",
+      "sha256": "8645255b9e92cfabe4e11c643cd7f376b34721567054e4391d03d9371bec55f5"
+    },
+    {
+      "path": "assets/bakery-approved/wall-soft.png",
+      "sha256": "9bb95d1c760f225083700c665ba597766409d1bce61ddf8c886a4f903718a6a5"
+    },
+    {
+      "path": "assets/bakery-faithful/GENERATION.md",
+      "sha256": "ab38a552d5be97debb816b0955ad6c0c5c39e5da749c36473f83473d3559ce22"
+    },
+    {
+      "path": "assets/bakery-faithful/background.webp",
+      "sha256": "39dfc347503d6963d75b7c9e4076b27d042e3b1743c6ac40575fa224bbb973ae"
+    },
+    {
+      "path": "assets/bakery-faithful/book-icon.png",
+      "sha256": "029bd50eef5a254df5b0913efa52cee7b9719d7b39a16725fa6ea139ff59fdbe"
+    },
+    {
+      "path": "assets/bakery-faithful/boost-hover.png",
+      "sha256": "1fd1a16e75cc0d7b3ae43480b4a3938e20d88d73289e0b626c5651a3f3ae74a6"
+    },
+    {
+      "path": "assets/bakery-faithful/boost-pressed.png",
+      "sha256": "6c6281c730f4ee73fddbe4f4100c4a354ea594faa8a241b0893f883a18ec9e1b"
+    },
+    {
+      "path": "assets/bakery-faithful/boost.png",
+      "sha256": "3c03546c44c360b9a5e62695714b4733ad853fe217c532dc06a8f35ef75d610b"
+    },
+    {
+      "path": "assets/bakery-faithful/coins-hover.png",
+      "sha256": "72ab97c2ac52c7a4387128d3416c95d8c4e816e81fe7fb7d74ff38dd6e7c4c15"
+    },
+    {
+      "path": "assets/bakery-faithful/coins-pressed.png",
+      "sha256": "e05fbb31a1ed4fee12e0cfaa25b6d365320b9c697d6c261ea522df1f16f6543e"
+    },
+    {
+      "path": "assets/bakery-faithful/coins.png",
+      "sha256": "9d8ac38fc87f2be9e562a99f5d6900a6d5395b4b6a3d28e50cb6d5bc4fdd6140"
+    },
+    {
+      "path": "assets/bakery-faithful/counter-gifts.png",
+      "sha256": "a607651615e1b947a32fc12bde337b75506df606681394993fa6097831afa0d4"
+    },
+    {
+      "path": "assets/bakery-faithful/food-brazo.png",
+      "sha256": "77152dfe52e96bc22066da456a9a7dca84e4fbdcd1eab3edbf2e1e3c7efe0956"
+    },
+    {
+      "path": "assets/bakery-faithful/food-buko-pie.png",
+      "sha256": "60b6d3c631827401697471096c24698ad79095267a0fef9f97d27ba5f9842abd"
+    },
+    {
+      "path": "assets/bakery-faithful/food-card.png",
+      "sha256": "439c57bd87a129352d15c439a986ab3343f45c7fa6cd83c7d3d093a32fe982d4"
+    },
+    {
+      "path": "assets/bakery-faithful/food-ensaymada.png",
+      "sha256": "5b5949f8241d506e938fe2d69c99283639cfe57b98fd65b628579ed94955ab82"
+    },
+    {
+      "path": "assets/bakery-faithful/food-pianono.png",
+      "sha256": "3ea253be40c349e734371e08c7654803481ebf052dd3233b56d593d20cacf5c4"
+    },
+    {
+      "path": "assets/bakery-faithful/food-ube-ensaymada.png",
+      "sha256": "03b35aa3b6697b0725f91a27a71be8a0915b2ae72ac1af6c18c0a40cc5e9d2a6"
+    },
+    {
+      "path": "assets/bakery-faithful/food-ube-pandesal.png",
+      "sha256": "60e541ca12983d5f3dbda96fb8b297ca6dd6cf09274f80beaf42b40ce6562ea5"
+    },
+    {
+      "path": "assets/bakery-faithful/gift-icon.png",
+      "sha256": "c9b143fdad18b791cbf5cde9ff246e01aa1bca12d2d9ead5b5356f6239ecd0fc"
+    },
+    {
+      "path": "assets/bakery-faithful/gold-hover.png",
+      "sha256": "b4eacac0b73b7af136c288910d26e4a88601d53814e65faa68c2d08577b4d56a"
+    },
+    {
+      "path": "assets/bakery-faithful/gold-pressed.png",
+      "sha256": "0efa7cf25021a41a952b5d013ee990bcfccaeb5846a2793c531049b9eb9057a1"
+    },
+    {
+      "path": "assets/bakery-faithful/gold-selected.png",
+      "sha256": "095e784deb3cab98cf8a4f7025591bddb8dc514cbf200c5d637db112c0c43947"
+    },
+    {
+      "path": "assets/bakery-faithful/gold.png",
+      "sha256": "59c71d1f0e212a56d61f87237b6f37ecaee5d24c332b44288a2a3fc0eabf8775"
+    },
+    {
+      "path": "assets/bakery-faithful/hat-icon.png",
+      "sha256": "ecfc39c7a9ef43527abfd59335adef853b38984bc993545a38fbfd8be1c3ed4c"
+    },
+    {
+      "path": "assets/bakery-faithful/help-hover.png",
+      "sha256": "1788abef75e15b8b538c7a1d9eb7392e72594335096f90f937f982cfa798e5b9"
+    },
+    {
+      "path": "assets/bakery-faithful/help-pressed.png",
+      "sha256": "af006866bedd2c16b1e2c86a66cd419926ada7723337e3565cea7983fd0a38f6"
+    },
+    {
+      "path": "assets/bakery-faithful/help.png",
+      "sha256": "1a48707399555ca8a8b91bed556b6b864faa3b37df94e4fe1d03558972113f45"
+    },
+    {
+      "path": "assets/bakery-faithful/menu-frame.png",
+      "sha256": "1b081fe4982d1fcae2e5dfa9a01e65790813cd526bf5b8b1f21017b7ecc51cad"
+    },
+    {
+      "path": "assets/bakery-faithful/orders-bottom.png",
+      "sha256": "c4367818b0e412191055953cc1e1384f4334bdd7660ffc474043a3f9d692fb3a"
+    },
+    {
+      "path": "assets/bakery-faithful/orders-frame.png",
+      "sha256": "610d734c5343c18ae67fe96ab450c5e9e85dd502ecc20fd1ac063178e845b30c"
+    },
+    {
+      "path": "assets/bakery-faithful/orders-icon.png",
+      "sha256": "f06b31136129c27d40e346b733418ab8e57b7527995852a4b3b659465a2c97c2"
+    },
+    {
+      "path": "assets/bakery-faithful/orders-middle.png",
+      "sha256": "aa5346453615d74d6b2395b7687df67ddc27f6fb0abd09953fbfb900283fb0ef"
+    },
+    {
+      "path": "assets/bakery-faithful/orders-top.png",
+      "sha256": "601a43654d9a7b1f8ec748ecc3183faeb794cdbc1a897f63406d2451acd70942"
+    },
+    {
+      "path": "assets/bakery-faithful/package-01.png",
+      "sha256": "799b9de0bce23975ce022a6d3339b7a7d0a3ab142d278a12c8347ed6da40afe4"
+    },
+    {
+      "path": "assets/bakery-faithful/package-02.png",
+      "sha256": "ea3571139ad8b7f8c32a229c26f97a65b23f1e97c64765c483cce56887666db5"
+    },
+    {
+      "path": "assets/bakery-faithful/package-03.png",
+      "sha256": "b385e9aa9cb69bedb2393df374aefbdf48193c376ad24e85d076d92727902946"
+    },
+    {
+      "path": "assets/bakery-faithful/package-04.png",
+      "sha256": "a179137b7d8587cd857904cacc56162b66591ec36d6b2572146e0a9965916434"
+    },
+    {
+      "path": "assets/bakery-faithful/package-05.png",
+      "sha256": "149ea24f969b9c96574184ba99a925d27e98a94241d392cd9667707e142b0f56"
+    },
+    {
+      "path": "assets/bakery-faithful/package-06.png",
+      "sha256": "b9a48ce848f6d7e88c0129320ff31ea3cd89d85d5ad7a1d6f56846ae26d71580"
+    },
+    {
+      "path": "assets/bakery-faithful/package-07.png",
+      "sha256": "1658d23e8a327e50e499fc84cc23df5c5aa4b82263b6c362d3a9b8cbffe95d30"
+    },
+    {
+      "path": "assets/bakery-faithful/package-08.png",
+      "sha256": "b19bf895dcc50c1724d0d633d181b9f232ae281775125f988476074d338dbbc8"
+    },
+    {
+      "path": "assets/bakery-faithful/packages-frame.png",
+      "sha256": "d22e517ca0d450cc787a5e527b92685ad63af8b33d64f15e2e5ba9ee52730132"
+    },
+    {
+      "path": "assets/bakery-faithful/price-coin.png",
+      "sha256": "7ea3d0c50521459a42ed2298a21e8b98b886008cfc9ff46aadbddd7f934b35fa"
+    },
+    {
+      "path": "assets/bakery-faithful/provenance.json",
+      "sha256": "29689de6b5eb31509801a6d77d5a334b93cd12afc5880313491a6d179233477a"
+    },
+    {
+      "path": "assets/bakery-faithful/purchase.png",
+      "sha256": "427544538304610be1e977e68e937631ac202d7d0383f5fc12cfa1a813b37724"
+    },
+    {
+      "path": "assets/bakery-faithful/refresh-icon.png",
+      "sha256": "923e6f1e2a32732f2606dff2f4a97e081fecc0396d9a2cf63f4c771c02006244"
+    },
+    {
+      "path": "assets/bakery-faithful/register.png",
+      "sha256": "52346d983e8bd5d6cc8b79c6814edc1d86e9c66cbdb8ced03c2ea271ed05e175"
+    },
+    {
+      "path": "assets/bakery-faithful/reward-bucket.png",
+      "sha256": "a207dbf9b7d66914b2e48135779af87ac57a432992a1ea3f6c9943b0278c14b3"
+    },
+    {
+      "path": "assets/bakery-faithful/reward-cart.png",
+      "sha256": "931bc05944b1d0fb24bc10becb2299c382bf618759307fbfa1b2dc68b1d1acf0"
+    },
+    {
+      "path": "assets/bakery-faithful/reward-chest.png",
+      "sha256": "c785b75846e5969909d996c414eb204274646cf97a124c8b8be84d3fad5c0bf4"
+    },
+    {
+      "path": "assets/bakery-faithful/reward-crown.png",
+      "sha256": "52b1f2bd9210889d8fd397e79ceed71507c5a3d79d0a6434844b1fa5859a3b94"
+    },
+    {
+      "path": "assets/bakery-faithful/scroll-rail.png",
+      "sha256": "da05f9d155104ee28daf57d7af7f1025e0b5343384eefe159ea31b9590d71daf"
+    },
+    {
+      "path": "assets/bakery-faithful/scroll-thumb.png",
+      "sha256": "981ff492d9bca372566e42c1792682ab8123b110108aa2baac066a4bdea984ab"
+    },
+    {
+      "path": "assets/bakery-faithful/settings-hover.png",
+      "sha256": "d0a6ae4a007d6ade2a2c3251a0351152c4891f5ab67dc5cf95ffd9e0a2bd6a90"
+    },
+    {
+      "path": "assets/bakery-faithful/settings-pressed.png",
+      "sha256": "cfc64c2d942ee99e63c4cc1180f5a2042dfd139c0f6c8d37d7ebf5805d6ed333"
+    },
+    {
+      "path": "assets/bakery-faithful/settings.png",
+      "sha256": "94136c2139f2cac7ef528ecf55570c780c1526f9fc07b0bd7e0796c5b3b0f772"
+    },
+    {
+      "path": "assets/bakery-faithful/ticket-gold.png",
+      "sha256": "9435e902d2c3a63621075a80bbca88bdeda443bb18762ac5e0a6826f4bc48b32"
+    },
+    {
+      "path": "assets/bakery-faithful/ticket-pink.png",
+      "sha256": "ee0fd1989768dccfbe3cd29546686923d2d29caab8464ac54374cceb1e5b8102"
+    },
+    {
+      "path": "assets/bakery-faithful/ticket-purple.png",
+      "sha256": "32bb518af8f84af0f5de202a65def5ea5eb0646aca08d218951c0c238a358c33"
+    },
+    {
+      "path": "assets/bakery-faithful/ticket-rainbow.png",
+      "sha256": "86a85ab4f65af72e1c2ca0b3a4fa0fecbb0e7457aaf8c0e49db8043e4b9fa8ed"
+    },
+    {
+      "path": "assets/bakery-faithful/tray.png",
+      "sha256": "c1798c9856d9ff1497d38a3ebe37b7cf1d98140cf1f20defd4d8ab3d270d17ba"
+    },
+    {
+      "path": "assets/bakery-faithful/utility-gift.png",
+      "sha256": "209172d43329a4685485bd3253d95dfc6f7cbd0b8b4a4dd9fd1bb8b427693730"
+    },
+    {
+      "path": "assets/bakery-faithful/utility.png",
+      "sha256": "b9d9430d5f87ed03917bd28ff6dd9edf429260a0bae6f6767b54f0a166abfd60"
+    },
+    {
+      "path": "assets/bakery-runtime/background-floor-restored.webp",
+      "sha256": "501c634e4b6db852a504729d189505dceafcf9e5871b43fbc2ec9d43cc83cf61"
+    },
+    {
+      "path": "assets/bakery-runtime/background-floor.webp",
+      "sha256": "b4efbfffb260bb9ae596ef7d4f74b1fc52e62b0ddf18996a043634c924abd905"
+    },
+    {
+      "path": "assets/bakery-runtime/generation-prompts.json",
+      "sha256": "1f6fce08e68d55c19934d530d61ee991277180e32a3a508b00ae700488cb560e"
+    },
+    {
+      "path": "assets/bakery-runtime/provenance.json",
+      "sha256": "2601e6da2ad6a8779b2caf60b580d9c143e59422496e579796bc1009df365efd"
+    },
+    {
+      "path": "assets/bakery-runtime/scoped-polish.provenance.json",
+      "sha256": "762aabbfc3efc3bcdf1820ae1243ad2aff1e20b45adf7e25b08ef5d1cc2bf4e4"
+    },
+    {
+      "path": "assets/bakery-ui/bakery-room.png",
+      "sha256": "276050f7d2a2acf0c92a81cce2b90f070795fbb0dd11757ca121ca181514a5c1"
+    },
+    {
+      "path": "assets/bakery-ui/cabinet-wood.png",
+      "sha256": "539beeed94d15b12b4e6675751ff781f0d501c43459d52eb6338894c7ae86025"
+    },
+    {
+      "path": "assets/bakery-ui/cash-register-facing.png",
+      "sha256": "956ae8ffca65617f2364c59304b405cd77e3c17dd1ce0956a983b527909193ef"
+    },
+    {
+      "path": "assets/bakery-ui/clipboard-wood.png",
+      "sha256": "1aaa82ec93cee8b4e8d6f7c161db418915e95d0362a90c53aa6d3305f6164c80"
+    },
+    {
+      "path": "assets/bakery-ui/food-01.png",
+      "sha256": "677c71d1bcdcc6f63d52a9557cce5aa5b43566b5738a998244f44e47e2816938"
+    },
+    {
+      "path": "assets/bakery-ui/food-02.png",
+      "sha256": "194d1598fbbc6f5e483c8cafccca017612ed377f7407dd804afbebe46661d0a9"
+    },
+    {
+      "path": "assets/bakery-ui/food-03.png",
+      "sha256": "17dca4945bea2b6c5bd9f85152998ebf15bc079eca0aa26fa462ae3dc02be952"
+    },
+    {
+      "path": "assets/bakery-ui/food-04.png",
+      "sha256": "bd1c688c31076de14c51713d0b304dd49995e9d3c0ee9ce61f2efe19c5c13adc"
+    },
+    {
+      "path": "assets/bakery-ui/food-05.png",
+      "sha256": "1e34f56bf45c50899af1887caa2367895f41ebf7e668e20546bfcc5dca1244dd"
+    },
+    {
+      "path": "assets/bakery-ui/food-06.png",
+      "sha256": "0b91a8efa68c137d759a3b8ca0ae5107061a61e5aefbc90b01bc69b79a1d7cf2"
+    },
+    {
+      "path": "assets/bakery-ui/food-07.png",
+      "sha256": "7125da6f621f26ff7f5255042e8a01c4e47540f7eb455e6e45565d12f78ec51a"
+    },
+    {
+      "path": "assets/bakery-ui/food-08.png",
+      "sha256": "3229e964f4d3bd0730c6dc0430c58c2417b5fdf41ba22ae28d5315037c3aa062"
+    },
+    {
+      "path": "assets/bakery-ui/food-09.png",
+      "sha256": "79febf9908c1abe8e13f1ae0d0573a2a63356bccc09b36b77575c8653eb59a72"
+    },
+    {
+      "path": "assets/bakery-ui/food-10.png",
+      "sha256": "682d059cfdd184fd92a5e43aa5ea1f0e5417421837142281b62f1f71dad79fe4"
+    },
+    {
+      "path": "assets/bakery-ui/food-11.png",
+      "sha256": "5db8a933ce6a7db88a7400486fbc58865636a0bf3b20411123d25db24ebdb14c"
+    },
+    {
+      "path": "assets/bakery-ui/food-12.png",
+      "sha256": "576aea09b37d79276b18d53ca860fc7c88d144b9c2d4b3b5653f09d5a627998e"
+    },
+    {
+      "path": "assets/bakery-ui/food-13.png",
+      "sha256": "e757791d994bb46ace02b742a5e5bf448ef9f356d3923ca038f67aa2b8366f7b"
+    },
+    {
+      "path": "assets/bakery-ui/food-14.png",
+      "sha256": "c0fb766b95f48ac023ced6e7af1d4837f3e817bbe354ed1fa85817347342c65a"
+    },
+    {
+      "path": "assets/bakery-ui/food-15.png",
+      "sha256": "54635ac4b1aa4923c459fba119b4ffe1c5d34ad2c3551bf29b8a66e1cc9e38d3"
+    },
+    {
+      "path": "assets/bakery-ui/food-16.png",
+      "sha256": "a26057ddf75ee9bd64099026822e5f0ae6c0a481ffcd0a82a44871f9f2b53da5"
+    },
+    {
+      "path": "assets/bakery-ui/food-17.png",
+      "sha256": "d3bfb67de4a8ec57451198792b125062a9721cf21dbd69946044f120c6e64550"
+    },
+    {
+      "path": "assets/bakery-ui/menu-heading.png",
+      "sha256": "bea9f3aae72f94ab0a840b495b296e34bf2f7fb1104ff436e51b7478b71085c5"
+    },
+    {
+      "path": "assets/bakery-ui/nav-collection.png",
+      "sha256": "c12243d43dc787f8a3904891267aeedbea22d3166b183dfd1490ab26ed2d092c"
+    },
+    {
+      "path": "assets/bakery-ui/nav-packages.png",
+      "sha256": "72515285bc9f2dabd2ec31dfa0c4433f8cafb77f0968d09e8733471859f79eef"
+    },
+    {
+      "path": "assets/bakery-ui/nav-play.png",
+      "sha256": "3819e406c61355e55c69d7ea586505b14eaf91f65af6a9d6a7fa0646c96e496f"
+    },
+    {
+      "path": "assets/bakery-ui/order-refinement-provenance.json",
+      "sha256": "5cd241b45103610ecbd51cd53f64892948f97ee6b359342369962f642f3e385e"
+    },
+    {
+      "path": "assets/bakery-ui/packages-entry-button.png",
+      "sha256": "3a9e270b617b6bc72c51b73bc31495e9448fa956a4ab3fb7ae362e38e4fc9add"
+    },
+    {
+      "path": "assets/bakery-ui/refinement-provenance.json",
+      "sha256": "5e5f21d1c23e0539e3c7db75dd27fc7784f9403b49ccbbdcf4349900d342fab4"
+    },
+    {
+      "path": "assets/bakery-ui/title-sign-refined.png",
+      "sha256": "8039f694cb5ce2735ea5bb0d883dcd3594b9f20ab17f64c90d935f8985b42094"
+    },
+    {
+      "path": "assets/bakery-world/provenance.json",
+      "sha256": "4d119cee5d01a999bc85f52d178ab3a3ebd6be4e3e5a985447c5ec42371c5866"
+    },
+    {
+      "path": "assets/environment/bakery-interior-source.webp",
+      "sha256": "4cc7a94757ee94e61e27d3e745a9f3cc03c030f37b1ade1e05253c573111aec5"
+    },
+    {
+      "path": "assets/environment/bakery-interior-tablet-source.webp",
+      "sha256": "92b5787cdb3d048ce06bfc78ec62b63f815e8cf4d43a5f7481b3107253964e0e"
+    },
+    {
+      "path": "assets/environment/generation-prompts.json",
+      "sha256": "e2418ddfc3c8830bcc42ed008643061cb7529e707dd6173ea8f210849f3c9154"
+    },
+    {
+      "path": "assets/illustrated/boost-silhouette.svg",
+      "sha256": "c0b4dcfecf954f059082652c42656ed0295ec5f17818a8aa107453f1c191c51f"
+    },
+    {
+      "path": "assets/illustrated/food-style-study.webp",
+      "sha256": "d1da2a73ce99b2f8cc873303224083aa5272cc13e4251ec254a85c2bbe055935"
+    },
+    {
+      "path": "assets/illustrated/generation-prompts.json",
+      "sha256": "5673e385aa8723964bb8ad98671935a58dd898630a30169a9400063e869b9b07"
+    }
+  ],
+  "musicSha256": "3e36ddcaaec4bb2cea84801774ea95fb90b85ae558ca2da8934bb5e773a7499a",
+  "fallbackGuard": {
+    "description": "Permit only original SHA-verified assets from isolated legacy directories when boot loader and scene fallback are untouched; scan every shipped text source and asset for references",
+    "sourceFiles": {
+      "index.html": "906b9bc2d09138ef7c6d42a3b2bbb218bbde81e31ada89bdc6ce7d3189a4beee",
+      "src/environment-entry.js": "d083d813f8b5b4690f678e35bf7e75f0658409bed882793bed3ac9e7af259839",
+      "src/bakery-assets.js": "894c2ca44cc782dd09ae6616c5a8ca3e7474ca3336ea7edd656fee441a0356c4",
+      "src/ui/bakery-scenes.js": "066db239aa2833167c2f086f74272ea6e2e1dd1a624f78b1ee84244601515a95"
+    },
+    "legacyRoots": [
+      "assets/bakery-approved/",
+      "assets/bakery-faithful/"
+    ],
+    "allowedFallbackReferences": [
+      "src/ui/bakery-scenes.js"
+    ]
+  }
+}
