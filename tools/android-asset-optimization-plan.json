@@ -1,12 +1,12 @@
 {
   "version": 1,
   "purpose": "Verified APK-only exclusions; all original repository assets are retained",
-  "sourceDigest": "5c795dbcc09aea279dfb4d8921d36a558176988b433a151c7d9c1e0a41dde417",
+  "sourceDigest": "809c2c15508529da38539df3d1c5d971724411038e424050516dba5b17ef5985",
   "sourceAudit": {
-    "previousDigest": "727acd7f409c9df14a5fc0739acbe95c7e17f28793c85938f556d697c25c2bc9",
-    "auditedCommit": "f843056",
+    "previousDigest": "5c795dbcc09aea279dfb4d8921d36a558176988b433a151c7d9c1e0a41dde417",
+    "auditedCommit": "f946827",
     "date": "2026-11-22",
-    "method": "Re-audit after source edits (tutorial, worksheet text, Co-Baker footer, page-swipe edge, package-reveal grid, deferred worksheet Undo): all 394 shipped index.html/src/styles/worksheet lines added since audited commit f843056 were scanned for asset paths, excluded basenames and the bakery-approved/bakery-faithful directories; none found (only retained bakery-runtime orders-icon.webp and price-coin.webp). Runtime: tests/browser-six-task-tutorial.py fails if any excluded asset is requested; tests/apk-contents-check.py verifies the built APK."
+    "method": "Re-audit after the Tagalog localization pass: the only shipped source change since audited commit f946827 is src/ui/language.js (translation tables and a render-time text pass); its added lines were scanned for asset paths, excluded basenames and the bakery-approved/bakery-faithful directories; none found. The earlier f843056 re-audit (digest 727acd7f…) covers all prior edits. Runtime: tests/browser-six-task-tutorial.py fails if any excluded asset is requested; tests/apk-contents-check.py verifies the built APK."
   },
   "exclude": [
     {
