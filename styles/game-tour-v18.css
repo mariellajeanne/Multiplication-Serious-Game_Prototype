@@ -1,22 +1,34 @@
 /* Six paper slips, one real interactive spotlight hole, and no pointer cloning. */
 .bakery-game-tour{position:fixed;inset:0;z-index:100200;pointer-events:none;font-family:'Panaderya Rounded','Bakery UI',Nunito,system-ui,sans-serif;color:#6a4129}
-.bakery-game-tour .tour-shade{position:fixed;background:rgba(29,18,29,.63);pointer-events:auto;transition:opacity .2s ease;touch-action:none}
+.bakery-game-tour .tour-shade{position:fixed;background:rgba(29,18,29,.63);pointer-events:auto;transition:opacity .24s ease;touch-action:none}
+.bakery-game-tour.is-own-backdrop .tour-shade{background:transparent}
 .bakery-game-tour .tour-focus-ring{position:fixed;display:none;border:3px solid #ffe8a3;border-radius:13px;box-shadow:0 0 0 3px #a66c32,0 0 28px 6px #ffd366a3;animation:tour-glow 1.8s ease-in-out infinite;pointer-events:none}
-.bakery-game-tour.is-spotlit .tour-focus-ring{display:block}
+.bakery-game-tour.is-spotlit .tour-focus-ring{display:block;animation:tour-ring-in .26s ease-out both,tour-glow 1.8s ease-in-out .26s infinite}
 .bakery-game-tour.is-travel .tour-checklist,.bakery-game-tour.is-free .tour-checklist{opacity:0!important;pointer-events:none}
 .bakery-game-tour.is-travel .tour-shade,.bakery-game-tour.is-free .tour-shade{opacity:0}
 .bakery-game-tour.is-free .tour-shade{pointer-events:none}
 .bakery-game-tour .tour-checklist{position:fixed;box-sizing:border-box;width:min(425px,44vw);max-width:calc(100vw - 24px);max-height:min(86dvh,740px);display:flex;flex-direction:column;gap:12px;pointer-events:none;transition:left .32s cubic-bezier(.2,.7,.24,1),top .32s cubic-bezier(.2,.7,.24,1),opacity .22s ease;filter:drop-shadow(0 6px 12px #26161433)}
 .bakery-game-tour .tour-title{margin:0 auto 4px;font-size:clamp(19px,2vw,28px);font-weight:950;text-align:center;color:#fff4d6;text-shadow:0 2px 4px #3b251c}
 .bakery-game-tour .tour-paper-stack{display:flex;flex-direction:column;gap:5px;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;max-height:65dvh}
-.bakery-game-tour .tour-paper{position:relative;min-height:clamp(41px,5.4vh,62px);display:flex;align-items:center;gap:9px;box-sizing:border-box;padding:7px 10px;border:2px solid #cba77b;border-radius:9px;background:#fffaf0;box-shadow:0 3px 0 #946d4e77;color:#694027;font-size:clamp(12px,1.32vw,19px);font-weight:850;line-height:1.15;transition:opacity .22s,border-color .22s}
-.bakery-game-tour .tour-paper.is-current{background:#fffdfa;border-color:#b78852;opacity:1}
-.bakery-game-tour .tour-paper.is-done,.bakery-game-tour .tour-paper.is-pending{opacity:.64}
-.bakery-game-tour .tour-paper.is-new{animation:tour-slip-in .32s cubic-bezier(.15,.7,.2,1) both}
+.bakery-game-tour .tour-paper{position:relative;z-index:calc(10 - var(--i,0));min-height:clamp(41px,5.4vh,62px);display:flex;align-items:center;gap:9px;box-sizing:border-box;padding:7px 10px;border:1.5px solid #d2b48e;border-radius:9px;background:#fffaf0;box-shadow:0 3px 0 #946d4e55;color:#694027;font-size:clamp(13px,1.32vw,19px);font-weight:850;line-height:1.15;transition:background-color .25s,border-color .25s,box-shadow .25s,color .25s,transform .25s}
+.bakery-game-tour:not(.is-intro) .tour-paper.is-current{background:#fffefb;border-color:#b07e48;box-shadow:0 3px 0 #946d4e88,0 0 0 3px #ffe39a;transform:scale(1.025)}
+.bakery-game-tour:not(.is-intro) .tour-paper.is-pending{background:#f6eedf;color:#8d6d55}
+.bakery-game-tour:not(.is-intro) .tour-paper.is-pending .tour-task-art{opacity:.75}
+.bakery-game-tour .tour-paper.is-done{background:#f7f3e6;color:#7b5a41}
+/* A new intro strip slides out from behind the strip above it. */
+.bakery-game-tour .tour-paper.is-new{animation:tour-slip-in .45s cubic-bezier(.2,.75,.25,1) both}
+.bakery-game-tour .tour-checklist[data-phase="intro"]{animation:tour-card-in .3s ease-out both}
 .bakery-game-tour .tour-task-number{flex:none;min-width:20px;text-align:center}
 .bakery-game-tour .tour-task-copy{min-width:0;flex:1}
-.bakery-game-tour .tour-task-checkbox{width:25px;height:25px;flex:none;border:2px solid #a58363;border-radius:6px;background:white;display:grid;place-items:center;color:#33754e;font-size:23px;font-weight:950}
-.bakery-game-tour .tour-paper.is-done .tour-task-checkbox{border-color:#57975e;background:#ebf8dc}
+.bakery-game-tour .tour-task-checkbox{width:27px;height:27px;flex:none;box-sizing:border-box;border:2px solid #a58363;border-radius:7px;background:white;display:grid;place-items:center}
+.bakery-game-tour .tour-tick{width:88%;height:88%;fill:none;stroke:#2f7a45;stroke-width:3.6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:24;stroke-dashoffset:24;opacity:0}
+.bakery-game-tour .tour-paper.is-done .tour-task-checkbox{border-color:#4f9a5b;background:#e3f6d6}
+.bakery-game-tour .tour-paper.is-done .tour-tick{stroke-dashoffset:0;opacity:1}
+/* Newly earned check: the box pops, the tick draws, and the strip glows. */
+/* Tick is fully drawn by ~0.35 s, leaving ~0.65 s of the 1 s hold showing it complete. */
+.bakery-game-tour .tour-paper.is-just-done .tour-task-checkbox{animation:tour-check-pop .4s cubic-bezier(.3,1.6,.5,1) both}
+.bakery-game-tour .tour-paper.is-just-done .tour-tick{animation:tour-tick-draw .3s ease-out .05s both}
+.bakery-game-tour .tour-paper.is-celebrating{background:#f4fbe9;border-color:#6aa868;box-shadow:0 3px 0 #5f8f5c88,0 0 0 3px #bfe8a9;transform:scale(1.03)}
 .bakery-game-tour .tour-task-art{display:grid;place-items:center;width:39px;height:39px;flex:none;position:relative}
 .bakery-game-tour .tour-task-art img{width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 2px 1px #926b4a55)}
 .bakery-game-tour .tour-task-art.is-open>span{position:absolute;top:-7px;right:0;color:#efaa3c;font-size:20px}
@@ -27,13 +39,17 @@
 .bakery-game-tour .tour-finale{padding:14px;border:2px solid #d6aa7d;border-radius:16px;background:#fff4d7;text-align:center;color:#6b452d;box-shadow:0 4px 0 #986d46}
 .bakery-game-tour .tour-finale h2{margin:0;font-size:clamp(22px,2.5vw,31px)}
 .bakery-game-tour .tour-finale p{margin:10px 0;font-size:clamp(13px,1.5vw,18px)}
-.bakery-game-tour .tour-skip{position:fixed;left:max(14px,env(safe-area-inset-left));bottom:max(14px,env(safe-area-inset-bottom));border:2px solid #aa886b;border-radius:12px;background:#fff1d7;color:#69452b;min-height:44px;padding:8px 14px;pointer-events:auto;font:800 14px 'Panaderya Rounded',Nunito,sans-serif;cursor:pointer;box-shadow:0 3px 0 #765339}
+.bakery-game-tour .tour-skip{position:fixed;left:max(14px,env(safe-area-inset-left));top:max(14px,env(safe-area-inset-top));transition:opacity .2s;border:2px solid #aa886b;border-radius:12px;background:#fff1d7;color:#69452b;min-height:44px;padding:8px 14px;pointer-events:auto;font:800 14px 'Panaderya Rounded',Nunito,sans-serif;cursor:pointer;box-shadow:0 3px 0 #765339}
 .bakery-game-tour button:focus-visible{outline:3px solid #3c9876;outline-offset:3px}
 @keyframes tour-fill{to{width:100%}}
-@keyframes tour-slip-in{from{opacity:0;transform:translateY(-28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tour-slip-in{from{margin-top:calc(-1 * clamp(46px,5.4vh,67px));opacity:1}to{margin-top:0;opacity:1}}
+@keyframes tour-card-in{from{opacity:0;transform:translateY(10px)}}
+@keyframes tour-check-pop{0%{transform:scale(.7)}60%{transform:scale(1.28)}100%{transform:scale(1)}}
+@keyframes tour-tick-draw{from{stroke-dashoffset:24;opacity:1}to{stroke-dashoffset:0;opacity:1}}
+@keyframes tour-ring-in{from{opacity:0;transform:scale(1.08)}}
 @keyframes tour-glow{50%{box-shadow:0 0 0 4px #ffdb69,0 0 22px 8px #ffd67566}}
 @media(max-width:850px){.bakery-game-tour .tour-checklist{width:min(315px,46vw)}.bakery-game-tour .tour-paper{gap:4px;padding:5px 6px;font-size:12px}.bakery-game-tour .tour-task-art{width:27px;height:27px}.bakery-game-tour .tour-task-checkbox{height:20px;width:20px;font-size:16px}}
-@media(prefers-reduced-motion:reduce){.bakery-game-tour *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}.bakery-game-tour .tour-next-progress{width:100%}}
+@media(prefers-reduced-motion:reduce){.bakery-game-tour *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}.bakery-game-tour .tour-next-progress{width:100%}.bakery-game-tour .tour-tick{stroke-dashoffset:0}}
 
 /* Small landscape tablets cannot fit a six-slip stack beside a central order.
    Preserve the active slip and completed count rather than cover its target. */
@@ -41,8 +57,9 @@
 @media(max-height:600px) and (orientation:landscape){
  .bakery-game-tour:not(.is-intro) .tour-checklist{width:min(320px,calc(100vw - 24px));gap:5px;max-height:calc(100dvh - 24px)}
  .bakery-game-tour:not(.is-intro) .tour-paper-stack{max-height:72px;overflow:hidden}
- .bakery-game-tour:not(.is-intro) .tour-paper:not(.is-current){display:none}
- .bakery-game-tour:not(.is-intro) .tour-paper.is-current{min-height:45px;font-size:14px}
+ .bakery-game-tour:not(.is-intro) .tour-paper:not(.is-current):not(.is-celebrating){display:none}
+ .bakery-game-tour.is-celebrating:not(.is-intro) .tour-paper.is-current{display:none}
+ .bakery-game-tour:not(.is-intro) .tour-paper:is(.is-current,.is-celebrating){min-height:45px;font-size:14px;transform:none}
  .bakery-game-tour:not(.is-intro) .tour-mini-progress{display:flex;justify-content:space-between;gap:12px;padding:4px 12px;background:#fff0c7;border:1px solid #caad82;border-radius:10px;color:#6c4729;font-size:12px;font-weight:800}
 }
 
@@ -56,3 +73,33 @@
 @keyframes tour-return-right{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:none}}
 @keyframes tour-return-down{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
 @keyframes tour-return-left{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}
+
+/* The Skip control never covers notifications or the worksheet; it rests while
+   the child works freely (worksheet, reward animation, package reveal). */
+.bakery-game-tour.is-free .tour-skip{opacity:0;pointer-events:none}
+/* Popups with their own backdrop stay bright; their non-guided controls read as
+   unavailable while the guide is waiting for a specific button. */
+body[data-tour-phase="back"] .worksheet-summary-modal .popup-head .close,
+body[data-tour-phase="ready"] #modals .modal button{opacity:.4;filter:grayscale(.7)}
+/* Inside a worksheet the guided button is the only action; Skip would cover headings. */
+.bakery-game-tour.is-worksheet .tour-skip{opacity:0;pointer-events:none}
+/* Single-strip checklist when the full stack would cover the step's content. */
+.bakery-game-tour.is-compact:not(.is-intro) .tour-checklist{width:min(340px,calc(100vw - 24px));gap:5px}
+.bakery-game-tour.is-compact:not(.is-intro) .tour-paper-stack{max-height:72px;overflow:hidden}
+.bakery-game-tour.is-compact:not(.is-intro) .tour-paper:not(.is-current):not(.is-celebrating){display:none}
+.bakery-game-tour.is-compact.is-celebrating:not(.is-intro) .tour-paper.is-current{display:none}
+.bakery-game-tour.is-compact:not(.is-intro) .tour-paper:is(.is-current,.is-celebrating){min-height:46px;transform:none}
+.bakery-game-tour.is-compact .tour-checklist[data-phase="ready"] .tour-paper-stack{display:none}
+.bakery-game-tour.is-compact .tour-checklist[data-phase="ready"] .tour-finale h2{font-size:clamp(20px,2.2vw,27px)}
+/* Strips never compress when the stack fills; short landscape screens get slimmer
+   intro strips so all six fit without a scrollbar or a shifting layout. */
+.bakery-game-tour .tour-paper{flex-shrink:0}
+@media(max-height:600px) and (orientation:landscape){
+ .bakery-game-tour.is-intro .tour-paper-stack{max-height:calc(100dvh - 150px)}
+ .bakery-game-tour.is-intro .tour-paper{min-height:40px;padding:4px 9px}
+ .bakery-game-tour.is-intro .tour-task-art{width:30px;height:30px}
+ .bakery-game-tour.is-intro .tour-checklist{gap:8px}
+ .bakery-game-tour .tour-next{min-height:48px}
+}
+/* Room for the slightly enlarged current/celebrating strip inside the scroll box. */
+.bakery-game-tour .tour-paper-stack{padding:4px 9px;margin:-4px -9px}

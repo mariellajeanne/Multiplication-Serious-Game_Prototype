@@ -58,8 +58,10 @@ try:
   inner=view.locator('#worksheetFrame').element_handle().content_frame()
   assert inner.locator('[data-part]').all_text_contents()==['5','6']
   t.shot(p,'sync-learner');t.shot(q,'sync-helper')
-  p.get_by_role('button',name='Find a Helper',exact=True).click()
-  p.locator('[data-help-action="end"]').click();p.wait_for_timeout(800);p.locator('[data-help-action="end"]').click()
+  # While connected, the footer's End Help replaces Find a Helper (deliberate two-tap end).
+  assert p.locator('#coBakerRemoveHelper').is_visible() and not p.get_by_role('button',name='Find a Helper',exact=True).is_visible()
+  p.locator('#coBakerRemoveHelper').click();assert p.locator('#coBakerRemoveHelper').inner_text()=='Remove helper?'
+  p.wait_for_timeout(800);p.locator('#coBakerRemoveHelper').click()
   p.wait_for_function('!panaderyaCoBaker.help.active');q.wait_for_selector('#coBakerObservation',state='detached')
   q.wait_for_function('document.getElementById("toasts").textContent.includes("The other Baker ended this help session.")')
   assert q.evaluate('panaderyaCoBaker.observation.latest') is None

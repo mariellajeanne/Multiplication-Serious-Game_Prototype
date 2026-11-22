@@ -12,27 +12,36 @@ def frame(p):return p.locator('#worksheetFrame').element_handle().content_frame(
 def child(p,code):return frame(p).evaluate(code)
 def flush(p):child(p,'bridgePoll()');p.wait_for_timeout(60)
 def setup(p,offered=True):
- p.goto(s.URL);p.wait_for_selector('.hub-food');p.wait_for_load_state('networkidle')
+ # Current three-page scene: wait for loading and dismiss the first-run tutorial.
+ p.goto(s.URL);p.wait_for_load_state('networkidle');p.wait_for_function("document.getElementById('bakeryLoading')?.hidden&&typeof startTicket==='function'");p.wait_for_timeout(250);p.evaluate('window.skipWholeBakeryGuide?.()')
  p.evaluate('''offered=>{const id=7701;g.mathPractice.facts={};g.mathPractice.steps=0;g.mathPractice.lastOffer=-100;
   let index=0;while(index<10000){const seed='visual-'+index,decision=goldenChallengeOffer(9,8,emptyFactProfile(),{seed:seed+'/'+id+'/0:0',step:0});if(decision.offered===offered){g.mathPractice.seed=seed;break}index++}
   g.board=[{id,a:79,b:18,coinTier:1,rarity:1,base:ticketBase(1),foodId:'pandesal'}];g.ticketSeq=id;save();startTicket(id)}''',offered)
- p.wait_for_function("$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===7701");p.wait_for_selector('#calculationExpression')
+ p.wait_for_function("$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===7701");p.wait_for_selector('#calculationPanel .calculator-heading')
 def connect(p):
- state=child(p,'({k:s.k,row:s.row})');f=frame(p);f.locator(f'[data-top="{state["k"]}"]').click();f.locator(f'[data-bottom="{state["row"]}"]').click();p.wait_for_selector('#generateAnswer:enabled');return state
+ state=child(p,'({k:s.k,row:s.row})');f=frame(p);f.locator(f'[data-top="{state["k"]}"]').click();f.locator(f'[data-bottom="{state["row"]}"]').click()
+ # The floating expression bubble (or a Golden choice) replaces the shell Generate button.
+ f.locator('#equationReveal').wait_for(state='visible');return state
 def generate(p):
- p.locator('#generateAnswer').click();p.wait_for_function("$('worksheetFrame').contentWindow.eval('s.revealed')")
+ f=frame(p);f.locator('#equationReveal').click();p.wait_for_timeout(200)
+ for root in (p,f):
+  if root.locator('[data-golden-option="auto"]').count():root.locator('[data-golden-option="auto"]').first.click();break
+ p.wait_for_function("$('worksheetFrame').contentWindow.eval('s.revealed')")
 def submit(p,value):
  for digit in str(value):p.locator(f'[data-calc-key="{digit}"]').click()
  p.locator('[data-calc-key="Enter"]').click()
  flush(p)
 def place_current(p):
+ # In-sheet product tiles; a waiting carry first joins the floating ones tile.
  st=child(p,'({row:s.row,k:s.k,incoming:s.incoming,mixed:s.mixed,last:lastDigit()})');f=frame(p)
  if st['incoming'] and not st['mixed']:
-  f.locator(f'[data-carry="{st["k"]}"]').click();f.locator(f'[data-slot="{st["row"]}:{st["row"]+st["k"]}"]').click();flush(p)
+  f.locator(f'[data-carry="{st["k"]}"]').click();f.locator('[data-part="ones"]').click()
+  p.wait_for_function("$('worksheetFrame').contentWindow.eval('s.mixed')");flush(p)
  has_tens=child(p,'tens()>0')
- p.locator('[data-answer-digit="ones"]').click();f.locator(f'[data-slot="{st["row"]}:{st["row"]+st["k"]}"]').click();flush(p)
+ f.locator('[data-part="ones"]').click();f.locator(f'[data-slot="{st["row"]}:{st["row"]+st["k"]}"]').click();flush(p)
  if has_tens:
-  p.locator('[data-answer-digit="tens"]').click();f.locator(f'[data-slot="{st["row"]}:{st["row"]+st["k"]+1}"]' if st['last'] else f'[data-carry="{st["k"]+1}"]').click();flush(p)
+  f.locator('[data-part="tens"]').click();f.locator(f'[data-slot="{st["row"]}:{st["row"]+st["k"]+1}"]' if st['last'] else f'[data-carry="{st["k"]+1}"]').click();flush(p)
+ p.wait_for_timeout(250)
 
 def complete_addition(p,engine):
  assert child(p,'s.phase')=='sum';assert p.locator('#collectRewards').is_disabled()

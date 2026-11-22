@@ -117,3 +117,7 @@ body[data-view="hub"] .hub-collection .bakery-popup.collection-modal{width:min(1
  body[data-view="hub"] .hub-collection .collection-card-statline{font-size:12px}
  body[data-view="hub"] .hub-collection .collection-card-image .food-art{max-height:78px}
 }
+/* Phone-landscape reveals (e.g. x10 at 844x390): the badge clearance above
+   (art-size*.08+56px) exceeded the whole food box and hid every food. Keep a
+   smaller clearance for the ~25px corner badges; tablets are unaffected. */
+@media(max-height:430px){.batch-reward .batch-food{padding-top:30px;padding-bottom:4px}}

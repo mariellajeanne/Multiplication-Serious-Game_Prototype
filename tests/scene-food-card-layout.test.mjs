@@ -17,7 +17,7 @@ test('scene food shows one centered illustration and a shared level/boost footer
  const html=h.run('renderSceneFoods()');
  assert.match(html,/class="scene-food-card hub-food r\d"/);
  assert.match(html,/class="food-art illustrated-food scene-food-image"/);
- assert.match(html,/class="food-stats" aria-hidden="true"><span class="food-level">Lv 1<\/span><span class="food-multiplier"/);
+ assert.match(html,/class="food-stats" aria-hidden="true"><span class="food-level">Lv\. 1<\/span><span class="food-multiplier"/);
  assert.match(html,/class="boost-gem boost-star"/);
  assert.doesNotMatch(html, /class="food-meta"/);
  assert.match(html,/onclick="openHubFood\(1\)"/);
@@ -32,7 +32,7 @@ test('upgrade-ready badge is populated from available mastery and is hidden at z
  assert.match(available,/<b>3<\/b><\/span><span class="food-stats"/);
  assert.match(available,/3 level-ups available/);
  h.run('g.owned[0].mastery=2');
- assert.match(h.run('renderSceneFoods()'),/class="food-level">Lv 3<\/span>/);
+ assert.match(h.run('renderSceneFoods()'),/class="food-level">Lv\. 3<\/span>/);
  assert.match(h.run('renderSceneFoods()'),/<b>1<\/b><\/span><span class="food-stats"/);
 });
 

@@ -306,7 +306,10 @@ function bindBakeryPageSwipe(home){
   const boundary=swipe.index===0&&dx>0||swipe.index===2&&dx<0;
   const offset=boundary?Math.sign(dx)*36*(1-Math.exp(-Math.abs(dx)/110)):Math.max(-160,Math.min(160,dx*.65));
   const centers=bakeryWorldCenters(),segment=dx>0?Math.max(0,swipe.index-1):Math.min(1,swipe.index);
-  swipe.camera=Math.max(0,Math.min(BAKERY_PAGES.length-1,(swipe.startCamera??swipe.index)-offset/(swipe.scale*(centers[segment+1]-centers[segment]))));
+  const raw=(swipe.startCamera??swipe.index)-offset/(swipe.scale*(centers[segment+1]-centers[segment]));
+  // Ordinary drags stay within the pages; at an edge the resisted (<=36px) offset
+  // is kept so the world visibly stretches and springs back instead of feeling dead.
+  swipe.camera=boundary?raw:Math.max(0,Math.min(BAKERY_PAGES.length-1,raw));
   if(!frame)frame=requestAnimationFrame(draw);
  },{passive:false});
  home.addEventListener('touchend',()=>finish());

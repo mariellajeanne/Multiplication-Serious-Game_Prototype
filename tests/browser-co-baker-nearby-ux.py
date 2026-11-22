@@ -5,6 +5,7 @@ ROOT=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(ROOT/'.test-tools'))
 os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH',str(ROOT/'.test-tools/browsers'))
 from playwright.sync_api import sync_playwright
+sys.path.insert(0,str(Path(__file__).resolve().parent));import scene_test_support as scene
 OUT=ROOT/'output/playwright/nearby-ux';OUT.mkdir(parents=True,exist_ok=True)
 with socket.socket() as s:s.bind(('127.0.0.1',0));port=s.getsockname()[1]
 server=subprocess.Popen(['node','tools/co-baker-dev.mjs'],cwd=ROOT,env={**os.environ,'PORT':str(port)},stdout=subprocess.DEVNULL,creationflags=getattr(subprocess,'CREATE_NO_WINDOW',0))
@@ -35,11 +36,11 @@ try:
             for i,name in enumerate(['Alex','Bea','Cora','Dani']):
                 ctx=browser.new_context(viewport={'width':2000 if i==2 else 1280,'height':1200 if i==2 else 800},has_touch=True)
                 ctx.add_init_script(f'if(!localStorage.panaderyaPlayerV1)localStorage.panaderyaPlayerV1=JSON.stringify({{id:"{i+1:032x}",name:"{name}",number:"{1000+i}"}})')
-                p=ctx.new_page();p.on('pageerror',lambda e:errors.append(str(e)));p.goto(url);p.wait_for_selector('.hub-food');contexts.append(ctx);pages.append(p)
+                p=ctx.new_page();p.on('pageerror',lambda e:errors.append(str(e)));p.goto(url);scene.ready(p);contexts.append(ctx);pages.append(p)
             a,b,c,d=pages
             for p in pages:wait(p,'panaderyaCoBaker.peers.size===3')
             open_order(a);open_order(b);open_order(c)
-            f=frame(c);f.locator('[data-top="0"]').click();f.locator('[data-bottom="0"]').click();c.locator('#generateAnswer').click();wait(c,'g.run.worksheetSession?.state.revealed')
+            f=frame(c);f.locator('[data-top="0"]').click();f.locator('[data-bottom="0"]').click();scene.generate(c);wait(c,'g.run.worksheetSession?.state.revealed||$("worksheetFrame").contentWindow.eval("s.revealed")')
             c.evaluate('captureActiveWorksheet();save()');own=c.evaluate('JSON.stringify(g.run.worksheetSession)')
             c.locator('.worksheet-settings').click()
             assert c.locator('.baker-profile').is_visible();assert c.locator('[data-help-mute]').count()==6
@@ -49,7 +50,8 @@ try:
             c.locator('[data-help-mute="dnd"]').uncheck();c.locator('[data-help-mute="worksheet"]').uncheck();assert c.locator('[data-help-mute="solo"]').is_checked()
             c.screenshot(path=str(OUT/f'{engine}-shared-settings.png'))
             c.locator('[data-help-mute="solo"]').uncheck()
-            c.get_by_role('button',name='Find Bakers',exact=True).click();c.locator('[data-crew="00000000000000000000000000000002"]').click()
+            # Favorites now live in the Call for Help list (settings' Find Bakers entry was removed in 0c10810).
+            c.locator('#modals .close').first.click();c.get_by_role('button',name='Find a Helper',exact=True).click();c.locator('[data-crew="00000000000000000000000000000002"]').click()
             assert c.locator('.cobaker-heart[aria-pressed=true]').count()==1;c.reload();wait(c,'document.querySelector("#worksheetFrame")?.worksheetStarted');wait(c,'panaderyaCoBaker.peers.size===3')
             c.evaluate('openCoBakerHelp(true)');assert c.locator('.cobaker-heart[aria-pressed=true]').count()==1;c.locator('#modals .close').click()
             assert c.evaluate('JSON.stringify(g.run.worksheetSession)')==own

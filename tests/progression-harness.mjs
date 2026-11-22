@@ -4,8 +4,8 @@ import {resolve} from 'node:path';
 export function progressionHarness(saved=null){
  const store=new Map(saved?[['panaderyaQuestV2',JSON.stringify(saved)]]:[]);
  const c=vm.createContext({Math:Object.create(Math),Date:class extends Date {},localStorage:{getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)},
- document:{getElementById:()=>null,querySelector:()=>null},setTimeout:()=>{},clearTimeout:()=>{}});
- for(const f of ['src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/ui/dialogs.js','src/game/package-batches.js','src/ui/scene.js','src/ui/menu.js'])vm.runInContext(readFileSync(resolve(import.meta.dirname,'..',f),'utf8'),c);
+ document:{getElementById:()=>null,querySelector:()=>null,documentElement:{}},setTimeout:()=>{},clearTimeout:()=>{}});
+ for(const f of ['src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js','src/ui/bakery-art.js','src/ui/language.js','src/ui/dialogs.js','src/game/package-batches.js','src/ui/scene.js','src/ui/menu.js'])vm.runInContext(readFileSync(resolve(import.meta.dirname,'..',f),'utf8'),c);
  // These older feature tests exercise an established bakery with the legacy
  // Pandesal/one-slot fixture. The production fresh() is intentionally empty
  // for the first-time six-task tutorial, tested in browser integration checks.

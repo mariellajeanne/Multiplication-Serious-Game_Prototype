@@ -93,3 +93,13 @@
 #coBakerHelpBody .cobaker-end.confirm-leave::before,#coBakerRemoveHelper.confirm-leave::before{display:none}
 @media(max-width:520px){.cobaker-find-row{gap:8px}.cobaker-call-count{padding:9px 8px;font-size:12px}.cobaker-find-button{font-size:13px!important;padding-inline:10px!important}.cobaker-help-peer strong{font-size:13px}.cobaker-call-time{font-size:11px}.cobaker-help-peer{gap:4px;padding-inline:4px}.cobaker-call-icon{width:18px}}
 @media(prefers-reduced-motion:reduce){.cobaker-call-count::before{transition:none}}
+/* Learner footer while a Co-Baker is connected. End Help uses the footer's own
+   illustrated-button sizing (so it follows every responsive rule) and replaces
+   Find a Helper, which cannot call anyone during a session; the connection status
+   becomes a caption above it instead of taking row space. */
+.worksheet-complete-bar button#coBakerRemoveHelper{background:#f6d0c8!important;border-color:#b98579!important;color:#6d3a2d!important}
+.worksheet-complete-bar button#coBakerRemoveHelper.confirm-leave{background:#f3b3a6!important;border-color:#a8604f!important}
+.worksheet-complete-bar .worksheet-header-actions:has(#coBakerRemoveHelper) .cobaker-help-button{display:none}
+.worksheet-complete-bar .worksheet-header-actions{position:relative}
+.worksheet-complete-bar .worksheet-header-actions>*{flex:none}
+.worksheet-complete-bar #coBakerConnectionStatus{position:absolute;bottom:calc(100% + 3px);right:0;max-width:none;white-space:nowrap;font-size:clamp(12px,.9vw,16px);font-weight:800;color:#6f4a33}

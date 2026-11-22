@@ -13,7 +13,9 @@ class Quiet(http.server.SimpleHTTPRequestHandler):
 server=http.server.ThreadingHTTPServer(('127.0.0.1',0),functools.partial(Quiet,directory=str(ROOT)))
 threading.Thread(target=server.serve_forever,daemon=True).start()
 URL=f'http://127.0.0.1:{server.server_port}/index.html'
-def ready(p):p.wait_for_function('document.body.dataset.view==="hub"&&!document.getElementById("app").inert')
+def ready(p):
+ p.wait_for_function('document.body.dataset.view==="hub"&&!document.getElementById("app").inert&&document.getElementById("bakeryLoading")?.hidden')
+ p.wait_for_timeout(250);p.evaluate('window.skipWholeBakeryGuide?.()')  # fresh profiles start the gating tutorial
 def settle(p):p.wait_for_timeout(300)
 def selected(p):return p.evaluate('bakeryTier')
 def shot(p,name):settle(p);p.screenshot(path=str(OUT/(name+'.png')))
@@ -52,6 +54,10 @@ def drag(p,touch=False,reverse=False):
   p.mouse.move(x,y);p.mouse.down();p.mouse.move(x+dx,y,steps=14);p.mouse.up()
  settle(p)
 def floating_phone(p,engine):
+ # New bakeries start empty (six-task tutorial); scrolling checks need an
+ # established bakery with a full Menu, created through the real discovery API.
+ p.evaluate('()=>{if(g.owned.length<6){FOOD.slice(0,6).forEach(f=>discoverFood(f));g.menuSlots=Math.max(g.menuSlots,6);g.activeMenu=g.owned.slice(0,6).map(o=>o.uid);save()}}')
+ p.reload();ready(p)
  for width,height in [(844,390),(800,360),(932,430)]:
   p.set_viewport_size({'width':width,'height':height});p.evaluate('navigateBakery("packages")');p.wait_for_function('!bakeryJourney')
   p.locator('.scene-window').evaluate('e=>e.scrollTop=0');settle(p)

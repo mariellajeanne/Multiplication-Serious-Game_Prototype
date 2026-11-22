@@ -6,9 +6,9 @@ import vm from 'node:vm';
 const root=resolve(import.meta.dirname,'..');
 function ui(){
  const c=vm.createContext({Math:Object.create(Math),localStorage:{getItem:()=>null,setItem:()=>{}},
-   document:{getElementById:()=>null},setTimeout:()=>{}});
+   document:{getElementById:()=>null,documentElement:{}},setTimeout:()=>{}});
  for(const file of ['src/data/catalog.js','src/game/economy-balance.js','src/game/progression.js','src/game/state.js','src/game/rewards.js','src/game/progression-economy.js','src/game/economy.js',
-   'src/ui/bakery-art.js','src/ui/dialogs.js','src/ui/scene.js','src/ui/menu.js'])
+   'src/ui/bakery-art.js','src/ui/language.js','src/ui/dialogs.js','src/ui/scene.js','src/ui/menu.js'])
    vm.runInContext(readFileSync(resolve(root,file),'utf8'),c);
  vm.runInContext(`g.owned=[{uid:1,id:'pandesal',level:1,fusion:1,spent:0}];g.discovered=['pandesal'];g.uidNext=2;g.menuSlots=1;g.activeMenu=[1];g.recipeCeilings={pandesal:0};showModal=(title,html)=>{result={title,html}};toast=()=>{};render=()=>{};
    closeModal=()=>{};Math.random=()=>{throw Error('Presentation must not consume reward RNG')}`,c);
@@ -27,7 +27,10 @@ test('floating food preview shows actual contribution, mastery availability and 
 test('main navigation keeps menu, Food Index and packages accessible without exposing future features',()=>{
  const c=ui();vm.runInContext('result=renderLeft();menu=renderMenu();tickets=renderTickets()',c);
  assert.match(c.result,/BUY PACKAGES!/);assert.match(c.menu,/menu-header/);assert.doesNotMatch(c.menu,/menu-heading|boost-hero/);assert.doesNotMatch(c.menu,/Kitchen|switchMenuTab|role="tab"/);assert.match(c.tickets,/openIndex/);assert.doesNotMatch(c.result,/Helper|Game modes/);
- vm.runInContext('g.completed=6;openSettings();settings=result.html',c);assert.match(c.settings,/openStaff/);assert.match(c.settings,/openModes/);
+ // Staff/mode shortcuts were deliberately removed from this dialog (commit 122500d);
+ // it keeps guide, sound, music and tutorial controls.
+ vm.runInContext('g.completed=6;openSettings();settings=result.html',c);assert.doesNotMatch(c.settings,/openStaff|openModes/);
+ assert.match(c.settings,/toggleArrows/);assert.match(c.settings,/toggleMusic/);assert.match(c.settings,/showTutorial/);
 });
 
 test('compact header counters open minimal Boost and Coins dialogs without changing progress',()=>{

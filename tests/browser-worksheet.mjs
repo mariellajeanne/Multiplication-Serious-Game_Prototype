@@ -107,10 +107,6 @@ try{
       const parentSelector=selector==='#undo'?'.worksheet-complete-bar button':selector;
       return evaluate(`(()=>{const el=document.querySelector(${JSON.stringify(parentSelector)});el.scrollIntoView({block:'nearest',inline:'nearest'});const r=el.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
     }
-    if(selector==='#equationReveal'){
-      await evaluate(`document.getElementById('generateAnswer')?.scrollIntoView({block:'center'})`);await pause(100);
-      return evaluate(`(()=>{const r=document.getElementById('generateAnswer').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
-    }
     await evaluate(`auditFrame.scrollIntoView({block:'center'})`);
     await waitFor(`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
     await pause(180);
@@ -127,10 +123,10 @@ try{
   const writeDigit=async part=>{await drag(`[data-answer-digit="${part}"]`,pendingDestination);await pause(140);};
   const click=async selector=>{
     if(selector.includes('[data-slot=')||selector.includes('[data-carry='))pendingDestination=selector;
-    if(selector.includes('[data-part=')){pendingPart=selector.includes('ones')?'ones':'tens';return;}
+    // Product tiles, the expression bubble and carries are all real in-sheet controls.
     if(selector==='#equationReveal'){await evaluate(`auditChild.eval('bridgePoll()')`);await pause(80);if(await evaluate(`auditChild.eval('s.revealed')`))return;}
 
-    await waitFor(selector==='#undo'?`document.querySelector('.worksheet-complete-bar button')!==null`:selector==='#equationReveal'?`document.querySelector('#generateAnswer:not(:disabled)')!==null`:`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
+    await waitFor(selector==='#undo'?`document.querySelector('.worksheet-complete-bar button')!==null`:selector==='#equationReveal'?`auditChild.document.querySelector('#equationReveal:not(:disabled)')!==null`:`auditChild.document.querySelector(${JSON.stringify(selector)})!==null`);
     const p=await point(selector);
     if(touchMode){
       await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...p,id:1}]});
@@ -144,10 +140,6 @@ try{
     if(pendingPart){const part=pendingPart;pendingPart=null;await writeDigit(part);}
   };
   const drag=async(from,to)=>{
-    if(from.includes('[data-part=')){await click(to);await writeDigit(from.includes('ones')?'ones':'tens');return;}
-    if(to.includes('[data-part=')){
-      await click(from);const [row,col]=await evaluate(`auditChild.eval('[s.row,currentCol()]')`);await click(`[data-slot="${row}:${col}"]`);return;
-    }
 
     const a=await point(from),b=await point(to);
     if(touchMode)await cdp('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:[{...a,id:1}]});
@@ -160,6 +152,15 @@ try{
     }
     if(touchMode){await cdp('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});await pause(160);}
     else await cdp('Input.dispatchMouseEvent',{type:'mouseReleased',button:'left',clickCount:1,...b});
+  };
+  // Tap the expression; when a floating Golden Challenge choice is offered, take
+  // the normal "auto" generation, then wait for the real product tiles.
+  const generate=async()=>{
+    await click('#equationReveal');
+    // Wait for whichever appears: the reveal itself or the floating Golden choice.
+    await waitFor(`auditChild.eval('s.revealed')||!!auditChild.document.querySelector('[data-golden-option="auto"]')`);
+    if(!await evaluate(`auditChild.eval('s.revealed')`))await click('[data-golden-option="auto"]');
+    await waitFor(`auditChild.eval('s.revealed')&&!!auditChild.document.querySelector('[data-part="ones"]')`);
   };
   const flush=async()=>{
     await evaluate(`auditChild.eval('bridgePoll()')`);await pause(60);
@@ -175,25 +176,36 @@ try{
   // Fix step-coin RNG only in this isolated test profile for exact payout checks.
   await evaluate(`Math.random=()=>.999`);
   const initialWallet=await evaluate('g.coins');let budget=await evaluate('g.run.budget');
-  await click('[data-bottom="0"]');await click('[data-top="1"]');
-  await waitFor(`auditChild.eval('s.revealed')||document.querySelector('#generateAnswer:not(:disabled)')!==null`);
-  await click('#equationReveal');await flush();
+  // The previous section replays duplicate ready/state messages; a late re-sync can
+  // occasionally restore the pre-connection state. Confirm the parent recorded the
+  // connection (reconnecting at most twice) before generating.
+  for(let attempt=0;attempt<3;attempt++){
+    await click('[data-bottom="0"]');await click('[data-top="1"]');
+    await waitFor(`auditChild.eval("!busy&&(s.phase==='product'||s.revealed)")`);await pause(350);await flush();
+    if(await evaluate(`auditChild.eval("s.phase==='product'")&&Object.keys(g.run.worksheetRewards.actions).some(k=>k.endsWith('/0/1/connect'))`))break;
+    console.log('NOTE browser: connection re-synced away after duplicate ready/state replay; reconnecting');
+  }
+  await generate();await flush();
   const revealRewards=await rewardSnapshot();
+  // Undo after a generated reveal keeps the already-generated fact (its tiles stay
+  // usable, so the reveal cannot be re-rolled); a tap during animation is deferred.
   await click('#undo');
-  await waitFor(`auditChild.eval('s.revealed')||document.querySelector('#generateAnswer:not(:disabled)')!==null`);
-  await click('#equationReveal');await flush();
+  await waitFor(`auditChild.eval("!busy&&s.phase==='product'")&&(auditChild.eval('s.revealed')?!!auditChild.document.querySelector('[data-part="ones"]'):!!auditChild.document.querySelector('#equationReveal'))`);
+  if(!await evaluate(`auditChild.eval('s.revealed')`))await generate();
+  await flush();
   assert.equal(await rewardSnapshot(),revealRewards,'undo/reveal must not farm coins or Luck');
-  await click('[data-carry="1"]');await click('[data-slot="0:1"]');
+  // Current engine: the waiting carry joins the floating product's ones tile first.
+  await drag('[data-carry="1"]','[data-part="ones"]');
   await waitFor(`auditChild.eval('!busy&&s.mixed')`);await preserve();
   assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),undefined,'Carry is resolved before answer placement');
-  await click('[data-slot="0:1"]');await writeDigit('ones');
+  await drag('[data-part="ones"]','[data-slot="0:1"]');await waitFor(`auditChild.eval('!busy&&s.onesPlaced')`);
   assert.equal(await evaluate(`auditChild.eval('s.rows[0][1]')`),3);
   await drag('[data-part="tens"]','[data-slot="0:2"]');
   await waitFor(`auditChild.eval('!busy&&s.row===1')`);await preserve();
   for(let col=0;col<2;col++){
     await drag('[data-bottom="1"]',`[data-top="${col}"]`);
-    await waitFor(`auditChild.eval('s.revealed')||document.querySelector('#generateAnswer:not(:disabled)')!==null`);
-    await click('#equationReveal');
+    await waitFor(`auditChild.eval("!busy&&(s.phase==='product'||s.revealed)")`);
+    await generate();
     await drag('[data-part="ones"]',`[data-slot="1:${col+1}"]`);
     await waitFor(col===0?`auditChild.eval('!busy&&s.k===1')`:`auditChild.eval("!busy&&s.phase==='sum'")`);
   }
@@ -232,6 +244,9 @@ try{
   assert.equal(await evaluate('g.completed'),1);
   console.log('PASS browser: reload restores the in-page completed-order claim; repeated collection pays once');
   console.log(`PASS browser: 79 × 18 = 1422, typed digits/connector drag, carry after placement, undo/reveal dedup, downward swipe; ${budget} coins claimed exactly once; no package drop`);
+  // New bakeries start with no food (six-task tutorial starter); own Pandesal
+  // through the real discovery API before testing its Mastery upgrade.
+  await evaluate("if(!g.owned.length){const r=discoverFood(F('pandesal'));g.menuSlots=Math.max(1,g.menuSlots);g.activeMenu=[r.uid];save()}");
   const levelCost=await evaluate('foodLevelCost(g.owned[0])');
   await evaluate("closeModal();discoverFood(F('pandesal'));if(typeof isBakeryHub==='function'&&isBakeryHub())openHubFood(1);else openFoodItem(1)");await pause(280);
   const upgrade=await evaluate(`(()=>{const r=document.querySelector('.action-mastery').getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2}})()`);
@@ -251,10 +266,10 @@ try{
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9002`);
   await evaluate(`auditFrame=$('worksheetFrame');auditChild=auditFrame.contentWindow;void 0`);
   await evaluate(`auditChild.eval("window.auditEvents=[];for(const type of ['click','pointerdown','pointerup'])document.addEventListener(type,e=>{auditEvents.push({type,target:e.target.id||e.target.className,ignoreClick,busy,x:e.clientX,y:e.clientY});if(auditEvents.length>20)auditEvents.shift()},true)")`);
-  await click('[data-top="0"]');await click('[data-bottom="0"]');await click('#equationReveal');
+  await click('[data-top="0"]');await click('[data-bottom="0"]');await generate();
   await drag('[data-part="tens"]','[data-carry="1"]');await waitFor(`auditChild.eval('!busy&&s.tensPlaced')`);
   await drag('[data-part="ones"]','[data-slot="0:0"]');await waitFor(`auditChild.eval('!busy&&s.k===1')`);
-  await drag('[data-top="1"]','[data-bottom="0"]');await click('#equationReveal');
+  await drag('[data-top="1"]','[data-bottom="0"]');await generate();
   await drag('[data-carry="1"]','[data-part="ones"]');await waitFor(`auditChild.eval('!busy&&s.mixed')`);
   assert.equal(await evaluate(`auditChild.eval('value()')`),17,'9 + carry 8 creates leading tens');await preserve();
   assert.equal(await evaluate(`auditChild.eval('sound&&tutorial')`),true);
@@ -273,7 +288,7 @@ try{
   await waitFor(`$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===9003`);
   await evaluate(`auditFrame=$('worksheetFrame');auditChild=auditFrame.contentWindow;void 0`);
   for(let row=0;row<2;row++)for(let col=0;col<2;col++){
-    await drag(`[data-bottom="${row}"]`,`[data-top="${col}"]`);await click('#equationReveal');
+    await drag(`[data-bottom="${row}"]`,`[data-top="${col}"]`);await generate();
     await waitFor(`auditChild.eval('s.revealed')`);
     if(await evaluate(`auditChild.eval('s.incoming>0')`)){
       await drag(`[data-carry="${col}"]`,'[data-part="ones"]');await waitFor(`auditChild.eval('!busy&&s.mixed')`);

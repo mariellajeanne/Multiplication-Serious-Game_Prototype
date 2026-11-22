@@ -5,6 +5,7 @@ root = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(root / '.test-tools'))
 os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH', str(root / '.test-tools/browsers'))
 from playwright.sync_api import sync_playwright
+sys.path.insert(0,str(Path(__file__).resolve().parent));import scene_test_support as scene
 remote='--remote' in sys.argv
 out = root / ('output/playwright/co-baker-recovery-remote' if remote else 'output/playwright/co-baker-recovery')
 out.mkdir(parents=True, exist_ok=True)
@@ -75,17 +76,15 @@ def point(learner, helper, target, touch=False):
     observer=helper.locator('#coBakerObservation iframe').element_handle().content_frame()
     # Bounding boxes are local automation input only; network messages carry
     # semantic identifiers, with different learner/helper viewport sizes.
-    where=observer.evaluate('target=>{const el=WorksheetCues.resolve(target);if(!el)return null;return {nested:el.ownerDocument!==document}}',target)
-    assert where is not None,target
-    doc=observer.locator('#worksheetFrame').element_handle().content_frame() if where['nested'] else observer
-    selectors={'calculator:product':'#calculationAnswer','calculator:tray':'.worksheet-digit-tray','calculator:ones':'[data-answer-digit="ones"]','calculator:tens':'[data-answer-digit="tens"]','calculator:carry':'.carry-source','control:generate':'#generateAnswer','control:undo':'[data-worksheet-control="undo"]','control:add':'#addRows'}
-    parts=target.split(':');selector=selectors.get(target) or f'[data-{parts[0]}="{":".join(parts[1:])}"]'
-    doc.locator(selector).wait_for(state='visible')
-    box=doc.locator(selector).bounding_box()
-    for _ in range(20):
-        if box:break
-        helper.wait_for_timeout(50);box=doc.locator(selector).bounding_box()
-    assert box,target
+    # Tap exactly what the game's own semantic resolver targets (shared with the
+    # pointing protocol), mapped from a nested engine frame into observer space.
+    observer.wait_for_function('t=>!!WorksheetCues.resolve(t)',arg=target)
+    spot=observer.evaluate('''t=>{const el=WorksheetCues.resolve(t);let r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;
+     if(el.ownerDocument!==document){const f=document.querySelector('#worksheetFrame'),q=f.getBoundingClientRect(),sx=q.width/(f.clientWidth||q.width),sy=q.height/(f.clientHeight||q.height);x=q.left+x*sx;y=q.top+y*sy}
+     return {x,y,w:r.width,h:r.height}}''',target)
+    assert spot and spot['w']>2 and spot['h']>2,(target,spot)
+    host=helper.locator('#coBakerObservation iframe').bounding_box()
+    box={'x':host['x']+spot['x']-1,'y':host['y']+spot['y']-1,'width':2,'height':2}
     before=learner.evaluate('({state:JSON.stringify(g.run.worksheetSession.state),rewards:JSON.stringify(g.run.worksheetRewards)})');before_save=personal_save(learner)
     own=personal_save(helper)
     x,y=box['x']+box['width']/2,box['y']+box['height']/2
@@ -159,7 +158,7 @@ def finish_order(p):
             fr.locator(f'[data-top="{st["k"]}"]').click();fr.locator(f'[data-bottom="{st["row"]}"]').click()
         elif st['phase']=='product':
             if not st['revealed']:
-                p.locator('#generateAnswer:enabled').click();fr.wait_for_function('s.revealed',polling=100)
+                scene.generate(p)
             elif st['incoming'] and not st['mixed']:
                 if not st['onesPlaced']:fr.evaluate('worksheetDropDigit("ones",{kind:"slot",r:s.row,c:currentCol()},ones())')
                 else:fr.evaluate('addCarry("placed")')
@@ -181,12 +180,12 @@ try:
         for i,browser in ((2,edge),(0,edge),(1,webkit)):
             ctx=browser.new_context(viewport={'width':2000 if i==1 else 1280,'height':1200 if i==1 else 800},has_touch=True,ignore_https_errors=True);contexts.append(ctx)
             p=ctx.new_page();pages[i]=p;p.on('pageerror',lambda e:errors.append(str(e)))
-            p.goto(base+'/index.html?cobaker=debug&'+query);p.wait_for_selector('.hub-food');connect(p)
+            p.goto(base+'/index.html?cobaker=debug&'+query);scene.ready(p);connect(p)
             if i==2:wait(p,'panaderyaCoBaker.coordinator.leader?.id===panaderyaCoBaker.profile.id')
         learner,helper,other=pages
         for width,height in ((2000,1200),(1280,800)):
             other.set_viewport_size({'width':width,'height':height});other.screenshot(path=str(out/f'home-{width}.png'))
-        helper.locator('.hub-ticket').first.click();wait(helper,'document.querySelector("#worksheetFrame")?.worksheetStarted')
+        scene.open_ticket(helper)
         helper.evaluate('captureActiveWorksheet();save()')
         own=helper.evaluate('JSON.stringify(g.run.worksheetSession.state)');save_before=json.loads(helper.evaluate('localStorage.panaderyaQuestV2'));other_before=other.evaluate('localStorage.panaderyaQuestV2')
         learner.evaluate('g.board[0].a=79;g.board[0].b=18;startTicket(g.board[0].id)')
@@ -194,21 +193,24 @@ try:
         session=reserve(learner,helper)
         save_before=json.loads(helper.evaluate('localStorage.panaderyaQuestV2'))
         fr=learner.locator('#worksheetFrame').element_handle().content_frame()
-        fr.locator('[data-top="0"]').click();fr.locator('[data-bottom="0"]').click();learner.locator('#generateAnswer:enabled').click();fr.wait_for_function('s.revealed && !busy')
+        fr.locator('[data-top="0"]').click();fr.locator('[data-bottom="0"]').click();scene.generate(learner);fr.wait_for_function('s.revealed && !busy')
         synced(learner,helper)
         stale=helper.evaluate('({kind:"hint",sessionId:panaderyaCoBaker.help.active.sessionId,streamId:panaderyaCoBaker.observation.streamId,recipientId:panaderyaCoBaker.help.active.otherId,cueToken:panaderyaCoBaker.observation.cueToken,stateVersion:panaderyaCoBaker.observation.received,sequence:999,hint:"retry"})')
         # Real learner drag continues through the helper's transport interruption.
-        tile=learner.locator('[data-answer-digit="ones"]').bounding_box();dest=fr.locator('[data-slot="0:0"]').bounding_box()
+        # The product tile and its drag ghost live inside the worksheet frame.
+        tile=fr.locator('[data-part="ones"]').bounding_box();dest=fr.locator('[data-slot="0:0"]').bounding_box()
         learner.mouse.move(tile['x']+tile['width']/2,tile['y']+tile['height']/2);learner.mouse.down();learner.mouse.move(tile['x']+tile['width']/2-20,tile['y']+tile['height']/2,steps=3)
-        wait(learner,'!!worksheetPointer?.ghost');interrupt(helper)
-        wait(learner,'!!panaderyaCoBaker.help.active?.lostAt');assert learner.evaluate('!!worksheetPointer?.ghost')
+        fr.wait_for_function('!!pointer?.ghost');interrupt(helper)
+        wait(learner,'!!panaderyaCoBaker.help.active?.lostAt');assert fr.evaluate('!!pointer?.ghost')
         learner.screenshot(path=str(out/'learner-reconnecting.png'));helper.screenshot(path=str(out/'helper-paused.png'))
         learner.mouse.move(dest['x']+dest['width']/2,dest['y']+dest['height']/2,steps=5);learner.mouse.up();fr.wait_for_function('s.onesPlaced && !busy')
         fr.evaluate('worksheetDropDigit("tens",{kind:"slot",r:0,c:1},7)');fr.wait_for_function('!busy')
         restore(helper);live(learner,helper,session)
         assert helper.evaluate('panaderyaCoBaker.observation.latest.state.tensLocation')=='row'
         helper.evaluate('h=>panaderyaCoBaker.help.send(h.recipientId,h)',stale);helper.wait_for_timeout(150);assert not learner.locator('#coBakerProceduralHint').count()
-        point(learner,helper,'slot:0:1',touch=True);point(learner,helper,'carry:1');point(learner,helper,'calculator:product')
+        # Both product tiles are already placed here (generated facts have no calculator
+        # product box), so the meaningful targets are the written tens and its carry slot.
+        point(learner,helper,'slot:0:1',touch=True);point(learner,helper,'carry:1')
         # Learner interruption: accepted local carry correction and Undo survive.
         interrupt(learner);wait(helper,'!!panaderyaCoBaker.help.active?.lostAt')
         learner.get_by_role('button',name='Undo',exact=True).click();fr.wait_for_function('!busy')
@@ -216,7 +218,7 @@ try:
         # Each role refreshes its own page. Only local persistence supplies math.
         for p in (helper,learner):
             before=learner.evaluate('JSON.stringify(g.run.worksheetSession.state)');version=helper.evaluate('panaderyaCoBaker.observation.received')
-            p.reload();p.wait_for_selector('.hub-food, #worksheetFrame')
+            p.reload();scene.ready(p,skip_tutorial=False)
             if remote:wait(p,'panaderyaCoBaker.status==="connected"')
             else:connect(p)
             live(learner,helper,session);assert helper.evaluate('panaderyaCoBaker.observation.received')>version
@@ -283,7 +285,9 @@ try:
         learner.screenshot(path=str(out/'completed-during-outage.png'))
         start_relay();wait(helper,'!panaderyaCoBaker.help.active')
         assert learner.evaluate('JSON.stringify(g.run.worksheetRewards)')==rewards;assert learner.evaluate('g.run.pool')==pool
-        learner.get_by_role('button',name='Save & Exit',exact=True).click()
+        # A finished order shows Complete Order in place of Save & Exit; leave it
+        # unclaimed through the same abandonTicket() that Save & Exit calls.
+        assert learner.locator('#collectRewards').is_visible();learner.evaluate('abandonTicket()')
         # Equal digits are distinct semantic elements at different columns/rows.
         learner.evaluate('const t=g.board.find(t=>t.id!==g.run.ticket.id);t.a=77;t.b=11;startTicket(t.id)')
         wait(learner,'document.querySelector("#worksheetFrame")?.worksheetStarted');session=reserve(learner,helper)
@@ -299,7 +303,9 @@ try:
         assert learner.evaluate('g.run.paused && !!g.run.worksheetSession')
         if remote:
             learner.reload();wait(learner,'panaderyaCoBaker.status==="connected"');assert learner.evaluate('panaderyaCoBaker.help.active') is None
-        after=personal_save(helper);save_before.pop('orderClock',None);save_before.pop('coBakerRewards',None);after['coins']-=helper.evaluate('Object.values(g.coBakerRewards?.receivedRewards||{}).reduce((n,e)=>n+e.coins,0)');assert after==save_before
+        after=personal_save(helper);save_before.pop('orderClock',None);save_before.pop('coBakerRewards',None);helped=helper.evaluate('Object.values(g.coBakerRewards?.receivedRewards||{}).reduce((n,e)=>n+e.coins,0)');after['coins']-=helped
+        # Validated helper grants also count toward package discovery (creditGameplayCoins).
+        after['coinsEarnedSinceLastDiscovery']=after.get('coinsEarnedSinceLastDiscovery',0)-helped;assert after==save_before
         assert helper.evaluate('JSON.stringify(g.run.worksheetSession.state)')==own
         assert other.evaluate('localStorage.panaderyaQuestV2')==other_before
         assert not errors,errors

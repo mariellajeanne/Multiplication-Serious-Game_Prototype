@@ -54,7 +54,7 @@
    const call=header.querySelector('.cobaker-help-button');if(call){if(call.dataset.networkIcon!=='1'){call.innerHTML=worksheetHelperButtonContent;call.dataset.networkIcon='1'}call.dataset.pending=String(!!help.outgoing)}
   }
   if(header){let remove=document.getElementById('coBakerRemoveHelper');if(active?.role==='Learner'){
-   if(!remove){header.insertAdjacentHTML('beforeend',endButton(help,'id="coBakerRemoveHelper" data-learner-end="true"'));remove=document.getElementById('coBakerRemoveHelper')}
+   if(!remove){header.insertAdjacentHTML('beforeend',endButton(help,'id="coBakerRemoveHelper" data-learner-end="true"'));remove=document.getElementById('coBakerRemoveHelper');remove?.classList.add('illustrated-worksheet-button')}
    if(remove){const confirming=endConfirm?.sessionId===active.sessionId&&help.clock()<endConfirm.until;remove.textContent=confirming?'Remove helper?':'End Help';remove.classList.toggle('confirm-leave',!!confirming)}
   }else{remove?.remove();endConfirm=null}}
   const collapsed=!expanded&&(innerWidth<1100||innerHeight<850)&&invitations.length>1;

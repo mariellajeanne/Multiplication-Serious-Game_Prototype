@@ -30,7 +30,9 @@ URL = f'http://127.0.0.1:{server.server_port}/index.html'
 
 
 def ready(page):
-    page.wait_for_function('document.body.dataset.view==="hub"&&!document.getElementById("app").inert')
+    page.wait_for_function('document.body.dataset.view==="hub"&&!document.getElementById("app").inert&&document.getElementById("bakeryLoading")?.hidden')
+    # A fresh profile starts the six-task tutorial, which gates taps and swipes.
+    page.wait_for_timeout(250); page.evaluate('window.skipWholeBakeryGuide?.()')
 
 
 def snapshot(page):
@@ -62,9 +64,12 @@ def check_layout(page, count):
         visible:cards.every(e=>r(e).top>=0&&r(e).bottom<=footer.top-4),
         bounded:grid.left>=0&&grid.right<=innerWidth&&footer.bottom<=innerHeight,
         noCard:cards.every(e=>{const s=getComputedStyle(e);return s.backgroundColor==='rgba(0, 0, 0, 0)'&&s.boxShadow==='none'&&parseFloat(s.borderTopWidth)===0}),
-        noFoodMotion:cards.every(e=>[e,e.querySelector('.batch-reward-visual'),e.querySelector('.batch-food'),e.querySelector('.food-art')].every(n=>{const s=getComputedStyle(n);return s.transform==='none'&&s.animationName==='none'&&s.transitionDuration==='0s'&&s.opacity==='1'})),
+        // Stationary food: no transform and no animation still running (the 160 ms
+        // opacity-only entrance fade from 122500d may remain as a finished animation).
+        noFoodMotion:cards.every(e=>[e,e.querySelector('.batch-reward-visual'),e.querySelector('.batch-food'),e.querySelector('.food-art')].every(n=>{const s=getComputedStyle(n);return s.transform==='none'&&s.transitionDuration==='0s'&&s.opacity==='1'&&!n.getAnimations().some(a=>a.playState==='running')})),
         textFits:cards.every(e=>[...e.querySelectorAll('.batch-reward-copy>*:not([hidden])')].every(n=>n.scrollWidth<=n.clientWidth+1&&n.scrollHeight<=n.clientHeight+1)),
-        panelBelowFood:cards.every(e=>r(e.querySelector('.batch-reward-copy')).top>=r(e.querySelector('.batch-food')).bottom+4),
+        // The visible food art (not its padded container) sits clear above the text panel.
+        panelBelowFood:cards.every(e=>r(e.querySelector('.batch-reward-copy')).top>=r(e.querySelector('.batch-food .food-art')).bottom+4&&r(e.querySelector('.batch-reward-copy')).top>=r(e.querySelector('.batch-food')).bottom-1),
         panelsSeparate:cards.every((e,i)=>!i||r(e).top>r(cards[i-1]).top+1||r(e).left>=r(cards[i-1]).right+8),
         noHeadings:!document.querySelector('.batch-heading,#packageBatchTitle,#packageBatchProgress,.batch-swipe-hint'),
         footerOnlyAction:document.querySelector('.batch-footer').innerText.trim()===(cards.length===1?'Collect':'Collect All'),
@@ -165,7 +170,9 @@ def run(pw, engine):
             assert abs(starts[-1]['time'] - starts[0]['time'] - (count - 1) * 150) < 350
             assert page.evaluate('''()=>packageBatchView.receipt.rewards.every((reward,i)=>{
               const food=F(reward.foodId),panel=document.querySelector(`[data-reward-index="${i}"] .batch-reward-copy`);
-              return panel.querySelector('strong').textContent===food.name&&panel.querySelector('span').textContent.includes(RARITIES[food.rarity])&&panel.querySelector('small').textContent===(reward.masteryUnlocked?`+${reward.masteryUnlocked} Mastery available`:'');
+              // Mastery moved from the text panel to the card's corner indicator (122500d).
+              const mastery=document.querySelector(`[data-reward-index="${i}"] .batch-mastery-value`);
+              return panel.querySelector('strong').textContent===food.name&&panel.querySelector('span').textContent.includes(RARITIES[food.rarity])&&(reward.masteryUnlocked?mastery?.textContent===`↑${reward.masteryUnlocked}`:!mastery);
             })''')
             check_layout(page, count)
             page.screenshot(path=str(OUT / f'{engine}-natural-{count}.png'))

@@ -52,6 +52,6 @@ test('rounded display never rounds a nonzero chance to zero or mutates model pre
 
 test('ingredient previews use actual unbounded Mastery rather than the legacy Level 5 mirror',()=>{
  const h=progressionHarness();h.run('g.owned[0].mastery=10;g.owned[0].level=5;html=outputPreview(g.owned[0])');
- assert.match(h.run('html'),/Mastery 10/);assert.match(h.run('html'),/370%/);
+ assert.match(h.run('html'),/Level 11/); /* Mastery 10, displayed +1 */assert.match(h.run('html'),/370%/);
  assert.match(h.run('html'),/5\.64/);
 });

@@ -151,3 +151,8 @@ body.package-batch-open{overflow:hidden}
  .package-batch-overlay[data-count="10"]{grid-template-rows:minmax(510px,1fr) auto}
 }
 @media(prefers-reduced-motion:reduce){.package-batch-overlay,.package-batch-overlay *{animation:none!important;transition:none!important}}
+/* Single-cell grids must fill (and shrink within) their box: an implicit auto row
+   resolved to 0px on short multi-row reveals (e.g. x10 at 844x390), collapsing the
+   food art to zero height and letting the container overlap the text panel. */
+.batch-reward-visual{grid-template:minmax(0,1fr)/minmax(0,1fr)}
+.batch-package,.batch-food{grid-template:minmax(0,1fr)/minmax(0,1fr)}

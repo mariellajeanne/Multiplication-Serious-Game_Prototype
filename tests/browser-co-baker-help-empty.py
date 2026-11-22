@@ -5,6 +5,7 @@ root=Path(__file__).resolve().parents[1]
 sys.path.insert(0,str(root/'.test-tools'))
 os.environ.setdefault('PLAYWRIGHT_BROWSERS_PATH',str(root/'.test-tools/browsers'))
 from playwright.sync_api import sync_playwright
+sys.path.insert(0,str(Path(__file__).resolve().parent));import scene_test_support as scene
 out=root/'output/playwright/co-baker-help-empty';out.mkdir(parents=True,exist_ok=True)
 with socket.socket() as free:
     free.bind(('127.0.0.1',0));port=free.getsockname()[1]
@@ -22,8 +23,7 @@ try:
                 # Same JS transport selection as APK; this stub does not test LAN.
                 ctx.add_init_script("window.PanaderyaLan={start(){},stop(){},send(){},diagnostics(){return JSON.stringify({'Last error':'OFFSCREEN_DIAGNOSTIC','Device':'SM-T505'})},copyDetails(summary){window.copiedSummary=JSON.parse(summary);window.copiedNative=JSON.parse(this.diagnostics());window.dispatchEvent(new CustomEvent('co-baker-native',{detail:{kind:'copy-details',status:'copied'}}))}}")
                 page=ctx.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-                page.goto(url);page.locator('.hub-ticket').first.tap()
-                page.wait_for_function('document.querySelector("#worksheetFrame")?.worksheetStarted===true')
+                page.goto(url);scene.ready(page);scene.open_ticket(page,tap=True)
                 button=page.get_by_role('button',name='Find a Helper',exact=True)
                 button.tap()
                 dialog=page.get_by_role('dialog');dialog.wait_for(state='visible')

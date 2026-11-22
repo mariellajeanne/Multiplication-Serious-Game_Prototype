@@ -159,7 +159,7 @@ window.addEventListener('message',event=>{
  if(m.type==='invalid-carry-target'&&m.attemptId===worksheetAttemptId&&m.row===s.row&&m.col===s.k)worksheetCarryTarget({kind:'carry',c:-1});
  if(m.type==='focus-phase'&&m.attemptId===worksheetAttemptId){document.body.dataset.focusPhase=m.phase;document.body.dataset.guideLevel=String(m.guideLevel);updateTutorial()}
  if(m.type==='summary-celebrate'&&m.attemptId===worksheetAttemptId&&s.complete)play('finish');
- if(m.type==='undo'&&m.attemptId===worksheetAttemptId){undo();bridgePoll()}
+ if(m.type==='undo'&&m.attemptId===worksheetAttemptId)requestWorksheetUndo(m.attemptId);
  if(m.type==='completion-ack'&&m.attemptId===worksheetAttemptId)bridgeMetrics.completionAck=true;
  if(m.type==='restart'&&window.__ACTIVE_WORKSHEET_TICKET)externalStart(window.__ACTIVE_WORKSHEET_TICKET,worksheetAttemptId,true);
  if(m.type==='sound'){$('sound').textContent=m.enabled?'♫ Sound on':'♫ Sound off';sound=!!m.enabled;}
@@ -178,3 +178,17 @@ window.addEventListener('keydown',event=>{
 });
 
 reset();
+// A shell Undo tap during a short animation (busy) used to be silently dropped
+// although the button looked enabled. Defer it until the animation ends; repeated
+// taps meanwhile coalesce into one Undo, and a stale attempt never applies.
+let worksheetUndoTimer=0;
+function requestWorksheetUndo(attemptId){
+ if(!busy){undo();bridgePoll();return}
+ if(worksheetUndoTimer)return;
+ const started=Date.now();
+ worksheetUndoTimer=setInterval(()=>{
+  if(busy&&Date.now()-started<3000)return;
+  clearInterval(worksheetUndoTimer);worksheetUndoTimer=0;
+  if(!busy&&attemptId===worksheetAttemptId){undo();bridgePoll()}
+ },50);
+}

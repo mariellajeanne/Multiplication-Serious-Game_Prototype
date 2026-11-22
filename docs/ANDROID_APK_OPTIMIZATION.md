@@ -106,3 +106,24 @@ audit and update the source fingerprint/manifest rather than bypassing the
 guards. If the optimized staging unexpectedly has missing art, install the
 backup APK retained by the accompanying CMD installer and report the specific
 screen and image.
+
+## Measured debug APK (2026-11-22 QA pass)
+
+| Build | APK bytes | MiB | Optimizer mode |
+|---|---:|---:|---|
+| Before QA (source changed after the audit) | 73,591,502 | 70.18 | `conservative-legacy` (69 exclusions) |
+| After re-audit and fingerprint refresh | 51,811,683 | **49.41** | `full-audit` (103 exclusions; 11 edited assets retained) |
+
+The fallback build was 20.8 MiB larger only because later edits changed the source
+fingerprint. The re-audit compared every shipped line added since the audited
+commit `f843056`: no new reference to an excluded file or to `bakery-approved/` or
+`bakery-faithful/` (only retained `bakery-runtime` icons). `sourceAudit` in the plan
+records the method and previous digest.
+
+Verify a build with `python tests/apk-contents-check.py`. It checks that source and
+assets are byte-identical, that exclusions are absent, that every literal asset
+reference and `BAKERY_ASSETS` entry resolves, and that the MP3 audio frames are
+preserved. `tests/browser-six-task-tutorial.py` also fails if the game requests an
+excluded asset. **After any further source edit, repeat the asset re-audit and
+refresh `sourceDigest`**; otherwise the next build falls back to ~70 MiB.
+Not established: physical installation, WebView decoding or audio on a real tablet.

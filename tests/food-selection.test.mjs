@@ -30,7 +30,8 @@ test('one selected food uses the detailed popup even in multi-select mode; multi
 test('single-food stats derive from actual tier, retained base and unbounded mastery; actions retain separate meanings',()=>{
  const h=progressionHarness();h.run(`g.owned[0]={...g.owned[0],fusion:3,mastery:8,baseCarry:7};g.recipeCeilings.pandesal=10;
   selectedFoods=new Set([1]);html=renderFoodPanel();base=tierBase(g.owned[0]);value=foodValue(g.owned[0]);next=foodValue({...g.owned[0],mastery:9})-value`);
- assert.match(h.run('html'),/Mastery: 8/);assert.match(h.run('html'),/Available \+2/);
+ // Displayed level = zero-based Mastery + 1 (display only; values/costs unchanged).
+ assert.match(h.run('html'),/Lv\. 9/);assert.match(h.run('html'),/Available \+2/);
  assert.ok(h.run('html').includes(`Base: ×${h.run('multiplierLabel(base)')}`));
  assert.ok(h.run('html').includes(`Boost: ×${h.run('multiplierLabel(value)')}`));
  assert.ok(h.run('html').includes(`Next: +${h.run('multiplierLabel(next)')}`));

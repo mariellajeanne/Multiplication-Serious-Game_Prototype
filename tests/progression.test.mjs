@@ -106,7 +106,7 @@ test('a stale tab save retains the latest refresh deadline',()=>{
 test('Mastery upgrade immediately improves equipped value, rendered totals and reload',()=>{
  const h=progressionHarness();h.run(`g.coins=1e9;g.recipeCeilings.pandesal=12;before=foodValue(g.owned[0]);total=bakeryValue();ok=upgradeFood(1,true);card=renderFoodCard(g.owned[0]);menu=renderMenu()`);
  assert.equal(h.run('ok'),true);assert.ok(h.run('foodValue(g.owned[0])>before'));assert.ok(h.run('bakeryValue()>total'));
- assert.match(h.run('card'),/Mastery 1/);assert.match(h.run('card'),/1\.50/);
+ assert.match(h.run('card'),/Lv\. 2/); /* Mastery 1 displays as Lv. 2 */assert.match(h.run('card'),/1\.50/);
  assert.match(h.run('card'),/mastery-ready/);assert.doesNotMatch(h.run('card'),/card-fuse|\u2192/);
  assert.ok(h.run('menu.includes(multiplierLabel(bakeryValue()))'));
  const r=progressionHarness(JSON.parse(h.store.get('panaderyaQuestV2')));

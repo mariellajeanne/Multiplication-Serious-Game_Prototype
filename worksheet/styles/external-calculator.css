@@ -2,7 +2,8 @@
  * floating RESULT digits, carries, connector capsule, Undo and addition intact. */
 .external-calculator :is(.top,.side,.machine-canopy,.feed-mouth,.receipt-caption,.receipt-rule,.receipt-footer,.cash-terminal,.modes,.multiplication-lab,.addition-lab,.addition-help,.footnote,.head,.sheethead){display:none!important}
 .external-calculator :is(.workspace,.receipt-wrapper){padding:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
-.external-calculator .guide-prompt{height:28px!important;min-height:28px!important;font-size:13px!important;line-height:1.25!important}
+/* Instruction text must stay readable for young children on large tablets. */
+.external-calculator .guide-prompt{height:34px!important;min-height:34px!important;font-size:clamp(14px,2vw,21px)!important;line-height:1.2!important}
 .external-calculator .statusbar{display:none!important}
 .external-calculator .actions{min-height:44px!important;padding:3px 5px 5px!important}
 .external-calculator .actions button{position:relative;isolation:isolate;border:0!important;min-height:44px;background:transparent!important;box-shadow:none!important}
@@ -32,7 +33,7 @@
 .carry-combination{position:absolute;z-index:45;padding:8px 12px;background:#fff0c8;border:2px solid #795034;border-radius:12px;box-shadow:0 3px 0 #79503422;font-size:19px;font-weight:900;pointer-events:none;animation:carry-combine-note 1s ease-out both}
 @keyframes carry-combine-note{0%{opacity:0;translate:0 6px}20%,80%{opacity:1;translate:0 0}100%{opacity:0;translate:0 -5px}}
 @media(prefers-reduced-motion:reduce){.carry-combination{animation:none}}
-.external-calculator.compact-workspace .guide-prompt{height:20px!important;min-height:20px!important;font-size:11px!important;padding:0!important}
+.external-calculator.compact-workspace .guide-prompt{height:22px!important;min-height:22px!important;font-size:13px!important;padding:0!important}
 .external-calculator.compact-workspace .line{margin-bottom:3px}
 .external-calculator.compact-workspace .line.topline{margin-bottom:var(--operand-gap)}
 .external-calculator.compact-workspace .line.bottomline{padding-bottom:5px;margin-bottom:5px}

@@ -113,37 +113,36 @@ def worksheet(p,engine):
  print(f'PASS {engine} P0: pointer connect/generate/drag/place 9x0, 6x7 both directions, Golden auto/manual, 79x18 carry, Undo, reopen/reload, guides, swipe/add and one claim',flush=True)
 
 def guide(p,engine):
- p.locator('#settings-button').click();p.locator('.adult-tools summary').click()
+ # The six-task tutorial (f843056) replaced the older data-step tour; its full
+ # timed journey is tests/browser-six-task-tutorial.py. This keeps P1's intents:
+ # reset starts it, unrelated input is blocked, reload resumes, Show Me replays,
+ # skip persists and a missing target never traps the child.
+ status=lambda:p.evaluate('window.panaderyaTutorialStatus?.()')
+ phase=lambda ph:p.wait_for_function('ph=>window.panaderyaTutorialStatus?.()?.phase===ph',arg=ph)
+ p.evaluate('closeModal()');p.locator('#settings-button').click();p.locator('.adult-tools summary').click()
  p.once('dialog',lambda d:d.accept());p.get_by_role('button',name='Erase progress…',exact=True).click()
- p.wait_for_selector('#bakeryGameTour[data-step="food"]')
- assert p.evaluate('g.completed===0&&g.coins===250')
- assert p.locator('#bakeryGameTour p,[data-tour="next"]').count()==0
- p.locator('[data-world-nav="orders"]').click();p.wait_for_timeout(250)
- assert p.evaluate('bakeryPage')=='menu' and p.locator('#bakeryGameTour').get_attribute('data-step')=='food'
- # Short legitimate order keeps the walkthrough end-to-end journey focused.
- p.evaluate('g.board[0].a=9;g.board[0].b=9;save();render()')
- p.locator('.scene-food-card.hub-food').first.click();p.wait_for_selector('#bakeryGameTour[data-step="close-food"]')
- p.locator('.food-panel-close').click();p.wait_for_selector('#bakeryGameTour[data-step="orders"]')
- p.reload();ready(p);p.wait_for_selector('#bakeryGameTour[data-step="orders"]')
- p.locator('[data-world-nav="orders"]').click();p.wait_for_selector('#bakeryGameTour[data-step="ticket"]')
- p.locator('.scene-ticket').first.click();p.wait_for_selector('#bakeryGameTour[data-step="worksheet"]')
- p.wait_for_function("$('worksheetFrame')?.contentWindow.__ACTIVE_WORKSHEET_TICKET?.id===g.run.ticket.id")
- assert p.locator('.bakery-tour-highlight').count()==0
- connect(p);generate(p);place(p,True,engine=='edge')
- p.wait_for_function('g.run.procedureComplete');p.wait_for_selector('#bakeryGameTour[data-step="claim"]')
- p.locator('#collectRewards').click();completion.finished(p);p.wait_for_timeout(250)
- p.locator('#acknowledgeWorksheetSummary').click();p.wait_for_selector('#bakeryGameTour[data-step="packages"]')
- p.locator('[data-world-nav="packages"]').click();p.wait_for_selector('#bakeryGameTour',state='detached')
- assert p.evaluate('localStorage.panaderyaWholeGameTourV1')=='done'
- p.reload();ready(p);p.wait_for_timeout(750);assert p.locator('#bakeryGameTour').count()==0
- p.locator('#settings-button').click();p.get_by_role('button',name='Show Me',exact=True).click()
- p.wait_for_selector('#bakeryGameTour[data-step="food"]');shot(p,engine+'-guide')
- p.locator('[data-tour="skip"]').click();assert p.evaluate('localStorage.panaderyaWholeGameTourV1')=='skipped'
- p.evaluate('startWholeBakeryGuide()');p.wait_for_selector('#bakeryGameTour[data-step="food"]')
- p.evaluate("document.querySelectorAll('.scene-food-card.hub-food,.view-all-foods').forEach(e=>e.remove())")
- p.wait_for_timeout(250);assert p.locator('.bakery-tour-highlight').count()==0
- p.locator('[data-tour="skip"]').click()
- print(f'PASS {engine} P1: Reset Everything through actual targets to worksheet/reward/Packages, unrelated input blocked, reload/resume, replay, skip, returning profile, missing-target escape',flush=True)
+ ready(p);phase('intro')
+ assert p.evaluate('g.completed===0&&g.coins===250&&g.owned.length===0&&g.menuSlots===0')
+ p.locator('[data-world-nav="orders"]').dispatch_event('click');p.wait_for_timeout(250)
+ assert p.evaluate('bakeryPage')=='menu' and status()['phase']=='intro'
+ for _ in range(5):p.locator('[data-tour="next"]').dispatch_event('click')
+ assert status()['revealed']==1,'reading interval must not be skippable'
+ for _ in range(6):
+  p.wait_for_function('!document.querySelector("[data-tour=next]").disabled');p.locator('[data-tour="next"]').click()
+ phase('nav-orders');p.reload();ready(p);phase('nav-orders')
+ p.wait_for_function('!window.panaderyaTutorialStatus().celebrating');p.locator('[data-world-nav="orders"]').click();phase('ticket')
+ shot(p,engine+'-guide')
+ p.locator('[data-tour="skip"]').click();assert status() is None
+ assert p.evaluate('localStorage.panaderyaWholeGameTourV2')=='skipped'
+ p.reload();ready(p);p.wait_for_timeout(750);assert status() is None
+ p.locator('#settings-button').click();p.get_by_role('button',name='Show Me',exact=True).click();phase('intro')
+ for _ in range(6):
+  p.wait_for_function('!document.querySelector("[data-tour=next]").disabled');p.locator('[data-tour="next"]').click()
+ phase('nav-orders');p.evaluate("document.querySelectorAll('[data-world-nav=\"orders\"]').forEach(e=>e.remove())")
+ p.wait_for_timeout(250);skip=p.locator('[data-tour="skip"]');assert skip.is_visible()
+ r=skip.bounding_box();hit=p.evaluate('([x,y])=>!!document.elementFromPoint(x,y)?.closest("[data-tour=skip]")',[r['x']+r['width']/2,r['y']+r['height']/2]);assert hit
+ skip.click();assert status() is None
+ print(f'PASS {engine} P1: reset starts the six-task tutorial, unrelated input blocked, unskippable reading, reload/resume, Show Me replay, persistent skip, missing-target escape',flush=True)
 
 def presentation(p,engine):
  p.evaluate('skipWholeBakeryGuide(true);closeModal();g.run=null;g.orderRuns={};render()')
@@ -154,7 +153,8 @@ def presentation(p,engine):
   p.wait_for_function("document.querySelector('.worksheet-summary')?.dataset.summaryPhase==='boost'")
   assert p.locator('.summary-boost').evaluate('e=>parseFloat(getComputedStyle(e).fontSize)>=38')
   assert p.locator('.worksheet-summary').evaluate("e=>['none','normal'].includes(getComputedStyle(e,'::before').content)")
-  assert p.locator('.bakery-popup-backdrop:has(.worksheet-summary)').evaluate("e=>getComputedStyle(e).backgroundColor==='rgba(0, 0, 0, 0)'&&getComputedStyle(e).backdropFilter==='none'")
+  # Order Complete now has a properly dimmed backdrop (QA requirement), still without blur.
+  assert p.locator('.bakery-popup-backdrop:has(.worksheet-summary)').evaluate("e=>{const m=getComputedStyle(e).backgroundColor.match(/rgba?\(([^)]+)\)/);return !!m&&Number((m[1].split(',')[3]??'1').trim())>=.45&&getComputedStyle(e).backdropFilter==='none'}")
   shot(p,f'{engine}-summary-{n}-boost')
   completion.finished(p);completion.check_final(p);completion.bounds(p)
   total=p.evaluate('g.run.settlement.total');wallet=p.evaluate('g.coins')

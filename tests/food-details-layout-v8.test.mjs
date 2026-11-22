@@ -16,7 +16,7 @@ test('food popup follows approved three-part upgrade row with gain grouped besid
  const h=detailHarness(),html=h.run('renderFoodPanel()');
  assert.match(html,/food-detail-showcase/);
  assert.match(html,/food-detail-upgrade/);
- assert.match(html,/class="upgrade-current"[^>]*><strong>Lv\. 8/);
+ assert.match(html,/class="upgrade-current"[^>]*><strong>Lv\. 9/); // Mastery 8 displays as Lv. 9 (display only)
  assert.match(html,/class="upgrade-next"/);
  assert.match(html,/↑3 Available/);
  assert.match(html,/class="upgrade-step">↑1<\/span><b>\+/);

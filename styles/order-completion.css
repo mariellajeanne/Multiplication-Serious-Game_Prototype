@@ -1,6 +1,8 @@
 /* Order Complete: unframed earned art, one dominant total, a quiet formula. */
 body[data-view='hub'] .bakery-popup.worksheet-summary-modal{width:min(980px,94vw);padding:12px 24px 18px}
-body[data-view='hub'] .bakery-popup-backdrop:has(.worksheet-summary-modal){padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:transparent;backdrop-filter:none}
+body[data-view='hub'] .bakery-popup-backdrop:has(.worksheet-summary-modal){padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left));background:#29150c9e;backdrop-filter:none;animation:summary-backdrop-in .24s ease-out both}
+/* The reward popup sits on a dimmed backdrop (no blur: cheaper on tablets). */
+@keyframes summary-backdrop-in{from{background-color:#29150c00}}
 body[data-view='hub'] .worksheet-summary-modal .popup-head{border:0;margin-bottom:4px;padding-bottom:6px}
 body[data-view='hub'] .worksheet-summary-modal .popup-head h2{width:100%;text-align:center;font-size:clamp(26px,3vw,40px)}
 .worksheet-summary-modal .dialog-wallet{display:none}

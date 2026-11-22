@@ -36,6 +36,8 @@ def status(page):return page.evaluate('window.panaderyaTutorialStatus?.()')
 
 def check_spotlight(page,phase,selector):
     wait_phase(page,phase)
+    # A newly earned checkmark is held visibly before focus moves to the target.
+    page.wait_for_function('!window.panaderyaTutorialStatus?.()?.celebrating')
     target=page.locator(selector).first
     target.wait_for(state='visible')
     result=page.evaluate('''s=>{
